@@ -16,7 +16,7 @@ private const val defaultGroup = "com.acme"
 class ProjectGeneratorTests {
 
     private val resources = Path("testResources")
-    private val repository = SourceFeatureRepository(Path(resources, "features"))
+    private val repository = LocalFeatureRepository(Path(resources, "features"))
     private val projectDir = Path(SystemTemporaryDirectory, "features")
 
     @OptIn(ExperimentalPathApi::class)

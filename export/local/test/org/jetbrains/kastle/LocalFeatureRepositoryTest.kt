@@ -13,11 +13,11 @@ import kotlin.io.path.readText
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class SourceFeatureRepositoryTest {
+class LocalFeatureRepositoryTest {
 
     private val root = "testResources/features"
     private val exportDir = Path(SystemTemporaryDirectory, "features")
-    private val repository = SourceFeatureRepository(root)
+    private val repository = LocalFeatureRepository(root)
     private val json = Json { prettyPrint = true }
 
     @Test
@@ -103,7 +103,7 @@ class SourceFeatureRepositoryTest {
         val sourceTemplate = descriptor.sources[0]
         val sourceText = Paths.get("$root/acme/child/Source.kt").readText()
         val (import, _) = sourceText.split('\n', limit = 2)
-        assertEquals("println(\"working dir: \" + Paths.get(\"\").toString())", sourceTemplate.text.trim())
+        assertEquals("// child source here\nprintln(\"working dir: \" + Paths.get(\"\").toString())", sourceTemplate.text.trim())
         assertEquals("slot://acme/parent/install", sourceTemplate.target)
         assertEquals(listOf(import.replaceFirst("import ", "")), sourceTemplate.imports)
     }

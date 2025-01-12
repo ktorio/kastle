@@ -37,7 +37,7 @@ import kotlin.collections.map
 private const val MANIFEST_YAML = "manifest.yaml"
 private const val GROUP_YAML = "group.yaml"
 
-class SourceFeatureRepository(
+class LocalFeatureRepository(
     private val root: Path,
     private val fs: FileSystem = SystemFileSystem,
     remoteRepository: FeatureRepository = FeatureRepository.EMPTY,
@@ -61,7 +61,7 @@ class SourceFeatureRepository(
             }
 
         private suspend fun fromLocalOrRemote(id: FeatureId): FeatureDescriptor? =
-            this@SourceFeatureRepository.get(id) ?: remoteRepository.get(id)
+            this@LocalFeatureRepository.get(id) ?: remoteRepository.get(id)
 
     }
 

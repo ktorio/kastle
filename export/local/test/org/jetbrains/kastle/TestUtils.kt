@@ -19,7 +19,8 @@ fun assertFilesAreEqualWithSnapshot(
     assertFilesAreEqual(Paths.get(expectedPath), Paths.get(actualPath), ignorePaths)
 } catch (cause: Throwable) {
     // Save a copy of the failed project
-    val destination = if (replace) Paths.get(expectedPath) else Paths.get("actual-files")
+    val destination = if (replace) Paths.get(expectedPath)
+                      else Files.createTempDirectory("actual-files-${System.currentTimeMillis()}")
     destination.let { target ->
         println("Files changed, see ${target.absolute()} for new snapshot")
         if (!target.exists())

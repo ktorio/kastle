@@ -2,5 +2,5 @@ modules:
   - core
   - client
   - server
-  - export/sources
+  - export/local
   - export/templates
