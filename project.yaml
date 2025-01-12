@@ -1,0 +1,6 @@
+modules:
+  - core
+  - client
+  - server
+  - export/sources
+  - export/templates

@@ -1,0 +1,7 @@
+id: acme/child
+name: Child Feature
+description: This targets a slot
+version: 1.0.0
+sources:
+  - path: Source.kt
+    target: "slot://acme/parent/install"

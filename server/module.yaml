@@ -1,0 +1,4 @@
+product: jvm/app
+
+dependencies:
+  - io.ktor:ktor-server-core:3.0.1

@@ -1,0 +1,19 @@
+product:
+  type: lib
+  platforms: [jvm]
+
+dependencies:
+  - $kotlin.serialization.core: exported
+  - $kotlin.serialization.json: exported
+  - com.charleskorn.kaml:kaml:0.62.1: exported
+  - org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0: exported
+  - org.jetbrains.kotlinx:kotlinx-serialization-json-io:1.7.3: exported
+  - org.jetbrains.kotlinx:kotlinx-io-core:0.5.4: exported
+
+test-dependencies:
+  - org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0
+
+settings:
+  kotlin:
+    serialization:
+      enabled: true
