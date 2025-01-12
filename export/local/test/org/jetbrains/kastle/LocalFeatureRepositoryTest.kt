@@ -4,12 +4,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.files.SystemTemporaryDirectory
 import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.io.JsonFileFeatureRepository.Companion.exportToJson
+import org.jetbrains.kastle.io.deleteRecursively
 import org.junit.Test
 import java.nio.file.Paths
 import kotlin.io.path.readText
+import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -19,6 +22,11 @@ class LocalFeatureRepositoryTest {
     private val exportDir = Path(SystemTemporaryDirectory, "features")
     private val repository = LocalFeatureRepository(root)
     private val json = Json { prettyPrint = true }
+
+    @AfterTest
+    fun cleanup() {
+        SystemFileSystem.deleteRecursively(exportDir)
+    }
 
     @Test
     fun featureIds() = runTest {

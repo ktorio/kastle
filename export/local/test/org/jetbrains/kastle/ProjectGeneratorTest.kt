@@ -13,11 +13,15 @@ import kotlin.test.AfterTest
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
 
-class ProjectGeneratorTests {
+abstract class ProjectGeneratorTest {
+    companion object {
+        val resources = Path("testResources")
+    }
 
-    private val resources = Path("testResources")
-    private val repository = LocalFeatureRepository(Path(resources, "features"))
     private val projectDir = Path(SystemTemporaryDirectory, "features")
+    private val repository by lazy { createRepository() }
+
+    abstract fun createRepository(): FeatureRepository
 
     @OptIn(ExperimentalPathApi::class)
     @AfterTest

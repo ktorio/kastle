@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.io.Buffer
-import kotlinx.io.writeCodePointValue
 import kotlinx.io.writeString
 
 interface ProjectGenerator {
@@ -38,12 +37,17 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
         return flow {
             for ((featureId, sources) in fileSourcesByFeatureId) {
                 for (source in sources) {
-                    val slotsForSource: Map<IntRange, List<SourceTemplate>> = source.slots.orEmpty().associate { slot ->
-                        slot.position.range to (slotSources["slot://$featureId/${slot.name}"] ?: when (slot.requirement) {
+                    val slotsForSource: Map<IntRange, List<SourceTemplate>> = source.slots.orEmpty().asSequence()
+                        .associate { slot ->
                             // TODO omitted should continue
-                            Requirement.REQUIRED, Requirement.OMITTED -> throw IllegalStateException("Missing slot ${slot.name}")
-                            Requirement.OPTIONAL -> emptyList()
-                        })
+                            val values = slotSources["slot://$featureId/${slot.name}"] ?: emptyList()
+                            require(slot.requirement == Requirement.OPTIONAL || values.isNotEmpty()) {
+                                "Missing slot ${slot.name}"
+                            }
+                            require(slot is RepeatingSlot || values.size <= 1) {
+                                "More than one target for non-repeating slot://$featureId/${slot.name}"
+                            }
+                            slot.position.range to values
                     }
                     emit(SourceFileEntry(source.target.afterProtocol) {
                         Buffer().also { buffer ->
@@ -71,7 +75,8 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
                                 }?.takeIf { it.all { it.isWhitespace() } }
 
                                 buffer.writeString(source.text, start, range.start)
-                                buffer.writeString(values.flatMap { it.text.lines() }.joinToString("\n$indent"))
+                                buffer.writeString(values.joinToString("\n") { it.text.lines().joinToString("\n$indent") })
+
                                 start = range.endInclusive + 1
                             }
                             buffer.writeString(source.text, start, source.text.length)

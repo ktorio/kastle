@@ -15,11 +15,21 @@ inline fun <reified T> __slot__(name: String, noinline default: (() -> T)? = nul
 fun __each__(name: String, block: () -> Unit = {}): Unit = Unit
 
 /**
+ * Replaces the invocation with a literal of the property's value.
+ */
+@TemplateDsl
+fun __property__(name: String, default: String? = null): String =
+    default ?: TODO("No default provided")
+
+/**
  * Contents of the block are included only when the property is assigned.
  */
 @TemplateDsl
 fun __when__(property: String, block: WhenContext.() -> Unit): Unit = Unit
 
+/**
+ * DSL context for conditional templating from project properties.
+ */
 @TemplateDsl
 interface WhenContext {
     fun __equals__(value: Any?, block: () -> Unit)
