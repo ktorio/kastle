@@ -184,6 +184,7 @@ data class SourceTemplate(
     val target: Url,
     val imports: List<String>? = null,
     val slots: List<Slot>? = null,
+    val blocks: List<LogicalBlock>? = null,
 ): SourceText
 
 @JvmInline
@@ -193,11 +194,20 @@ value class Snippet(
 ): SourceText
 
 @Serializable
-sealed interface Slot {
-    val name: String
+sealed interface Block {
     val position: SlotPosition
-    val requirement: Requirement
     val block: SourceText?
+}
+
+@Serializable
+sealed interface Slot: Block {
+    val name: String
+    val requirement: Requirement
+}
+
+@Serializable
+sealed interface LogicalBlock: Block {
+    val property: String
 }
 
 @Serializable(SlotPositionSerializer::class)
@@ -238,6 +248,14 @@ sealed interface SlotPosition {
 }
 
 @Serializable
+data class NamedSlot(
+    override val name: String,
+    override val position: SlotPosition,
+    override val requirement: Requirement = Requirement.OPTIONAL,
+    override val block: SourceText? = null
+): Slot
+
+@Serializable
 data class RepeatingSlot(
     override val name: String,
     override val position: SlotPosition,
@@ -246,12 +264,32 @@ data class RepeatingSlot(
 ): Slot
 
 @Serializable
-data class NamedSlot(
-    override val name: String,
+data class PropertyLiteral(
+    override val property: String,
     override val position: SlotPosition,
-    override val requirement: Requirement = Requirement.OPTIONAL,
     override val block: SourceText? = null
-): Slot
+): LogicalBlock
+
+@Serializable
+data class IfBlock(
+    override val property: String,
+    override val position: SlotPosition,
+    override val block: SourceText? = null
+): LogicalBlock
+
+@Serializable
+data class EachBlock(
+    override val property: String,
+    override val position: SlotPosition,
+    override val block: SourceText? = null
+): LogicalBlock
+
+@Serializable
+data class WhenBlock(
+    override val property: String,
+    override val position: SlotPosition,
+    override val block: SourceText? = null
+): LogicalBlock
 
 typealias Url = String
 

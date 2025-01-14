@@ -37,8 +37,8 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
         return flow {
             for ((featureId, sources) in fileSourcesByFeatureId) {
                 for (source in sources) {
-                    val slotsForSource: Map<IntRange, List<SourceTemplate>> = source.slots.orEmpty().asSequence()
-                        .associate { slot ->
+                    val resolvedSlots = source.slots.orEmpty().asSequence()
+                        .map { slot ->
                             // TODO omitted should continue
                             val values = slotSources["slot://$featureId/${slot.name}"] ?: emptyList()
                             require(slot.requirement == Requirement.OPTIONAL || values.isNotEmpty()) {
@@ -47,8 +47,18 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
                             require(slot is RepeatingSlot || values.size <= 1) {
                                 "More than one target for non-repeating slot://$featureId/${slot.name}"
                             }
-                            slot.position.range to values
-                    }
+                            ResolvedBlock.Templates(slot.position.range, values)
+                        }
+                    val resolvedLogicalBlocks = source.blocks.orEmpty().asSequence()
+                        .map { block ->
+                            val value = project.properties[block.property]
+                            // TODO do logic
+                            ResolvedBlock.Property(block.position.range, value)
+                        }
+                    val blocks = (resolvedSlots + resolvedLogicalBlocks)
+                        .sortedBy { it.range.start }
+                        .toList()
+
                     emit(SourceFileEntry(source.target.afterProtocol) {
                         Buffer().also { buffer ->
                             when(source.target.extension) {
@@ -56,10 +66,11 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
                                     buffer.writeString("package ${project.group}")
                                     buffer.writeString("\n\n")
 
-                                    val allImports: List<String> = slotsForSource.values
-                                        .flatMap { templates ->
-                                            templates.flatMap { it.imports.orEmpty() }
-                                        }.distinct()
+                                    val allImports: List<String> = blocks.asSequence()
+                                        .filterIsInstance<ResolvedBlock.Templates>()
+                                        .flatMap { it.templates.flatMap { it.imports.orEmpty() } }
+                                        .distinct()
+                                        .toList()
 
                                     if (allImports.isNotEmpty()) {
                                         for (import in allImports)
@@ -69,15 +80,23 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
                                 }
                             }
                             var start = 0
-                            for ((range, values) in slotsForSource) {
-                                val indent = source.text.lastIndexOf('\n', range.start).takeIf { it > 0 }?.let { newLineIndex ->
-                                    source.text.substring(newLineIndex + 1, range.start)
+                            for (block in blocks) {
+                                val indent = source.text.lastIndexOf('\n', block.range.start).takeIf { it > 0 }?.let { newLineIndex ->
+                                    source.text.substring(newLineIndex + 1, block.range.start)
                                 }?.takeIf { it.all { it.isWhitespace() } }
 
-                                buffer.writeString(source.text, start, range.start)
-                                buffer.writeString(values.joinToString("\n") { it.text.lines().joinToString("\n$indent") })
+                                buffer.writeString(source.text, start, block.range.start)
 
-                                start = range.endInclusive + 1
+                                when(block) {
+                                    is ResolvedBlock.Property -> block.value?.let {
+                                        buffer.writeString(it.toString())
+                                    }
+                                    is ResolvedBlock.Templates -> buffer.writeString(block.templates.joinToString("\n\n$indent") {
+                                        it.text.lines().joinToString("\n$indent")
+                                    })
+                                }
+
+                                start = block.range.endInclusive + 1
                             }
                             buffer.writeString(source.text, start, source.text.length)
                         }
@@ -86,6 +105,13 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
             }
         }
     }
+}
+
+sealed interface ResolvedBlock {
+    val range: IntRange
+
+    data class Templates(override val range: IntRange, val templates: List<SourceTemplate>): ResolvedBlock
+    data class Property(override val range: IntRange, val value: Any?): ResolvedBlock
 }
 
 class MissingFeatureException(feature: FeatureId) : Exception("Missing feature: $feature")

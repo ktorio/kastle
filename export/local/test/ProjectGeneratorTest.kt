@@ -30,7 +30,7 @@ abstract class ProjectGeneratorTest {
     }
 
     @Test
-    fun emptyProject() = runTest {
+    fun `empty project`() = runTest {
         generateWithFeatures("acme/basic")
         assertFilesAreEqualWithSnapshot(
             "$resources/projects/empty",
@@ -39,13 +39,26 @@ abstract class ProjectGeneratorTest {
     }
 
     @Test
-    fun projectWithSlot() = runTest {
+    fun `project with slot`() = runTest {
         generateWithFeatures(
             "acme/parent",
-            "acme/child"
+            "acme/child",
         )
         assertFilesAreEqualWithSnapshot(
             "$resources/projects/parent-child",
+            projectDir.toString(),
+        )
+    }
+
+    @Test
+    fun `project with slot and two children`() = runTest {
+        generateWithFeatures(
+            "acme/parent",
+            "acme/child",
+            "acme/child2",
+        )
+        assertFilesAreEqualWithSnapshot(
+            "$resources/projects/parent-child2",
             projectDir.toString(),
         )
     }

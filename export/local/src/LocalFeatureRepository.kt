@@ -37,6 +37,13 @@ import kotlin.collections.map
 private const val MANIFEST_YAML = "manifest.yaml"
 private const val GROUP_YAML = "group.yaml"
 
+private const val SLOT = "__slot"
+private const val SLOTS = "__slots"
+private const val PROPERTY = "__property"
+private const val IF = "__if"
+private const val EACH = "__each"
+private const val WHEN = "__when"
+
 class LocalFeatureRepository(
     private val root: Path,
     private val fs: FileSystem = SystemFileSystem,
@@ -140,6 +147,7 @@ class KotlinCompilerSourceAnalyzer(
                 text = contents,
                 target = reference.target,
                 slots = ktFile.findSlots(),
+                blocks = ktFile.findLogicalBlocks(),
             )
             "slot" -> {
                 val slot = repository.slot(reference.target.slotId)
@@ -158,6 +166,7 @@ class KotlinCompilerSourceAnalyzer(
                     target = reference.target,
                     imports = imports,
                     slots = ktFile.findSlots(),
+                    blocks = ktFile.findLogicalBlocks(),
                 )
             }
             else -> throw IllegalArgumentException("Unsupported target protocol: ${reference.target.protocol}")
@@ -174,22 +183,50 @@ class KotlinCompilerSourceAnalyzer(
 
     private fun KtFile.findSlots(): List<Slot> =
         findFunctionCalls(
-            "__slot__",
-            "__each__",
-            "__when__",
+            SLOT,
+            SLOTS,
         ).map { expression ->
             val arguments = expression.valueArguments.map { it.text }
 
             when(expression.calleeExpression?.text) {
-                "__slot__" -> NamedSlot(
+                SLOT -> NamedSlot(
                     name = arguments[0].unwrapQuotes(),
                     position = expression.slotPosition()
                 )
-                "__each__" -> RepeatingSlot(
+                SLOTS -> RepeatingSlot(
                     name = arguments[0].unwrapQuotes(),
                     position = expression.slotPosition()
                 )
-                "__when__" -> TODO("Complicated, do later")
+                else -> throw IllegalArgumentException("Unexpected function: ${expression.calleeExpression?.text}")
+            }
+        }
+
+    private fun KtFile.findLogicalBlocks(): List<LogicalBlock> =
+        findFunctionCalls(
+            PROPERTY,
+            IF,
+            EACH,
+            WHEN,
+        ).map { expression ->
+            val arguments = expression.valueArguments.map { it.text }
+
+            when(expression.calleeExpression?.text) {
+                PROPERTY -> PropertyLiteral(
+                    property = arguments[0].unwrapQuotes(),
+                    position = expression.slotPosition()
+                )
+                IF -> IfBlock(
+                    property = arguments[0].unwrapQuotes(),
+                    position = expression.slotPosition()
+                )
+                EACH -> EachBlock(
+                    property = arguments[0].unwrapQuotes(),
+                    position = expression.slotPosition()
+                )
+                WHEN -> WhenBlock(
+                    property = arguments[0].unwrapQuotes(),
+                    position = expression.slotPosition()
+                )
                 else -> throw IllegalArgumentException("Unexpected function: ${expression.calleeExpression?.text}")
             }
         }

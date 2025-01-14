@@ -38,7 +38,9 @@ class LocalFeatureRepositoryTest {
             listOf(
                 "acme/basic",
                 "acme/child",
+                "acme/child2",
                 "acme/parent",
+                "acme/properties",
             ), listOfFeatures
         )
     }
@@ -56,22 +58,6 @@ class LocalFeatureRepositoryTest {
     @Test
     fun child() = runTest {
         checkChild(repository.get("acme/child"))
-    }
-
-    @Test
-    fun generator() = runTest {
-        val projectFiles = ProjectGenerator.fromRepository(repository)
-            .generate(ProjectDescriptor(
-                name = "test-project",
-                group = "org.test",
-                properties = emptyMap(),
-                features = listOf(
-                    FeatureId("acme", "parent"),
-                    FeatureId("acme", "child"),
-                ),
-            ))
-            .toList()
-        assertEquals(1, projectFiles.size)
     }
 
     @Test
@@ -102,7 +88,7 @@ class LocalFeatureRepositoryTest {
         val slot = sourceTemplate.slots?.singleOrNull()
         assertNotNull(slot, "Expected a single slot file")
         assertEquals("install", slot.name)
-        assertEquals(SlotPosition.Inline(43 until 62, "Source"), slot.position)
+        assertEquals(SlotPosition.Inline(43..60, "Source"), slot.position)
     }
 
     private fun checkChild(descriptor: FeatureDescriptor?) {

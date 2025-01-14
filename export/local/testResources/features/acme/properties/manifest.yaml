@@ -1,0 +1,9 @@
+id: acme/properties
+name: Properties
+description: Show all kinds of properties
+version: 1.0.0
+sources:
+  - path: Literal.kt
+  - path: Conditional.kt
+  - path: When.kt
+  - path: Each.kt

@@ -1,6 +1,6 @@
 import java.nio.file.Paths
 
-fun Source.install() {
+fun Literal.install() {
     // child source here
     println("working dir: " + Paths.get("").toString())
 }
