@@ -58,28 +58,29 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
                                 val block = blocks[i]
                                 println("  Block $block")
 
-                                // finish ancestor nodes
+                                // ancestors
                                 stack.findParent(block) { parent ->
                                     val bodyEnd = parent.body?.rangeEnd ?: return@findParent
                                     buffer.writeString(source.text, start, bodyEnd)
                                     start = parent.rangeEnd
                                 }
 
-                                // write the interstitial
+                                // interstitial content
                                 buffer.writeString(source.text, start, block.rangeStart)
 
-                                // write the block's contents
+                                // block's body
                                 var child = blocks.getOrNull(i + 1)?.takeIf { it in block }
+                                fun skipContents() {
+                                    child = null
+                                    while (blocks.getOrNull(i + 1) in block)
+                                        i++
+                                }
 
                                 val indent = source.text.lastIndexOf('\n', block.rangeStart).takeIf { it > 0 }?.let { newLineIndex ->
                                     source.text.substring(newLineIndex + 1, block.rangeStart)
                                 }?.takeIf {
                                     it.all { it.isWhitespace() }
                                 } ?: ""
-
-                                val contents = block.body?.let { body ->
-                                    source.text.substring(body.rangeStart, child?.rangeStart ?: body.rangeEnd)
-                                }?.indent(indent)
 
                                 when(block) {
                                     is Slot -> {
@@ -88,8 +89,29 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
                                             it.text.indent(indent)
                                         })
                                     }
-                                    is LogicalBlock -> {
+                                    is CompareBlock -> {
+                                        val contents = block.body?.let { body ->
+                                            source.text.substring(body.rangeStart, child?.rangeStart ?: body.rangeEnd)
+                                        }?.indent(indent)
+
+                                        when (block) {
+                                            is EqualsBlock -> {
+                                                val parent = stack.lastOrNull() as? WhenBlock
+                                                    ?: error("__equals found with no parent __when")
+                                                val value = project.properties[parent.property]
+                                                // TODO types
+                                                if (value == block.value)
+                                                    buffer.writeString(contents ?: "")
+                                                else skipContents()
+                                            }
+                                        }
+                                    }
+                                    is PropertyBlock -> {
+                                        val contents = block.body?.let { body ->
+                                            source.text.substring(body.rangeStart, child?.rangeStart ?: body.rangeEnd)
+                                        }?.indent(indent)
                                         val value = project.properties[block.property]
+
                                         when(block) {
                                             is PropertyLiteral -> {
                                                 // writes "null" when missing
@@ -98,29 +120,17 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
                                             is IfBlock -> {
                                                 if (value.isTruthy())
                                                     buffer.writeString(contents ?: "")
-                                                else if (child != null) {
-                                                    // skip child contents
-                                                    child = null
-                                                    while (blocks[i + 1] in block)
-                                                        i++
-                                                }
+                                                else skipContents()
                                             }
-                                            is EachBlock -> {
-                                                if (value is Iterable<*>) {
-                                                    // TODO Template contents with element
-                                                }
-                                                buffer.writeString(contents ?: "")
-                                            }
-                                            is WhenBlock -> {
-                                                buffer.writeString(contents ?: "")
-                                            }
+                                            is EachBlock -> buffer.writeString(contents ?: "")
+                                            is WhenBlock -> {} // ignore contents of when block
                                         }
                                     }
                                 }
 
                                 if (child != null) {
                                     stack += block
-                                    start = child.rangeStart
+                                    start = child!!.rangeStart
                                 } else {
                                     start = block.rangeEnd
                                 }

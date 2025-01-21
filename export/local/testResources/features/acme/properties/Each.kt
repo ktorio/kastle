@@ -1,5 +1,5 @@
 fun main() {
-    __each("collection") {
-        println("Element: TODO")
+    __each("collection") { item ->
+        println(__value(item))
     }
 }

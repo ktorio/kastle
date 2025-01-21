@@ -23,5 +23,5 @@ val SourcePosition.rangeEnd: Int get() =
 fun String.indent(indent: String) =
     lines().joinToString("\n$indent")
 
-operator fun Block.contains(block: Block) =
-    block.rangeStart in position.range
+operator fun Block.contains(block: Block?) =
+    block != null && block.rangeStart in position.range

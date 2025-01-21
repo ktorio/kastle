@@ -1,1 +1,1 @@
-const val literal: String = __property("literal")
+const val literal: String = __value("literal")

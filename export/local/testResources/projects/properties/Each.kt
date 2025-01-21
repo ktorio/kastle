@@ -1,5 +1,5 @@
 package com.acme
 
 fun main() {
-    println("Element: TODO")
+    println(null)
 }

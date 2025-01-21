@@ -39,10 +39,11 @@ private const val GROUP_YAML = "group.yaml"
 
 private const val SLOT = "__slot"
 private const val SLOTS = "__slots"
-private const val PROPERTY = "__property"
+private const val VALUE = "__value"
 private const val IF = "__if"
 private const val EACH = "__each"
 private const val WHEN = "__when"
+private const val EQUALS = "__equals"
 
 class LocalFeatureRepository(
     private val root: Path,
@@ -90,7 +91,7 @@ class LocalFeatureRepository(
         val sources = manifest.sources.asFlow().map(analyzer::read).toList()
         val sourceProperties = sources.flatMap { source ->
             source.blocks.orEmpty().asSequence()
-                .filterIsInstance<LogicalBlock>()
+                .filterIsInstance<PropertyBlock>()
                 .mapNotNull { block ->
                     Property(block.property).takeIf {
                         !block.property.startsWith("__")
@@ -124,7 +125,7 @@ class KotlinCompilerSourceAnalyzer(
     private val repository: FeatureRepository = FeatureRepository.EMPTY,
 ) {
     private companion object {
-        val bodyOpenRegex = Regex("^\\{\\s*")
+        val bodyOpenRegex = Regex("^\\{\\s*(?:\\w+\\s*->\\s*)?")
         val bodyCloseRegex = Regex("\\s*}$")
     }
 
@@ -167,7 +168,7 @@ class KotlinCompilerSourceAnalyzer(
             "file" -> SourceTemplate(
                 text = contents,
                 target = reference.target,
-                blocks = ktFile.findSlots() + ktFile.findLogicalBlocks(),
+                blocks = ktFile.findBlocks(),
             )
             "slot" -> {
                 val slot = repository.slot(reference.target.slotId)
@@ -185,7 +186,7 @@ class KotlinCompilerSourceAnalyzer(
                     text = text,
                     target = reference.target,
                     imports = imports,
-                    blocks = ktFile.findSlots() + ktFile.findLogicalBlocks(),
+                    blocks = ktFile.findBlocks(),
                 )
             }
             else -> throw IllegalArgumentException("Unsupported target protocol: ${reference.target.protocol}")
@@ -200,37 +201,28 @@ class KotlinCompilerSourceAnalyzer(
             .singleOrNull()
             ?.bodyExpression?.text?.trimBraces()?.trimIndent()?.trim()
 
-    private fun KtFile.findSlots(): List<Slot> =
+    private fun KtFile.findBlocks(): List<Block> =
         findFunctionCalls(
             SLOT,
             SLOTS,
-        ).map { expression ->
-            val arguments = expression.valueArguments.map { it.text }
-
-            when(expression.calleeExpression?.text) {
-                SLOT -> NamedSlot(
-                    name = arguments[0].unwrapQuotes(),
-                    position = expression.slotPosition()
-                )
-                SLOTS -> RepeatingSlot(
-                    name = arguments[0].unwrapQuotes(),
-                    position = expression.slotPosition()
-                )
-                else -> throw IllegalArgumentException("Unexpected function: ${expression.calleeExpression?.text}")
-            }
-        }
-
-    private fun KtFile.findLogicalBlocks(): List<LogicalBlock> =
-        findFunctionCalls(
-            PROPERTY,
+            VALUE,
             IF,
             EACH,
             WHEN,
+            EQUALS,
         ).map { expression ->
             val arguments = expression.valueArguments
 
             when(expression.calleeExpression?.text) {
-                PROPERTY -> PropertyLiteral(
+                SLOT -> NamedSlot(
+                    name = arguments[0].text.unwrapQuotes(),
+                    position = expression.slotPosition()
+                )
+                SLOTS -> RepeatingSlot(
+                    name = arguments[0].text.unwrapQuotes(),
+                    position = expression.slotPosition()
+                )
+                VALUE -> PropertyLiteral(
                     property = arguments[0].text.unwrapQuotes(),
                     position = expression.slotPosition(),
                     body = arguments.getOrNull(1)?.bodyPosition()
@@ -243,10 +235,16 @@ class KotlinCompilerSourceAnalyzer(
                 EACH -> EachBlock(
                     property = arguments[0].text.unwrapQuotes(),
                     position = expression.slotPosition(),
+                    argument = arguments.getOrNull(1)?.getArgumentName()?.name ?: "it",
                     body = arguments.getOrNull(1)?.bodyPosition()
                 )
                 WHEN -> WhenBlock(
                     property = arguments[0].text.unwrapQuotes(),
+                    position = expression.slotPosition(),
+                    body = arguments.getOrNull(1)?.bodyPosition()
+                )
+                EQUALS -> EqualsBlock(
+                    value = arguments[0].text.unwrapQuotes(),
                     position = expression.slotPosition(),
                     body = arguments.getOrNull(1)?.bodyPosition()
                 )

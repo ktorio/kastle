@@ -205,8 +205,13 @@ sealed interface Slot: Block {
 }
 
 @Serializable
-sealed interface LogicalBlock: Block {
+sealed interface PropertyBlock: Block {
     val property: String
+}
+
+@Serializable
+sealed interface CompareBlock: Block {
+    val value: Any?
 }
 
 @Serializable(SlotPositionSerializer::class)
@@ -267,28 +272,36 @@ data class PropertyLiteral(
     override val property: String,
     override val position: SourcePosition,
     override val body: SourcePosition? = null
-): LogicalBlock
+): PropertyBlock
 
 @Serializable
 data class IfBlock(
     override val property: String,
     override val position: SourcePosition,
     override val body: SourcePosition? = null
-): LogicalBlock
+): PropertyBlock
 
 @Serializable
 data class EachBlock(
     override val property: String,
     override val position: SourcePosition,
+    val argument: String,
     override val body: SourcePosition? = null
-): LogicalBlock
+): PropertyBlock
 
 @Serializable
 data class WhenBlock(
     override val property: String,
     override val position: SourcePosition,
     override val body: SourcePosition? = null
-): LogicalBlock
+): PropertyBlock
+
+@Serializable
+data class EqualsBlock(
+    override val value: String,
+    override val position: SourcePosition,
+    override val body: SourcePosition? = null
+): CompareBlock
 
 typealias Url = String
 
