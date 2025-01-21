@@ -216,36 +216,36 @@ class KotlinCompilerSourceAnalyzer(
             when(expression.calleeExpression?.text) {
                 SLOT -> NamedSlot(
                     name = arguments[0].text.unwrapQuotes(),
-                    position = expression.slotPosition()
+                    position = expression.sourcePosition()
                 )
                 SLOTS -> RepeatingSlot(
                     name = arguments[0].text.unwrapQuotes(),
-                    position = expression.slotPosition()
+                    position = expression.sourcePosition()
                 )
                 VALUE -> PropertyLiteral(
                     property = arguments[0].text.unwrapQuotes(),
-                    position = expression.slotPosition(),
+                    position = expression.sourcePosition(),
                     body = arguments.getOrNull(1)?.bodyPosition()
                 )
                 IF -> IfBlock(
                     property = arguments[0].text.unwrapQuotes(),
-                    position = expression.slotPosition(),
+                    position = expression.sourcePosition(),
                     body = arguments.getOrNull(1)?.bodyPosition()
                 )
                 EACH -> EachBlock(
                     property = arguments[0].text.unwrapQuotes(),
-                    position = expression.slotPosition(),
+                    position = expression.sourcePosition(),
                     argument = arguments.getOrNull(1)?.getArgumentName()?.name ?: "it",
                     body = arguments.getOrNull(1)?.bodyPosition()
                 )
                 WHEN -> WhenBlock(
                     property = arguments[0].text.unwrapQuotes(),
-                    position = expression.slotPosition(),
+                    position = expression.sourcePosition(),
                     body = arguments.getOrNull(1)?.bodyPosition()
                 )
                 EQUALS -> EqualsBlock(
                     value = arguments[0].text.unwrapQuotes(),
-                    position = expression.slotPosition(),
+                    position = expression.sourcePosition(),
                     body = arguments.getOrNull(1)?.bodyPosition()
                 )
                 else -> throw IllegalArgumentException("Unexpected function: ${expression.calleeExpression?.text}")
@@ -259,21 +259,20 @@ class KotlinCompilerSourceAnalyzer(
         return SourcePosition.TopLevel(range)
     }
 
-    private fun PsiElement.slotPosition(): SourcePosition =
-        parents.firstNotNullOfOrNull { parent ->
-            when(parent) {
-                is KtClass -> parent.name
-                is KtNamedFunction -> parent.receiverTypeReference?.name
-                else -> null
-            }
-        }?.let { context ->
-            SourcePosition.Inline(textRange.toIntRange(), context)
+    private fun PsiElement.sourcePosition(): SourcePosition =
+        parents.firstNotNullOfOrNull(::inlineContext)?.let {
+            SourcePosition.Inline(textRange.toIntRange(), it)
         } ?: SourcePosition.TopLevel(textRange.toIntRange())
+
+    private fun inlineContext(parent: PsiElement): String? = when (parent) {
+        is KtClass -> parent.name
+        is KtNamedFunction -> parent.receiverTypeReference?.name
+        else -> null
+    }
 
     private fun KtFile.findFunctionCalls(vararg functionNames: String): List<KtCallExpression> =
         buildList {
             val visitor = object : KtTreeVisitorVoid() {
-
                 override fun visitCallExpression(expression: KtCallExpression) {
                     super.visitCallExpression(expression)
                     if (expression.calleeExpression?.text in functionNames)

@@ -13,6 +13,7 @@ import org.jetbrains.kastle.utils.slots
 import org.junit.Test
 import java.nio.file.Paths
 import kotlin.io.path.readText
+import kotlin.random.Random
 import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -20,7 +21,7 @@ import kotlin.test.assertNotNull
 class LocalFeatureRepositoryTest {
 
     private val root = "testResources/features"
-    private val exportDir = Path(SystemTemporaryDirectory, "features")
+    private val exportDir = Path(SystemTemporaryDirectory, "features" + Random.nextInt(9999))
     private val repository = LocalFeatureRepository(root)
     private val json = Json { prettyPrint = true }
 
@@ -113,10 +114,10 @@ class LocalFeatureRepositoryTest {
         assertNotNull(descriptor, "Missing manifest!")
         assertEquals(4, descriptor.sources.size, "Should be 4 source files")
         val (conditional, each, literal, switch) = descriptor.sources.sortedBy { it.target }
-        assertEquals(4, conditional.blocks?.size)
+        assertEquals(8, conditional.blocks?.size)
         assertEquals(2, each.blocks?.size)
         assertEquals(1, literal.blocks?.size)
-        assertEquals(1, switch.blocks?.size)
+        assertEquals(3, switch.blocks?.size)
     }
 
 }
