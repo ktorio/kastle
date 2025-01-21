@@ -3,6 +3,7 @@ package org.jetbrains.kastle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.mapNotNull
+import org.jetbrains.kastle.utils.slots
 
 interface FeatureRepository {
     companion object {
@@ -18,9 +19,9 @@ interface FeatureRepository {
 
     suspend fun get(featureId: FeatureId): FeatureDescriptor?
     suspend fun slot(slotId: SlotId): Slot? =
-        get(slotId.feature)?.sources?.flatMap { it.slots.orEmpty() }?.find { slot ->
-            slot.name == slotId.name
-        }
+        get(slotId.feature)?.sources?.asSequence()
+            ?.flatMap { it.slots }
+            ?.find { slot -> slot.name == slotId.name }
 }
 
 suspend fun FeatureRepository.get(featureId: String): FeatureDescriptor? =

@@ -43,14 +43,14 @@ class SemanticVersionSerializer: KSerializer<SemanticVersion> {
         SemanticVersion.parse(decoder.decodeString())
 }
 
-class SlotPositionSerializer: KSerializer<SlotPosition> {
+class SlotPositionSerializer: KSerializer<SourcePosition> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("SlotPosition", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: SlotPosition) {
+    override fun serialize(encoder: Encoder, value: SourcePosition) {
         encoder.encodeString(value.toString())
     }
 
-    override fun deserialize(decoder: Decoder): SlotPosition =
-        SlotPosition.parse(decoder.decodeString())
+    override fun deserialize(decoder: Decoder): SourcePosition =
+        SourcePosition.parse(decoder.decodeString())
 }

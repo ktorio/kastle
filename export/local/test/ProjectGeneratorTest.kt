@@ -9,9 +9,11 @@ import org.jetbrains.kastle.io.export
 import org.junit.Test
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
+private const val replaceSnapshot = false
 
 abstract class ProjectGeneratorTest {
     companion object {
@@ -39,7 +41,7 @@ abstract class ProjectGeneratorTest {
     }
 
     @Test
-    fun `project with slot`() = runTest {
+    fun `with slot`() = runTest {
         generateWithFeatures(
             "acme/parent",
             "acme/child",
@@ -51,7 +53,7 @@ abstract class ProjectGeneratorTest {
     }
 
     @Test
-    fun `project with slot and two children`() = runTest {
+    fun `with slot and two children`() = runTest {
         generateWithFeatures(
             "acme/parent",
             "acme/child",
@@ -63,13 +65,35 @@ abstract class ProjectGeneratorTest {
         )
     }
 
+    @Test
+    fun `with properties`() = runTest {
+        generate(features = listOf("acme/properties"), properties = mapOf(
+            "true-condition" to "true",
+            "false-condition" to "false",
+            "collection" to listOf("1", "2", "3"),
+            "when-property" to "yes",
+        ))
+        assertFilesAreEqualWithSnapshot(
+            "$resources/projects/properties",
+            projectDir.toString(),
+            replace = replaceSnapshot,
+        )
+    }
+
     private suspend fun generateWithFeatures(vararg features: String) =
-        ProjectGenerator.fromRepository(repository)
-            .generate(ProjectDescriptor(
+        generate(features = features.toList())
+
+    private suspend fun generate(
+        properties: Map<String, Any> = emptyMap(),
+        features: List<String>
+    ) = ProjectGenerator.fromRepository(repository)
+        .generate(
+            ProjectDescriptor(
                 name = defaultName,
                 group = defaultGroup,
-                properties = emptyMap(),
-                features = features.toList().map(FeatureId::parse),
-            )).export(projectDir)
+                properties = properties,
+                features = features.map(FeatureId::parse),
+            )
+        ).export(projectDir)
 
 }

@@ -2,6 +2,17 @@ id: acme/properties
 name: Properties
 description: Show all kinds of properties
 version: 1.0.0
+properties:
+  - key: literal
+    default: Hello
+    description: Show a literal value
+  - key: true-condition
+    type: Boolean
+  - key: false-condition
+    type: Boolean
+  - key: collection
+    type: List<String>
+    description: A collection of elements
 sources:
   - path: Literal.kt
   - path: Conditional.kt

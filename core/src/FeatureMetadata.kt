@@ -140,8 +140,8 @@ data class Repository(
 @Serializable
 data class Property(
     val key: String,
-    val type: String,
-    val default: String,
+    val type: String = "String",
+    val default: String? = null,
     val description: String? = null,
 )
 
@@ -183,8 +183,7 @@ data class SourceTemplate(
     override val text: String,
     val target: Url,
     val imports: List<String>? = null,
-    val slots: List<Slot>? = null,
-    val blocks: List<LogicalBlock>? = null,
+    val blocks: List<Block>? = null,
 ): SourceText
 
 @JvmInline
@@ -195,8 +194,8 @@ value class Snippet(
 
 @Serializable
 sealed interface Block {
-    val position: SlotPosition
-    val block: SourceText?
+    val position: SourcePosition
+    val body: SourcePosition?
 }
 
 @Serializable
@@ -211,13 +210,13 @@ sealed interface LogicalBlock: Block {
 }
 
 @Serializable(SlotPositionSerializer::class)
-sealed interface SlotPosition {
+sealed interface SourcePosition {
     companion object {
         private val Regex by lazy {
             Regex("(\\w+)\\(([^)]+)\\)")
         }
 
-        fun parse(text: String): SlotPosition {
+        fun parse(text: String): SourcePosition {
             val (function, argsString) = Regex.matchEntire(text)?.destructured
                 ?: throw IllegalArgumentException("Invalid slot position: $text")
             val args = argsString.split(',').map { it.trim() }.filter { it.isNotEmpty() }
@@ -237,12 +236,12 @@ sealed interface SlotPosition {
 
     val range: IntRange
 
-    data class TopLevel(override val range: IntRange): SlotPosition {
+    data class TopLevel(override val range: IntRange): SourcePosition {
         override fun toString(): String = "top(${range.start}, ${range.endInclusive})"
     }
 
     // TODO multiple receivers, context parameters, scope parameters
-    data class Inline(override val range: IntRange, val receiver: String): SlotPosition {
+    data class Inline(override val range: IntRange, val receiver: String): SourcePosition {
         override fun toString(): String = "inline(${range.start}, ${range.endInclusive}, $receiver)"
     }
 }
@@ -250,45 +249,45 @@ sealed interface SlotPosition {
 @Serializable
 data class NamedSlot(
     override val name: String,
-    override val position: SlotPosition,
+    override val position: SourcePosition,
     override val requirement: Requirement = Requirement.OPTIONAL,
-    override val block: SourceText? = null
+    override val body: SourcePosition? = null
 ): Slot
 
 @Serializable
 data class RepeatingSlot(
     override val name: String,
-    override val position: SlotPosition,
+    override val position: SourcePosition,
     override val requirement: Requirement = Requirement.OPTIONAL,
-    override val block: SourceText? = null
+    override val body: SourcePosition? = null
 ): Slot
 
 @Serializable
 data class PropertyLiteral(
     override val property: String,
-    override val position: SlotPosition,
-    override val block: SourceText? = null
+    override val position: SourcePosition,
+    override val body: SourcePosition? = null
 ): LogicalBlock
 
 @Serializable
 data class IfBlock(
     override val property: String,
-    override val position: SlotPosition,
-    override val block: SourceText? = null
+    override val position: SourcePosition,
+    override val body: SourcePosition? = null
 ): LogicalBlock
 
 @Serializable
 data class EachBlock(
     override val property: String,
-    override val position: SlotPosition,
-    override val block: SourceText? = null
+    override val position: SourcePosition,
+    override val body: SourcePosition? = null
 ): LogicalBlock
 
 @Serializable
 data class WhenBlock(
     override val property: String,
-    override val position: SlotPosition,
-    override val block: SourceText? = null
+    override val position: SourcePosition,
+    override val body: SourcePosition? = null
 ): LogicalBlock
 
 typealias Url = String

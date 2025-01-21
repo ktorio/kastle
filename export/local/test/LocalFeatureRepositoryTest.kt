@@ -9,6 +9,7 @@ import kotlinx.io.files.SystemTemporaryDirectory
 import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.io.JsonFileFeatureRepository.Companion.exportToJson
 import org.jetbrains.kastle.io.deleteRecursively
+import org.jetbrains.kastle.utils.slots
 import org.junit.Test
 import java.nio.file.Paths
 import kotlin.io.path.readText
@@ -61,11 +62,17 @@ class LocalFeatureRepositoryTest {
     }
 
     @Test
+    fun properties() = runTest {
+        checkProperties(repository.get("acme/properties"))
+    }
+
+    @Test
     fun exportToJson() = runTest {
         val result = repository.exportToJson(exportDir, json = json)
         checkBasic(result.get("acme/basic"))
         checkParent(result.get("acme/parent"))
         checkChild(result.get("acme/child"))
+        checkProperties(result.get("acme/properties"))
     }
 
     private fun checkBasic(descriptor: FeatureDescriptor?) {
@@ -85,10 +92,10 @@ class LocalFeatureRepositoryTest {
         assertEquals(sourceText, sourceTemplate.text)
         assertEquals("file:Source.kt", sourceTemplate.target)
         assertEquals(null, sourceTemplate.imports)
-        val slot = sourceTemplate.slots?.singleOrNull()
+        val slot = sourceTemplate.slots.singleOrNull()
         assertNotNull(slot, "Expected a single slot file")
         assertEquals("install", slot.name)
-        assertEquals(SlotPosition.Inline(43..60, "Source"), slot.position)
+        assertEquals(SourcePosition.Inline(43..60, "Source"), slot.position)
     }
 
     private fun checkChild(descriptor: FeatureDescriptor?) {
@@ -100,6 +107,16 @@ class LocalFeatureRepositoryTest {
         assertEquals("// child source here\nprintln(\"working dir: \" + Paths.get(\"\").toString())", sourceTemplate.text.trim())
         assertEquals("slot://acme/parent/install", sourceTemplate.target)
         assertEquals(listOf(import.replaceFirst("import ", "")), sourceTemplate.imports)
+    }
+
+    private fun checkProperties(descriptor: FeatureDescriptor?) {
+        assertNotNull(descriptor, "Missing manifest!")
+        assertEquals(4, descriptor.sources.size, "Should be 4 source files")
+        val (conditional, each, literal, switch) = descriptor.sources.sortedBy { it.target }
+        assertEquals(4, conditional.blocks?.size)
+        assertEquals(2, each.blocks?.size)
+        assertEquals(1, literal.blocks?.size)
+        assertEquals(1, switch.blocks?.size)
     }
 
 }

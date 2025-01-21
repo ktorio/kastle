@@ -1,3 +1,5 @@
-__each("collection") {
-    println("Element: ${__property("__elem")}")
+fun main() {
+    __each("collection") {
+        println("Element: TODO")
+    }
 }

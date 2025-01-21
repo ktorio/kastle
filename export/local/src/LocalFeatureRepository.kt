@@ -63,7 +63,7 @@ class LocalFeatureRepository(
             }
 
         override suspend fun slot(slotId: SlotId): Slot? =
-            this.get(slotId.feature)?.sources?.flatMap { it.slots.orEmpty() }?.find { slot ->
+            this.get(slotId.feature)?.sources?.flatMap { it.blocks.orEmpty() }?.filterIsInstance<Slot>()?.find { slot ->
                 slot.name == slotId.name
             }
 
@@ -87,9 +87,25 @@ class LocalFeatureRepository(
             ?: throw MissingManifestFileException("Cannot find $MANIFEST_YAML in $path")
         val group = manifest.group ?: path.resolve("../$GROUP_YAML").readYaml()
         val analyzer = KotlinCompilerSourceAnalyzer(path, repository)
-        val sources = manifest.sources.asFlow().map(analyzer::read)
+        val sources = manifest.sources.asFlow().map(analyzer::read).toList()
+        val sourceProperties = sources.flatMap { source ->
+            source.blocks.orEmpty().asSequence()
+                .filterIsInstance<LogicalBlock>()
+                .mapNotNull { block ->
+                    Property(block.property).takeIf {
+                        !block.property.startsWith("__")
+                    }
+                }
+        }
+        val properties = (manifest.properties + sourceProperties).distinctBy { it.key }
 
-        return FeatureDescriptor(manifest.copy(group = group), sources.toList())
+        return FeatureDescriptor(
+            manifest.copy(
+                group = group,
+                properties = properties,
+            ),
+            sources
+        )
     }
 }
 
@@ -107,6 +123,11 @@ class KotlinCompilerSourceAnalyzer(
     private val path: Path,
     private val repository: FeatureRepository = FeatureRepository.EMPTY,
 ) {
+    private companion object {
+        val bodyOpenRegex = Regex("^\\{\\s*")
+        val bodyCloseRegex = Regex("\\s*}$")
+    }
+
     private var environment: KotlinCoreEnvironment
     private var psiFileFactory: PsiFileFactory
     private val analyzer = TopDownAnalyzerFacadeForJVM
@@ -146,27 +167,25 @@ class KotlinCompilerSourceAnalyzer(
             "file" -> SourceTemplate(
                 text = contents,
                 target = reference.target,
-                slots = ktFile.findSlots(),
-                blocks = ktFile.findLogicalBlocks(),
+                blocks = ktFile.findSlots() + ktFile.findLogicalBlocks(),
             )
             "slot" -> {
                 val slot = repository.slot(reference.target.slotId)
                     ?: throw IllegalArgumentException("Slot not found: ${reference.target.afterProtocol}")
                 val imports = ktFile.importList?.imports?.map { it.text.substring("import ".length) } ?: emptyList()
                 val text = when(slot.position) {
-                    is SlotPosition.TopLevel -> ktFile.endOfImports()?.let { endOfImports ->
+                    is SourcePosition.TopLevel -> ktFile.endOfImports()?.let { endOfImports ->
                         contents.substring(endOfImports)
                     } ?: contents
                     // TODO other positions, annotations, etc.
-                    is SlotPosition.Inline -> ktFile.functionBody()
+                    is SourcePosition.Inline -> ktFile.functionBody()
                         ?: throw IllegalArgumentException("Expected single function body for targeting slot")
                 }
                 SourceTemplate(
                     text = text,
                     target = reference.target,
                     imports = imports,
-                    slots = ktFile.findSlots(),
-                    blocks = ktFile.findLogicalBlocks(),
+                    blocks = ktFile.findSlots() + ktFile.findLogicalBlocks(),
                 )
             }
             else -> throw IllegalArgumentException("Unsupported target protocol: ${reference.target.protocol}")
@@ -208,30 +227,41 @@ class KotlinCompilerSourceAnalyzer(
             EACH,
             WHEN,
         ).map { expression ->
-            val arguments = expression.valueArguments.map { it.text }
+            val arguments = expression.valueArguments
 
             when(expression.calleeExpression?.text) {
                 PROPERTY -> PropertyLiteral(
-                    property = arguments[0].unwrapQuotes(),
-                    position = expression.slotPosition()
+                    property = arguments[0].text.unwrapQuotes(),
+                    position = expression.slotPosition(),
+                    body = arguments.getOrNull(1)?.bodyPosition()
                 )
                 IF -> IfBlock(
-                    property = arguments[0].unwrapQuotes(),
-                    position = expression.slotPosition()
+                    property = arguments[0].text.unwrapQuotes(),
+                    position = expression.slotPosition(),
+                    body = arguments.getOrNull(1)?.bodyPosition()
                 )
                 EACH -> EachBlock(
-                    property = arguments[0].unwrapQuotes(),
-                    position = expression.slotPosition()
+                    property = arguments[0].text.unwrapQuotes(),
+                    position = expression.slotPosition(),
+                    body = arguments.getOrNull(1)?.bodyPosition()
                 )
                 WHEN -> WhenBlock(
-                    property = arguments[0].unwrapQuotes(),
-                    position = expression.slotPosition()
+                    property = arguments[0].text.unwrapQuotes(),
+                    position = expression.slotPosition(),
+                    body = arguments.getOrNull(1)?.bodyPosition()
                 )
                 else -> throw IllegalArgumentException("Unexpected function: ${expression.calleeExpression?.text}")
             }
         }
 
-    private fun PsiElement.slotPosition(): SlotPosition =
+    private fun PsiElement.bodyPosition(): SourcePosition {
+        val start = bodyOpenRegex.find(text)?.range?.endInclusive?.let { it + 1 } ?: 0
+        val end = bodyCloseRegex.find(text)?.range?.start ?: text.length
+        val range = (textRange.startOffset + start) until (textRange.startOffset + end)
+        return SourcePosition.TopLevel(range)
+    }
+
+    private fun PsiElement.slotPosition(): SourcePosition =
         parents.firstNotNullOfOrNull { parent ->
             when(parent) {
                 is KtClass -> parent.name
@@ -239,8 +269,8 @@ class KotlinCompilerSourceAnalyzer(
                 else -> null
             }
         }?.let { context ->
-            SlotPosition.Inline(textRange.toIntRange(), context)
-        } ?: SlotPosition.TopLevel(textRange.toIntRange())
+            SourcePosition.Inline(textRange.toIntRange(), context)
+        } ?: SourcePosition.TopLevel(textRange.toIntRange())
 
     private fun KtFile.findFunctionCalls(vararg functionNames: String): List<KtCallExpression> =
         buildList {
@@ -256,7 +286,7 @@ class KotlinCompilerSourceAnalyzer(
         }
 
     private fun TextRange.toIntRange(): IntRange =
-        startOffset..<endOffset
+        startOffset until endOffset
 
     // Function contents usually will include braces
     private fun String.trimBraces() =
