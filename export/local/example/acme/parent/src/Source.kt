@@ -1,4 +1,4 @@
-class Source {
+class Parent {
     fun install() {
         __slots("install")
     }

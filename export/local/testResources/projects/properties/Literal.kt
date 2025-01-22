@@ -1,3 +1,3 @@
 package com.acme
 
-const val literal: String = null
+val literal: String = null

@@ -1,0 +1,1 @@
+val literal: String = __value("literal")

@@ -2,7 +2,7 @@ package com.acme
 
 import java.nio.file.Paths
 
-class Source {
+class Parent {
     fun install() {
         // child source here
         println("working dir: " + Paths.get("").toString())

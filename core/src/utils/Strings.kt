@@ -5,8 +5,8 @@ package org.jetbrains.kastle.utils
  */
 fun String.getIndentAt(startIndex: Int) = lastIndexOf('\n', startIndex).takeIf { it > 0 }
     ?.let { newLineIndex ->
-        val nonWhitespaceIndex = indexOfFirst {
-            !it.isWhitespace()
-        }.takeIf { it > 0 } ?: newLineIndex
+        val nonWhitespaceIndex = subSequence(newLineIndex..<startIndex)
+            .indexOfFirst { !it.isWhitespace() }
+            .takeIf { it > newLineIndex + 1 } ?: startIndex
         substring(newLineIndex + 1, nonWhitespaceIndex)
     }?.takeIf(String::isBlank) ?: ""

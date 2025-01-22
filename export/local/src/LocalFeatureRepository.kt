@@ -87,7 +87,7 @@ class LocalFeatureRepository(
         val manifest: FeatureManifest = path.resolve(MANIFEST_YAML).readYaml()
             ?: throw MissingManifestFileException("Cannot find $MANIFEST_YAML in $path")
         val group = manifest.group ?: path.resolve("../$GROUP_YAML").readYaml()
-        val analyzer = KotlinCompilerSourceAnalyzer(path, repository)
+        val analyzer = KotlinCompilerSourceAnalyzer(path.resolve("src"), repository)
         val sources = manifest.sources.asFlow().map(analyzer::read).toList()
         val sourceProperties = sources.flatMap { source ->
             source.blocks.orEmpty().asSequence()

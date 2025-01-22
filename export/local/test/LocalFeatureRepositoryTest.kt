@@ -20,7 +20,7 @@ import kotlin.test.assertNotNull
 
 class LocalFeatureRepositoryTest {
 
-    private val root = "testResources/features"
+    private val root = "example"
     private val exportDir = Path(SystemTemporaryDirectory, "features" + Random.nextInt(9999))
     private val repository = LocalFeatureRepository(root)
     private val json = Json { prettyPrint = true }
@@ -89,21 +89,21 @@ class LocalFeatureRepositoryTest {
         assertNotNull(descriptor, "Missing manifest!")
         assertEquals(1, descriptor.sources.size, "Should be 1 source file")
         val sourceTemplate = descriptor.sources[0]
-        val sourceText = Paths.get("$root/acme/parent/Source.kt").readText()
+        val sourceText = Paths.get("$root/acme/parent/src/Source.kt").readText()
         assertEquals(sourceText, sourceTemplate.text)
         assertEquals("file:Source.kt", sourceTemplate.target)
         assertEquals(null, sourceTemplate.imports)
         val slot = sourceTemplate.slots.singleOrNull()
         assertNotNull(slot, "Expected a single slot file")
         assertEquals("install", slot.name)
-        assertEquals(SourcePosition.Inline(43..60, "Source"), slot.position)
+        assertEquals(SourcePosition.Inline(43..60, "Parent"), slot.position)
     }
 
     private fun checkChild(descriptor: FeatureDescriptor?) {
         assertNotNull(descriptor, "Missing manifest!")
         assertEquals(1, descriptor.sources.size, "Should be 1 source file")
         val sourceTemplate = descriptor.sources[0]
-        val sourceText = Paths.get("$root/acme/child/Source.kt").readText()
+        val sourceText = Paths.get("$root/acme/child/src/Source.kt").readText()
         val (import, _) = sourceText.split('\n', limit = 2)
         assertEquals("// child source here\nprintln(\"working dir: \" + Paths.get(\"\").toString())", sourceTemplate.text.trim())
         assertEquals("slot://acme/parent/install", sourceTemplate.target)

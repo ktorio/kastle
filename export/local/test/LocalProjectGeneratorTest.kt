@@ -5,7 +5,7 @@ import kotlin.test.Test
 
 class LocalProjectGeneratorTest: ProjectGeneratorTest() {
     override fun createRepository(): FeatureRepository =
-        LocalFeatureRepository(Path(resources, "features"))
+        LocalFeatureRepository(Path("example"))
 
     @Test
     fun doATest() {
