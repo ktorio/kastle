@@ -32,6 +32,7 @@ import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 import org.jetbrains.kotlin.psi.psiUtil.parents
 import java.io.File
 import kotlin.collections.map
+import kotlin.io.path.notExists
 
 private const val MANIFEST_YAML = "manifest.yaml"
 private const val GROUP_YAML = "group.yaml"
@@ -86,7 +87,15 @@ class LocalFeatureRepository(
         val manifest: FeatureManifest = path.resolve(MANIFEST_YAML).readYaml()
             ?: throw MissingManifestFileException("Cannot find $MANIFEST_YAML in $path")
         val group = manifest.group ?: path.resolve("../$GROUP_YAML").readYaml()
-        val analyzer = KotlinCompilerSourceAnalyzer(path.resolve("src"), repository)
+        val sourceFolder = path.resolve("src")
+        if (!fs.exists(sourceFolder)) {
+            return FeatureDescriptor(
+                manifest.copy(group = group),
+                sources = emptyList()
+            )
+        }
+
+        val analyzer = KotlinCompilerSourceAnalyzer(sourceFolder, repository)
         val sources = manifest.sources.asFlow().map(analyzer::read).toList()
         val sourceProperties = sources.flatMap { source ->
             source.blocks.orEmpty().asSequence()
