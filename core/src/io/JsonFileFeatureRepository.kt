@@ -20,6 +20,10 @@ class JsonFileFeatureRepository(
 ) {
     companion object {
         suspend fun FeatureRepository.exportToJson(
+            path: String
+        ) = exportToJson(Path(path))
+
+        suspend fun FeatureRepository.exportToJson(
             path: Path,
             clear: Boolean = true,
             fs: FileSystem = SystemFileSystem,

@@ -70,7 +70,7 @@ abstract class ProjectGeneratorTest {
         generate(features = listOf("acme/properties"), properties = mapOf(
             "true-condition" to "true",
             "false-condition" to "false",
-            "collection" to listOf("1", "2", "3"),
+            "collection" to "1,2,3",
             "when-property" to "yes",
         ))
         assertFilesAreEqualWithSnapshot(
@@ -84,7 +84,7 @@ abstract class ProjectGeneratorTest {
         generate(features = features.toList())
 
     private suspend fun generate(
-        properties: Map<String, Any> = emptyMap(),
+        properties: Map<String, String> = emptyMap(),
         features: List<String>
     ) = ProjectGenerator.fromRepository(repository)
         .generate(

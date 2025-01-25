@@ -1,0 +1,14 @@
+# Generate a project
+POST http://localhost:8080/api/generate/download
+Content-Type: application/json
+
+{
+  "name": "abrakadabra",
+  "group": "wizards.rule",
+  "properties": {},
+  "features": [
+    "acme/parent",
+    "acme/child",
+    "acme/properties"
+  ]
+}

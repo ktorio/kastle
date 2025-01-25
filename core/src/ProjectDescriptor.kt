@@ -1,8 +1,11 @@
 package org.jetbrains.kastle
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ProjectDescriptor(
     val name: String,
     val group: String,
-    val properties: Map<String, Any>,
-    val features: List<FeatureId>,
+    val properties: Map<String, String> = emptyMap(),
+    val features: List<FeatureId> = emptyList(),
 )

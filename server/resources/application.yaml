@@ -1,0 +1,10 @@
+ktor:
+    application:
+        modules:
+            - org.jetbrains.kastle.RoutingKt.routing
+            - org.jetbrains.kastle.SerializationKt.serialization
+    deployment:
+        port: 8080
+
+repository:
+  dir: export/local/json

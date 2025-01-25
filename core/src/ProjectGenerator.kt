@@ -25,12 +25,16 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
         val features = project.features.map {
             repository.get(it) ?: throw MissingFeatureException(it)
         }
-        val fileSourcesByFeatureId = features.mapNotNull { feature ->
-            feature.sources
+        val allFileNames = mutableSetOf<String>()
+        val fileSourcesByFeatureId: Map<FeatureId, List<SourceTemplate>> = features.associate { feature ->
+            feature.id to feature.sources.asSequence()
                 .filter { it.target.protocol == "file" }
-                .takeIf { it.isNotEmpty() }
-                ?.let { feature.id to it }
-        }.toMap()
+                .onEach { source ->
+                    require(allFileNames.add(source.target.relativeFile)) {
+                        "File conflict for feature \"${feature.id}\" on file \"${source.target}\""
+                    }
+                }.toList()
+        }
 
         if (fileSourcesByFeatureId.isEmpty())
             return emptyFlow()
@@ -42,7 +46,7 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
         return flow {
             for ((featureId, sources) in fileSourcesByFeatureId) {
                 for (source in sources) {
-                    emit(SourceFileEntry(source.target.afterProtocol) {
+                    emit(SourceFileEntry(source.target.relativeFile) {
                         writeSourceFile {
                             writeSourcePreamble(
                                 featureId,
@@ -208,64 +212,68 @@ private class SourceFileWriteContext(
                 i++
             }
         }
-    }
-}
 
-private fun SourceFileWriteContext.SourceFileBlockIterationContext.appendBlockContents(
-    block: Block,
-    source: SourceTemplate,
-    properties: Map<String, Any?> = emptyMap(),
-    slots: List<SourceTemplate> = emptyList()
-) {
-    val startIndex = block.rangeStart
-    val indent = source.text.getIndentAt(startIndex)
-
-    when (block) {
-        is Slot -> {
-            append(slots.joinToString("\n\n$indent") {
-                it.text.indent(indent)
-            })
-        }
-
-        is CompareBlock -> {
-            val contents = block.body?.let { body ->
-                source.text.substring(
-                    body.rangeStart,
-                    child?.rangeStart ?: body.rangeEnd
-                )
-            }?.indent(indent)
+        fun appendBlockContents(
+            block: Block,
+            source: SourceTemplate,
+            properties: Map<String, String> = emptyMap(),
+            slots: List<SourceTemplate> = emptyList()
+        ) {
+            val startIndex = block.rangeStart
+            val indent = source.text.getIndentAt(startIndex)
 
             when (block) {
-                is EqualsBlock -> {
-                    val parent = stack.lastOrNull() as? WhenBlock
-                        ?: error("__equals found with no parent __when")
-                    val value = properties[parent.property]
-                    // TODO types
-                    if (value == block.value)
-                        append(contents ?: "")
-                    else skipContents()
+                is Slot -> {
+                    append(slots.joinToString("\n\n$indent") {
+                        it.text.indent(indent)
+                    })
                 }
-            }
-        }
 
-        is PropertyBlock -> {
-            val contents = block.body?.let { body ->
-                source.text.substring(
-                    body.rangeStart,
-                    child?.rangeStart ?: body.rangeEnd
-                )
-            }?.indent(indent)
-            val value = properties[block.property]
+                is CompareBlock -> {
+                    val contents = block.body?.let { body ->
+                        source.text.substring(
+                            body.rangeStart,
+                            child?.rangeStart ?: body.rangeEnd
+                        )
+                    }?.indent(indent)
 
-            when (block) {
-                is PropertyLiteral -> append(value.toString()) // writes "null" when missing
-                is IfBlock ->
-                    if (value.isTruthy())
-                        append(contents ?: "")
-                    else skipContents()
+                    when (block) {
+                        is EqualsBlock -> {
+                            val parent = stack.lastOrNull() as? WhenBlock
+                                ?: error("__equals found with no parent __when")
+                            val value = properties[parent.property]
+                            // TODO types
+                            if (value == block.value)
+                                append(contents ?: "")
+                            else skipContents()
+                        }
+                    }
+                }
 
-                is EachBlock -> append(contents ?: "")
-                is WhenBlock -> {} // ignore contents of when block
+                is PropertyBlock -> {
+                    val contents = block.body?.let { body ->
+                        source.text.substring(
+                            body.rangeStart,
+                            child?.rangeStart ?: body.rangeEnd
+                        )
+                    }?.indent(indent)
+                    val value = properties[block.property]
+
+                    when (block) {
+                        is PropertyLiteral -> append(value.toString()) // writes "null" when missing
+                        is IfBlock ->
+                            if (value.isTruthy())
+                                append(contents ?: "")
+                            else skipContents()
+
+                        is EachBlock ->
+                            // TODO iterate on values
+                            if (value.isTruthy())
+                                append(contents ?: "")
+                            else skipContents()
+                        is WhenBlock -> {} // ignore contents of when block
+                    }
+                }
             }
         }
     }

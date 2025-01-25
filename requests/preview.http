@@ -1,0 +1,18 @@
+# Generate a project
+POST http://localhost:8080/api/generate/preview
+Content-Type: application/json
+
+{
+  "name": "abrakadabra",
+  "group": "wizards.rule",
+  "properties": {
+    "literal": "test string",
+    "true-condition": "true",
+    "positive-condition": "1"
+  },
+  "features": [
+    "acme/parent",
+    "acme/child",
+    "acme/properties"
+  ]
+}

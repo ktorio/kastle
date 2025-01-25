@@ -6,51 +6,35 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlin.reflect.KClass
 
-class FeatureIdSerializer: KSerializer<FeatureId> {
-    override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("FeatureId", PrimitiveKind.STRING)
+open class CustomParserSerializer<T: Any>(
+    override val descriptor: SerialDescriptor,
+    private val parse: (String) -> T
+): KSerializer<T> {
+    constructor(
+        type: KClass<T>,
+        parse: (String) -> T
+    ): this(
+        PrimitiveSerialDescriptor(
+            type.simpleName ?: "CustomParser",
+            PrimitiveKind.STRING
+        ),
+        parse
+    )
 
-    override fun serialize(encoder: Encoder, value: FeatureId) {
+    override fun serialize(encoder: Encoder, value: T) {
         encoder.encodeString(value.toString())
     }
 
-    override fun deserialize(decoder: Decoder): FeatureId =
-        FeatureId.parse(decoder.decodeString())
+    override fun deserialize(decoder: Decoder): T =
+        parse(decoder.decodeString())
 }
 
-class SlotIdSerializer: KSerializer<SlotId> {
-    override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("SlotId", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: SlotId) {
-        encoder.encodeString(value.toString())
-    }
-
-    override fun deserialize(decoder: Decoder): SlotId =
-        SlotId.parse(decoder.decodeString())
-}
-
-class SemanticVersionSerializer: KSerializer<SemanticVersion> {
-    override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("SemanticVersion", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: SemanticVersion) {
-        encoder.encodeString(value.toString())
-    }
-
-    override fun deserialize(decoder: Decoder): SemanticVersion =
-        SemanticVersion.parse(decoder.decodeString())
-}
-
-class SlotPositionSerializer: KSerializer<SourcePosition> {
-    override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("SlotPosition", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: SourcePosition) {
-        encoder.encodeString(value.toString())
-    }
-
-    override fun deserialize(decoder: Decoder): SourcePosition =
-        SourcePosition.parse(decoder.decodeString())
-}
+class FeatureIdSerializer: CustomParserSerializer<FeatureId>(FeatureId::class, FeatureId::parse)
+class SlotIdSerializer: CustomParserSerializer<SlotId>(SlotId::class, SlotId::parse)
+class RevisionSerializer: CustomParserSerializer<Revision>(Revision::class, Revision::parse)
+class VersionRangeSerializer: CustomParserSerializer<VersionRange>(VersionRange::class, VersionRange::parse)
+class SemanticVersionSerializer: CustomParserSerializer<SemanticVersion>(SemanticVersion::class, SemanticVersion::parse)
+class SourcePositionSerializer: CustomParserSerializer<SourcePosition>(SourcePosition::class, SourcePosition::parse)
+class PropertyTypeSerializer: CustomParserSerializer<PropertyType>(PropertyType::class, PropertyType::parse)

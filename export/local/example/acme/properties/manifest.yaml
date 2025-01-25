@@ -7,11 +7,11 @@ properties:
     default: Hello
     description: Show a literal value
   - key: true-condition
-    type: Boolean
+    type: boolean
   - key: false-condition
-    type: Boolean
+    type: boolean
   - key: collection
-    type: List<String>
+    type: list<string>
     description: A collection of elements
 sources:
   - path: Literal.kt

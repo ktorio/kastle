@@ -22,9 +22,8 @@ open class FileSystemFeatureRepository(
         fs.list(root).flatMap { groupPath ->
             fs.list(groupPath)
         }.asFlow().mapNotNull { path ->
-            if (fs.metadataOrNull(path)?.isDirectory == true)
-                FeatureId.parse("${path.parent!!.name}/${path.name.removeSuffix(".$ext")}")
-            else null
+            if (!path.toString().endsWith(ext)) return@mapNotNull null
+            FeatureId.parse("${path.parent!!.name}/${path.name.removeSuffix(".${ext}")}")
         }
 
     override suspend fun get(id: FeatureId): FeatureDescriptor? {

@@ -12,9 +12,8 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
-import org.jetbrains.kastle.io.readText
-import org.jetbrains.kastle.io.readYaml
-import org.jetbrains.kastle.io.resolve
+import org.jetbrains.kastle.io.*
+import org.jetbrains.kastle.utils.*
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
@@ -284,12 +283,6 @@ class KotlinCompilerSourceAnalyzer(
 
     private fun TextRange.toIntRange(): IntRange =
         startOffset until endOffset
-
-    // Function contents usually will include braces
-    private fun String.trimBraces() =
-        if (startsWith('{') && endsWith('}'))
-            substring(1, length - 1)
-        else this
 
     private fun String.unwrapQuotes() =
         if (startsWith('"') && endsWith('"'))

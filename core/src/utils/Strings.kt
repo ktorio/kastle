@@ -10,3 +10,14 @@ fun String.getIndentAt(startIndex: Int) = lastIndexOf('\n', startIndex).takeIf {
             .takeIf { it > newLineIndex + 1 } ?: startIndex
         substring(newLineIndex + 1, nonWhitespaceIndex)
     }?.takeIf(String::isBlank) ?: ""
+
+fun String.trimAngleBrackets() =
+    trimEnclosingCharacters('<', '>')
+
+fun String.trimBraces() =
+    trimEnclosingCharacters('{', '}')
+
+fun String.trimEnclosingCharacters(start: Char, end: Char) =
+    if (startsWith(start) && endsWith(end))
+        substring(1, length - 1)
+    else this

@@ -1,4 +1,11 @@
 product: jvm/app
 
 dependencies:
-  - io.ktor:ktor-server-core:3.0.1
+  - ../core
+  - io.ktor:ktor-server-core:3.0.3
+  - io.ktor:ktor-server-cio:3.0.3
+  - io.ktor:ktor-server-call-logging:3.0.3
+  - io.ktor:ktor-server-config-yaml:3.0.3
+  - io.ktor:ktor-server-content-negotiation:3.0.3
+  - io.ktor:ktor-serialization-kotlinx-json:3.0.3
+  - ch.qos.logback:logback-classic:1.4.14

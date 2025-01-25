@@ -5,3 +5,4 @@ modules:
   - export/local
   - export/templates
   - export/local/example/*/*
+  - scripts
