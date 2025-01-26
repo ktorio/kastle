@@ -1,0 +1,6 @@
+id: gradle/script
+name: Gradle Build Script
+description: This adds the gradle build to the project
+version: 1.0.0
+sources:
+  - path: build.gradle.kts

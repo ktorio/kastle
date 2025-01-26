@@ -11,6 +11,9 @@ inline fun <reified T> __value(name: String, noinline default: (() -> T)? = null
 @TemplateDsl
 fun __if(property: String, block: () -> Unit): Unit = Unit
 
+@TemplateDsl
+fun __else(block: () -> Unit): Unit = Unit
+
 /**
  * Include the contents only when the provided property is truthy.
  */

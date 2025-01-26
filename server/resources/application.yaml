@@ -3,6 +3,7 @@ ktor:
         modules:
             - org.jetbrains.kastle.RoutingKt.routing
             - org.jetbrains.kastle.SerializationKt.serialization
+            - org.jetbrains.kastle.MonitoringKt.monitoring
     deployment:
         port: 8080
 

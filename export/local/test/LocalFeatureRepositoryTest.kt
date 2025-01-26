@@ -1,5 +1,6 @@
 package org.jetbrains.kastle
 
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
@@ -33,6 +34,7 @@ class LocalFeatureRepositoryTest {
     @Test
     fun featureIds() = runTest {
         val listOfFeatures = repository.featureIds()
+            .filter { it.group == "acme" }
             .map { it.toString() }
             .toList()
             .sorted()
@@ -114,7 +116,7 @@ class LocalFeatureRepositoryTest {
         assertNotNull(descriptor, "Missing manifest!")
         assertEquals(4, descriptor.sources.size, "Should be 4 source files")
         val (conditional, each, literal, switch) = descriptor.sources.sortedBy { it.target }
-        assertEquals(8, conditional.blocks?.size)
+        assertEquals(10, conditional.blocks?.size)
         assertEquals(2, each.blocks?.size)
         assertEquals(1, literal.blocks?.size)
         assertEquals(3, switch.blocks?.size)

@@ -265,7 +265,10 @@ private class SourceFileWriteContext(
                             if (value.isTruthy())
                                 append(contents ?: "")
                             else skipContents()
-
+                        is ElseBlock ->
+                            if (value.isTruthy())
+                                skipContents()
+                            else append(contents ?: "")
                         is EachBlock ->
                             // TODO iterate on values
                             if (value.isTruthy())

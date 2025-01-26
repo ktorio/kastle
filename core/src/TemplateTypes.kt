@@ -81,6 +81,13 @@ data class IfBlock(
 ): PropertyBlock
 
 @Serializable
+data class ElseBlock(
+    override val property: String,
+    override val position: SourcePosition,
+    override val body: SourcePosition? = null
+): PropertyBlock
+
+@Serializable
 data class EachBlock(
     override val property: String,
     override val position: SourcePosition,

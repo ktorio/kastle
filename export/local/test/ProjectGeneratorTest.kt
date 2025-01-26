@@ -9,7 +9,6 @@ import org.jetbrains.kastle.io.export
 import org.junit.Test
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"

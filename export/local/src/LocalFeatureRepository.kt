@@ -32,7 +32,6 @@ import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
 import org.jetbrains.kotlin.psi.psiUtil.parents
 import java.io.File
 import kotlin.collections.map
-import kotlin.io.path.notExists
 
 private const val MANIFEST_YAML = "manifest.yaml"
 private const val GROUP_YAML = "group.yaml"
@@ -41,6 +40,7 @@ private const val SLOT = "__slot"
 private const val SLOTS = "__slots"
 private const val VALUE = "__value"
 private const val IF = "__if"
+private const val ELSE = "__else"
 private const val EACH = "__each"
 private const val WHEN = "__when"
 private const val EQUALS = "__equals"
@@ -139,6 +139,7 @@ class KotlinCompilerSourceAnalyzer(
 
     private var environment: KotlinCoreEnvironment
     private var psiFileFactory: PsiFileFactory
+    // TODO verify compilation, etc.
     private val analyzer = TopDownAnalyzerFacadeForJVM
 
     init {
@@ -215,6 +216,7 @@ class KotlinCompilerSourceAnalyzer(
             SLOTS,
             VALUE,
             IF,
+            ELSE,
             EACH,
             WHEN,
             EQUALS,
@@ -240,6 +242,20 @@ class KotlinCompilerSourceAnalyzer(
                     position = expression.sourcePosition(),
                     body = arguments.getOrNull(1)?.bodyPosition()
                 )
+                ELSE -> {
+                    val previousSiblings = expression.previousSiblings()
+                    val previousIf = previousSiblings
+                        .filterIsInstance<KtCallExpression>()
+                        .firstOrNull { it.calleeExpression?.text == IF }
+                    require(previousIf != null) {
+                        "$ELSE must be preceded with $IF"
+                    }
+                    ElseBlock(
+                        property = previousIf.valueArguments[0].text.unwrapQuotes(),
+                        position = expression.sourcePosition(),
+                        body = arguments.getOrNull(1)?.bodyPosition()
+                    )
+                }
                 EACH -> EachBlock(
                     property = arguments[0].text.unwrapQuotes(),
                     position = expression.sourcePosition(),
@@ -289,6 +305,11 @@ class KotlinCompilerSourceAnalyzer(
             }
             accept(visitor)
         }
+
+    private fun KtCallExpression.previousSiblings(): List<PsiElement> =
+        parent.children.toList()
+            .subList(0, parent.children.indexOf(this))
+            .asReversed()
 
     private fun TextRange.toIntRange(): IntRange =
         startOffset until endOffset
