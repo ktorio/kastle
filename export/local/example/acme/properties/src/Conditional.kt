@@ -1,20 +1,23 @@
+val trueCondition: Boolean by Template
+val positiveCondition: Boolean by Template
+val nullCondition: Boolean by Template
+val falseCondition: Boolean by Template
+
 fun main() {
-    __if("true-condition") {
-        println(__value<String>("true-condition"))
+    if (trueCondition) {
+        println("trueCondition is true")
     }
-    __if("positive-condition") {
-        println(__value<String>("positive-condition"))
+    if (positiveCondition) {
+        println("positiveCondition is true")
     }
-    __if("null-condition") {
-        println(__value<String>("null-condition"))
+    if (nullCondition) {
+        println("nullCondition is true")
+    } else {
+        println("nullCondition else")
     }
-    __else {
-        println("null condition not set")
-    }
-    __if("false-condition") {
-        println(__value<String>("false-condition"))
-    }
-    __else {
-        println("false condition was false")
+    if (falseCondition) {
+        println("falseCondition is true")
+    } else {
+        println("false condition else")
     }
 }

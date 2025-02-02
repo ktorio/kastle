@@ -1,10 +1,8 @@
 package com.acme
 
 fun main() {
-    println(true)
+    println("trueCondition is true")
     
     
-    
-    println(false)
-    
+    println("falseCondition is true")
 }

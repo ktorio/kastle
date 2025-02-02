@@ -1,14 +1,8 @@
 package org.jetbrains.kastle
 
 import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.*
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -24,26 +18,16 @@ import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.idea.KotlinFileType
-import org.jetbrains.kotlin.psi.KtCallExpression
-import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.kotlin.psi.KtTreeVisitorVoid
-import org.jetbrains.kotlin.psi.psiUtil.parents
 import java.io.File
-import kotlin.collections.map
+import kotlin.collections.*
+import kotlin.text.substring
+import kotlin.text.trim
+import kotlin.text.trimIndent
 
 private const val MANIFEST_YAML = "manifest.yaml"
 private const val GROUP_YAML = "group.yaml"
-
-private const val SLOT = "__slot"
-private const val SLOTS = "__slots"
-private const val VALUE = "__value"
-private const val IF = "__if"
-private const val ELSE = "__else"
-private const val EACH = "__each"
-private const val WHEN = "__when"
-private const val EQUALS = "__equals"
 
 class LocalFeatureRepository(
     private val root: Path,
@@ -95,23 +79,18 @@ class LocalFeatureRepository(
             )
         }
 
+        // Properties are supplied both from the manifest and from declarations in the source files
         val analyzer = KotlinCompilerSourceAnalyzer(sourceFolder, repository)
-        val sources = manifest.sources.asFlow().map(analyzer::read).toList()
-        val sourceProperties = sources.flatMap { source ->
-            source.blocks.orEmpty().asSequence()
-                .filterIsInstance<PropertyBlock>()
-                .mapNotNull { block ->
-                    Property(block.property).takeIf {
-                        !block.property.startsWith("__")
-                    }
-                }
-        }
-        val properties = (manifest.properties + sourceProperties).distinctBy { it.key }
+        val properties = manifest.properties.toMutableList()
+        val sources = manifest.sources.asFlow()
+            .map { sourceFile ->
+                analyzer.read(sourceFile, properties)
+            }.toList()
 
         return FeatureDescriptor(
             manifest.copy(
                 group = group,
-                properties = properties,
+                properties = properties.distinctBy { it.key },
             ),
             sources
         )
@@ -128,14 +107,10 @@ class LocalFeatureRepository(
  * @property path The path to the Kotlin source files to be analyzed.
  * @property repository An optional feature repository for additional data or functionality.
  */
-class KotlinCompilerSourceAnalyzer(
+private class KotlinCompilerSourceAnalyzer(
     private val path: Path,
     private val repository: FeatureRepository = FeatureRepository.EMPTY,
 ) {
-    private companion object {
-        val bodyOpenRegex = Regex("^\\{\\s*(?:\\w+\\s*->\\s*)?")
-        val bodyCloseRegex = Regex("\\s*}$")
-    }
 
     private var environment: KotlinCoreEnvironment
     private var psiFileFactory: PsiFileFactory
@@ -147,7 +122,7 @@ class KotlinCompilerSourceAnalyzer(
         val stderrMessages = PrintingMessageCollector(System.err, MessageRenderer.PLAIN_RELATIVE_PATHS, verbose)
         val configuration = CompilerConfiguration().apply {
             put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, stderrMessages)
-            put(CommonConfigurationKeys.MODULE_NAME, "PluginRegistry")
+            put(CommonConfigurationKeys.MODULE_NAME, path.parent!!.name)
             put(CommonConfigurationKeys.ALLOW_ANY_SCRIPTS_IN_SOURCE_ROOTS, true)
             put(JVMConfigurationKeys.JDK_HOME, File(System.getenv("JAVA_HOME")))
 
@@ -169,7 +144,10 @@ class KotlinCompilerSourceAnalyzer(
      *
      * @throws IllegalArgumentException if the source file specified in the reference cannot be found.
      */
-    suspend fun read(reference: SourceTemplateReference): SourceTemplate {
+    suspend fun read(
+        reference: SourceTemplateReference,
+        properties: MutableList<Property>
+    ): SourceTemplate {
         val contents = path.resolve(reference.path).readText() ?: throw IllegalArgumentException("Source file not found: ${reference.path}")
         val ktFile by lazy { psiFileFactory.createFileFromText(reference.path, KotlinFileType.INSTANCE, contents) as KtFile }
 
@@ -177,7 +155,7 @@ class KotlinCompilerSourceAnalyzer(
             "file" -> SourceTemplate(
                 text = contents,
                 target = reference.target,
-                blocks = ktFile.findBlocks(),
+                blocks = ktFile.findBlocks(properties),
             )
             "slot" -> {
                 val slot = repository.slot(reference.target.slotId)
@@ -188,134 +166,43 @@ class KotlinCompilerSourceAnalyzer(
                         contents.substring(endOfImports)
                     } ?: contents
                     // TODO other positions, annotations, etc.
-                    is SourcePosition.Inline -> ktFile.functionBody()
+                    is SourcePosition.Inline -> ktFile.firstFunctionBody()
                         ?: throw IllegalArgumentException("Expected single function body for targeting slot")
                 }
                 SourceTemplate(
                     text = text,
                     target = reference.target,
                     imports = imports,
-                    blocks = ktFile.findBlocks(),
+                    blocks = ktFile.findBlocks(properties),
                 )
             }
             else -> throw IllegalArgumentException("Unsupported target protocol: ${reference.target.protocol}")
         }
     }
 
-    private fun KtFile.endOfImports(): Int? =
-        importDirectives.maxOfOrNull { it.textRange.endOffset }
-
-    private fun KtFile.functionBody() =
+    private fun KtFile.firstFunctionBody() =
         declarations.filterIsInstance<KtNamedFunction>()
             .singleOrNull()
             ?.bodyExpression?.text?.trimBraces()?.trimIndent()?.trim()
 
-    private fun KtFile.findBlocks(): List<Block> =
-        findFunctionCalls(
-            SLOT,
-            SLOTS,
-            VALUE,
-            IF,
-            ELSE,
-            EACH,
-            WHEN,
-            EQUALS,
-        ).map { expression ->
-            val arguments = expression.valueArguments
-
-            when(expression.calleeExpression?.text) {
-                SLOT -> NamedSlot(
-                    name = arguments[0].text.unwrapQuotes(),
-                    position = expression.sourcePosition()
-                )
-                SLOTS -> RepeatingSlot(
-                    name = arguments[0].text.unwrapQuotes(),
-                    position = expression.sourcePosition()
-                )
-                VALUE -> PropertyLiteral(
-                    property = arguments[0].text.unwrapQuotes(),
-                    position = expression.sourcePosition(),
-                    body = arguments.getOrNull(1)?.bodyPosition()
-                )
-                IF -> IfBlock(
-                    property = arguments[0].text.unwrapQuotes(),
-                    position = expression.sourcePosition(),
-                    body = arguments.getOrNull(1)?.bodyPosition()
-                )
-                ELSE -> {
-                    val previousSiblings = expression.previousSiblings()
-                    val previousIf = previousSiblings
-                        .filterIsInstance<KtCallExpression>()
-                        .firstOrNull { it.calleeExpression?.text == IF }
-                    require(previousIf != null) {
-                        "$ELSE must be preceded with $IF"
-                    }
-                    ElseBlock(
-                        property = previousIf.valueArguments[0].text.unwrapQuotes(),
-                        position = expression.sourcePosition(),
-                        body = arguments.getOrNull(1)?.bodyPosition()
-                    )
-                }
-                EACH -> EachBlock(
-                    property = arguments[0].text.unwrapQuotes(),
-                    position = expression.sourcePosition(),
-                    argument = arguments.getOrNull(1)?.getArgumentName()?.name ?: "it",
-                    body = arguments.getOrNull(1)?.bodyPosition()
-                )
-                WHEN -> WhenBlock(
-                    property = arguments[0].text.unwrapQuotes(),
-                    position = expression.sourcePosition(),
-                    body = arguments.getOrNull(1)?.bodyPosition()
-                )
-                EQUALS -> EqualsBlock(
-                    value = arguments[0].text.unwrapQuotes(),
-                    position = expression.sourcePosition(),
-                    body = arguments.getOrNull(1)?.bodyPosition()
-                )
-                else -> throw IllegalArgumentException("Unexpected function: ${expression.calleeExpression?.text}")
+    private fun KtFile.findBlocks(properties: MutableList<Property>): List<Block> {
+        val templateReferences = findReferencesTo("Template").map(TemplateReference::classify).toList()
+        val propertyDeclarations = templateReferences.filterIsInstance<TemplateReference.PropertyDelegate>()
+            .map { it.declaration }
+        val declarationBlocks = propertyDeclarations.map { declaration ->
+            SkipBlock(position = declaration.sourcePosition(includeTrailingNewline = true))
+        }
+        val propertyBlocks = propertyDeclarations.asSequence().flatMap { declaration ->
+            declaration.findReferences().flatMap { reference ->
+                reference.readPropertyBlocks(declaration.name!!)
             }
         }
+        val slots = templateReferences.filterIsInstance<TemplateReference.SlotExpression>()
+            .map { it.expression.readSlotBlock() }
+        // TODO merge properties to feature manifest
+        properties.addAll(propertyDeclarations.map { it.asProperty() })
 
-    private fun PsiElement.bodyPosition(): SourcePosition {
-        val start = bodyOpenRegex.find(text)?.range?.endInclusive?.let { it + 1 } ?: 0
-        val end = bodyCloseRegex.find(text)?.range?.start ?: text.length
-        val range = (textRange.startOffset + start) until (textRange.startOffset + end)
-        return SourcePosition.TopLevel(range)
+        return declarationBlocks + propertyBlocks + slots
     }
 
-    private fun PsiElement.sourcePosition(): SourcePosition =
-        parents.firstNotNullOfOrNull(::inlineContext)?.let {
-            SourcePosition.Inline(textRange.toIntRange(), it)
-        } ?: SourcePosition.TopLevel(textRange.toIntRange())
-
-    private fun inlineContext(parent: PsiElement): String? = when (parent) {
-        is KtClass -> parent.name
-        is KtNamedFunction -> parent.receiverTypeReference?.name
-        else -> null
-    }
-
-    private fun KtFile.findFunctionCalls(vararg functionNames: String): List<KtCallExpression> =
-        buildList {
-            val visitor = object : KtTreeVisitorVoid() {
-                override fun visitCallExpression(expression: KtCallExpression) {
-                    super.visitCallExpression(expression)
-                    if (expression.calleeExpression?.text in functionNames)
-                        add(expression)
-                }
-            }
-            accept(visitor)
-        }
-
-    private fun KtCallExpression.previousSiblings(): List<PsiElement> =
-        parent.children.toList()
-            .subList(0, parent.children.indexOf(this))
-            .asReversed()
-
-    private fun TextRange.toIntRange(): IntRange =
-        startOffset until endOffset
-
-    private fun String.unwrapQuotes() =
-        if (startsWith('"') && endsWith('"'))
-            substring(1, length - 1)
-        else this
 }

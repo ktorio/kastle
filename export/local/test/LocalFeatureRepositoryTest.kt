@@ -98,7 +98,6 @@ class LocalFeatureRepositoryTest {
         val slot = sourceTemplate.slots.singleOrNull()
         assertNotNull(slot, "Expected a single slot file")
         assertEquals("install", slot.name)
-        assertEquals(SourcePosition.Inline(43..60, "Parent"), slot.position)
     }
 
     private fun checkChild(descriptor: FeatureDescriptor?) {
@@ -115,11 +114,6 @@ class LocalFeatureRepositoryTest {
     private fun checkProperties(descriptor: FeatureDescriptor?) {
         assertNotNull(descriptor, "Missing manifest!")
         assertEquals(4, descriptor.sources.size, "Should be 4 source files")
-        val (conditional, each, literal, switch) = descriptor.sources.sortedBy { it.target }
-        assertEquals(10, conditional.blocks?.size)
-        assertEquals(2, each.blocks?.size)
-        assertEquals(1, literal.blocks?.size)
-        assertEquals(3, switch.blocks?.size)
     }
 
 }

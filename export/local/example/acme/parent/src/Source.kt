@@ -1,5 +1,5 @@
 class Parent {
     fun install() {
-        __slots("install")
+        Template.Slots("install")
     }
 }

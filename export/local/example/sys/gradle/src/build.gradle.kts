@@ -1,30 +1,35 @@
+val versionCatalogEnabled: Boolean by Template
+val gradlePluginIds: List<String> by Template
+val gradleDependencies: List<String> by Template
+val gradleTestDependencies: List<String> by Template
+val groupName: String by Template
+
 plugins {
-    __if("versionCatalogEnabled") {
-        __each("gradlePluginIds") { item ->
-            alias(__value(item))
+    if (versionCatalogEnabled) {
+        for (item in gradlePluginIds) {
+            alias(item)
         }
-    }
-    __else {
-        __each("gradlePluginIds") { item ->
-            id(__value(item))
+    } else {
+        for (item in gradlePluginIds) {
+            id(item)
         }
     }
 }
 
-group = __value("group")
+group = groupName
 version = "1.0.0-SNAPSHOT"
 
-__slots("gradlePluginConfigurations")
+Template.Slots("gradlePluginConfigurations")
 
 repositories {
-    __slots("gradleRepositories")
+    Template.Slots("gradleRepositories")
 }
 
 dependencies {
-    __each("gradleDependencies") { item ->
-        implementation(__value(item))
+    for (dependency in gradleDependencies) {
+        implementation(dependency)
     }
-    __each("gradleTestDependencies") { item ->
-        testImplementation(__value(item))
+    for (dependency in gradleTestDependencies) {
+        testImplementation(dependency)
     }
 }

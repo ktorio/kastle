@@ -1,3 +1,4 @@
 package com.acme
 
-val literal: String = null
+val withValue = "literal"
+val withMissing = null

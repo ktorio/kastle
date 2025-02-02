@@ -46,8 +46,8 @@ sealed interface PropertyBlock: Block {
 }
 
 @Serializable
-sealed interface CompareBlock: Block {
-    val value: Any?
+sealed interface CompareBlock<T>: Block {
+    val value: T
 }
 
 @Serializable
@@ -72,6 +72,11 @@ data class PropertyLiteral(
     override val position: SourcePosition,
     override val body: SourcePosition? = null
 ): PropertyBlock
+
+@Serializable
+data class SkipBlock(override val position: SourcePosition): Block {
+    override val body: SourcePosition? = null
+}
 
 @Serializable
 data class IfBlock(
@@ -102,12 +107,13 @@ data class WhenBlock(
     override val body: SourcePosition? = null
 ): PropertyBlock
 
+// TODO can include different conditions
 @Serializable
-data class EqualsBlock(
-    override val value: String,
+data class OneOfBlock(
+    override val value: List<String>,
     override val position: SourcePosition,
     override val body: SourcePosition? = null
-): CompareBlock
+): CompareBlock<List<String>>
 
 typealias Url = String
 

@@ -21,3 +21,8 @@ fun String.trimEnclosingCharacters(start: Char, end: Char) =
     if (startsWith(start) && endsWith(end))
         substring(1, length - 1)
     else this
+
+fun String.unwrapQuotes() =
+    if (startsWith('"') && endsWith('"'))
+        substring(1, length - 1)
+    else this

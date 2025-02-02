@@ -1,10 +1,8 @@
+val whenProperty: String by Template
+
 fun main() {
-    __when("when-property") {
-        __equals("yes") {
-            println("property is yes")
-        }
-        __equals("no") {
-            println("property is no")
-        }
+    when (whenProperty) {
+        "yes" -> println("property is yes")
+        "no" -> println("property is no")
     }
 }

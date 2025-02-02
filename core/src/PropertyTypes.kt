@@ -10,7 +10,13 @@ data class Property(
     val type: PropertyType = PropertyType.String,
     val default: String? = null,
     val description: String? = null,
-)
+) {
+    override fun toString(): String = buildString {
+        append("$key: $type")
+        if (default != null) append(" = $default")
+        if (description != null) append(" /* $description */")
+    }
+}
 
 @Serializable(PropertyTypeSerializer::class)
 sealed interface PropertyType {

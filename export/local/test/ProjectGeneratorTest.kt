@@ -67,10 +67,11 @@ abstract class ProjectGeneratorTest {
     @Test
     fun `with properties`() = runTest {
         generate(features = listOf("acme/properties"), properties = mapOf(
-            "true-condition" to "true",
-            "false-condition" to "false",
+            "trueCondition" to "true",
+            "falseCondition" to "false",
             "collection" to "1,2,3",
-            "when-property" to "yes",
+            "whenProperty" to "yes",
+            "literal" to "literal",
         ))
         assertFilesAreEqualWithSnapshot(
             "$resources/projects/properties",

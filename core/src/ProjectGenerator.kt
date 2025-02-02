@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.io.Buffer
 import kotlinx.io.writeCodePointValue
 import kotlinx.io.writeString
+import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.SourceFileWriteContext.Companion.writeSourceFile
 import org.jetbrains.kastle.utils.*
-import java.lang.IllegalArgumentException
 import kotlin.collections.isNotEmpty
 
 interface ProjectGenerator {
@@ -21,6 +21,7 @@ interface ProjectGenerator {
 }
 
 internal class ProjectGeneratorImpl(private val repository: FeatureRepository) : ProjectGenerator {
+
     override suspend fun generate(project: ProjectDescriptor): Flow<SourceFileEntry> {
         val features = project.features.map {
             repository.get(it) ?: throw MissingFeatureException(it)
@@ -223,13 +224,15 @@ private class SourceFileWriteContext(
             val indent = source.text.getIndentAt(startIndex)
 
             when (block) {
+                is SkipBlock -> skipContents()
+
                 is Slot -> {
                     append(slots.joinToString("\n\n$indent") {
                         it.text.indent(indent)
                     })
                 }
 
-                is CompareBlock -> {
+                is CompareBlock<*> -> {
                     val contents = block.body?.let { body ->
                         source.text.substring(
                             body.rangeStart,
@@ -238,12 +241,12 @@ private class SourceFileWriteContext(
                     }?.indent(indent)
 
                     when (block) {
-                        is EqualsBlock -> {
+                        is OneOfBlock -> {
                             val parent = stack.lastOrNull() as? WhenBlock
                                 ?: error("__equals found with no parent __when")
                             val value = properties[parent.property]
                             // TODO types
-                            if (value == block.value)
+                            if (value in block.value)
                                 append(contents ?: "")
                             else skipContents()
                         }
@@ -260,7 +263,11 @@ private class SourceFileWriteContext(
                     val value = properties[block.property]
 
                     when (block) {
-                        is PropertyLiteral -> append(value.toString()) // writes "null" when missing
+                        is PropertyLiteral ->
+                            append(when(value) {
+                                is String -> "\"$value\""
+                                else -> "null"
+                            })
                         is IfBlock ->
                             if (value.isTruthy())
                                 append(contents ?: "")
