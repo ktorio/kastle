@@ -6,37 +6,37 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
-import org.jetbrains.kastle.FeatureDescriptor
-import org.jetbrains.kastle.FeatureId
-import org.jetbrains.kastle.MutableFeatureRepository
+import org.jetbrains.kastle.KodDescriptor
+import org.jetbrains.kastle.KodId
+import org.jetbrains.kastle.MutableKodRepository
 
-open class FileSystemFeatureRepository(
+open class FileSystemKodRepository(
     val root: Path,
     val fs: FileSystem = SystemFileSystem,
     val ext: String,
-    val read: (Path) -> FeatureDescriptor?,
-    val write: (Path, FeatureDescriptor) -> Unit,
-) : MutableFeatureRepository {
+    val read: (Path) -> KodDescriptor?,
+    val write: (Path, KodDescriptor) -> Unit,
+) : MutableKodRepository {
 
-    override fun featureIds(): Flow<FeatureId> =
+    override fun kodIds(): Flow<KodId> =
         fs.list(root).flatMap { groupPath ->
             fs.list(groupPath)
         }.asFlow().mapNotNull { path ->
             if (!path.toString().endsWith(ext)) return@mapNotNull null
-            FeatureId.parse("${path.parent!!.name}/${path.name.removeSuffix(".${ext}")}")
+            KodId.parse("${path.parent!!.name}/${path.name.removeSuffix(".${ext}")}")
         }
 
-    override suspend fun get(id: FeatureId): FeatureDescriptor? {
+    override suspend fun get(id: KodId): KodDescriptor? {
         return read(root.resolve("$id.$ext"))
     }
 
-    override suspend fun add(descriptor: FeatureDescriptor) {
+    override suspend fun add(descriptor: KodDescriptor) {
         val file = root.resolve("${descriptor.id}.$ext")
         file.parent?.let(fs::createDirectories)
         write(file, descriptor)
     }
 
-    override suspend fun remove(id: FeatureId) {
+    override suspend fun remove(id: KodId) {
         fs.delete(root.resolve("$id.$ext"))
     }
 

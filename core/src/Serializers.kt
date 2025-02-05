@@ -31,7 +31,7 @@ open class CustomParserSerializer<T: Any>(
         parse(decoder.decodeString())
 }
 
-class FeatureIdSerializer: CustomParserSerializer<FeatureId>(FeatureId::class, FeatureId::parse)
+class KodIdSerializer: CustomParserSerializer<KodId>(KodId::class, KodId::parse)
 class SlotIdSerializer: CustomParserSerializer<SlotId>(SlotId::class, SlotId::parse)
 class RevisionSerializer: CustomParserSerializer<Revision>(Revision::class, Revision::parse)
 class VersionRangeSerializer: CustomParserSerializer<VersionRange>(VersionRange::class, VersionRange::parse)

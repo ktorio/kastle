@@ -2,61 +2,55 @@ package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
 
-sealed interface FeatureMetadata {
-    val id: FeatureId
+sealed interface KodMetadata {
+    val id: KodId
     val name: String
     val version: SemanticVersion
     val icon: String?
     val description: String?
     val license: String?
     val group: Group?
-    val links: FeatureLinks?
+    val links: KodLinks?
     val documentation: String?
-    val prerequisites: List<FeatureReference>
+    val prerequisites: List<KodReference>
     val properties: List<Property>
     val repositories: List<Repository>
-    val dependencies: List<BuildSystemDependency>
-    val modules: List<Module>
 }
 
 @Serializable
-data class FeatureManifest(
-    override val id: FeatureId,
+data class KodManifest(
+    override val id: KodId,
     override val name: String,
     override val version: SemanticVersion,
     override val group: Group? = null,
     override val license: String? = null,
     override val icon: String? = null,
     override val description: String? = null,
-    override val links: FeatureLinks? = null,
+    override val links: KodLinks? = null,
     override val documentation: String? = null,
-    override val prerequisites: List<FeatureReference> = emptyList(),
+    override val prerequisites: List<KodReference> = emptyList(),
     override val properties: List<Property> = emptyList(),
     override val repositories: List<Repository> = emptyList(),
-    override val dependencies: List<BuildSystemDependency> = emptyList(),
-    override val modules: List<Module> = emptyList(),
-    val sources: List<SourceTemplateReference> = emptyList(),
-): FeatureMetadata
+    val path: String = "",
+): KodMetadata
 
 @Serializable
-data class FeatureDescriptor(
-    override val id: FeatureId,
+data class KodDescriptor(
+    override val id: KodId,
     override val name: String,
     override val version: SemanticVersion,
     override val group: Group? = null,
     override val license: String? = null,
     override val icon: String? = null,
     override val description: String? = null,
-    override val links: FeatureLinks? = null,
+    override val links: KodLinks? = null,
     override val documentation: String? = null,
-    override val prerequisites: List<FeatureReference> = emptyList(),
+    override val prerequisites: List<KodReference> = emptyList(),
     override val properties: List<Property> = emptyList(),
     override val repositories: List<Repository> = emptyList(),
-    override val dependencies: List<BuildSystemDependency> = emptyList(),
-    override val modules: List<Module> = emptyList(),
-    val sources: List<SourceTemplate> = emptyList(),
-): FeatureMetadata {
-    constructor(manifest: FeatureManifest, sources: List<SourceTemplate>) : this(
+    val structure: ProjectStructure = ProjectStructure.Empty,
+): KodMetadata {
+    constructor(manifest: KodManifest, structure: ProjectStructure) : this(
         manifest.id,
         manifest.name,
         manifest.version,
@@ -69,11 +63,14 @@ data class FeatureDescriptor(
         manifest.prerequisites,
         manifest.properties,
         manifest.repositories,
-        manifest.dependencies,
-        manifest.modules,
-        sources
+        if (structure is ProjectStructure.Single && structure.module.path.isEmpty())
+            structure.copy(module = structure.module.copy(path = manifest.path))
+        else structure
     )
 }
+
+val KodDescriptor.sources: Sequence<SourceTemplate> get() =
+    structure.modules.asSequence().flatMap { it.sources }
 
 @Serializable
 data class Group(
@@ -83,23 +80,23 @@ data class Group(
 )
 
 @Serializable
-data class FeatureReference(
-    val id: FeatureId,
+data class KodReference(
+    val id: KodId,
     val version: VersionRange
 )
 
 @Serializable
-data class FeatureLinks(
+data class KodLinks(
     val vcs: String? = null,
     val home: String? = null,
     val docs: String? = null,
 )
 
-@Serializable(FeatureIdSerializer::class)
-data class FeatureId(val group: String, val id: String) {
+@Serializable(KodIdSerializer::class)
+data class KodId(val group: String, val id: String) {
     companion object {
-        fun parse(text: String) = text.split('/', limit = 2).let { (group, feature) ->
-            FeatureId(group, feature)
+        fun parse(text: String) = text.split('/', limit = 2).let { (group, kod) ->
+            KodId(group, kod)
         }
     }
     override fun toString(): String =
@@ -107,15 +104,15 @@ data class FeatureId(val group: String, val id: String) {
 }
 
 @Serializable(SlotIdSerializer::class)
-data class SlotId(val feature: FeatureId, val name: String) {
+data class SlotId(val kod: KodId, val name: String) {
     companion object {
-        fun parse(text: String) = text.split('/', limit = 3).let { (group, feature, slot) ->
-            SlotId(FeatureId(group, feature), slot)
+        fun parse(text: String) = text.split('/', limit = 3).let { (group, kod, slot) ->
+            SlotId(KodId(group, kod), slot)
         }
     }
-    val group: String get() = feature.group
-    val featureId: String get() = feature.id
+    val group: String get() = kod.group
+    val kodId: String get() = kod.id
 
     override fun toString(): String =
-        "$group/$featureId/$name"
+        "$group/$kodId/$name"
 }

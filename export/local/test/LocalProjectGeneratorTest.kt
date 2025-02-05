@@ -4,8 +4,8 @@ import kotlinx.io.files.Path
 import kotlin.test.Test
 
 class LocalProjectGeneratorTest: ProjectGeneratorTest() {
-    override fun createRepository(): FeatureRepository =
-        LocalFeatureRepository(Path("example"))
+    override fun createRepository(): KodRepository =
+        LocalKodRepository(Path("example"))
 
     @Test
     fun doATest() {

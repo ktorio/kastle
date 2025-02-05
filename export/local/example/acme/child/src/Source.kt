@@ -1,3 +1,6 @@
+/**
+ * @target slot://acme/parent/install
+ */
 import java.nio.file.Paths
 
 fun Parent.install() {

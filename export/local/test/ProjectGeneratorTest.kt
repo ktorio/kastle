@@ -19,10 +19,10 @@ abstract class ProjectGeneratorTest {
         val resources = Path("testResources")
     }
 
-    private val projectDir = Path(SystemTemporaryDirectory, "features")
+    private val projectDir = Path(SystemTemporaryDirectory, "kods")
     private val repository by lazy { createRepository() }
 
-    abstract fun createRepository(): FeatureRepository
+    abstract fun createRepository(): KodRepository
 
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
@@ -32,7 +32,7 @@ abstract class ProjectGeneratorTest {
 
     @Test
     fun `empty project`() = runTest {
-        generateWithFeatures("acme/basic")
+        generateWithKods("acme/basic")
         assertFilesAreEqualWithSnapshot(
             "$resources/projects/empty",
             projectDir.toString(),
@@ -41,7 +41,7 @@ abstract class ProjectGeneratorTest {
 
     @Test
     fun `with slot`() = runTest {
-        generateWithFeatures(
+        generateWithKods(
             "acme/parent",
             "acme/child",
         )
@@ -53,7 +53,7 @@ abstract class ProjectGeneratorTest {
 
     @Test
     fun `with slot and two children`() = runTest {
-        generateWithFeatures(
+        generateWithKods(
             "acme/parent",
             "acme/child",
             "acme/child2",
@@ -66,7 +66,7 @@ abstract class ProjectGeneratorTest {
 
     @Test
     fun `with properties`() = runTest {
-        generate(features = listOf("acme/properties"), properties = mapOf(
+        generate(kods = listOf("acme/properties"), properties = mapOf(
             "trueCondition" to "true",
             "falseCondition" to "false",
             "collection" to "1,2,3",
@@ -80,19 +80,19 @@ abstract class ProjectGeneratorTest {
         )
     }
 
-    private suspend fun generateWithFeatures(vararg features: String) =
-        generate(features = features.toList())
+    private suspend fun generateWithKods(vararg kods: String) =
+        generate(kods = kods.toList())
 
     private suspend fun generate(
         properties: Map<String, String> = emptyMap(),
-        features: List<String>
+        kods: List<String>
     ) = ProjectGenerator.fromRepository(repository)
         .generate(
             ProjectDescriptor(
                 name = defaultName,
                 group = defaultGroup,
                 properties = properties,
-                features = features.map(FeatureId::parse),
+                modules = kods.map(KodId::parse),
             )
         ).export(projectDir)
 

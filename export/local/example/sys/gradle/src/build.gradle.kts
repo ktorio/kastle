@@ -19,7 +19,7 @@ plugins {
 group = groupName
 version = "1.0.0-SNAPSHOT"
 
-Template.Slots("gradlePluginConfigurations")
+Template.Slots("gradleConfigurations")
 
 repositories {
     Template.Slots("gradleRepositories")

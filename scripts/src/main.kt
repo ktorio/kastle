@@ -1,8 +1,8 @@
 package org.jetbrains.kastle
 
-import org.jetbrains.kastle.io.JsonFileFeatureRepository.Companion.exportToJson
+import org.jetbrains.kastle.io.JsonFileKodRepository.Companion.exportToJson
 
 suspend fun main() {
-    LocalFeatureRepository("export/local/example")
+    LocalKodRepository("export/local/example")
         .exportToJson("export/local/json")
 }

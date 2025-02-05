@@ -1,56 +1,51 @@
 package org.jetbrains.kastle
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.io.Buffer
 import kotlinx.io.writeCodePointValue
 import kotlinx.io.writeString
-import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.SourceFileWriteContext.Companion.writeSourceFile
 import org.jetbrains.kastle.utils.*
 import kotlin.collections.isNotEmpty
 
 interface ProjectGenerator {
     companion object {
-        fun fromRepository(repository: FeatureRepository): ProjectGenerator =
+        fun fromRepository(repository: KodRepository): ProjectGenerator =
             ProjectGeneratorImpl(repository)
     }
 
     suspend fun generate(project: ProjectDescriptor): Flow<SourceFileEntry>
 }
 
-internal class ProjectGeneratorImpl(private val repository: FeatureRepository) : ProjectGenerator {
+internal class ProjectGeneratorImpl(private val repository: KodRepository) : ProjectGenerator {
 
-    override suspend fun generate(project: ProjectDescriptor): Flow<SourceFileEntry> {
-        val features = project.features.map {
-            repository.get(it) ?: throw MissingFeatureException(it)
+    override suspend fun generate(project: ProjectDescriptor): Flow<SourceFileEntry> = flow {
+        val kods = project.modules.map {
+            repository.get(it) ?: throw MissingKodException(it)
         }
+        // TODO ensure structure consistency
+        val structure = kods.asSequence()
+            .map { it.structure }
+            .reduceOrNull(ProjectStructure::plus)
+            ?: ProjectStructure.Empty
         val allFileNames = mutableSetOf<String>()
-        val fileSourcesByFeatureId: Map<FeatureId, List<SourceTemplate>> = features.associate { feature ->
-            feature.id to feature.sources.asSequence()
-                .filter { it.target.protocol == "file" }
-                .onEach { source ->
-                    require(allFileNames.add(source.target.relativeFile)) {
-                        "File conflict for feature \"${feature.id}\" on file \"${source.target}\""
-                    }
-                }.toList()
-        }
-
-        if (fileSourcesByFeatureId.isEmpty())
-            return emptyFlow()
-
-        val slotSources: Map<Url, List<SourceTemplate>> = features.flatMap { it.sources }
+        val slotSources: Map<Url, List<SourceTemplate>> = kods.asSequence()
+            .flatMap { it.sources }
             .filter { it.target.protocol == "slot" }
             .groupBy { it.target }
 
-        return flow {
-            for ((featureId, sources) in fileSourcesByFeatureId) {
-                for (source in sources) {
-                    emit(SourceFileEntry(source.target.relativeFile) {
+        for (kod in kods) {
+            for (module in kod.structure.modules) {
+                for (source in module.sources.filter { it.target.protocol == "file" }) {
+                    val path = source.target.relativeFile
+                    require(allFileNames.add(path)) {
+                        "File conflict for module \"${kod.id}\" at \"${source.target}\""
+                    }
+                    emit(SourceFileEntry(path) {
                         writeSourceFile {
                             writeSourcePreamble(
-                                featureId,
+                                kod.id,
                                 source,
                                 slotSources,
                                 project
@@ -72,11 +67,11 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
                                         block,
                                         source,
                                         project.properties,
-                                        slotSources.lookup(featureId, block)
+                                        slotSources.lookup(kod.id, block)
                                     )
 
                                     // where to go next
-                                    start = when(child) {
+                                    start = when (child) {
                                         null -> block.rangeEnd
                                         else -> {
                                             stack += block
@@ -103,13 +98,13 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
     }
 
     private fun Appendable.writeSourcePreamble(
-        featureId: FeatureId,
+        kodId: KodId,
         source: SourceTemplate,
         slotSources: Map<Url, List<SourceTemplate>>,
         project: ProjectDescriptor
     ) {
         val slots = source.blocks?.asSequence().orEmpty()
-            .flatMap { slotSources.lookup(featureId, it) }
+            .flatMap { slotSources.lookup(kodId, it) }
             .toList()
         when (source.target.extension) {
             "kt" -> writeKotlinSourcePreamble(project, slots)
@@ -137,22 +132,22 @@ internal class ProjectGeneratorImpl(private val repository: FeatureRepository) :
         }
     }
 
-    private fun Map<Url, List<SourceTemplate>>.lookup(featureId: FeatureId, block: Block): List<SourceTemplate> {
+    private fun Map<Url, List<SourceTemplate>>.lookup(kodId: KodId, block: Block): List<SourceTemplate> {
         if (block !is Slot)
             return emptyList()
 
-        val key = "slot://$featureId/${block.name}"
+        val key = "slot://$kodId/${block.name}"
         val values = this[key] ?: emptyList()
         if (values.isEmpty()) {
             when (block.requirement) {
                 Requirement.REQUIRED ->
-                    throw IllegalArgumentException("Missing slot slot://$featureId/${block.name}")
+                    throw IllegalArgumentException("Missing slot slot://$kodId/${block.name}")
                 Requirement.OMITTED -> return emptyList()
                 Requirement.OPTIONAL -> {}
             }
         }
         require(block is RepeatingSlot || values.size <= 1) {
-            "More than one target for non-repeating slot://$featureId/${block.name}"
+            "More than one target for non-repeating slot://$kodId/${block.name}"
         }
         return values
     }
@@ -313,4 +308,4 @@ private fun BlockStack.removeAll(onEach: (Block) -> Unit) {
 }
 
 
-class MissingFeatureException(feature: FeatureId) : Exception("Missing feature: $feature")
+class MissingKodException(kod: KodId) : Exception("Missing kod: $kod")

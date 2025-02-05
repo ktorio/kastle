@@ -83,10 +83,42 @@ data class Repository(
 )
 
 @Serializable
-data class Module(
-    val path: String,
-    val description: String,
-    val dependencies: List<Dependency>
+sealed interface ProjectStructure {
+    companion object {
+        fun fromList(modules: List<SourceModule>) =
+            when (modules.size) {
+                0 -> Empty
+                1 -> Single(modules.single())
+                else -> Multi(modules)
+            }
+    }
+
+    val modules: List<SourceModule>
+
+    // TODO merge / throw on matching
+    operator fun plus(other: ProjectStructure): ProjectStructure =
+        fromList((modules + other.modules).distinctBy { it.path })
+
+    @Serializable
+    data object Empty: ProjectStructure {
+        override val modules: List<SourceModule> = emptyList()
+        override fun plus(other: ProjectStructure) = other
+    }
+    @Serializable
+    data class Single(val module: SourceModule): ProjectStructure {
+        override val modules: List<SourceModule> = listOf(module)
+    }
+    @Serializable
+    data class Multi(override val modules: List<SourceModule>): ProjectStructure
+}
+
+@Serializable
+data class SourceModule(
+    val type: String = "lib",
+    val path: String = "",
+    val platforms: List<String> = emptyList(),
+    val dependencies: List<Dependency> = emptyList(),
+    val sources: List<SourceTemplate> = emptyList(),
 )
 
 @Serializable

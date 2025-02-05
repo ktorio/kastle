@@ -13,8 +13,3 @@ properties:
   - key: collection
     type: list<string>
     description: A collection of elements
-sources:
-  - path: Literal.kt
-  - path: Conditional.kt
-  - path: When.kt
-  - path: Each.kt

@@ -12,13 +12,13 @@ import kotlinx.io.asSink
 import kotlinx.io.files.Path
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.jetbrains.kastle.io.JsonFileFeatureRepository
+import org.jetbrains.kastle.io.JsonFileKodRepository
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 fun Application.routing() {
     val root = Path(environment.config.property("repository.dir").getString())
-    val repository = JsonFileFeatureRepository(root)
+    val repository = JsonFileKodRepository(root)
     val generator = ProjectGenerator.fromRepository(repository)
     val json = Json {
         encodeDefaults = false
@@ -27,13 +27,13 @@ fun Application.routing() {
 
     routing {
         route("/api") {
-            get("/features") {
+            get("/modules") {
                 val repositories = repository.all()
                 call.respondBytesWriter(ContentType.Application.Json) {
                     var first = true
                     writeByte('['.code.toByte())
                     repositories.map {
-                        it.copy(sources = emptyList())
+                        it.copy(structure = ProjectStructure.Empty)
                     }.collect { descriptor ->
                         if (!first) writeByte(','.code.toByte())
                         else first = false
