@@ -5,29 +5,29 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.mapNotNull
 import org.jetbrains.kastle.utils.slots
 
-interface KodRepository {
+interface PackRepository {
     companion object {
-        val EMPTY = object : KodRepository {
-            override fun kodIds(): Flow<KodId> = emptyFlow()
-            override suspend fun get(kodId: KodId): KodDescriptor? = null
+        val EMPTY = object : PackRepository {
+            override fun packIds(): Flow<PackId> = emptyFlow()
+            override suspend fun get(packId: PackId): PackDescriptor? = null
             override suspend fun slot(slotId: SlotId): Slot? = null
         }
     }
-    fun kodIds(): Flow<KodId>
-    fun all(): Flow<KodDescriptor> =
-        kodIds().mapNotNull(::get)
+    fun packIds(): Flow<PackId>
+    fun all(): Flow<PackDescriptor> =
+        packIds().mapNotNull(::get)
 
-    suspend fun get(kodId: KodId): KodDescriptor?
+    suspend fun get(packId: PackId): PackDescriptor?
     suspend fun slot(slotId: SlotId): Slot? =
-        get(slotId.kod)?.sources?.asSequence()
+        get(slotId.pack)?.sources?.asSequence()
             ?.flatMap { it.slots }
             ?.find { slot -> slot.name == slotId.name }
 }
 
-suspend fun KodRepository.get(kodId: String): KodDescriptor? =
-    get(KodId.parse(kodId))
+suspend fun PackRepository.get(packId: String): PackDescriptor? =
+    get(PackId.parse(packId))
 
-interface MutableKodRepository : KodRepository {
-    suspend fun add(descriptor: KodDescriptor)
-    suspend fun remove(id: KodId)
+interface MutablePackRepository : PackRepository {
+    suspend fun add(descriptor: PackDescriptor)
+    suspend fun remove(id: PackId)
 }

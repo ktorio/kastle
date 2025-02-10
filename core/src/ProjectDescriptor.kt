@@ -7,5 +7,5 @@ data class ProjectDescriptor(
     val name: String,
     val group: String,
     val properties: Map<String, String> = emptyMap(),
-    val modules: List<KodId> = emptyList(),
+    val packs: List<PackId> = emptyList(),
 )

@@ -11,41 +11,41 @@ import kotlin.collections.isNotEmpty
 
 interface ProjectGenerator {
     companion object {
-        fun fromRepository(repository: KodRepository): ProjectGenerator =
+        fun fromRepository(repository: PackRepository): ProjectGenerator =
             ProjectGeneratorImpl(repository)
     }
 
     suspend fun generate(project: ProjectDescriptor): Flow<SourceFileEntry>
 }
 
-internal class ProjectGeneratorImpl(private val repository: KodRepository) : ProjectGenerator {
+internal class ProjectGeneratorImpl(private val repository: PackRepository) : ProjectGenerator {
 
     override suspend fun generate(project: ProjectDescriptor): Flow<SourceFileEntry> = flow {
-        val kods = project.modules.map {
-            repository.get(it) ?: throw MissingKodException(it)
+        val packs = project.packs.map {
+            repository.get(it) ?: throw MissingPackException(it)
         }
         // TODO ensure structure consistency
-        val structure = kods.asSequence()
+        val structure = packs.asSequence()
             .map { it.structure }
             .reduceOrNull(ProjectStructure::plus)
             ?: ProjectStructure.Empty
         val allFileNames = mutableSetOf<String>()
-        val slotSources: Map<Url, List<SourceTemplate>> = kods.asSequence()
+        val slotSources: Map<Url, List<SourceTemplate>> = packs.asSequence()
             .flatMap { it.sources }
             .filter { it.target.protocol == "slot" }
             .groupBy { it.target }
 
-        for (kod in kods) {
-            for (module in kod.structure.modules) {
+        for (pack in packs) {
+            for (module in pack.structure.modules) {
                 for (source in module.sources.filter { it.target.protocol == "file" }) {
                     val path = source.target.relativeFile
                     require(allFileNames.add(path)) {
-                        "File conflict for module \"${kod.id}\" at \"${source.target}\""
+                        "File conflict for module \"${pack.id}\" at \"${source.target}\""
                     }
                     emit(SourceFileEntry(path) {
                         writeSourceFile {
                             writeSourcePreamble(
-                                kod.id,
+                                pack.id,
                                 source,
                                 slotSources,
                                 project
@@ -67,7 +67,7 @@ internal class ProjectGeneratorImpl(private val repository: KodRepository) : Pro
                                         block,
                                         source,
                                         project.properties,
-                                        slotSources.lookup(kod.id, block)
+                                        slotSources.lookup(pack.id, block)
                                     )
 
                                     // where to go next
@@ -98,13 +98,13 @@ internal class ProjectGeneratorImpl(private val repository: KodRepository) : Pro
     }
 
     private fun Appendable.writeSourcePreamble(
-        kodId: KodId,
+        packId: PackId,
         source: SourceTemplate,
         slotSources: Map<Url, List<SourceTemplate>>,
         project: ProjectDescriptor
     ) {
         val slots = source.blocks?.asSequence().orEmpty()
-            .flatMap { slotSources.lookup(kodId, it) }
+            .flatMap { slotSources.lookup(packId, it) }
             .toList()
         when (source.target.extension) {
             "kt" -> writeKotlinSourcePreamble(project, slots)
@@ -132,22 +132,22 @@ internal class ProjectGeneratorImpl(private val repository: KodRepository) : Pro
         }
     }
 
-    private fun Map<Url, List<SourceTemplate>>.lookup(kodId: KodId, block: Block): List<SourceTemplate> {
+    private fun Map<Url, List<SourceTemplate>>.lookup(packId: PackId, block: Block): List<SourceTemplate> {
         if (block !is Slot)
             return emptyList()
 
-        val key = "slot://$kodId/${block.name}"
+        val key = "slot://$packId/${block.name}"
         val values = this[key] ?: emptyList()
         if (values.isEmpty()) {
             when (block.requirement) {
                 Requirement.REQUIRED ->
-                    throw IllegalArgumentException("Missing slot slot://$kodId/${block.name}")
+                    throw IllegalArgumentException("Missing slot slot://$packId/${block.name}")
                 Requirement.OMITTED -> return emptyList()
                 Requirement.OPTIONAL -> {}
             }
         }
         require(block is RepeatingSlot || values.size <= 1) {
-            "More than one target for non-repeating slot://$kodId/${block.name}"
+            "More than one target for non-repeating slot://$packId/${block.name}"
         }
         return values
     }
@@ -308,4 +308,4 @@ private fun BlockStack.removeAll(onEach: (Block) -> Unit) {
 }
 
 
-class MissingKodException(kod: KodId) : Exception("Missing kod: $kod")
+class MissingPackException(pack: PackId) : Exception("Missing pack: $pack")

@@ -1,0 +1,10 @@
+{
+    "id": "acme/basic",
+    "name": "Basic Feature",
+    "version": "1.0.0",
+    "group": {
+        "id": "acme",
+        "name": "ACME"
+    },
+    "description": "This is a sample feature"
+}

@@ -31,10 +31,11 @@ open class CustomParserSerializer<T: Any>(
         parse(decoder.decodeString())
 }
 
-class KodIdSerializer: CustomParserSerializer<KodId>(KodId::class, KodId::parse)
+class PackIdSerializer: CustomParserSerializer<PackId>(PackId::class, PackId::parse)
 class SlotIdSerializer: CustomParserSerializer<SlotId>(SlotId::class, SlotId::parse)
 class RevisionSerializer: CustomParserSerializer<Revision>(Revision::class, Revision::parse)
 class VersionRangeSerializer: CustomParserSerializer<VersionRange>(VersionRange::class, VersionRange::parse)
+class DependencySerializer: CustomParserSerializer<Dependency>(Dependency::class, Dependency::parse)
 class SemanticVersionSerializer: CustomParserSerializer<SemanticVersion>(SemanticVersion::class, SemanticVersion::parse)
 class SourcePositionSerializer: CustomParserSerializer<SourcePosition>(SourcePosition::class, SourcePosition::parse)
 class PropertyTypeSerializer: CustomParserSerializer<PropertyType>(PropertyType::class, PropertyType::parse)

@@ -2,7 +2,7 @@ modules:
   - core
   - client
   - server
-  - export/local
-  - export/templates
-  - export/local/example/*/*
+  - local
+  - templates
   - scripts
+  - local/example/*/*

@@ -8,4 +8,4 @@ ktor:
         port: 8080
 
 repository:
-  dir: export/local/json
+  dir: local/json

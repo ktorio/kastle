@@ -1,4 +1,4 @@
 product: jvm/app
 
 dependencies:
-  - ../export/local
+  - ../local

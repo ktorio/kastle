@@ -1,0 +1,2 @@
+# Get the full list of packs
+GET http://localhost:8080/api/packs

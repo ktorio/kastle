@@ -1,1 +1,0 @@
-{"id":"acme/child2","name":"Second Child Feature","version":"1.0.0","group":{"id":"acme","name":"ACME"},"description":"This also targets the same slot","sources":[{"text":"(0..10).forEach {\n    println(it)\n}","target":"slot://acme/parent/install","imports":[],"blocks":[]}]}

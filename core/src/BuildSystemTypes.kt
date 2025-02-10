@@ -121,17 +121,31 @@ data class SourceModule(
     val sources: List<SourceTemplate> = emptyList(),
 )
 
-@Serializable
-sealed interface Dependency
+// TODO catalog references, variables, etc.
+@Serializable(DependencySerializer::class)
+sealed interface Dependency {
+    companion object {
+        // TODO make gud
+        fun parse(text: String): Dependency {
+            val (group, artifact, version) = text.split(':', limit = 3)
+            return ArtifactDependency(group, artifact, version)
+        }
+    }
+}
 
 @Serializable
 data class ArtifactDependency(
     val group: String,
     val artifact: String,
     val version: String
-): Dependency
+): Dependency {
+    override fun toString(): String =
+        "$group:$artifact:$version"
+}
 
 @Serializable
 data class ModuleDependency(
     val module: String,
-): Dependency
+): Dependency {
+    override fun toString(): String = module
+}

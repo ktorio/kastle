@@ -1,6 +1,7 @@
 package org.jetbrains.kastle.io
 
 import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlNode
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
@@ -21,6 +22,10 @@ fun Path.readText(fs: FileSystem = SystemFileSystem): String? {
         it.buffered().readString()
     }
 }
+
+// TODO
+fun Path.relativeTo(base: Path): Path =
+    Path(toString().removePrefix(base.toString()))
 
 @OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T: Any> Path.readJson(
@@ -55,6 +60,17 @@ inline fun <reified T: Any> Path.readYaml(
         yaml.decodeFromString(it)
     }
 }
+
+fun Path.readYamlNode(
+    fs: FileSystem = SystemFileSystem,
+    yaml: Yaml = Yaml.default,
+): YamlNode? {
+    if (!fs.exists(this)) return null
+    return fs.source(this).buffered().readString().let {
+        yaml.parseToYamlNode(it)
+    }
+}
+
 
 fun FileSystem.deleteRecursively(path: Path) {
     if (isDirectory(path)) {

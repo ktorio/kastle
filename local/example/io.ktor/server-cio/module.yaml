@@ -1,0 +1,5 @@
+product: jvm/app
+
+dependencies:
+  - ../../../../templates
+  - io.ktor:ktor-server-cio:3.0.3

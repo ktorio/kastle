@@ -1,1 +1,0 @@
-{"id":"acme/parent","name":"Parent Feature","version":"1.0.0","group":{"id":"acme","name":"ACME"},"description":"This includes a slot","sources":[{"text":"class Parent {\n    fun install() {\n        __slots(\"install\")\n    }\n}","target":"file:Source.kt","blocks":[{"type":"org.jetbrains.kastle.RepeatingSlot","name":"install","position":"inline(43, 60, Parent)"}]}]}

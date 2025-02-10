@@ -2,55 +2,55 @@ package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
 
-sealed interface KodMetadata {
-    val id: KodId
+sealed interface PackMetadata {
+    val id: PackId
     val name: String
     val version: SemanticVersion
     val icon: String?
     val description: String?
     val license: String?
     val group: Group?
-    val links: KodLinks?
+    val links: PackLinks?
     val documentation: String?
-    val prerequisites: List<KodReference>
+    val requires: List<PackReference>
     val properties: List<Property>
     val repositories: List<Repository>
 }
 
 @Serializable
-data class KodManifest(
-    override val id: KodId,
+data class PackManifest(
+    override val id: PackId,
     override val name: String,
     override val version: SemanticVersion,
     override val group: Group? = null,
     override val license: String? = null,
     override val icon: String? = null,
     override val description: String? = null,
-    override val links: KodLinks? = null,
+    override val links: PackLinks? = null,
     override val documentation: String? = null,
-    override val prerequisites: List<KodReference> = emptyList(),
+    override val requires: List<PackReference> = emptyList(),
     override val properties: List<Property> = emptyList(),
     override val repositories: List<Repository> = emptyList(),
     val path: String = "",
-): KodMetadata
+): PackMetadata
 
 @Serializable
-data class KodDescriptor(
-    override val id: KodId,
+data class PackDescriptor(
+    override val id: PackId,
     override val name: String,
     override val version: SemanticVersion,
     override val group: Group? = null,
     override val license: String? = null,
     override val icon: String? = null,
     override val description: String? = null,
-    override val links: KodLinks? = null,
+    override val links: PackLinks? = null,
     override val documentation: String? = null,
-    override val prerequisites: List<KodReference> = emptyList(),
+    override val requires: List<PackReference> = emptyList(),
     override val properties: List<Property> = emptyList(),
     override val repositories: List<Repository> = emptyList(),
     val structure: ProjectStructure = ProjectStructure.Empty,
-): KodMetadata {
-    constructor(manifest: KodManifest, structure: ProjectStructure) : this(
+): PackMetadata {
+    constructor(manifest: PackManifest, structure: ProjectStructure) : this(
         manifest.id,
         manifest.name,
         manifest.version,
@@ -60,7 +60,7 @@ data class KodDescriptor(
         manifest.description,
         manifest.links,
         manifest.documentation,
-        manifest.prerequisites,
+        manifest.requires,
         manifest.properties,
         manifest.repositories,
         if (structure is ProjectStructure.Single && structure.module.path.isEmpty())
@@ -69,7 +69,7 @@ data class KodDescriptor(
     )
 }
 
-val KodDescriptor.sources: Sequence<SourceTemplate> get() =
+val PackDescriptor.sources: Sequence<SourceTemplate> get() =
     structure.modules.asSequence().flatMap { it.sources }
 
 @Serializable
@@ -80,23 +80,23 @@ data class Group(
 )
 
 @Serializable
-data class KodReference(
-    val id: KodId,
+data class PackReference(
+    val id: PackId,
     val version: VersionRange
 )
 
 @Serializable
-data class KodLinks(
+data class PackLinks(
     val vcs: String? = null,
     val home: String? = null,
     val docs: String? = null,
 )
 
-@Serializable(KodIdSerializer::class)
-data class KodId(val group: String, val id: String) {
+@Serializable(PackIdSerializer::class)
+data class PackId(val group: String, val id: String) {
     companion object {
-        fun parse(text: String) = text.split('/', limit = 2).let { (group, kod) ->
-            KodId(group, kod)
+        fun parse(text: String) = text.split('/', limit = 2).let { (group, pack) ->
+            PackId(group, pack)
         }
     }
     override fun toString(): String =
@@ -104,15 +104,15 @@ data class KodId(val group: String, val id: String) {
 }
 
 @Serializable(SlotIdSerializer::class)
-data class SlotId(val kod: KodId, val name: String) {
+data class SlotId(val pack: PackId, val name: String) {
     companion object {
-        fun parse(text: String) = text.split('/', limit = 3).let { (group, kod, slot) ->
-            SlotId(KodId(group, kod), slot)
+        fun parse(text: String) = text.split('/', limit = 3).let { (group, pack, slot) ->
+            SlotId(PackId(group, pack), slot)
         }
     }
-    val group: String get() = kod.group
-    val kodId: String get() = kod.id
+    val group: String get() = pack.group
+    val packId: String get() = pack.id
 
     override fun toString(): String =
-        "$group/$kodId/$name"
+        "$group/$packId/$name"
 }

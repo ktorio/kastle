@@ -1,0 +1,186 @@
+{
+    "id": "acme/properties",
+    "name": "Properties",
+    "version": "1.0.0",
+    "group": {
+        "id": "acme",
+        "name": "ACME"
+    },
+    "description": "Show all kinds of properties",
+    "properties": [
+        {
+            "key": "literal",
+            "default": "Hello",
+            "description": "Show a literal value"
+        },
+        {
+            "key": "true-condition",
+            "type": "boolean"
+        },
+        {
+            "key": "false-condition",
+            "type": "boolean"
+        },
+        {
+            "key": "collection",
+            "type": "list<string>",
+            "description": "A collection of elements"
+        },
+        {
+            "key": "trueCondition",
+            "type": "boolean"
+        },
+        {
+            "key": "positiveCondition",
+            "type": "boolean"
+        },
+        {
+            "key": "nullCondition",
+            "type": "boolean"
+        },
+        {
+            "key": "falseCondition",
+            "type": "boolean"
+        },
+        {
+            "key": "missing"
+        },
+        {
+            "key": "whenProperty"
+        }
+    ],
+    "structure": {
+        "type": "org.jetbrains.kastle.ProjectStructure.Single",
+        "module": {
+            "platforms": [
+                "jvm"
+            ],
+            "sources": [
+                {
+                    "text": "val trueCondition: Boolean by Template\nval positiveCondition: Boolean by Template\nval nullCondition: Boolean by Template\nval falseCondition: Boolean by Template\n\nfun main() {\n    if (trueCondition) {\n        println(\"trueCondition is true\")\n    }\n    if (positiveCondition) {\n        println(\"positiveCondition is true\")\n    }\n    if (nullCondition) {\n        println(\"nullCondition is true\")\n    } else {\n        println(\"nullCondition else\")\n    }\n    if (falseCondition) {\n        println(\"falseCondition is true\")\n    } else {\n        println(\"false condition else\")\n    }\n}",
+                    "target": "file:Conditional.kt",
+                    "blocks": [
+                        {
+                            "type": "org.jetbrains.kastle.SkipBlock",
+                            "position": "top(0, 38)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.SkipBlock",
+                            "position": "top(39, 81)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.SkipBlock",
+                            "position": "top(82, 120)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.SkipBlock",
+                            "position": "top(121, 161)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.IfBlock",
+                            "property": "trueCondition",
+                            "position": "top(179, 245)",
+                            "body": "top(208, 239)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.IfBlock",
+                            "property": "positiveCondition",
+                            "position": "top(251, 325)",
+                            "body": "top(284, 319)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.IfBlock",
+                            "property": "nullCondition",
+                            "position": "top(331, 448)",
+                            "body": "top(360, 391)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.IfBlock",
+                            "property": "falseCondition",
+                            "position": "top(454, 575)",
+                            "body": "top(484, 516)"
+                        }
+                    ]
+                },
+                {
+                    "text": "val collection: List<String> by Template\n\nfun main() {\n    for (item in collection) {\n        println(item)\n    }\n}",
+                    "target": "file:Each.kt",
+                    "blocks": [
+                        {
+                            "type": "org.jetbrains.kastle.SkipBlock",
+                            "position": "top(0, 41)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.EachBlock",
+                            "property": "collection",
+                            "position": "top(59, 112)",
+                            "argument": "item",
+                            "body": "top(94, 106)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.PropertyLiteral",
+                            "property": "item",
+                            "position": "top(102, 105)"
+                        }
+                    ]
+                },
+                {
+                    "text": "val literal: String by Template\nval missing: String by Template\n\nval withValue = literal\nval withMissing = missing",
+                    "target": "file:Literal.kt",
+                    "blocks": [
+                        {
+                            "type": "org.jetbrains.kastle.SkipBlock",
+                            "position": "top(0, 31)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.SkipBlock",
+                            "position": "top(32, 64)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.PropertyLiteral",
+                            "property": "literal",
+                            "position": "top(81, 87)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.PropertyLiteral",
+                            "property": "missing",
+                            "position": "top(107, 113)"
+                        }
+                    ]
+                },
+                {
+                    "text": "val whenProperty: String by Template\n\nfun main() {\n    when (whenProperty) {\n        \"yes\" -> println(\"property is yes\")\n        \"no\" -> println(\"property is no\")\n    }\n}",
+                    "target": "file:When.kt",
+                    "blocks": [
+                        {
+                            "type": "org.jetbrains.kastle.SkipBlock",
+                            "position": "top(0, 37)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.WhenBlock",
+                            "property": "whenProperty",
+                            "position": "top(55, 167)",
+                            "body": "top(55, 161)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.OneOfBlock",
+                            "value": [
+                                "yes"
+                            ],
+                            "position": "top(85, 119)",
+                            "body": "top(94, 119)"
+                        },
+                        {
+                            "type": "org.jetbrains.kastle.OneOfBlock",
+                            "value": [
+                                "no"
+                            ],
+                            "position": "top(129, 161)",
+                            "body": "top(137, 161)"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

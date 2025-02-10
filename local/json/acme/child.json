@@ -1,0 +1,28 @@
+{
+    "id": "acme/child",
+    "name": "Child Feature",
+    "version": "1.0.0",
+    "group": {
+        "id": "acme",
+        "name": "ACME"
+    },
+    "description": "This targets a slot",
+    "structure": {
+        "type": "org.jetbrains.kastle.ProjectStructure.Single",
+        "module": {
+            "platforms": [
+                "jvm"
+            ],
+            "sources": [
+                {
+                    "text": "// child source here\nprintln(\"working dir: \" + Paths.get(\"\").toString())",
+                    "target": "slot://acme/parent/install",
+                    "imports": [
+                        "java.nio.file.Paths"
+                    ],
+                    "blocks": []
+                }
+            ]
+        }
+    }
+}

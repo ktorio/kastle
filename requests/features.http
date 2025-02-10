@@ -1,2 +1,0 @@
-# Get the full list of features
-GET http://localhost:8080/api/features
