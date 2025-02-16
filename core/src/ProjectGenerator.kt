@@ -5,8 +5,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.io.Buffer
 import kotlinx.io.writeCodePointValue
 import kotlinx.io.writeString
-import org.jetbrains.kastle.SourceFileWriteContext.Companion.writeSourceFile
+import org.jetbrains.kastle.gen.load
+import org.jetbrains.kastle.gen.getVariables
 import org.jetbrains.kastle.utils.*
+import org.jetbrains.kastle.utils.plusAssign
 import kotlin.collections.isNotEmpty
 
 interface ProjectGenerator {
@@ -15,27 +17,22 @@ interface ProjectGenerator {
             ProjectGeneratorImpl(repository)
     }
 
-    suspend fun generate(project: ProjectDescriptor): Flow<SourceFileEntry>
+    suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry>
 }
 
-internal class ProjectGeneratorImpl(private val repository: PackRepository) : ProjectGenerator {
+internal class ProjectGeneratorImpl(
+    private val repository: PackRepository,
+    private val log: (() -> String) -> Unit = { println(it()) }
+) : ProjectGenerator {
 
-    override suspend fun generate(project: ProjectDescriptor): Flow<SourceFileEntry> = flow {
-        val packs = project.packs.map {
-            repository.get(it) ?: throw MissingPackException(it)
-        }
+    override suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
+        val project = projectDescriptor.load(repository)
         // TODO ensure structure consistency
-        val structure = packs.asSequence()
-            .map { it.structure }
-            .reduceOrNull(ProjectStructure::plus)
-            ?: ProjectStructure.Empty
         val allFileNames = mutableSetOf<String>()
-        val slotSources: Map<Url, List<SourceTemplate>> = packs.asSequence()
-            .flatMap { it.sources }
-            .filter { it.target.protocol == "slot" }
-            .groupBy { it.target }
 
-        for (pack in packs) {
+        for (pack in project.packs) {
+            val variables = project.getVariables(pack)
+
             for (module in pack.structure.modules) {
                 for (source in module.sources.filter { it.target.protocol == "file" }) {
                     val path = source.target.relativeFile
@@ -43,52 +40,69 @@ internal class ProjectGeneratorImpl(private val repository: PackRepository) : Pr
                         "File conflict for module \"${pack.id}\" at \"${source.target}\""
                     }
                     emit(SourceFileEntry(path) {
-                        writeSourceFile {
+                        writeSourceFile(source, variables) {
                             writeSourcePreamble(
                                 pack.id,
                                 source,
-                                slotSources,
-                                project
+                                project.slotSources,
+                                projectDescriptor
                             )
-                            withBlocks(source.blocks) {
-                                forEach { block ->
-                                    // ancestors
-                                    stack.removeUpToParent(block) { parent ->
-                                        val bodyEnd = parent.body?.rangeEnd ?: return@removeUpToParent
-                                        append(source.text, start, bodyEnd)
-                                        start = parent.rangeEnd
+                            log { source.target }
+                            if (source.blocks.isNullOrEmpty()) {
+                                append(source.text)
+                                return@writeSourceFile
+                            }
+
+                            forEachBlock(source.blocks) { block ->
+                                log {
+                                    buildString {
+                                        append("  ${block.position.range.toString().padEnd(12)} ")
+                                        append(block::class.simpleName?.padEnd(18))
+                                        append(block.contents.replace("\n", "\\n"))
                                     }
+                                }
+                            }
+                            log { "" } // log empty line
 
-                                    // interstitial
-                                    append(source.text, start, block.rangeStart)
+                            forEachBlock(source.blocks) { block ->
+                                // ancestors
+                                stack.popUntil({ block in it }) { parent ->
+                                    parent.close()
+                                    if (parent.tryLoopBack())
+                                        return@forEachBlock
+                                }
 
-                                    // current block
-                                    appendBlockContents(
-                                        block,
-                                        source,
-                                        project.properties,
-                                        slotSources.lookup(pack.id, block)
-                                    )
+                                // interstitial
+                                append(source.text, start, block.rangeStart)
 
-                                    // where to go next
-                                    start = when (child) {
-                                        null -> block.rangeEnd
-                                        else -> {
-                                            stack += block
-                                            child!!.rangeStart
-                                        }
+                                // current block
+                                appendBlockContents(
+                                    block,
+                                    source,
+                                    project.slotSources.lookup(pack.id, block)
+                                )
+
+                                // where to go next
+                                start = when (child) {
+                                    null -> block.rangeEnd
+                                    else -> {
+                                        log { "  push $block" }
+                                        stack += block
+                                        child!!.rangeStart
                                     }
                                 }
 
-                                // trailing ancestors
-                                stack.removeAll { parent ->
-                                    val bodyEnd = parent.body?.rangeEnd ?: return@removeAll
-                                    append(source.text, start, bodyEnd)
-                                    start = parent.rangeEnd
-                                }
+                                if (isLast()) {
+                                    // trailing ancestors
+                                    stack.popSequence().forEach { parent ->
+                                        parent.close()
+                                        if (parent.tryLoopBack())
+                                            return@forEachBlock
+                                    }
 
-                                // trailing content
-                                append(source.text, start, source.text.length)
+                                    // trailing content
+                                    append(source.text, start, source.text.length)
+                                }
                             }
                         }
                     })
@@ -151,161 +165,182 @@ internal class ProjectGeneratorImpl(private val repository: PackRepository) : Pr
         }
         return values
     }
-}
 
-/**
- * Writer context for building a source file.
- */
-private class SourceFileWriteContext(
-    private val buffer: Buffer = Buffer(),
-): Appendable {
-    companion object {
-        fun writeSourceFile(action: SourceFileWriteContext.() -> Unit): Buffer =
-            SourceFileWriteContext().apply(action).buffer
-    }
-
-    override fun append(csq: CharSequence?): java.lang.Appendable {
-        if (csq == null) return this
-        buffer.writeString(csq)
-        return this
-    }
-
-    override fun append(csq: CharSequence?, start: Int, end: Int): java.lang.Appendable {
-        if (csq == null) return this
-        buffer.writeString(csq, start, end)
-        return this
-    }
-
-    override fun append(c: Char): java.lang.Appendable {
-        buffer.writeCodePointValue(c.code)
-        return this
-    }
-
-    fun withBlocks(blocks: List<Block>?, op: SourceFileBlockIterationContext.() -> Unit) {
-        SourceFileBlockIterationContext(blocks.orEmpty().sortedBy { it.rangeStart }).apply(op)
-    }
+    private fun writeSourceFile(
+        source: SourceTemplate,
+        variables: Variables,
+        action: SourceFileWriteContext.() -> Unit
+    ): Buffer = SourceFileWriteContext(source, variables).apply(action).buffer
 
     /**
-     * Context for iterating over the given blocks.  Allows extra navigation controls.
+     * Writer context for building a source file.
      */
-    inner class SourceFileBlockIterationContext(
-        private val blocks: List<Block>,
-        var start: Int = 0,
-        var i: Int = 0,
-        var stack: BlockStack = mutableListOf()
-    ): Appendable by this {
-        val child: Block? get() = next?.takeIf { it in blocks[i] }
-        val next: Block? get() = blocks.getOrNull(i + 1)
+    private inner class SourceFileWriteContext(
+        val source: SourceTemplate,
+        val variables: Variables,
+        val buffer: Buffer = Buffer(),
+    ): Appendable {
 
-        fun skipContents() {
-            while (next in blocks[i])
-                i++
+        val Block.contents: String get() =
+            source.text.substring(rangeStart, rangeEnd)
+
+        override fun append(csq: CharSequence?): java.lang.Appendable {
+            if (csq == null) return this
+            buffer.writeString(csq)
+            return this
         }
 
-        fun forEach(onEach: (Block) -> Unit) {
-            while (i < blocks.size) {
-                onEach(blocks[i])
-                i++
+        override fun append(csq: CharSequence?, start: Int, end: Int): java.lang.Appendable {
+            if (csq == null) return this
+            require(start <= end) {
+                "Overlap $start > $end: ${csq.substring(end, start)}"
             }
+            buffer.writeString(csq, start, end)
+            return this
         }
 
-        fun appendBlockContents(
-            block: Block,
-            source: SourceTemplate,
-            properties: Map<String, String> = emptyMap(),
-            slots: List<SourceTemplate> = emptyList()
-        ) {
-            val startIndex = block.rangeStart
-            val indent = source.text.getIndentAt(startIndex)
+        override fun append(c: Char): java.lang.Appendable {
+            buffer.writeCodePointValue(c.code)
+            return this
+        }
 
-            when (block) {
-                is SkipBlock -> skipContents()
-
-                is Slot -> {
-                    append(slots.joinToString("\n\n$indent") {
-                        it.text.indent(indent)
-                    })
+        fun forEachBlock(blocks: List<Block>?, op: SourceFileBlockIterationContext.(Block) -> Unit): SourceFileBlockIterationContext =
+            SourceFileBlockIterationContext(
+                blocks = blocks.orEmpty().sortedBy { it.rangeStart },
+                variables = variables.copy(),
+            ).also { context ->
+                while (context.i < context.blocks.size) {
+                    context.op(context.current)
+                    context.i++
                 }
+            }
 
-                is CompareBlock<*> -> {
-                    val contents = block.body?.let { body ->
-                        source.text.substring(
-                            body.rangeStart,
-                            child?.rangeStart ?: body.rangeEnd
-                        )
-                    }?.indent(indent)
+        /**
+         * Context for iterating over the given blocks.  Allows extra navigation controls.
+         */
+        inner class SourceFileBlockIterationContext(
+            val blocks: List<Block>,
+            val variables: Variables,
+            var start: Int = 0,
+            var i: Int = 0,
+            var stack: Stack<Block> = Stack.of()
+        ): Appendable by this {
+            val current: Block get() = blocks[i]
+            val child: Block? get() = next?.takeIf { it in blocks[i] }
+            val next: Block? get() = blocks.getOrNull(i + 1)
+            val loops: MutableMap<DeclaringBlock, MutableList<*>> = mutableMapOf()
 
-                    when (block) {
-                        is OneOfBlock -> {
-                            val parent = stack.lastOrNull() as? WhenBlock
-                                ?: error("__equals found with no parent __when")
-                            val value = properties[parent.property]
-                            // TODO types
-                            if (value in block.value)
-                                append(contents ?: "")
-                            else skipContents()
+            fun skipContents() {
+                val current = blocks[i]
+                while (next in current)
+                    i++
+            }
+
+            fun isLast() =
+                i == blocks.lastIndex
+
+            /**
+             * Return to the start of the loop for the next element.
+             */
+            fun Block.tryLoopBack(): Boolean {
+                if (this !is DeclaringBlock) return false
+                val items = loops[this] ?: return false
+                val nextItem = items.removeFirstOrNull() ?: return false
+                start = bodyStart ?: return false
+                stack += this
+                variables += variable to nextItem
+                i = blocks.indexOf(this)
+                return true
+            }
+
+            fun Block.close() {
+                log { "  pop $this" }
+                bodyEnd?.let { bodyEnd ->
+                    append(source.text, start, bodyEnd)
+                }
+                start = rangeEnd
+                // TODO synchronize push/pop
+                // variables.pop()
+            }
+
+            fun appendBlockContents(
+                block: Block,
+                source: SourceTemplate,
+                slots: List<SourceTemplate> = emptyList()
+            ) {
+                val startIndex = block.rangeStart
+                val indent = source.text.getIndentAt(startIndex)
+
+                when (block) {
+                    is SkipBlock -> skipContents()
+
+                    is Slot -> {
+                        append(slots.joinToString("\n\n$indent") {
+                            it.text.indent(indent)
+                        })
+                    }
+
+                    is CompareBlock<*> -> {
+                        val contents = block.body?.let { body ->
+                            source.text.substring(
+                                body.rangeStart,
+                                child?.rangeStart ?: body.rangeEnd
+                            )
+                        }?.indent(indent)
+
+                        when (block) {
+                            is OneOfBlock -> {
+                                val parent = stack.lastOrNull() as? WhenBlock
+                                    ?: error("__equals found with no parent __when")
+                                val value = variables[parent.property]
+                                // TODO types
+                                if (value in block.value)
+                                    append(contents ?: "")
+                                else skipContents()
+                            }
+                        }
+                    }
+
+                    is PropertyBlock -> {
+                        val contents = block.body?.let { body ->
+                            source.text.substring(
+                                body.rangeStart,
+                                child?.rangeStart ?: body.rangeEnd
+                            )
+                        }?.indent(indent)
+
+                        val value = variables[block.property]
+
+                        when (block) {
+                            is PropertyLiteral ->
+                                append(when(value) {
+                                    is String -> "\"$value\""
+                                    else -> "null"
+                                })
+                            is IfBlock ->
+                                if (value.isTruthy())
+                                    append(contents ?: "")
+                                else skipContents()
+                            is ElseBlock ->
+                                if (value.isTruthy())
+                                    skipContents()
+                                else append(contents ?: "")
+                            is EachBlock -> {
+                                val list = (value as? List<*>)?.toMutableList()
+                                if (list != null && list.isNotEmpty()) {
+                                    loops[block] = list
+                                    variables += block.variable to list.removeFirst()
+                                    append(contents ?: "")
+                                } else skipContents()
+                            }
+                            // contents provided by children
+                            is WhenBlock -> {}
                         }
                     }
                 }
-
-                is PropertyBlock -> {
-                    val contents = block.body?.let { body ->
-                        source.text.substring(
-                            body.rangeStart,
-                            child?.rangeStart ?: body.rangeEnd
-                        )
-                    }?.indent(indent)
-                    val value = properties[block.property]
-
-                    when (block) {
-                        is PropertyLiteral ->
-                            append(when(value) {
-                                is String -> "\"$value\""
-                                else -> "null"
-                            })
-                        is IfBlock ->
-                            if (value.isTruthy())
-                                append(contents ?: "")
-                            else skipContents()
-                        is ElseBlock ->
-                            if (value.isTruthy())
-                                skipContents()
-                            else append(contents ?: "")
-                        is EachBlock ->
-                            // TODO iterate on values
-                            if (value.isTruthy())
-                                append(contents ?: "")
-                            else skipContents()
-                        is WhenBlock -> {} // ignore contents of when block
-                    }
-                }
             }
         }
     }
 }
-
-private typealias BlockStack = MutableList<Block>
-
-/**
- * Removes from top of stack until parent is found, executing `onNotParent` for non-matches.
- */
-private fun BlockStack.removeUpToParent(next: Block, onNotParent: (Block) -> Unit): Block? {
-    while (isNotEmpty()) {
-        val parent = last()
-        if (next in parent)
-            return parent
-        onNotParent(removeLast())
-    }
-    return null
-}
-
-/**
- * Empties the stack, performing `onEach` for every element.
- */
-private fun BlockStack.removeAll(onEach: (Block) -> Unit) {
-    while (isNotEmpty())
-        onEach(removeLast())
-}
-
 
 class MissingPackException(pack: PackId) : Exception("Missing pack: $pack")

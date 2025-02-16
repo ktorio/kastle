@@ -31,12 +31,20 @@ sealed interface SourcePosition {
 
     val range: IntRange
 
+    fun withBounds(start: Int? = null, end: Int? = null): SourcePosition
+
     data class TopLevel(override val range: IntRange): SourcePosition {
+        override fun withBounds(start: Int?, end: Int?) =
+            copy(range = IntRange(start ?: range.first, end ?: range.last))
+
         override fun toString(): String = "top(${range.start}, ${range.endInclusive})"
     }
 
     // TODO receiver type, multiple receivers, context parameters, scope parameters
     data class Inline(override val range: IntRange, val receiver: String): SourcePosition {
+        override fun withBounds(start: Int?, end: Int?) =
+            copy(range = IntRange(start ?: range.first, end ?: range.last))
+
         override fun toString(): String = "inline(${range.start}, ${range.endInclusive}, $receiver)"
     }
 }

@@ -29,4 +29,6 @@ replay_pid*
 .editorconfig
 build
 
+# application artifacts
+server/json
 actual-files

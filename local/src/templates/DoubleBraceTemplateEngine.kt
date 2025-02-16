@@ -112,7 +112,7 @@ class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                 EachBlock(
                     property = list,
                     position = SourcePosition.TopLevel(match.range.start..endMatch.range.endInclusive),
-                    argument = element,
+                    variable = element,
                     body = SourcePosition.TopLevel(match.range.endInclusive + 1 .. endMatch.range.start - 1),
                 )
             }

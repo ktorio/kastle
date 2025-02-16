@@ -8,4 +8,8 @@ dependencies:
   - io.ktor:ktor-server-config-yaml:3.0.3
   - io.ktor:ktor-server-content-negotiation:3.0.3
   - io.ktor:ktor-serialization-kotlinx-json:3.0.3
-  - ch.qos.logback:logback-classic:1.4.14
+  - ch.qos.logback:logback-classic:1.5.16
+
+test-dependencies:
+  - ../client
+  - io.ktor:ktor-server-test-host:3.0.3

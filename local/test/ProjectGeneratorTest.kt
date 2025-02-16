@@ -6,13 +6,13 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.files.SystemTemporaryDirectory
 import org.jetbrains.kastle.io.deleteRecursively
 import org.jetbrains.kastle.io.export
-import org.junit.Test
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.test.AfterTest
+import kotlin.test.Test
 
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
-private const val replaceSnapshot = false
+private const val replaceSnapshot = true
 
 abstract class ProjectGeneratorTest {
     companion object {
@@ -32,7 +32,7 @@ abstract class ProjectGeneratorTest {
 
     @Test
     fun `empty project`() = runTest {
-        generateWithPacks("acme/basic")
+        generateWithPacks("com.acme/basic")
         assertFilesAreEqualWithSnapshot(
             "$resources/projects/empty",
             projectDir.toString(),
@@ -42,8 +42,8 @@ abstract class ProjectGeneratorTest {
     @Test
     fun `with slot`() = runTest {
         generateWithPacks(
-            "acme/parent",
-            "acme/child",
+            "com.acme/parent",
+            "com.acme/child",
         )
         assertFilesAreEqualWithSnapshot(
             "$resources/projects/parent-child",
@@ -54,9 +54,9 @@ abstract class ProjectGeneratorTest {
     @Test
     fun `with slot and two children`() = runTest {
         generateWithPacks(
-            "acme/parent",
-            "acme/child",
-            "acme/child2",
+            "com.acme/parent",
+            "com.acme/child",
+            "com.acme/child2",
         )
         assertFilesAreEqualWithSnapshot(
             "$resources/projects/parent-child2",
@@ -66,15 +66,29 @@ abstract class ProjectGeneratorTest {
 
     @Test
     fun `with properties`() = runTest {
-        generate(packs = listOf("acme/properties"), properties = mapOf(
+        generate(packs = listOf("com.acme/properties"), properties = mapOf(
             "trueCondition" to "true",
             "falseCondition" to "false",
             "collection" to "1,2,3",
             "whenProperty" to "yes",
             "literal" to "literal",
-        ))
+        ).mapKeys { (key) -> VariableId.parse("com.acme/properties/$key") })
         assertFilesAreEqualWithSnapshot(
             "$resources/projects/properties",
+            projectDir.toString(),
+            replace = replaceSnapshot,
+        )
+    }
+
+    @Test
+    fun `ktor server`() = runTest {
+        generateWithPacks(
+            "std/gradle",
+            "io.ktor/server-core",
+            "io.ktor/server-cio",
+        )
+        assertFilesAreEqualWithSnapshot(
+            "$resources/projects/ktor-server",
             projectDir.toString(),
             replace = replaceSnapshot,
         )
@@ -84,7 +98,7 @@ abstract class ProjectGeneratorTest {
         generate(packs = packs.toList())
 
     private suspend fun generate(
-        properties: Map<String, String> = emptyMap(),
+        properties: Map<VariableId, String> = emptyMap(),
         packs: List<String>
     ) = ProjectGenerator.fromRepository(repository)
         .generate(

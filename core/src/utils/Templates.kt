@@ -14,6 +14,12 @@ val Block.rangeStart: Int get() =
 val Block.rangeEnd: Int get() =
     position.rangeEnd
 
+val Block.bodyStart: Int? get() =
+    body?.rangeStart
+
+val Block.bodyEnd: Int? get() =
+    body?.rangeEnd
+
 val SourcePosition.rangeStart: Int get() =
     range.start
 

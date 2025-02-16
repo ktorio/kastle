@@ -5,4 +5,9 @@ the Kastle system when creating new projects.
 
 In this guide, we'll cover the topics required for authoring your own packs.
 
-# TODO
+# The Guide
+
+1. Publish your relevant libraries to Maven.
+2. Create a PACK repository project.
+3. Get a publisher token for the destination repository.
+4. Run the `publish` target in your local repository.

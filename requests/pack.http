@@ -1,0 +1,2 @@
+# Get a single pack descriptor
+GET http://localhost:8080/api/packs/com.acme/child

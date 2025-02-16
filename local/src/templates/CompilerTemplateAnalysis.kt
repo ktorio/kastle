@@ -37,6 +37,11 @@ import org.jetbrains.kotlin.psi.KtWhenEntry
 import org.jetbrains.kotlin.psi.KtWhenExpression
 import org.jetbrains.kotlin.psi.psiUtil.parents
 
+private const val SLOT = "slot"
+private const val SLOTS = "slots"
+private const val DEPENDENCIES = "dependencies"
+private const val TEST_DEPENDENCIES = "testDependencies"
+
 private val bodyOpenRegex = Regex("^\\{\\s*(?:\\w+\\s*->\\s*)?")
 private val bodyCloseRegex = Regex("\\s*}$")
 
@@ -47,6 +52,7 @@ fun PsiElement.bodyPosition(): SourcePosition {
     childrenOfType<KtContainerNodeForControlStructureBody>().firstOrNull()?.let { bodyElement ->
         return bodyElement.bodyPosition()
     }
+    // TODO what the heck is going on here?
     val start = bodyOpenRegex.find(text)?.range?.endInclusive?.let { it + 1 } ?: 0
     val end = bodyCloseRegex.find(text)?.range?.start ?: text.length
     val range = (textRange.startOffset + start) until (textRange.startOffset + end)
@@ -102,15 +108,10 @@ fun KtDeclaration.asProperty(): Property {
 fun KtDeclaration.findReferences(): Sequence<KtNameReferenceExpression> =
     parent.findReferencesTo(name!!)
 
-fun PsiElement.findReferencesTo(name: String): Sequence<KtNameReferenceExpression> =
+fun PsiElement.findReferencesTo(vararg names: String): Sequence<KtNameReferenceExpression> =
     descendantsOfType<KtNameReferenceExpression>().filter {
-        it.text == name
+        it.text in names
     }
-
-fun KtNameReferenceExpression.readPropertyBlocks(variableName: String): Sequence<Block> =
-    parent.tryReadBlocks(variableName) ?:
-    parent.parent.tryReadBlocks(variableName) ?:
-    asLiteralReference(variableName)
 
 fun KtExpression.readSlotBlock(): Slot {
     val call = childrenOfType<KtCallExpression>().firstOrNull()
@@ -122,11 +123,11 @@ fun KtExpression.readSlotBlock(): Slot {
     // TODO look for !! to establish required
     // TODO look for expected return type
     return when (functionName) {
-        "Slot" -> NamedSlot(
+        SLOT -> NamedSlot(
             slotName,
             sourcePosition(),
         )
-        "Slots" -> RepeatingSlot(
+        SLOTS -> RepeatingSlot(
             slotName,
             sourcePosition(),
         )
@@ -134,7 +135,7 @@ fun KtExpression.readSlotBlock(): Slot {
     }
 }
 
-private fun KtNameReferenceExpression.asLiteralReference(variableName: String): Sequence<Block> =
+private fun KtExpression.asLiteralReference(variableName: String): Sequence<Block> =
     sequenceOf(
         PropertyLiteral(
             property = variableName,
@@ -154,8 +155,11 @@ private fun KtWhenExpression.asWhenBlock(variableName: String): Sequence<Block> 
     yield(
         WhenBlock(
             property = variableName,
-            position = this@asWhenBlock.sourcePosition(),
-            body = this@asWhenBlock.bodyPosition(),
+            position = sourcePosition(),
+            body = sourcePosition().withBounds(
+                start = children[1].textRange.startOffset,
+                end = children.last().textRange.endOffset
+            )
         )
     )
     for (child in childrenOfType<KtWhenEntry>()) {
@@ -183,14 +187,31 @@ private fun KtWhenExpression.asWhenBlock(variableName: String): Sequence<Block> 
     }
 }
 
+fun KtExpression.readPropertyBlocks(variableName: String): Sequence<Block> =
+    parent.tryReadBlocks(variableName) ?:
+    parent.parent.tryReadBlocks(variableName) ?:
+    asLiteralReference(variableName)
+
+// TODO handle else-if
+// TODO trailing }
 private fun KtIfExpression.asIfBlock(variableName: String): Sequence<Block> =
     sequenceOf(
         IfBlock(
             property = variableName,
-            position = this@asIfBlock.sourcePosition(),
-            body = this@asIfBlock.bodyPosition(),
-        )
-    )
+            // if expression includes else, so we trim to that
+            position = sourcePosition()
+                .withBounds(end = then?.textRange?.endOffset),
+            body = then?.bodyPosition(),
+        ),
+        `else`?.let {
+            ElseBlock(
+                property = variableName,
+                position = it.sourcePosition()
+                    .withBounds(start = then?.textRange?.endOffset?.let { it + 1 }),
+                body = it.bodyPosition(),
+            )
+        }
+    ).filterNotNull()
 
 private fun KtForExpression.asEachBlock(variableName: String): Sequence<Block> = sequence {
     val entryName = this@asEachBlock.loopParameter?.name ?: "it"
@@ -198,7 +219,7 @@ private fun KtForExpression.asEachBlock(variableName: String): Sequence<Block> =
         EachBlock(
             property = variableName,
             position = this@asEachBlock.sourcePosition(),
-            argument = entryName,
+            variable = entryName,
             body = this@asEachBlock.bodyPosition(),
         )
     )
@@ -209,18 +230,22 @@ private fun KtForExpression.asEachBlock(variableName: String): Sequence<Block> =
     }
 }
 
-sealed interface TemplateReference {
+sealed interface TemplateParentReference {
     companion object {
-        fun classify(reference: KtNameReferenceExpression): TemplateReference {
-            if (reference.parent is KtPropertyDelegate)
-                return PropertyDelegate(reference.parent.parent as KtDeclaration)
-            else if (reference.parent is KtDotQualifiedExpression)
-                return SlotExpression(reference.parent as KtDotQualifiedExpression)
-            else
-                throw IllegalArgumentException("Unrecognized Template reference: ${reference.parent.text} ${reference.parent.textRange}")
-        }
+        fun classify(reference: KtNameReferenceExpression): TemplateParentReference =
+            when (val parent = reference.parent) {
+                is KtPropertyDelegate -> PropertyDelegate(reference.parent.parent as KtDeclaration)
+                is KtDotQualifiedExpression ->
+                    when(val callReference = parent.selectorExpression?.text?.substringBefore('(')) {
+                        SLOT, SLOTS -> Slot(parent)
+                        DEPENDENCIES, TEST_DEPENDENCIES -> Dependencies(parent)
+                        else -> throw IllegalArgumentException("Unrecognized ${reference.text} reference: $callReference ${parent.textRange}")
+                    }
+                else -> throw IllegalArgumentException("Unrecognized ${reference.text} reference: ${parent.text} ${parent.textRange}")
+            }
     }
 
-    data class PropertyDelegate(val declaration: KtDeclaration): TemplateReference
-    data class SlotExpression(val expression: KtExpression): TemplateReference
+    data class PropertyDelegate(val declaration: KtDeclaration): TemplateParentReference
+    data class Slot(val expression: KtDotQualifiedExpression): TemplateParentReference
+    data class Dependencies(val expression: KtDotQualifiedExpression): TemplateParentReference
 }

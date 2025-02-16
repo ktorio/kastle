@@ -33,6 +33,7 @@ open class CustomParserSerializer<T: Any>(
 
 class PackIdSerializer: CustomParserSerializer<PackId>(PackId::class, PackId::parse)
 class SlotIdSerializer: CustomParserSerializer<SlotId>(SlotId::class, SlotId::parse)
+class VariableIdSerializer: CustomParserSerializer<VariableId>(VariableId::class, VariableId::parse)
 class RevisionSerializer: CustomParserSerializer<Revision>(Revision::class, Revision::parse)
 class VersionRangeSerializer: CustomParserSerializer<VersionRange>(VersionRange::class, VersionRange::parse)
 class DependencySerializer: CustomParserSerializer<Dependency>(Dependency::class, Dependency::parse)

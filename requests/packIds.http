@@ -1,0 +1,2 @@
+# Get all pack IDs
+GET http://localhost:8080/api/packIds

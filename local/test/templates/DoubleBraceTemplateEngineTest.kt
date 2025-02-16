@@ -114,7 +114,7 @@ class DoubleBraceTemplateEngineTest {
 
         assertIs<EachBlock>(forEach)
         assertEquals("aList", forEach.property)
-        assertEquals("elem", forEach.argument)
+        assertEquals("elem", forEach.variable)
         assertEquals("\nHello, {{ elem }}!\n", input.substring(forEach.body!!.range)) // TODO trim newlines
     }
 

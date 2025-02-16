@@ -2,3 +2,6 @@ id: io.ktor/server-cio
 name: Ktor Server CIO Engine
 description: Adds the CIO engine to your Ktor server
 version: 1.0.0
+module: server
+requires:
+  - io.ktor/server-core

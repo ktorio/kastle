@@ -1,5 +1,5 @@
 package com.acme
 
 fun main() {
-    println(null)
+    println("1")println("2")println("3")
 }

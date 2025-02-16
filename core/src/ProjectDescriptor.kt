@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 data class ProjectDescriptor(
     val name: String,
     val group: String,
-    val properties: Map<String, String> = emptyMap(),
+    val properties: Map<VariableId, String> = emptyMap(),
     val packs: List<PackId> = emptyList(),
 )

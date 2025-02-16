@@ -28,6 +28,9 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import java.io.File
 
+private const val PROJECT = "Project"
+private const val MODULE = "Module"
+
 /**
  * Provides analysis capabilities for Kotlin source files within a specified path.
  * This class utilizes Kotlin compiler's source analysis with a predefined environment setup.
@@ -41,6 +44,8 @@ import java.io.File
 internal class KotlinDSLCompilerTemplateEngine(
     private val path: Path,
     private val repository: PackRepository = PackRepository.Companion.EMPTY,
+    private val log: (() -> String) -> Unit = { println(it()) }
+
 ) {
     companion object {
         private val targetRegex = Regex("""@target\s+(\S+)""", RegexOption.IGNORE_CASE)
@@ -95,6 +100,7 @@ internal class KotlinDSLCompilerTemplateEngine(
                 targetRegex.find(it.text)?.groupValues?.getOrNull(1)
             }
         val target = targetFromHeader ?: "file:${ktFile.virtualFile.name}"
+        log { "Target: $target" }
 
         return when (target.protocol) {
             "file" -> SourceTemplate(
@@ -106,7 +112,10 @@ internal class KotlinDSLCompilerTemplateEngine(
                 val slot = repository.slot(target.slotId)
                     ?: throw IllegalArgumentException("Slot not found: ${target.afterProtocol}")
                 val imports = ktFile.importList?.imports?.map { it.text.substring("import ".length) } ?: emptyList()
-                val text = when(slot.position) {
+                // TODO
+                val text = ktFile.firstFunctionBody()
+                        ?: throw IllegalArgumentException("Expected single function body for targeting slot")
+                when(slot.position) {
                     is SourcePosition.TopLevel -> ktFile.endOfImports()?.let { endOfImports ->
                         ktFile.text.substring(endOfImports)
                     } ?: ktFile.text
@@ -131,23 +140,43 @@ internal class KotlinDSLCompilerTemplateEngine(
             ?.bodyExpression?.text?.trimBraces()?.trimIndent()?.trim()
 
     private fun KtFile.findBlocks(properties: MutableList<Property>): List<Block> {
-        val templateReferences = findReferencesTo("Template").map(TemplateReference.Companion::classify).toList()
-        val propertyDeclarations = templateReferences.filterIsInstance<TemplateReference.PropertyDelegate>()
+        // references to Project or Module
+        val templateReferences = findReferencesTo(PROJECT, MODULE)
+            .map(TemplateParentReference.Companion::classify)
+            .toList()
+
+        // declarations of properties
+        val propertyDeclarations = templateReferences
+            .filterIsInstance<TemplateParentReference.PropertyDelegate>()
             .map { it.declaration }
+
+        // remove all declarations
         val declarationBlocks = propertyDeclarations.map { declaration ->
             SkipBlock(position = declaration.sourcePosition(includeTrailingNewline = true))
         }
+
+        // inline blocks with references to properties
         val propertyBlocks = propertyDeclarations.asSequence().flatMap { declaration ->
             declaration.findReferences().flatMap { reference ->
                 reference.readPropertyBlocks(declaration.name!!)
             }
         }
-        val slots = templateReferences.filterIsInstance<TemplateReference.SlotExpression>()
+
+        // inline dependency references
+        val dependencyReferences = templateReferences
+            .filterIsInstance<TemplateParentReference.Dependencies>()
+            .flatMap { it.expression.readPropertyBlocks(it.expression.text) }
+
+        // slot references
+        val slots = templateReferences
+            .filterIsInstance<TemplateParentReference.Slot>()
             .map { it.expression.readSlotBlock() }
-        // TODO merge properties to pack manifest
+
+        // include discovered properties in the list of properties
+        // TODO bad abstraction
         properties.addAll(propertyDeclarations.map { it.asProperty() })
 
-        return declarationBlocks + propertyBlocks + slots
+        return declarationBlocks + propertyBlocks + dependencyReferences + slots
     }
 
 }
