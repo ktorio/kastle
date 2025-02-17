@@ -7,6 +7,7 @@ import kotlinx.io.writeCodePointValue
 import kotlinx.io.writeString
 import org.jetbrains.kastle.gen.load
 import org.jetbrains.kastle.gen.getVariables
+import org.jetbrains.kastle.gen.toVariableEntry
 import org.jetbrains.kastle.utils.*
 import org.jetbrains.kastle.utils.plusAssign
 import kotlin.collections.isNotEmpty
@@ -27,86 +28,102 @@ internal class ProjectGeneratorImpl(
 
     override suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
         val project = projectDescriptor.load(repository)
+        log { project.name }
+        log {
+            buildString {
+                for (module in project.structure.modules) {
+                    appendLine("  ${module.path.ifEmpty { "<root>" }}")
+                    append("    dependencies:")
+                    if (module.dependencies.isEmpty()) appendLine(" <none>") else appendLine()
+                    module.dependencies.forEach { appendLine("      - $it") }
+                    append("    testDependencies:")
+                    if (module.testDependencies.isEmpty()) appendLine(" <none>") else appendLine()
+                    module.testDependencies.forEach { appendLine("      - $it") }
+                }
+            }
+        }
         // TODO ensure structure consistency
         val allFileNames = mutableSetOf<String>()
 
-        for (pack in project.packs) {
-            val variables = project.getVariables(pack)
+        for (module in project.structure.modules) {
 
-            for (module in pack.structure.modules) {
-                for (source in module.sources.filter { it.target.protocol == "file" }) {
-                    val path = source.target.relativeFile
-                    require(allFileNames.add(path)) {
-                        "File conflict for module \"${pack.id}\" at \"${source.target}\""
-                    }
-                    emit(SourceFileEntry(path) {
-                        writeSourceFile(source, variables) {
-                            writeSourcePreamble(
-                                pack.id,
-                                source,
-                                project.slotSources,
-                                projectDescriptor
-                            )
-                            log { source.target }
-                            if (source.blocks.isNullOrEmpty()) {
-                                append(source.text)
-                                return@writeSourceFile
-                            }
+            for (source in module.sources.filter { it.target.protocol == "file" }) {
+                val packId = source.packId ?: continue
+                val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
+                val variables = project.getVariables(pack) + module.toVariableEntry()
+                val path = source.target.relativeFile
+                require(allFileNames.add(path)) {
+                    "File conflict for module \"${packId}\" at \"${source.target}\""
+                }
+                emit(SourceFileEntry(path) {
+                    writeSourceFile(source, variables) {
+                        writeSourcePreamble(
+                            pack.id,
+                            source,
+                            project.slotSources,
+                            projectDescriptor
+                        )
+                        log { source.target }
+                        if (source.blocks.isNullOrEmpty()) {
+                            append(source.text)
+                            return@writeSourceFile
+                        }
 
-                            forEachBlock(source.blocks) { block ->
-                                log {
-                                    buildString {
-                                        append("  ${block.position.range.toString().padEnd(12)} ")
-                                        append(block::class.simpleName?.padEnd(18))
-                                        append(block.contents.replace("\n", "\\n"))
-                                    }
+                        // print debug info to logs
+                        forEachBlock(source.blocks) { block ->
+                            log {
+                                buildString {
+                                    append("  ${block.position.range.toString().padEnd(12)} ")
+                                    append(block::class.simpleName?.padEnd(18))
+                                    append(block.contents.replace("\n", "\\n").padEnd(100))
+                                    append(block.bodyContents?.replace("\n", "\\n"))
                                 }
                             }
-                            log { "" } // log empty line
+                        }
+                        log { "" } // log empty line
 
-                            forEachBlock(source.blocks) { block ->
-                                // ancestors
-                                stack.popUntil({ block in it }) { parent ->
+                        forEachBlock(source.blocks) { block ->
+                            // ancestors
+                            stack.popUntil({ block in it }) { parent ->
+                                parent.close()
+                                if (parent.tryLoopBack())
+                                    return@forEachBlock
+                            }
+
+                            // interstitial
+                            append(source.text, start, block.rangeStart)
+
+                            // current block
+                            appendBlockContents(
+                                block,
+                                source,
+                                project.slotSources.lookup(pack.id, block)
+                            )
+
+                            // where to go next
+                            start = when (child) {
+                                null -> block.rangeEnd
+                                else -> {
+                                    log { "  push $block" }
+                                    stack += block
+                                    child!!.rangeStart
+                                }
+                            }
+
+                            if (isLast()) {
+                                // trailing ancestors
+                                stack.popSequence().forEach { parent ->
                                     parent.close()
                                     if (parent.tryLoopBack())
                                         return@forEachBlock
                                 }
 
-                                // interstitial
-                                append(source.text, start, block.rangeStart)
-
-                                // current block
-                                appendBlockContents(
-                                    block,
-                                    source,
-                                    project.slotSources.lookup(pack.id, block)
-                                )
-
-                                // where to go next
-                                start = when (child) {
-                                    null -> block.rangeEnd
-                                    else -> {
-                                        log { "  push $block" }
-                                        stack += block
-                                        child!!.rangeStart
-                                    }
-                                }
-
-                                if (isLast()) {
-                                    // trailing ancestors
-                                    stack.popSequence().forEach { parent ->
-                                        parent.close()
-                                        if (parent.tryLoopBack())
-                                            return@forEachBlock
-                                    }
-
-                                    // trailing content
-                                    append(source.text, start, source.text.length)
-                                }
+                                // trailing content
+                                append(source.text, start, source.text.length)
                             }
                         }
-                    })
-                }
+                    }
+                })
             }
         }
     }
@@ -183,6 +200,8 @@ internal class ProjectGeneratorImpl(
 
         val Block.contents: String get() =
             source.text.substring(rangeStart, rangeEnd)
+        val Block.bodyContents: String? get() =
+            body?.let { source.text.substring(bodyStart!!, bodyEnd!!) }
 
         override fun append(csq: CharSequence?): java.lang.Appendable {
             if (csq == null) return this
@@ -245,11 +264,13 @@ internal class ProjectGeneratorImpl(
             fun Block.tryLoopBack(): Boolean {
                 if (this !is DeclaringBlock) return false
                 val items = loops[this] ?: return false
-                val nextItem = items.removeFirstOrNull() ?: return false
-                start = bodyStart ?: return false
-                stack += this
-                variables += variable to nextItem
-                i = blocks.indexOf(this)
+                if (items.isEmpty()) {
+                    loops -= this
+                    return false
+                }
+                i = blocks.indexOf(this) - 1
+                // TODO this will mess up with for loops not on new line
+                start = source.text.lastIndexOf('\n', rangeStart)
                 return true
             }
 
@@ -291,7 +312,7 @@ internal class ProjectGeneratorImpl(
                         when (block) {
                             is OneOfBlock -> {
                                 val parent = stack.lastOrNull() as? WhenBlock
-                                    ?: error("__equals found with no parent __when")
+                                    ?: error("when clause with no parent: $block")
                                 val value = variables[parent.property]
                                 // TODO types
                                 if (value in block.value)
@@ -326,10 +347,10 @@ internal class ProjectGeneratorImpl(
                                     skipContents()
                                 else append(contents ?: "")
                             is EachBlock -> {
-                                val list = (value as? List<*>)?.toMutableList()
-                                if (list != null && list.isNotEmpty()) {
-                                    loops[block] = list
+                                val list = loops[block] ?: (value as? List<*>).orEmpty().toMutableList()
+                                if (list.isNotEmpty()) {
                                     variables += block.variable to list.removeFirst()
+                                    loops[block] = list
                                     append(contents ?: "")
                                 } else skipContents()
                             }

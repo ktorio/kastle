@@ -54,22 +54,35 @@ fun PsiElement.bodyPosition(): SourcePosition {
     }
     // TODO what the heck is going on here?
     val start = bodyOpenRegex.find(text)?.range?.endInclusive?.let { it + 1 } ?: 0
-    val end = bodyCloseRegex.find(text)?.range?.start ?: text.length
-    val range = (textRange.startOffset + start) until (textRange.startOffset + end)
+    val length = bodyCloseRegex.find(text)?.range?.start ?: text.length
+    val range = (textRange.startOffset + start) until (textRange.startOffset + length)
     return SourcePosition.TopLevel(range)
 }
 
-fun PsiElement.sourcePosition(includeTrailingNewline: Boolean = false): SourcePosition {
+fun PsiElement.sourcePosition(
+    includeTrailingNewline: Boolean = false,
+    trim: Boolean = false,
+): SourcePosition {
     val inlineContext = parents.firstNotNullOfOrNull(::inlineContext)
     if (inlineContext != null)
-        return SourcePosition.Inline(textIntRange(includeTrailingNewline), inlineContext)
-    return SourcePosition.TopLevel(textIntRange(includeTrailingNewline))
+        return SourcePosition.Inline(textIntRange(includeTrailingNewline, trim), inlineContext)
+    return SourcePosition.TopLevel(textIntRange(includeTrailingNewline, trim))
 }
 
-fun PsiElement.textIntRange(includeTrailingNewline: Boolean = false): IntRange =
-    if (includeTrailingNewline && nextSibling is PsiWhiteSpace && nextSibling.text.all { it == '\n' })
+fun PsiElement.textIntRange(
+    includeTrailingNewline: Boolean = false,
+    trim: Boolean = false,
+): IntRange =
+    if (includeTrailingNewline && hasWhitespaceSibling())
         textRange.startOffset until nextSibling.textRange.endOffset
+    else if (trim) {
+        val (startWs, endWs) = text.takeWhile { it.isWhitespace() }.length to text.takeLastWhile { it.isWhitespace() }.length
+        textRange.startOffset + startWs until textRange.endOffset - endWs
+    }
     else textRange.toIntRange()
+
+fun PsiElement.hasWhitespaceSibling() =
+    nextSibling is PsiWhiteSpace && nextSibling.text.all { it == '\n' }
 
 fun TextRange.toIntRange(): IntRange =
     startOffset until endOffset
@@ -195,23 +208,27 @@ fun KtExpression.readPropertyBlocks(variableName: String): Sequence<Block> =
 // TODO handle else-if
 // TODO trailing }
 private fun KtIfExpression.asIfBlock(variableName: String): Sequence<Block> =
-    sequenceOf(
-        IfBlock(
-            property = variableName,
-            // if expression includes else, so we trim to that
-            position = sourcePosition()
-                .withBounds(end = then?.textRange?.endOffset),
-            body = then?.bodyPosition(),
-        ),
-        `else`?.let {
-            ElseBlock(
+    if (then == null)
+        emptySequence()
+    else {
+        sequenceOf(
+            IfBlock(
                 property = variableName,
-                position = it.sourcePosition()
-                    .withBounds(start = then?.textRange?.endOffset?.let { it + 1 }),
-                body = it.bodyPosition(),
-            )
-        }
-    ).filterNotNull()
+                // if expression includes else, so we trim to that
+                position = sourcePosition()
+                    .withBounds(end = then!!.textIntRange(trim = true).endInclusive),
+                body = then!!.bodyPosition(),
+            ),
+            `else`?.let {
+                ElseBlock(
+                    property = variableName,
+                    position = it.sourcePosition()
+                        .withBounds(start = then!!.textIntRange().endInclusive + 1),
+                    body = it.bodyPosition(),
+                )
+            }
+        ).filterNotNull()
+    }
 
 private fun KtForExpression.asEachBlock(variableName: String): Sequence<Block> = sequence {
     val entryName = this@asEachBlock.loopParameter?.name ?: "it"

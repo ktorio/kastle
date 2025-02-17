@@ -29,7 +29,7 @@ class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         return SourceTemplate(
             text = template,
             target = "file:$file",
-            blocks = findBlocks(template).toList()
+            blocks = findBlocks(template).toList(),
         )
     }
 

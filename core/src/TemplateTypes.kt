@@ -20,6 +20,7 @@ data class SourceTemplate(
     val imports: List<String>? = null,
     val blocks: List<Block>? = null,
     val condition: String? = null,
+    val packId: PackId? = null,
 ): SourceText
 
 @JvmInline

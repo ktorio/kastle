@@ -1,13 +1,16 @@
 package org.jetbrains.kastle.utils
 
+import kotlin.collections.toMutableList
+
 interface Stack<E>: Iterable<E> {
     companion object {
-        fun <E> of() = of<E>(emptyList())
-        fun <E> of(item: E) = of(listOf(item))
-        fun <E> of(list: List<E>) = ListStack(list.toMutableList())
+        fun <E> of() = ListStack<E>(mutableListOf())
+        fun <E> of(item: E) = ListStack(mutableListOf(item))
+        fun <E> Collection<E>.toStack() = ListStack(toMutableList())
     }
 
     val top: E?
+    fun isEmpty(): Boolean = top == null
     fun pop(): E?
     operator fun plusAssign(element: E)
     operator fun dec(): Stack<E> = apply { pop() }
@@ -16,15 +19,15 @@ interface Stack<E>: Iterable<E> {
 
 class ListStack<E>(private val list: MutableList<E>) : Stack<E> {
     override val top: E? get() = list.lastOrNull()
-    override fun pop(): E? =
-        list.removeLastOrNull()
+    override fun isEmpty(): Boolean = list.isEmpty()
+    override fun pop(): E? = list.removeLastOrNull()
     override fun plusAssign(element: E) {
         list.add(element)
     }
     override fun iterator(): Iterator<E> =
         list.asReversed().iterator()
     override fun copy(): Stack<E> =
-        Stack.of<E>(ArrayList<E>(list))
+        ListStack(ArrayList<E>(list))
 }
 
 inline fun <E> Stack<E>.popUntil(

@@ -1,11 +1,16 @@
 package org.jetbrains.kastle.gen
 
+import org.jetbrains.kastle.ArtifactDependency
+import org.jetbrains.kastle.BuildSystemDependency
+import org.jetbrains.kastle.Dependency
 import org.jetbrains.kastle.MissingPackException
+import org.jetbrains.kastle.ModuleDependency
 import org.jetbrains.kastle.PackDescriptor
 import org.jetbrains.kastle.PackRepository
 import org.jetbrains.kastle.ProjectDescriptor
 import org.jetbrains.kastle.ProjectStructure
 import org.jetbrains.kastle.PropertyType
+import org.jetbrains.kastle.SourceModule
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.Url
 import org.jetbrains.kastle.VariableId
@@ -69,3 +74,21 @@ fun Project.getVariables(pack: PackDescriptor): Variables {
         }
     )
 }
+
+fun SourceModule.toVariableEntry(): Pair<String, Any?> =
+    "Module" to mapOf(
+        "dependencies" to dependencies.map { it.toVariableMap() },
+        "testDependencies" to testDependencies.map { it.toVariableMap() },
+    )
+
+fun Dependency.toVariableMap() =
+    when(this) {
+        is ArtifactDependency -> mapOf(
+            "group" to group,
+            "artifact" to artifact,
+            "version" to version.toString(),
+        )
+        is ModuleDependency -> mapOf(
+            "module" to module
+        )
+    }

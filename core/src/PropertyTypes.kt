@@ -1,9 +1,10 @@
 package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.utils.trimAngleBrackets
 import org.jetbrains.kastle.utils.trimBraces
-import kotlin.text.toBooleanStrict
 
 @Serializable
 data class Property(
@@ -19,6 +20,16 @@ data class Property(
     }
 }
 
+private const val STRING = "string"
+private const val BOOLEAN = "boolean"
+private const val INT = "int"
+private const val LONG = "long"
+private const val FLOAT = "float"
+private const val DOUBLE = "double"
+private const val ENUM = "enum"
+private const val LIST = "list"
+private const val OBJECT = "object"
+
 @Serializable(PropertyTypeSerializer::class)
 sealed interface PropertyType {
     companion object {
@@ -28,15 +39,15 @@ sealed interface PropertyType {
             val details by lazy { text.removePrefix(word).trim() }
 
             return when(word.lowercase()) {
-                "string" -> String
-                "boolean" -> Boolean
-                "int" -> Int
-                "long" -> Long
-                "float" -> Float
-                "double" -> Double
-                "enum" -> Enum(details.trimBraces().split(Regex(",\\s*")))
-                "list" -> List(parse(details.trimAngleBrackets()))
-                "type" -> Type(details.trimAngleBrackets())
+                STRING -> String
+                BOOLEAN -> Boolean
+                INT -> Int
+                LONG -> Long
+                FLOAT -> Float
+                DOUBLE -> Double
+                ENUM -> Enum(details.trimBraces().split(Regex(",\\s*")))
+                LIST -> List(parse(details.trimAngleBrackets()))
+                OBJECT -> Object(Json.decodeFromString(details.trimBraces()))
                 else -> throw IllegalArgumentException("Invalid property type: $text")
             }
         }
@@ -46,32 +57,32 @@ sealed interface PropertyType {
 
     data object String: PropertyType {
         override fun parse(text: kotlin.String) = text
-        override fun toString() = "string"
+        override fun toString() = STRING
     }
 
     data object Boolean: PropertyType {
         override fun parse(text: kotlin.String): Any = text.toBooleanStrict()
-        override fun toString() = "boolean"
+        override fun toString() = BOOLEAN
     }
 
     data object Int: PropertyType {
         override fun parse(text: kotlin.String) = text.toInt()
-        override fun toString() = "int"
+        override fun toString() = INT
     }
 
     data object Long: PropertyType {
         override fun parse(text: kotlin.String) = text.toLong()
-        override fun toString() = "long"
+        override fun toString() = LONG
     }
 
     data object Float: PropertyType {
         override fun parse(text: kotlin.String) = text.toFloat()
-        override fun toString() = "float"
+        override fun toString() = FLOAT
     }
 
     data object Double: PropertyType {
         override fun parse(text: kotlin.String): Any = text.toDouble()
-        override fun toString() = "double"
+        override fun toString() = DOUBLE
     }
 
     data class List(val elementType: PropertyType): PropertyType {
@@ -80,15 +91,19 @@ sealed interface PropertyType {
     }
 
     data class Enum(val values: Collection<kotlin.String>): PropertyType {
-        override fun parse(text: kotlin.String) =
+        override fun parse(text: kotlin.String): kotlin.String =
             if (text in values) text
             else throw IllegalArgumentException("Invalid enum value: $text, expected one of $values")
         override fun toString() = "enum{${values.joinToString(", ")}}"
     }
 
-    // TODO instead of qualified name we should use some serialization format
-    data class Type(val qualifiedName: QualifiedName): PropertyType {
-        override fun parse(text: kotlin.String): Any = TODO()
-        override fun toString() = "type<$qualifiedName>"
+    data class Object(val properties: Map<String, PropertyType>): PropertyType {
+        override fun parse(text: kotlin.String): Any =
+            Json.decodeFromString<Map<String, String>>(text).let { stringMap ->
+                stringMap.mapValues { (key, value) ->
+                    properties[key]?.parse(value.toString())
+                }
+            }
+        override fun toString() = "object${Json.encodeToString<Map<String, PropertyType>>(properties)}"
     }
 }

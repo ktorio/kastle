@@ -31,53 +31,53 @@ class LocalPackRepositoryTest {
     @Test
     fun packIds() = runTest {
         val listOfPacks = repository.packIds()
-            .filter { it.group == "acme" }
+            .filter { it.group == "com.acme" }
             .map { it.toString() }
             .toList()
             .sorted()
         assertEquals(
             listOf(
-                "acme/basic",
-                "acme/child",
-                "acme/child2",
-                "acme/parent",
-                "acme/properties",
+                "com.acme/basic",
+                "com.acme/child",
+                "com.acme/child2",
+                "com.acme/parent",
+                "com.acme/properties",
             ), listOfPacks
         )
     }
 
     @Test
     fun basic() = runTest {
-        checkBasic(repository.get("acme/basic"))
+        checkBasic(repository.get("com.acme/basic"))
     }
 
     @Test
     fun parent() = runTest {
-        checkParent(repository.get("acme/parent"))
+        checkParent(repository.get("com.acme/parent"))
     }
 
     @Test
     fun child() = runTest {
-        checkChild(repository.get("acme/child"))
+        checkChild(repository.get("com.acme/child"))
     }
 
     @Test
     fun properties() = runTest {
-        checkProperties(repository.get("acme/properties"))
+        checkProperties(repository.get("com.acme/properties"))
     }
 
     @Test
     fun exportToJson() = runTest {
         val result = repository.exportToJson(exportDir, json = json)
-        checkBasic(result.get("acme/basic"))
-        checkParent(result.get("acme/parent"))
-        checkChild(result.get("acme/child"))
-        checkProperties(result.get("acme/properties"))
+        checkBasic(result.get("com.acme/basic"))
+        checkParent(result.get("com.acme/parent"))
+        checkChild(result.get("com.acme/child"))
+        checkProperties(result.get("com.acme/properties"))
     }
 
     private fun checkBasic(descriptor: PackDescriptor?) {
         assertNotNull(descriptor, "Missing manifest!")
-        assertEquals("acme/basic", descriptor.id.toString())
+        assertEquals("com.acme/basic", descriptor.id.toString())
         assertEquals("Basic Feature", descriptor.name)
         assertEquals("1.0.0", descriptor.version.toString())
         assertEquals("acme", descriptor.group?.id)

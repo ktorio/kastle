@@ -13,7 +13,8 @@ repositories {
 
 // TODO multiplatform
 dependencies {
-    
+    implementation("${null.group}:${null.artifact}:${null.version}}")
+        implementation("${null.group}:${null.artifact}:${null.version}}")
 
         
 }

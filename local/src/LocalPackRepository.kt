@@ -2,6 +2,7 @@ package org.jetbrains.kastle
 
 import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlNode
 import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
@@ -22,7 +23,7 @@ class LocalPackRepository(
     private val fs: FileSystem = SystemFileSystem,
     remoteRepository: PackRepository = PackRepository.EMPTY,
 ): PackRepository {
-    private val nonKtsTemplateEngine = DoubleBraceTemplateEngine()
+    private val textFileTemplateEngine = DoubleBraceTemplateEngine()
 
     constructor(root: String): this(Path(root))
 
@@ -58,22 +59,29 @@ class LocalPackRepository(
 
     override suspend fun get(packId: PackId): PackDescriptor? {
         val packRoot = root.resolve(packId.toString())
-        val manifest: PackManifest = packRoot.resolve(MANIFEST_YAML).readYaml()
-            ?: throw MissingManifestFileException("Cannot find $MANIFEST_YAML in $packRoot")
+        val manifest: PackManifest = packRoot.resolve(MANIFEST_YAML).readYaml() ?: return null
         val group = manifest.group ?: packRoot.resolve("../$GROUP_YAML").readYaml()
         val properties = manifest.properties.toMutableList()
         val modules = packRoot.moduleFolders().asFlow().map { path ->
             val relativeModulePath = path.relativeTo(packRoot).toString()
-            val amperYaml = path.resolve("amper.yaml").readYamlNode()?.yamlMap
-            val productType = amperYaml?.get<YamlMap>("product")?.get<YamlScalar>("type")?.content ?: "lib"
-            val platforms = amperYaml?.get<YamlMap>("product")?.get<YamlList>("platforms")?.items?.mapNotNull {
-                it.yamlScalar.content
-            } ?: listOf("jvm")
-            val dependencies = amperYaml?.get<YamlList>("dependencies")?.items.orEmpty().map {
-                it.yamlScalar.content
-            }.filter {
-                !it.startsWith("..") // TODO filter better
-            }.map(Dependency::parse)
+            val amperYaml = path.resolve("module.yaml").readYamlNode()?.yamlMap
+            // TODO not entirely correct
+            val (productType, platforms) = when(val productNode = amperYaml?.get<YamlNode>("product")) {
+                is YamlScalar -> productNode.content to listOf("jvm")
+                is YamlMap -> {
+                    val productType = productNode.get<YamlScalar>("type")?.content ?: "lib"
+                    val platforms = productNode.get<YamlList>("platforms")?.items?.map { it.yamlScalar.content }.orEmpty()
+                    productType to platforms
+                }
+                else -> "lib" to listOf("jvm")
+            }
+            fun YamlMap?.readDependencies(key: String) =
+                this?.get<YamlList>(key)
+                    ?.items?.map { it.yamlScalar.content }
+                    ?.filter { !it.startsWith("..") }
+                    ?.map(Dependency::parse).orEmpty()
+            val dependencies = amperYaml.readDependencies("dependencies")
+            val testDependencies = amperYaml.readDependencies("testDependencies")
 
             // TODO discover + iterate through all modules
             val sourceFolder = path.resolve("src")
@@ -83,12 +91,12 @@ class LocalPackRepository(
             // Properties are supplied both from the manifest and from declarations in the source files
             val kotlinAnalyzer = KotlinDSLCompilerTemplateEngine(sourceFolder, repository)
             val sources = kotlinAnalyzer.ktFiles.map { sourceFile ->
-                kotlinAnalyzer.read(sourceFile, properties)
+                kotlinAnalyzer.read(sourceFile, properties).copy(packId = packId)
             }
             val resourcesFolder = path.resolve("resources")
             val resources = if (fs.exists(resourcesFolder)) {
                 fs.list(resourcesFolder).map { file ->
-                    nonKtsTemplateEngine.read(file)
+                    textFileTemplateEngine.read(file).copy(packId = packId)
                 }
             } else emptyList()
 
@@ -97,6 +105,7 @@ class LocalPackRepository(
                 path = relativeModulePath,
                 platforms = platforms,
                 dependencies = dependencies,
+                testDependencies = testDependencies,
                 sources = sources + resources,
             )
         }.toList()

@@ -1,6 +1,7 @@
 package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.kastle.utils.Queue.Companion.toQueue
 
 
 @Serializable(RevisionSerializer::class)
@@ -95,9 +96,7 @@ sealed interface ProjectStructure {
 
     val modules: List<SourceModule>
 
-    // TODO merge / throw on matching
-    operator fun plus(other: ProjectStructure): ProjectStructure =
-        fromList((modules + other.modules).distinctBy { it.path })
+    operator fun plus(other: ProjectStructure): ProjectStructure
 
     @Serializable
     data object Empty: ProjectStructure {
@@ -106,10 +105,34 @@ sealed interface ProjectStructure {
     }
     @Serializable
     data class Single(val module: SourceModule): ProjectStructure {
+        override fun plus(other: ProjectStructure): ProjectStructure =
+            when(other) {
+                is Empty -> this
+                is Single -> module.tryMerge(other.module)?.let(::Single) ?: Multi(listOf(module, other.module))
+                is Multi -> Multi(listOf(module) + other.modules)
+            }
         override val modules: List<SourceModule> = listOf(module)
     }
     @Serializable
-    data class Multi(override val modules: List<SourceModule>): ProjectStructure
+    data class Multi(override val modules: List<SourceModule>): ProjectStructure {
+        override fun plus(other: ProjectStructure): ProjectStructure {
+            val modules = modules.toMutableList()
+            val otherModules = other.modules.toMutableList()
+            for (i in modules.indices) {
+                for (j in otherModules.indices) {
+                    when (val merged = modules[i].tryMerge(otherModules[j])) {
+                        null -> {}
+                        else -> {
+                            modules[i] = merged
+                            otherModules.removeAt(j)
+                            break
+                        }
+                    }
+                }
+            }
+            return Multi(modules + otherModules)
+        }
+    }
 }
 
 @Serializable
@@ -118,8 +141,28 @@ data class SourceModule(
     val path: String = "",
     val platforms: List<String> = emptyList(),
     val dependencies: List<Dependency> = emptyList(),
+    val testDependencies: List<Dependency> = emptyList(),
     val sources: List<SourceTemplate> = emptyList(),
 )
+
+fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
+    return SourceModule(
+        type = when {
+            other.type == "lib" || type == other.type -> type
+            type == "lib" -> other.type
+            else -> return null
+        },
+        path = when {
+            other.path.isEmpty() || path == other.path -> path
+            path.isEmpty() -> other.path
+            else -> return null
+        },
+        platforms = (platforms + other.platforms).distinct(),
+        dependencies = (dependencies + other.dependencies).distinct(),
+        testDependencies = (testDependencies + other.testDependencies).distinct(),
+        sources = sources + other.sources,
+    )
+}
 
 // TODO catalog references, variables, etc.
 @Serializable(DependencySerializer::class)
