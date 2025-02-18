@@ -12,7 +12,7 @@ import kotlin.test.Test
 
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
-private const val replaceSnapshot = false
+private const val replaceSnapshot = true
 
 abstract class ProjectGeneratorTest {
     companion object {

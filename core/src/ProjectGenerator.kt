@@ -201,7 +201,7 @@ internal class ProjectGeneratorImpl(
         val Block.contents: String get() =
             source.text.substring(rangeStart, rangeEnd)
         val Block.bodyContents: String? get() =
-            body?.let { source.text.substring(bodyStart!!, bodyEnd!!) }
+            source.text.substring(bodyStart, bodyEnd)
 
         override fun append(csq: CharSequence?): java.lang.Appendable {
             if (csq == null) return this
@@ -276,9 +276,7 @@ internal class ProjectGeneratorImpl(
 
             fun Block.close() {
                 log { "  pop $this" }
-                bodyEnd?.let { bodyEnd ->
-                    append(source.text, start, bodyEnd)
-                }
+                append(source.text, start, bodyEnd)
                 start = rangeEnd
                 // TODO synchronize push/pop
                 // variables.pop()
@@ -302,12 +300,10 @@ internal class ProjectGeneratorImpl(
                     }
 
                     is CompareBlock<*> -> {
-                        val contents = block.body?.let { body ->
-                            source.text.substring(
-                                body.rangeStart,
-                                child?.rangeStart ?: body.rangeEnd
-                            )
-                        }?.indent(indent)
+                        val contents = source.text.substring(
+                            block.bodyStart,
+                            child?.rangeStart ?: block.bodyEnd
+                        ).indent(indent)
 
                         when (block) {
                             is OneOfBlock -> {
@@ -316,42 +312,43 @@ internal class ProjectGeneratorImpl(
                                 val value = variables[parent.property]
                                 // TODO types
                                 if (value in block.value)
-                                    append(contents ?: "")
+                                    append(contents)
                                 else skipContents()
                             }
                         }
                     }
 
                     is PropertyBlock -> {
-                        val contents = block.body?.let { body ->
-                            source.text.substring(
-                                body.rangeStart,
-                                child?.rangeStart ?: body.rangeEnd
-                            )
-                        }?.indent(indent)
+                        val contents = source.text.substring(
+                            block.bodyStart,
+                            child?.rangeStart ?: block.bodyEnd
+                        ).indent(indent)
 
                         val value = variables[block.property]
 
                         when (block) {
-                            is PropertyLiteral ->
-                                append(when(value) {
-                                    is String -> "\"$value\""
-                                    else -> "null"
-                                })
+                            is PropertyLiteral -> {
+                                append(
+                                    when {
+                                        value is String && !block.embedded -> "\"$value\""
+                                        else -> value.toString()
+                                    }
+                                )
+                            }
                             is IfBlock ->
                                 if (value.isTruthy())
-                                    append(contents ?: "")
+                                    append(contents)
                                 else skipContents()
                             is ElseBlock ->
                                 if (value.isTruthy())
                                     skipContents()
-                                else append(contents ?: "")
+                                else append(contents)
                             is EachBlock -> {
                                 val list = loops[block] ?: (value as? List<*>).orEmpty().toMutableList()
                                 if (list.isNotEmpty()) {
                                     variables += block.variable to list.removeFirst()
                                     loops[block] = list
-                                    append(contents ?: "")
+                                    append(contents)
                                 } else skipContents()
                             }
                             // contents provided by children

@@ -13,8 +13,8 @@ repositories {
 
 // TODO multiplatform
 dependencies {
-    implementation("${null.group}:${null.artifact}:${null.version}}")
-        implementation("${null.group}:${null.artifact}:${null.version}}")
+    implementation("io.ktor:ktor-server-core:3.0.3")
+        implementation("io.ktor:ktor-server-cio:3.0.3")
 
         
 }

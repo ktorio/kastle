@@ -158,14 +158,14 @@ internal class KotlinDSLCompilerTemplateEngine(
         // inline blocks with references to properties
         val propertyBlocks = propertyDeclarations.asSequence().flatMap { declaration ->
             declaration.findReferences().flatMap { reference ->
-                reference.readPropertyBlocks(declaration.name!!)
+                reference.readPropertyBlocks()
             }
         }
 
         // inline dependency references
         val dependencyReferences = templateReferences
             .filterIsInstance<TemplateParentReference.Dependencies>()
-            .flatMap { it.expression.readPropertyBlocks(it.expression.text) }
+            .flatMap { it.expression.readPropertyBlocks() }
 
         // slot references
         val slots = templateReferences

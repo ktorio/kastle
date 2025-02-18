@@ -35,11 +35,11 @@ dependencies {
         }
     } else {
         for (dependency in Module.dependencies) {
-            implementation("${dependency.group}:${dependency.artifact}:${dependency.version}}")
+            implementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
         }
 
         for (dependency in Module.testDependencies) {
-            testImplementation("${dependency.group}:${dependency.artifact}:${dependency.version}}")
+            testImplementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
         }
     }
 }

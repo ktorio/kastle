@@ -32,7 +32,7 @@ value class Snippet(
 @Serializable
 sealed interface Block {
     val position: SourcePosition
-    val body: SourcePosition?
+    val body: SourcePosition
 }
 
 @Serializable
@@ -61,7 +61,7 @@ data class NamedSlot(
     override val name: String,
     override val position: SourcePosition,
     override val requirement: Requirement = Requirement.OPTIONAL,
-    override val body: SourcePosition? = null
+    override val body: SourcePosition = position
 ): Slot {
     override fun toString(): String = "slots(\"$name\")"
 }
@@ -71,23 +71,27 @@ data class RepeatingSlot(
     override val name: String,
     override val position: SourcePosition,
     override val requirement: Requirement = Requirement.OPTIONAL,
-    override val body: SourcePosition? = null
+    override val body: SourcePosition = position
 ): Slot {
     override fun toString(): String = "slots(\"$name\")"
 }
 
+/**
+ * @param embedded this indicates the value should not be wrapped in quotes
+ */
 @Serializable
 data class PropertyLiteral(
     override val property: String,
     override val position: SourcePosition,
-    override val body: SourcePosition? = null
+    override val body: SourcePosition = position,
+    val embedded: Boolean = true,
 ): PropertyBlock {
     override fun toString(): String = "property(\"$property\")"
 }
 
 @Serializable
 data class SkipBlock(override val position: SourcePosition): Block {
-    override val body: SourcePosition? = null
+    override val body: SourcePosition = position
     override fun toString(): String = "skip"
 }
 
@@ -95,7 +99,7 @@ data class SkipBlock(override val position: SourcePosition): Block {
 data class IfBlock(
     override val property: String,
     override val position: SourcePosition,
-    override val body: SourcePosition? = null
+    override val body: SourcePosition = position
 ): PropertyBlock {
     override fun toString(): String = "if(\"$property\")"
 }
@@ -104,7 +108,7 @@ data class IfBlock(
 data class ElseBlock(
     override val property: String,
     override val position: SourcePosition,
-    override val body: SourcePosition? = null
+    override val body: SourcePosition = position
 ): PropertyBlock {
     override fun toString(): String = "else(\"$property\")"
 }
@@ -114,7 +118,7 @@ data class EachBlock(
     override val property: String,
     override val position: SourcePosition,
     override val variable: String,
-    override val body: SourcePosition? = null
+    override val body: SourcePosition = position
 ): PropertyBlock, DeclaringBlock {
     override fun toString(): String = "each(\"$variable\" in \"$property\")"
 }
@@ -123,7 +127,7 @@ data class EachBlock(
 data class WhenBlock(
     override val property: String,
     override val position: SourcePosition,
-    override val body: SourcePosition? = null
+    override val body: SourcePosition = position
 ): PropertyBlock {
     override fun toString(): String = "when(\"$property\")"
 }
@@ -133,7 +137,7 @@ data class WhenBlock(
 data class OneOfBlock(
     override val value: List<String>,
     override val position: SourcePosition,
-    override val body: SourcePosition? = null
+    override val body: SourcePosition = position
 ): CompareBlock<List<String>> {
     override fun toString(): String = "-> ${value.joinToString(", ") { "\"$it\"" }})"
 }

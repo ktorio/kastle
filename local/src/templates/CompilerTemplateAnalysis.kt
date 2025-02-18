@@ -20,8 +20,10 @@ import org.jetbrains.kastle.Slot
 import org.jetbrains.kastle.SourcePosition
 import org.jetbrains.kastle.WhenBlock
 import org.jetbrains.kastle.utils.unwrapQuotes
+import org.jetbrains.kotlin.psi.KtBlockStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtContainerNode
 import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
 import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
@@ -32,6 +34,8 @@ import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtPropertyDelegate
+import org.jetbrains.kotlin.psi.KtQualifiedExpression
+import org.jetbrains.kotlin.psi.KtStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.psi.KtWhenEntry
 import org.jetbrains.kotlin.psi.KtWhenExpression
@@ -148,11 +152,29 @@ fun KtExpression.readSlotBlock(): Slot {
     }
 }
 
-private fun KtExpression.asLiteralReference(variableName: String): Sequence<Block> =
+/**
+ * Reads logical expressions that can be inlined, or returns property literal match.
+ */
+fun KtExpression.readPropertyBlocks(): Sequence<Block> {
+    // handles deep references (i.e., foo.bar)
+    var variableReference: KtExpression = this
+    var ancestor: PsiElement? = parent
+    while (ancestor is KtExpression || ancestor is KtContainerNode || ancestor is KtStringTemplateEntry) {
+        val blocks = ancestor.tryReadBlocks(variableReference.text)
+        if (blocks != null)
+            return blocks
+        variableReference = ancestor as? KtQualifiedExpression ?: variableReference
+        ancestor = ancestor.parent
+    }
+    return variableReference.asLiteralReference()
+}
+
+private fun KtExpression.asLiteralReference(): Sequence<Block> =
     sequenceOf(
         PropertyLiteral(
-            property = variableName,
-            position = sourcePosition()
+            property = text,
+            position = sourcePosition(),
+            embedded = false,
         )
     )
 
@@ -161,6 +183,7 @@ private fun PsiElement.tryReadBlocks(variableName: String): Sequence<Block>? =
         is KtWhenExpression -> asWhenBlock(variableName)
         is KtIfExpression -> asIfBlock(variableName)
         is KtForExpression -> asEachBlock(variableName)
+        is KtBlockStringTemplateEntry -> asStringTemplateLiteral(variableName)
         else -> null
     }
 
@@ -195,15 +218,10 @@ private fun KtWhenExpression.asWhenBlock(variableName: String): Sequence<Block> 
     this@asWhenBlock.subjectVariable?.let { subjectVariable ->
         val subjectName = subjectVariable.name!!
         this@asWhenBlock.findReferencesTo(subjectName).forEach { subjectReference ->
-            yieldAll(subjectReference.readPropertyBlocks(subjectName))
+            yieldAll(subjectReference.readPropertyBlocks())
         }
     }
 }
-
-fun KtExpression.readPropertyBlocks(variableName: String): Sequence<Block> =
-    parent.tryReadBlocks(variableName) ?:
-    parent.parent.tryReadBlocks(variableName) ?:
-    asLiteralReference(variableName)
 
 // TODO handle else-if
 // TODO trailing }
@@ -243,9 +261,18 @@ private fun KtForExpression.asEachBlock(variableName: String): Sequence<Block> =
     // include references to the element variable
     val bodyNode = childrenOfType<KtContainerNodeForControlStructureBody>().first()
     for (entryReference in bodyNode.findReferencesTo(entryName)) {
-        yieldAll(entryReference.readPropertyBlocks(entryName))
+        yieldAll(entryReference.readPropertyBlocks())
     }
 }
+
+private fun KtBlockStringTemplateEntry.asStringTemplateLiteral(variableName: String): Sequence<Block> =
+    sequenceOf(
+        PropertyLiteral(
+            variableName,
+            position = sourcePosition(),
+            body = childrenOfType<KtExpression>().first().sourcePosition(),
+        )
+    )
 
 sealed interface TemplateParentReference {
     companion object {
