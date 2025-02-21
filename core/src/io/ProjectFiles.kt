@@ -11,6 +11,8 @@ import kotlin.use
 suspend fun Flow<SourceFileEntry>.export(path: Path, fs: FileSystem = SystemFileSystem) {
     fs.createDirectories(path)
     collect { (name, content) ->
+        val file = path.resolve(name)
+        file.parent?.let(fs::createDirectories)
         fs.sink(path.resolve(name)).buffered().use { sink ->
             content().transferTo(sink)
         }

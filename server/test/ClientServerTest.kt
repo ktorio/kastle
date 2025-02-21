@@ -10,14 +10,14 @@ import kotlin.test.assertEquals
 
 // TODO replace static expected
 private const val expectedPlugins = """
+    com.acme/child
+    com.acme/child2
+    com.acme/empty
     com.acme/parent
     com.acme/properties
-    com.acme/child2
-    com.acme/child
-    com.acme/basic
-    std/gradle
     io.ktor/server-cio
     io.ktor/server-core
+    std/gradle
 """
 
 class ClientServerTest {
@@ -28,7 +28,9 @@ class ClientServerTest {
             config = ApplicationConfig("application.yaml")
         }
         val repository = client.asRepository()
-        val packs = repository.packIds().toList().joinToString("\n")
+        val packs = repository.packIds().toList()
+            .sortedBy { it.toString() }
+            .joinToString("\n")
         assertEquals(expectedPlugins.trimIndent(), packs)
     }
 
@@ -38,8 +40,8 @@ class ClientServerTest {
             config = ApplicationConfig("application.yaml")
         }
         val repository = client.asRepository()
-        val pack = repository.get("com.acme/basic")
-        assertEquals("Basic Feature", pack?.name)
+        val pack = repository.get("com.acme/empty")
+        assertEquals("Empty Feature", pack?.name)
         assertEquals("1.0.0", pack?.version?.toString())
         assertEquals("acme", pack?.group?.id)
         assertEquals("ACME", pack?.group?.name)

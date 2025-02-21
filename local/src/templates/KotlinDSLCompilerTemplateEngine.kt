@@ -11,6 +11,7 @@ import org.jetbrains.kastle.Property
 import org.jetbrains.kastle.SkipBlock
 import org.jetbrains.kastle.SourcePosition
 import org.jetbrains.kastle.SourceTemplate
+import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.utils.afterProtocol
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.slotId
@@ -51,10 +52,10 @@ internal class KotlinDSLCompilerTemplateEngine(
         private val targetRegex = Regex("""@target\s+(\S+)""", RegexOption.IGNORE_CASE)
     }
 
-    private var environment: KotlinCoreEnvironment
-    private var psiFileFactory: PsiFileFactory
+    val environment: KotlinCoreEnvironment
+    val psiFileFactory: PsiFileFactory
     // TODO verify compilation, etc.
-    private val analyzer = TopDownAnalyzerFacadeForJVM
+    //private val analyzer = TopDownAnalyzerFacadeForJVM
 
     init {
         val verbose = false
@@ -88,6 +89,7 @@ internal class KotlinDSLCompilerTemplateEngine(
      * @throws IllegalArgumentException if the source file specified in the reference cannot be found.
      */
     suspend fun read(
+        sourcePath: Path,
         ktFile: KtFile,
         properties: MutableList<Property>
     ): SourceTemplate {
@@ -99,7 +101,7 @@ internal class KotlinDSLCompilerTemplateEngine(
             ?.let {
                 targetRegex.find(it.text)?.groupValues?.getOrNull(1)
             }
-        val target = targetFromHeader ?: "file:${ktFile.virtualFile.name}"
+        val target = targetFromHeader ?: "file:${sourcePath.resolve(ktFile.name)}"
         log { "Target: $target" }
 
         return when (target.protocol) {

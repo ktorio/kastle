@@ -31,7 +31,7 @@ internal class ProjectGeneratorImpl(
         log { project.name }
         log {
             buildString {
-                for (module in project.structure.modules) {
+                for (module in project.moduleSources.modules) {
                     appendLine("  ${module.path.ifEmpty { "<root>" }}")
                     append("    dependencies:")
                     if (module.dependencies.isEmpty()) appendLine(" <none>") else appendLine()
@@ -42,19 +42,17 @@ internal class ProjectGeneratorImpl(
                 }
             }
         }
-        // TODO ensure structure consistency
-        val allFileNames = mutableSetOf<String>()
-
-        for (module in project.structure.modules) {
-
-            for (source in module.sources.filter { it.target.protocol == "file" }) {
-                val packId = source.packId ?: continue
+        for (module in project.moduleSources.modules) {
+            val moduleSources = (module.sources.filter { it.target.protocol == "file" } + project.commonSources).distinctBy { it.target }
+            for (source in moduleSources) {
+                val packId = source.packId
+                if (packId == null) {
+                    log { "Skipping ${source.target}; missing pack ID" }
+                    continue
+                }
                 val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
                 val variables = project.getVariables(pack) + module.toVariableEntry()
                 val path = source.target.relativeFile
-                require(allFileNames.add(path)) {
-                    "File conflict for module \"${packId}\" at \"${source.target}\""
-                }
                 emit(SourceFileEntry(path) {
                     writeSourceFile(source, variables) {
                         writeSourcePreamble(

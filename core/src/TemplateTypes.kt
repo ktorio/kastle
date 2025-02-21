@@ -3,9 +3,10 @@ package org.jetbrains.kastle
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SourceTemplateReference(
-    val path: String,
-    val target: Url = "file:$path",
+data class SourceDefinition(
+    val path: String? = null,
+    val text: String? = null,
+    val target: Url? = path?.let { "file:$path" },
 )
 
 @Serializable

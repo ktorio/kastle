@@ -32,6 +32,7 @@ data class PackManifest(
     override val properties: List<Property> = emptyList(),
     override val repositories: List<Repository> = emptyList(),
     val module: String = "",
+    val sources: List<SourceDefinition> = emptyList(),
 ): PackMetadata
 
 @Serializable
@@ -48,9 +49,10 @@ data class PackDescriptor(
     override val requires: List<PackId> = emptyList(),
     override val properties: List<Property> = emptyList(),
     override val repositories: List<Repository> = emptyList(),
-    val structure: ProjectStructure = ProjectStructure.Empty,
+    val commonSources: List<SourceTemplate> = emptyList(),
+    val projectSources: ProjectModules = ProjectModules.Empty,
 ): PackMetadata {
-    constructor(manifest: PackManifest, structure: ProjectStructure) : this(
+    constructor(manifest: PackManifest, commonSources: List<SourceTemplate>, projectSources: ProjectModules) : this(
         manifest.id,
         manifest.name,
         manifest.version,
@@ -63,14 +65,15 @@ data class PackDescriptor(
         manifest.requires,
         manifest.properties,
         manifest.repositories,
-        if (structure is ProjectStructure.Single && structure.module.path.isEmpty())
-            structure.copy(module = structure.module.copy(path = manifest.module))
-        else structure
+        commonSources = commonSources,
+        projectSources = if (projectSources is ProjectModules.Single && projectSources.module.path.isEmpty())
+            projectSources.copy(module = projectSources.module.copy(path = manifest.module))
+        else projectSources
     )
 }
 
 val PackDescriptor.sources: Sequence<SourceTemplate> get() =
-    structure.modules.asSequence().flatMap { it.sources }
+    commonSources.asSequence() + projectSources.modules.asSequence().flatMap { it.sources }
 
 @Serializable
 data class Group(
@@ -92,6 +95,12 @@ data class PackLinks(
     val home: String? = null,
     val docs: String? = null,
 )
+
+@Serializable
+data class SlotDescriptor(
+    val slot: Slot,
+    val parent: Url,
+): Slot by slot
 
 @Serializable(PackIdSerializer::class)
 data class PackId(val group: String, val id: String) {

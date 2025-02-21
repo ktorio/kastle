@@ -12,7 +12,7 @@ import kotlin.test.Test
 
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
-private const val replaceSnapshot = true
+private const val replaceSnapshot = false
 
 abstract class ProjectGeneratorTest {
     companion object {
@@ -32,7 +32,7 @@ abstract class ProjectGeneratorTest {
 
     @Test
     fun `empty project`() = runTest {
-        generateWithPacks("com.acme/basic")
+        generateWithPacks("com.acme/empty")
         assertFilesAreEqualWithSnapshot(
             "$resources/projects/empty",
             projectDir.toString(),

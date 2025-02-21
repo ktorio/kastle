@@ -37,9 +37,9 @@ class LocalPackRepositoryTest {
             .sorted()
         assertEquals(
             listOf(
-                "com.acme/basic",
                 "com.acme/child",
                 "com.acme/child2",
+                "com.acme/empty",
                 "com.acme/parent",
                 "com.acme/properties",
             ), listOfPacks
@@ -47,8 +47,8 @@ class LocalPackRepositoryTest {
     }
 
     @Test
-    fun basic() = runTest {
-        checkBasic(repository.get("com.acme/basic"))
+    fun empty() = runTest {
+        checkEmpty(repository.get("com.acme/empty"))
     }
 
     @Test
@@ -69,16 +69,16 @@ class LocalPackRepositoryTest {
     @Test
     fun exportToJson() = runTest {
         val result = repository.exportToJson(exportDir, json = json)
-        checkBasic(result.get("com.acme/basic"))
+        checkEmpty(result.get("com.acme/empty"))
         checkParent(result.get("com.acme/parent"))
         checkChild(result.get("com.acme/child"))
         checkProperties(result.get("com.acme/properties"))
     }
 
-    private fun checkBasic(descriptor: PackDescriptor?) {
+    private fun checkEmpty(descriptor: PackDescriptor?) {
         assertNotNull(descriptor, "Missing manifest!")
-        assertEquals("com.acme/basic", descriptor.id.toString())
-        assertEquals("Basic Feature", descriptor.name)
+        assertEquals("com.acme/empty", descriptor.id.toString())
+        assertEquals("Empty Feature", descriptor.name)
         assertEquals("1.0.0", descriptor.version.toString())
         assertEquals("acme", descriptor.group?.id)
         assertEquals("ACME", descriptor.group?.name)

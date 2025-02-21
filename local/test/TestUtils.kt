@@ -21,13 +21,11 @@ fun assertFilesAreEqualWithSnapshot(
     // Save a copy of the failed project
     val destination = if (replace) Paths.get(expectedPath)
                       else Files.createTempDirectory("actual-files-${System.currentTimeMillis()}")
-    destination.let { target ->
-        println("Files changed, see ${target.absolute()} for new snapshot")
-        if (!target.exists())
-            target.createDirectories()
-        target.deleteRecursively()
-        Paths.get(actualPath).copyToRecursively(target, followLinks = false, overwrite = true)
-    }
+    println("Files changed, see ${destination.absolute()} for new snapshot")
+    if (!destination.exists())
+        destination.createDirectories()
+    destination.deleteRecursively()
+    Paths.get(actualPath).copyToRecursively(destination, followLinks = false, overwrite = true)
     throw cause
 }
 

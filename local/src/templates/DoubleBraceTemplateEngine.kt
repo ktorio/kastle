@@ -33,10 +33,10 @@ class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         )
     }
 
-    fun read(path: String, text: String): SourceTemplate =
+    fun read(target: Url, text: String): SourceTemplate =
         SourceTemplate(
             text = text,
-            target = "file:$path",
+            target = target,
             blocks = findBlocks(text).toList()
         )
 

@@ -1,7 +1,7 @@
 package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
-import org.jetbrains.kastle.utils.Queue.Companion.toQueue
+import org.jetbrains.kastle.utils.protocol
 
 
 @Serializable(RevisionSerializer::class)
@@ -84,7 +84,7 @@ data class Repository(
 )
 
 @Serializable
-sealed interface ProjectStructure {
+sealed interface ProjectModules {
     companion object {
         fun fromList(modules: List<SourceModule>) =
             when (modules.size) {
@@ -96,16 +96,16 @@ sealed interface ProjectStructure {
 
     val modules: List<SourceModule>
 
-    operator fun plus(other: ProjectStructure): ProjectStructure
+    operator fun plus(other: ProjectModules): ProjectModules
 
     @Serializable
-    data object Empty: ProjectStructure {
+    data object Empty: ProjectModules {
         override val modules: List<SourceModule> = emptyList()
-        override fun plus(other: ProjectStructure) = other
+        override fun plus(other: ProjectModules) = other
     }
     @Serializable
-    data class Single(val module: SourceModule): ProjectStructure {
-        override fun plus(other: ProjectStructure): ProjectStructure =
+    data class Single(val module: SourceModule): ProjectModules {
+        override fun plus(other: ProjectModules): ProjectModules =
             when(other) {
                 is Empty -> this
                 is Single -> module.tryMerge(other.module)?.let(::Single) ?: Multi(listOf(module, other.module))
@@ -114,8 +114,8 @@ sealed interface ProjectStructure {
         override val modules: List<SourceModule> = listOf(module)
     }
     @Serializable
-    data class Multi(override val modules: List<SourceModule>): ProjectStructure {
-        override fun plus(other: ProjectStructure): ProjectStructure {
+    data class Multi(override val modules: List<SourceModule>): ProjectModules {
+        override fun plus(other: ProjectModules): ProjectModules {
             val modules = modules.toMutableList()
             val otherModules = other.modules.toMutableList()
             for (i in modules.indices) {
@@ -137,7 +137,7 @@ sealed interface ProjectStructure {
 
 @Serializable
 data class SourceModule(
-    val type: String = "lib",
+    val type: SourceModuleType = SourceModuleType.LIB,
     val path: String = "",
     val platforms: List<String> = emptyList(),
     val dependencies: List<Dependency> = emptyList(),
@@ -145,11 +145,24 @@ data class SourceModule(
     val sources: List<SourceTemplate> = emptyList(),
 )
 
+enum class SourceModuleType {
+    LIB,
+    APP;
+
+    companion object {
+        fun parse(text: String) = when {
+            text == "lib" -> LIB
+            text.endsWith("app") -> APP
+            else -> throw IllegalArgumentException("Invalid module type: $text")
+        }
+    }
+}
+
 fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
     return SourceModule(
         type = when {
-            other.type == "lib" || type == other.type -> type
-            type == "lib" -> other.type
+            other.type == SourceModuleType.LIB || type == other.type -> type
+            type == SourceModuleType.LIB -> other.type
             else -> return null
         },
         path = when {
@@ -160,7 +173,14 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
         platforms = (platforms + other.platforms).distinct(),
         dependencies = (dependencies + other.dependencies).distinct(),
         testDependencies = (testDependencies + other.testDependencies).distinct(),
-        sources = sources + other.sources,
+        sources = (sources + other.sources).also { mergedSources ->
+            val uniquePaths = mutableSetOf<Url>()
+            mergedSources.forEach {
+                require(it.target.protocol != "file" || uniquePaths.add(it.target)) {
+                    "Duplicate target in sources: ${it.target}"
+                }
+            }
+        },
     )
 }
 

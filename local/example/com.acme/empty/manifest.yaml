@@ -1,4 +1,4 @@
-id: com.acme/basic
-name: Basic Feature
+id: com.acme/empty
+name: Empty Feature
 description: This is a sample feature
 version: 1.0.0
