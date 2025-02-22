@@ -61,7 +61,12 @@ sealed interface PropertyType {
     }
 
     data object Boolean: PropertyType {
-        override fun parse(text: kotlin.String): Any = text.toBooleanStrict()
+        /**
+         * Lenient parsing of property values
+         */
+        override fun parse(text: kotlin.String): Any =
+            text.toBooleanStrictOrNull() ?:
+            text.toIntOrNull()?.let { it != 0 } ?: text.isEmpty()
         override fun toString() = BOOLEAN
     }
 

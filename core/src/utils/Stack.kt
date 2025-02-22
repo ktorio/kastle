@@ -33,11 +33,11 @@ class ListStack<E>(private val list: MutableList<E>) : Stack<E> {
 inline fun <E> Stack<E>.popUntil(
     predicate: (E) -> Boolean,
     onPop: (E) -> Unit = {},
-) {
+): E? {
     while (true) {
-        val current = top ?: return
+        val current = top ?: return null
         if (predicate(current))
-            return
+            return current
         pop()?.also(onPop)
     }
 }

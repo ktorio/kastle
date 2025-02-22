@@ -11,6 +11,9 @@ val SourceTemplate.slots: Sequence<Slot> get() =
 val Block.rangeStart: Int get() =
     position.rangeStart
 
+val Block.indent: Int get() =
+    position.indent
+
 val Block.rangeEnd: Int get() =
     position.rangeEnd
 
@@ -25,6 +28,9 @@ val SourcePosition.rangeStart: Int get() =
 
 val SourcePosition.rangeEnd: Int get() =
     range.endInclusive + 1
+
+fun Int.stringOf(char: Char) =
+    CharArray(this) { char }.concatToString()
 
 fun String.indent(indent: String) =
     lines().joinToString("\n$indent")

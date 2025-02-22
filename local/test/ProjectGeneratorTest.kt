@@ -68,6 +68,7 @@ abstract class ProjectGeneratorTest {
     fun `with properties`() = runTest {
         generate(packs = listOf("com.acme/properties"), properties = mapOf(
             "trueCondition" to "true",
+            "positiveCondition" to "1",
             "falseCondition" to "false",
             "collection" to "1,2,3",
             "whenProperty" to "yes",

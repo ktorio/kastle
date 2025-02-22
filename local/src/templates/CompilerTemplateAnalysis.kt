@@ -40,14 +40,13 @@ import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.psi.KtWhenEntry
 import org.jetbrains.kotlin.psi.KtWhenExpression
 import org.jetbrains.kotlin.psi.psiUtil.parents
+import org.jetbrains.kotlin.utils.addToStdlib.indexOfOrNull
+import org.jetbrains.kotlin.utils.addToStdlib.lastIndexOfOrNull
 
 private const val SLOT = "slot"
 private const val SLOTS = "slots"
 private const val DEPENDENCIES = "dependencies"
 private const val TEST_DEPENDENCIES = "testDependencies"
-
-private val bodyOpenRegex = Regex("^\\{\\s*(?:\\w+\\s*->\\s*)?")
-private val bodyCloseRegex = Regex("\\s*}$")
 
 fun KtFile.endOfImports(): Int? =
     importDirectives.maxOfOrNull { it.textRange.endOffset }
@@ -56,21 +55,26 @@ fun PsiElement.bodyPosition(): SourcePosition {
     childrenOfType<KtContainerNodeForControlStructureBody>().firstOrNull()?.let { bodyElement ->
         return bodyElement.bodyPosition()
     }
-    // TODO what the heck is going on here?
-    val start = bodyOpenRegex.find(text)?.range?.endInclusive?.let { it + 1 } ?: 0
-    val length = bodyCloseRegex.find(text)?.range?.start ?: text.length
+    // TODO when clause issue
+    val start = text.indexOfOrNull('{')?.plus(1) ?: 0
+    val length = text.lastIndexOfOrNull('}') ?: textRange.length
     val range = (textRange.startOffset + start) until (textRange.startOffset + length)
-    return SourcePosition.TopLevel(range)
+    val indent = findIndent(this)
+
+    return SourcePosition.TopLevel(range, indent)
 }
 
 fun PsiElement.sourcePosition(
     includeTrailingNewline: Boolean = false,
     trim: Boolean = false,
 ): SourcePosition {
-    val inlineContext = parents.firstNotNullOfOrNull(::inlineContext)
-    if (inlineContext != null)
-        return SourcePosition.Inline(textIntRange(includeTrailingNewline, trim), inlineContext)
-    return SourcePosition.TopLevel(textIntRange(includeTrailingNewline, trim))
+    val receiver = parents.firstNotNullOfOrNull(::inlineContext)
+    val range = textIntRange(includeTrailingNewline, trim)
+    val indent = findIndent(this)
+    if (receiver != null)
+        return SourcePosition.Inline(range, indent, receiver)
+
+    return SourcePosition.TopLevel(range, indent)
 }
 
 fun PsiElement.textIntRange(
@@ -192,10 +196,7 @@ private fun KtWhenExpression.asWhenBlock(variableName: String): Sequence<Block> 
         WhenBlock(
             property = variableName,
             position = sourcePosition(),
-            body = sourcePosition().withBounds(
-                start = children[1].textRange.startOffset,
-                end = children.last().textRange.endOffset
-            )
+            body = bodyPosition()
         )
     )
     for (child in childrenOfType<KtWhenEntry>()) {
@@ -273,6 +274,20 @@ private fun KtBlockStringTemplateEntry.asStringTemplateLiteral(variableName: Str
             body = childrenOfType<KtExpression>().first().sourcePosition(),
         )
     )
+
+private fun findIndent(element: PsiElement): Int {
+    val startOffset = element.textRange.startOffset
+    val fileText = element.containingFile.text
+    val lineStartOffset =
+        fileText.lastIndexOf('\n', startOffset - 1)
+            .takeIf { it != -1 }?.plus(1) ?: return 0
+    val whiteSpaceCountAfterLineStart =
+        fileText.subSequence(lineStartOffset, startOffset + 1)
+            .indexOfFirst { !it.isWhitespace() }
+            .takeIf { it != -1 } ?: return 0
+
+    return whiteSpaceCountAfterLineStart
+}
 
 sealed interface TemplateParentReference {
     companion object {
