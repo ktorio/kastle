@@ -1,7 +1,7 @@
-val trueCondition: Boolean by Project
-val positiveCondition: Boolean by Project
-val nullCondition: Boolean by Project
-val falseCondition: Boolean by Project
+val trueCondition: Boolean by _properties
+val positiveCondition: Boolean by _properties
+val nullCondition: Boolean by _properties
+val falseCondition: Boolean by _properties
 
 fun main() {
     if (trueCondition) {

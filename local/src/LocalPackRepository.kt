@@ -73,6 +73,7 @@ class LocalPackRepository(
         val manifest: PackManifest = projectPath.resolve(MANIFEST_YAML).readYaml() ?: return null
         val group = manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml()
         val properties = manifest.properties.toMutableList()
+        val documentation = projectPath.resolve("README.md").readText()
 
         val projectSources = projectPath.moduleFolders().asFlow().map { modulePath ->
             val relativeModulePath = modulePath.relativeTo(projectPath).toString()
@@ -164,6 +165,7 @@ class LocalPackRepository(
             manifest.copy(
                 group = group,
                 properties = properties.distinctBy { it.key },
+                documentation = documentation,
             ),
             commonSources = commonSources,
             projectSources = projectSources,

@@ -1,5 +1,5 @@
-val literal: String by Project
-val missing: String by Project
+val literal: String by _properties
+val missing: String by _properties
 
 val withValue = literal
 val withMissing = missing

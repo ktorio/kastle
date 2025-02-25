@@ -1,6 +1,6 @@
-val versionCatalogEnabled: Boolean by Project
-val groupName: String by Project
-val gradlePluginIds: List<String> by Module
+val versionCatalogEnabled: Boolean by _properties
+val groupName: String by _properties
+val gradlePluginIds: List<String> by _properties
 
 plugins {
     if (versionCatalogEnabled) {
@@ -17,28 +17,28 @@ plugins {
 group = groupName
 version = "1.0.0-SNAPSHOT"
 
-Module.slots("gradleConfigurations")
+_slots("gradleConfigurations")
 
 repositories {
-    Project.slots("gradleRepositories")
+    _slots("gradleRepositories")
 }
 
 // TODO multiplatform
 dependencies {
     if (versionCatalogEnabled) {
-        for (dependency in Module.dependencies) {
+        for (dependency in _module.dependencies) {
             implementation(dependency.catalogReference)
         }
 
-        for (dependency in Module.testDependencies) {
+        for (dependency in _module.testDependencies) {
             testImplementation(dependency.catalogReference)
         }
     } else {
-        for (dependency in Module.dependencies) {
+        for (dependency in _module.dependencies) {
             implementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
         }
 
-        for (dependency in Module.testDependencies) {
+        for (dependency in _module.testDependencies) {
             testImplementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
         }
     }

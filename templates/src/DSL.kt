@@ -3,12 +3,36 @@ import kotlin.reflect.KProperty
 @DslMarker
 annotation class TemplateDsl
 
-interface TemplateParent {
+/**
+ * For reading properties supplied from the project configuration.
+ */
+val _properties: TemplateProperties = object : TemplateProperties {}
+
+/**
+ * References the current module in the templated project.
+ */
+val _module: SourceModule = object: SourceModule {
+    override val path: String = ""
+    override val defaultTarget: Target? = null
+    override val targets: List<Target> = emptyList()
+
+    override val dependencies: Collection<BuildDependency> = emptyList()
+    override val testDependencies: Collection<BuildDependency> = emptyList()
+}
+
+/**
+ * Injects the slot with the given name.
+ */
+val _slot: (String) -> Slot? = { null }
+
+/**
+ * Injects all slots targetting the given slot name.
+ */
+fun _slots(key: String): Sequence<Slot> = emptySequence()
+
+interface TemplateProperties {
     operator fun <T> getValue(thisRef: Any?, property: KProperty<*>): T = TODO()
     operator fun <T> get(key: String): T = TODO()
-
-    fun slot(key: String): Slot? = null
-    fun slots(key: String): Sequence<Slot> = emptySequence()
 }
 
 interface DependencyHolder {
@@ -16,28 +40,10 @@ interface DependencyHolder {
     val testDependencies: Collection<BuildDependency>
 }
 
-@TemplateDsl
-object Project: TemplateParent {
-    val modules: List<Module> = emptyList()
-
-    override operator fun <T> getValue(thisRef: Any?, property: KProperty<*>): T = TODO()
-    override operator fun <T> get(key: String): T = TODO()
-    override fun slot(key: String): Slot? = null
-    override fun slots(key: String): Sequence<Slot> = emptySequence()
-}
-
-object Module: TemplateParent, DependencyHolder {
-    val path: String = ""
-    val defaultTarget: Target? = null
-    val targets: List<Target> = emptyList()
-
-    override operator fun <T> getValue(thisRef: Any?, property: KProperty<*>): T = TODO()
-    override operator fun <T> get(key: String): T = TODO()
-    override fun slot(key: String): Slot? = null
-    override fun slots(key: String): Sequence<Slot> = emptySequence()
-
-    override val dependencies: Collection<BuildDependency> = emptyList()
-    override val testDependencies: Collection<BuildDependency> = emptyList()
+interface SourceModule: DependencyHolder {
+    val path: String
+    val defaultTarget: Target?
+    val targets: List<Target>
 }
 
 @TemplateDsl

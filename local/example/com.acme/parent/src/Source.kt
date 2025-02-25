@@ -1,5 +1,5 @@
 class Parent {
     fun install() {
-        Project.slots("install")
+        _slots("install")
     }
 }

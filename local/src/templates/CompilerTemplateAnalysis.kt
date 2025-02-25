@@ -42,11 +42,7 @@ import org.jetbrains.kotlin.psi.KtWhenExpression
 import org.jetbrains.kotlin.psi.psiUtil.parents
 import org.jetbrains.kotlin.utils.addToStdlib.indexOfOrNull
 import org.jetbrains.kotlin.utils.addToStdlib.lastIndexOfOrNull
-
-private const val SLOT = "slot"
-private const val SLOTS = "slots"
-private const val DEPENDENCIES = "dependencies"
-private const val TEST_DEPENDENCIES = "testDependencies"
+import kotlin.math.exp
 
 fun KtFile.endOfImports(): Int? =
     importDirectives.maxOfOrNull { it.textRange.endOffset }
@@ -134,13 +130,9 @@ fun PsiElement.findReferencesTo(vararg names: String): Sequence<KtNameReferenceE
         it.text in names
     }
 
-fun KtExpression.readSlotBlock(): Slot {
-    val call = childrenOfType<KtCallExpression>().firstOrNull()
-    require(call != null) {
-        "Missing template function call: $text $textRange"
-    }
-    val functionName = call.childrenOfType<KtNameReferenceExpression>().first().text
-    val slotName = call.valueArguments[0].text.unwrapQuotes()
+fun KtCallExpression.readSlotBlock(): Slot {
+    val functionName = childrenOfType<KtNameReferenceExpression>().first().text
+    val slotName = valueArguments[0].text.unwrapQuotes()
     // TODO look for !! to establish required
     // TODO look for expected return type
     return when (functionName) {
@@ -289,22 +281,23 @@ private fun findIndent(element: PsiElement): Int {
     return whiteSpaceCountAfterLineStart
 }
 
+// TODO validation, unchecked casts
 sealed interface TemplateParentReference {
     companion object {
         fun classify(reference: KtNameReferenceExpression): TemplateParentReference =
-            when (val parent = reference.parent) {
-                is KtPropertyDelegate -> PropertyDelegate(reference.parent.parent as KtDeclaration)
-                is KtDotQualifiedExpression ->
-                    when(val callReference = parent.selectorExpression?.text?.substringBefore('(')) {
-                        SLOT, SLOTS -> Slot(parent)
-                        DEPENDENCIES, TEST_DEPENDENCIES -> Dependencies(parent)
-                        else -> throw IllegalArgumentException("Unrecognized ${reference.text} reference: $callReference ${parent.textRange}")
-                    }
-                else -> throw IllegalArgumentException("Unrecognized ${reference.text} reference: ${parent.text} ${parent.textRange}")
+            when (reference.text) {
+                SLOT, SLOTS -> Slot(reference.parent as KtCallExpression)
+                PROPERTIES -> PropertyDelegate(reference.parent.parent as KtDeclaration)
+                MODULE -> {
+                    val expression = reference.parent as KtDotQualifiedExpression
+                    // TODO other kinds of module references
+                    Dependencies(expression)
+                }
+                else -> throw IllegalArgumentException("Unrecognized reference: ${reference.text}")
             }
     }
 
     data class PropertyDelegate(val declaration: KtDeclaration): TemplateParentReference
-    data class Slot(val expression: KtDotQualifiedExpression): TemplateParentReference
+    data class Slot(val expression: KtCallExpression): TemplateParentReference
     data class Dependencies(val expression: KtDotQualifiedExpression): TemplateParentReference
 }

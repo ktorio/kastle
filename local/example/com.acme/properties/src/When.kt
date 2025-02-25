@@ -1,4 +1,4 @@
-val whenProperty: String by Project
+val whenProperty: String by _properties
 
 fun main() {
     when (whenProperty) {

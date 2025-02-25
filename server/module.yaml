@@ -2,14 +2,22 @@ product: jvm/app
 
 dependencies:
   - ../core
-  - io.ktor:ktor-server-core:3.0.3
-  - io.ktor:ktor-server-cio:3.0.3
-  - io.ktor:ktor-server-call-logging:3.0.3
-  - io.ktor:ktor-server-config-yaml:3.0.3
-  - io.ktor:ktor-server-content-negotiation:3.0.3
-  - io.ktor:ktor-serialization-kotlinx-json:3.0.3
+  - io.ktor:ktor-server-core:3.2.0-eap-1239
+  - io.ktor:ktor-server-cio:3.2.0-eap-1239
+  - io.ktor:ktor-server-call-logging:3.2.0-eap-1239
+  - io.ktor:ktor-server-config-yaml:3.2.0-eap-1239
+  - io.ktor:ktor-server-content-negotiation:3.2.0-eap-1239
+  - io.ktor:ktor-server-status-pages:3.2.0-eap-1239
+  - io.ktor:ktor-server-htmx:3.2.0-eap-1239
+  - io.ktor:ktor-server-html-builder:3.2.0-eap-1239
+  - io.ktor:ktor-htmx-html:3.2.0-eap-1239
+  - io.ktor:ktor-serialization-kotlinx-json:3.2.0-eap-1239
   - ch.qos.logback:logback-classic:1.5.16
+  - org.commonmark:commonmark:0.24.0
 
 test-dependencies:
   - ../client
-  - io.ktor:ktor-server-test-host:3.0.3
+  - io.ktor:ktor-server-test-host:3.2.0-eap-1239
+
+repositories:
+  - https://maven.pkg.jetbrains.space/public/p/ktor/eap

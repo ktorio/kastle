@@ -4,8 +4,9 @@ ktor:
             - org.jetbrains.kastle.EndpointsKt.endpoints
             - org.jetbrains.kastle.SerializationKt.serialization
             - org.jetbrains.kastle.MonitoringKt.monitoring
+            - org.jetbrains.kastle.ErrorHandlingKt.errorHandling
     deployment:
         port: 8080
 
 repository:
-  dir: json
+  dir: server/json

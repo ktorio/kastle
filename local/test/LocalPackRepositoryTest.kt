@@ -86,14 +86,17 @@ class LocalPackRepositoryTest {
 
     private fun checkParent(descriptor: PackDescriptor?) {
         assertNotNull(descriptor, "Missing manifest!")
+        assertNotNull(descriptor.documentation, "Missing documentation!")
     }
 
     private fun checkChild(descriptor: PackDescriptor?) {
         assertNotNull(descriptor, "Missing manifest!")
+        assertNotNull(descriptor.documentation, "Missing documentation!")
     }
 
     private fun checkProperties(descriptor: PackDescriptor?) {
         assertNotNull(descriptor, "Missing manifest!")
+        assertNotNull(descriptor.documentation, "Missing documentation!")
     }
 
 }

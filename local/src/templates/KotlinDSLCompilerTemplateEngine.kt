@@ -29,9 +29,6 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import java.io.File
 
-private const val PROJECT = "Project"
-private const val MODULE = "Module"
-
 /**
  * Provides analysis capabilities for Kotlin source files within a specified path.
  * This class utilizes Kotlin compiler's source analysis with a predefined environment setup.
@@ -143,7 +140,7 @@ internal class KotlinDSLCompilerTemplateEngine(
 
     private fun KtFile.findBlocks(properties: MutableList<Property>): List<Block> {
         // references to Project or Module
-        val templateReferences = findReferencesTo(PROJECT, MODULE)
+        val templateReferences = findReferencesTo(PROPERTIES, SLOT, SLOTS, MODULE)
             .map(TemplateParentReference.Companion::classify)
             .toList()
 
