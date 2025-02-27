@@ -1,8 +1,6 @@
 package org.jetbrains.kastle.ui
 
 import kotlinx.html.*
-import org.commonmark.parser.Parser
-import org.commonmark.renderer.html.HtmlRenderer
 import org.jetbrains.kastle.PackDescriptor
 
 fun HTML.packDetailsHtml(pack: PackDescriptor?) {
@@ -19,11 +17,3 @@ fun HTML.packDetailsHtml(pack: PackDescriptor?) {
     }
 }
 
-object Markdown {
-    val parser by lazy {
-        Parser.builder().build()
-    }
-    val renderer by lazy {
-        HtmlRenderer.builder().build()
-    }
-}

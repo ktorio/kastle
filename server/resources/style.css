@@ -1,9 +1,10 @@
 :root {
-    --background-color: #eeeeee;
-    --layer-background-color: rgba(0, 0, 0, 0.1);
+    --background-color: #dddddd;
+    --layer-background-color: #ffffff;
     --highlight-background-color: rgba(128, 128, 64, 0.2);
     --text-color: #121212;
-    --secondary-text-color: #484848;
+    --text-color-strong: #000000;
+    --secondary-text-color: #686868;
 }
 
 /* Reset CSS for lists */
@@ -19,6 +20,11 @@ button {
     display: inline-block;
     cursor: pointer;
     text-align: center;
+
+    &:hover {
+        transform: scale(1.05);
+        text-shadow: 0 1px 2px var(--highlight-background-color);
+    }
 }
 
 /* Global stuff */
@@ -41,8 +47,9 @@ body {
     body {
         --background-color: #121212;
         --text-color: #f2f2f2;
+        --text-color-strong: #ffffff;
         --secondary-text-color: #aaaaaa;
-        --layer-background-color: rgba(255, 255, 255, 0.1);
+        --layer-background-color: #2b2b2b;
         --highlight-background-color: rgba(216, 255, 255, 0.2);
     }
 }
@@ -252,15 +259,63 @@ main {
         background-color: var(--layer-background-color);
     }
 }
+#form-panel {
+    form {
+        display: flex;
+        gap: 1em;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .properties {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+        padding: 24px;
+        border: 1px solid var(--secondary-text-color);
+        border-radius: 8px;
+        margin: 12px 0 8px 0;
+        max-height: 225px;
+
+        > h3 {
+            position: absolute;
+            top: -6px;
+            left: 12px;
+            padding: 0 4px;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0;
+            display: inline-block;
+            background-color: var(--layer-background-color);
+        }
+    }
+
+    .field {
+        min-width: 120px;
+    }
+}
+
 #pack-details-docs, #form-panel-contents {
     padding: 12px 24px 16px 24px;
 }
 
 #preview-panel > input:checked ~ .contents {
+    position: relative;
     display: grid;
-    grid-template-columns: min-content 1fr;
+    grid-template-columns: 225px 1fr;
+    height: 400px;
+}
+#preview-panel-controls {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    display: inline-block;
 }
 #preview-panel-tree {
+    overflow: auto;
+    font-size: 0.875em;
     padding: 8px 16px;
     border-right: 1px solid var(--secondary-text-color);
 
@@ -279,11 +334,11 @@ main {
     }
     input[type='checkbox'] {
         + label::before {
-            content: '› ';
+            content: '+ ';
         }
         &:checked {
             + label::before {
-                content: '⌄ ';
+                content: '− ';
             }
             ~ ul {
                 display: block;
@@ -296,4 +351,5 @@ main {
 }
 #preview-panel-contents {
     padding: 8px 16px;
+    overflow: auto;
 }

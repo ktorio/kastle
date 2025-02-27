@@ -22,6 +22,7 @@ import org.jetbrains.kastle.ui.fileContentsHtml
 import org.jetbrains.kastle.ui.indexHtml
 import org.jetbrains.kastle.ui.packDetailsHtml
 import org.jetbrains.kastle.ui.fileTreeHtml
+import org.jetbrains.kastle.ui.packPropertiesHtml
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -45,17 +46,28 @@ fun Application.endpoints() {
             }
         }
         route("/pack/{group}/{id}") {
-            get("docs") {
-                val pack = repository.get(PackId(
-                    call.parameters["group"]!!,
-                    call.parameters["id"]!!
+            suspend fun RoutingCall.readPack(): PackDescriptor? =
+                repository.get(PackId(
+                    parameters["group"]!!,
+                    parameters["id"]!!
                 ))
+
+            get("docs") {
+                val pack = call.readPack()
                 call.respondHtml {
                     packDetailsHtml(pack)
                 }
             }
+            get("properties") {
+                val pack = call.readPack()
+                if (pack == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                }  else call.respondHtml {
+                    packPropertiesHtml(pack)
+                }
+            }
         }
-        route("/preview") {
+        route("/project") {
             get("listing") {
                 val descriptor = call.projectDescriptorFromQuery()
                 val files = generator.generate(descriptor)
@@ -168,5 +180,5 @@ private fun RoutingCall.projectDescriptorFromQuery() =
         name = request.queryParameters["name"]!!,
         group = request.queryParameters["group"]!!,
         properties = emptyMap(),
-        packs = request.queryParameters.getAll("pack")!!.map(PackId::parse),
+        packs = request.queryParameters.getAll("pack").orEmpty().map(PackId::parse),
     )

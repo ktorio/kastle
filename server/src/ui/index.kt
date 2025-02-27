@@ -5,26 +5,17 @@ import io.ktor.htmx.html.hx
 import kotlinx.html.*
 import org.jetbrains.kastle.PackDescriptor
 
+@OptIn(ExperimentalHtmxApi::class)
 fun HTML.indexHtml(packs: List<PackDescriptor>) {
     head {
         title = "Kastle"
-        style {
-            unsafe {
-                +Resources.css
-            }
-        }
+        style { unsafe { +Resources.css } }
         styleLink("/assets/a11y-light.min.css")
         styleLink("/assets/a11y-dark.min.css")
-        link(rel = "stylesheet") {
-            id = "highlight-style"
-        }
+        link(rel = "stylesheet") { id = "highlight-style" }
         script(src = "/assets/htmx.min.js") {}
         script(src = "/assets/highlight.min.js") {}
-        script {
-            unsafe {
-                +Resources.js
-            }
-        }
+        script { unsafe { +Resources.js } }
     }
     body {
         div {
@@ -59,30 +50,68 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
                 id = "form-panel-contents"
 
                 form {
-                    label {
-                        htmlFor = "artifact-name"
-                        +"Artifact"
-                    }
-                    input(type = InputType.text) {
-                        id = "artifact-name"
-                        placeholder = "org.jetbrains.kotlin-stdlib"
+                    div("properties") {
+                        h3 {
+                            +"Project"
+                        }
+                        div("field") {
+                            label {
+                                htmlFor = "group-name"
+                                +"Group"
+                            }
+                            input(type = InputType.text) {
+                                id = "group-name"
+                                placeholder = "com.example"
+                                value = "com.example"
+                            }
+                        }
+                        div("field") {
+                            label {
+                                htmlFor = "project-name"
+                                +"Artifact"
+                            }
+                            input(type = InputType.text) {
+                                id = "project-name"
+                                placeholder = "generated"
+                                value = "generated"
+                            }
+                        }
                     }
                     div {
-                        id = "properties"
+                        id = "dynamic-properties"
                     }
                     div {
-                        id = "selected-packs"
+                        id = "selected-packs-config"
                     }
                 }
             }
             collapsibleSection(id = "pack-details", title = "Module Details") {
                 id = "pack-details-docs"
+                attributes.hx {
+                    get = "/pack/docs"
+                    trigger = "load"
+                }
 
                 +"No details available."
             }
             collapsibleSection(id = "preview-panel", title = "Preview") {
                 div {
+                    id = "preview-panel-controls"
+                    button {
+                        attributes.hx {
+                            get = "/project/listing"
+                            target = "#preview-panel-tree"
+                            trigger = "click"
+                        }
+                        +"Refresh"
+                    }
+                }
+                div {
                     id = "preview-panel-tree"
+                    attributes.hx {
+                        get = "/project/listing"
+                        trigger = "load"
+                    }
                 }
                 div {
                     id = "preview-panel-contents"
@@ -124,6 +153,7 @@ private fun UL.packListItem(pack: PackDescriptor) {
                 trigger = "change"
             }
             this.id = inputId
+            this.value = pack.id.toString()
         }
         label {
             htmlFor = inputId
@@ -137,21 +167,15 @@ private fun UL.packListItem(pack: PackDescriptor) {
             }
         }
         input(type = InputType.checkBox, classes = "include-pack-toggle") {
-            attributes["data-id"] = pack.id.toString()
+            attributes["data-pack-id"] = pack.id.toString()
+            attributes["data-swap-id"] = "properties-${pack.id.group}-${pack.id.id}"
             attributes.hx {
-                get = "/preview/listing"
-                target = "#preview-panel-tree"
+                get = "/pack/${pack.id}/properties"
+                target = "#dynamic-properties"
                 trigger = "change"
+                swap = "afterend"
             }
         }
     }
 }
 
-object Resources {
-    val css: String by lazy {
-        this::class.java.getResourceAsStream("/style.css")!!.readAllBytes().decodeToString()
-    }
-    val js: String by lazy {
-        this::class.java.getResourceAsStream("/script.js")!!.readAllBytes().decodeToString()
-    }
-}

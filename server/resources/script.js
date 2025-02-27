@@ -1,3 +1,6 @@
+/**
+ * Load the correct syntax highlighting stylesheet based on the user's preference.
+ */
 document.onload = function() {
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.getElementById('highlight-style').href = '/assets/a11y-dark.min.css'
@@ -5,6 +8,72 @@ document.onload = function() {
         document.getElementById('highlight-style').href = '/assets/a11y-light.min.css'
     }
 }
+
+/**
+ * Custom logic for toggles and preventing duplicate content based on `data-swap-id`.
+ */
+document.addEventListener('htmx:beforeRequest', (event) => {
+    const triggeringElement = event.target;
+    const swapId = triggeringElement.dataset.swapId;
+    if (swapId) {
+        let existingElement = document.getElementById(swapId);
+        if (existingElement) {
+            if (triggeringElement.tagName === 'INPUT' && !triggeringElement.checked) {
+                existingElement.remove()
+            }
+            event.preventDefault(); // Prevent the request from being sent
+        }
+    }
+
+});
+
+/**
+ * Populate the preview parameters from the state of the form elements.
+ */
+document.addEventListener('htmx:configRequest', (event) => {
+    let requestPath = event.detail.path;
+
+    // Always populate preview params from project settings
+    if (requestPath.startsWith('/project')) {
+        const url = new URL(requestPath, window.location.origin);
+        url.searchParams.append('group', 'org.test');  // TODO
+        url.searchParams.append('name', 'test-artifact'); // TODO
+        for (const el of document.getElementsByClassName('include-pack-toggle')) {
+            if (el.checked) {
+                console.log(el.dataset);
+                console.log(el.dataset.packId);
+                url.searchParams.append('pack', el.dataset.packId);
+            }
+        }
+        event.detail.path = url.pathname + url.search;
+    }
+    // Include current selected pack for docs request on load
+    else if (requestPath === '/pack/docs') {
+        const packId = document.querySelector('input[name="selected-pack"]:checked')?.value;
+        if (packId) {
+            event.detail.path = `/pack/${packId}/docs`
+        } else {
+            // if nothing selected, abort request
+            event.preventDefault();
+        }
+    }
+})
+
+/**
+ * We use the ID's of the incoming content to prevent replacing existing.
+ */
+document.addEventListener('htmx:beforeSwap', (event) => {
+    const incomingContent = event.detail.xhr.response;
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = incomingContent;
+
+    const incomingIds = Array.from(tempDiv.querySelectorAll('[id]')).map(el => el.id);
+    const duplicated = !!incomingIds.find(id => document.getElementById(id) !== null);
+
+    if (duplicated) {
+        event.preventDefault();
+    }
+});
 
 /**
  * Handle HTMX swap events for loading documentation:
@@ -24,21 +93,3 @@ document.addEventListener('htmx:afterSwap', (event) => {
         hljs.highlightElement(block); // Apply syntax highlighting
     });
 });
-
-/**
- * Populate the preview parameters from the state of the form elements.
- */
-document.addEventListener('htmx:configRequest', (event) => {
-    console.log(event.detail.path);
-    if (event.detail.path.startsWith('/preview')) {
-        const url = new URL(event.detail.path, window.location.origin);
-        url.searchParams.append('group', 'org.test');
-        url.searchParams.append('name', 'test-artifact');
-        for (const el of document.getElementsByClassName('include-pack-toggle')) {
-            if (el.checked) {
-                url.searchParams.append('pack', el.dataset.id)
-            }
-        }
-        event.detail.path = url.pathname + url.search;
-    }
-})

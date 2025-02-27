@@ -32,7 +32,7 @@ private fun UL.buildTree(paths: List<List<String>>, prefix: List<String> = empty
                     input(type = InputType.radio, name = "preview-file") {
                         id = inputId
                         attributes.hx {
-                            get = "/preview/file/${fullPath.joinToString("/")}"
+                            get = "/project/file/${fullPath.joinToString("/")}"
                             target = "#preview-panel-contents"
                             trigger = "change"
                         }
