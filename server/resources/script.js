@@ -60,22 +60,6 @@ document.addEventListener('htmx:configRequest', (event) => {
 })
 
 /**
- * We use the ID's of the incoming content to prevent replacing existing.
- */
-document.addEventListener('htmx:beforeSwap', (event) => {
-    const incomingContent = event.detail.xhr.response;
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = incomingContent;
-
-    const incomingIds = Array.from(tempDiv.querySelectorAll('[id]')).map(el => el.id);
-    const duplicated = !!incomingIds.find(id => document.getElementById(id) !== null);
-
-    if (duplicated) {
-        event.preventDefault();
-    }
-});
-
-/**
  * Handle HTMX swap events for loading documentation:
  * 1. Expand the collapsible section.
  * 2. Highlight the code in the documentation.
