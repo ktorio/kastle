@@ -69,17 +69,18 @@ fun Application.endpoints() {
         }
         route("/project") {
             get("listing") {
-                val descriptor = call.projectDescriptorFromQuery()
+                val descriptor = call.readProjectDescriptor()
+                val selectedFile = call.request.queryParameters["selected"]
                 val files = generator.generate(descriptor)
                     .map { it.path }
                     .toList()
                 call.respondHtml {
-                    fileTreeHtml(files)
+                    fileTreeHtml(files, selectedFile)
                 }
             }
             get("file/{path...}") {
                 val path = call.pathParameters.getAll("path").orEmpty().joinToString("/")
-                val descriptor = call.projectDescriptorFromQuery()
+                val descriptor = call.readProjectDescriptor()
                 val fileEntry = generator.generate(descriptor)
                     .filter { it.path == path }
                     .singleOrNull()
@@ -175,10 +176,15 @@ fun Application.endpoints() {
     }
 }
 
-private fun RoutingCall.projectDescriptorFromQuery() =
+private fun RoutingCall.readProjectDescriptor() =
     ProjectDescriptor(
         name = request.queryParameters["name"]!!,
         group = request.queryParameters["group"]!!,
-        properties = emptyMap(),
+        properties = request.queryParameters.entries()
+            .asSequence()
+            .filter { runCatching { VariableId.parse(it.key) }.isSuccess }
+            .associate { (key, value) ->
+                VariableId.parse(key) to value.first()
+            },
         packs = request.queryParameters.getAll("pack").orEmpty().map(PackId::parse),
     )

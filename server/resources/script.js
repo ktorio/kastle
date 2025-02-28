@@ -36,15 +36,38 @@ document.addEventListener('htmx:configRequest', (event) => {
     // Always populate preview params from project settings
     if (requestPath.startsWith('/project')) {
         const url = new URL(requestPath, window.location.origin);
-        url.searchParams.append('group', 'org.test');  // TODO
-        url.searchParams.append('name', 'test-artifact'); // TODO
+        const form = document.getElementById('form-panel-contents');
+        for (let input of form.getElementsByTagName('input')) {
+            const key = removeUpToFirstSlash(input.name || input.id)
+            switch(input.type) {
+                case 'text': case 'number': case 'password': case 'email': case 'url': case 'search':
+                    url.searchParams.append(key, input.value);
+                    break;
+                case 'checkbox':
+                    if (input.checked)
+                        url.searchParams.append(key, 'true');
+                    break;
+                case 'radio':
+                    if (input.checked)
+                        url.searchParams.append(key, input.value);
+                    break;
+
+            }
+        }
+        // TODO select, etc.
+
         for (const el of document.getElementsByClassName('include-pack-toggle')) {
             if (el.checked) {
-                console.log(el.dataset);
-                console.log(el.dataset.packId);
                 url.searchParams.append('pack', el.dataset.packId);
             }
         }
+
+        const selectedFileElement = document.querySelector(`input[name="preview-file"]:checked`);
+        if (selectedFileElement) {
+            const selectedFile = removeUpToFirstSlash(selectedFileElement.id);
+            url.searchParams.append('selected', selectedFile);
+        }
+
         event.detail.path = url.pathname + url.search;
     }
     // Include current selected pack for docs request on load
@@ -77,3 +100,11 @@ document.addEventListener('htmx:afterSwap', (event) => {
         hljs.highlightElement(block); // Apply syntax highlighting
     });
 });
+
+function removeUpToFirstSlash(str) {
+    const indexOfSlash = str.indexOf('/');
+    if (indexOfSlash !== -1) {
+        return str.substring(indexOfSlash + 1); // Remove up to the first '/'
+    }
+    return str; // Return the original string if no '/' is found
+}

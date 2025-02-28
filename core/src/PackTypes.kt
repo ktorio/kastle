@@ -116,8 +116,11 @@ data class PackId(val group: String, val id: String) {
 @Serializable(VariableIdSerializer::class)
 data class VariableId(val packId: PackId, val name: String) {
     companion object {
-        fun parse(text: String) = text.split('/', limit = 3).let { (group, pack, variable) ->
-            VariableId(PackId(group, pack), variable)
+        fun parse(text: String): VariableId {
+            val segments = text.split('/', limit = 3)
+            if (segments.size != 3) throw IllegalArgumentException("Invalid variable id: $text")
+            val (group, pack, variable) = segments
+            return VariableId(PackId(group, pack), variable)
         }
     }
     override fun toString(): String =

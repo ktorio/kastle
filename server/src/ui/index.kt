@@ -61,6 +61,7 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
                             }
                             input(type = InputType.text) {
                                 id = "group-name"
+                                name = "group"
                                 placeholder = "com.example"
                                 value = "com.example"
                             }
@@ -72,6 +73,7 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
                             }
                             input(type = InputType.text) {
                                 id = "project-name"
+                                name = "name"
                                 placeholder = "generated"
                                 value = "generated"
                             }
@@ -145,7 +147,7 @@ private fun FlowContent.collapsibleSection(id: String, title: String, checked: B
 private fun UL.packListItem(pack: PackDescriptor) {
     li {
         // TODO role is tab?
-        val inputId = "pack-toggle-${pack.id.toString().replace("/", "-")}"
+        val inputId = "toggle/${pack.id}"
         input(type = InputType.radio, name = "selected-pack") {
             attributes.hx {
                 get = "/pack/${pack.id}/docs"
@@ -168,7 +170,7 @@ private fun UL.packListItem(pack: PackDescriptor) {
         }
         input(type = InputType.checkBox, classes = "include-pack-toggle") {
             attributes["data-pack-id"] = pack.id.toString()
-            attributes["data-swap-id"] = "properties-${pack.id.group}-${pack.id.id}"
+            attributes["data-swap-id"] = "properties/${pack.id}"
             attributes.hx {
                 get = "/pack/${pack.id}/properties"
                 target = "#dynamic-properties"

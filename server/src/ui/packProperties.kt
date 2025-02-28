@@ -7,13 +7,10 @@ import org.jetbrains.kastle.PropertyType
 import org.jetbrains.kastle.utils.isTruthy
 
 fun HTML.packPropertiesHtml(pack: PackDescriptor) {
-    head {
-        title(pack.name)
-    }
     body {
         if (pack.properties.isNotEmpty()) {
             div("properties") {
-                id = "properties-${pack.id.group}-${pack.id.id}"
+                id = "properties/${pack.id}"
                 h3 { +pack.name }
                 for (property in pack.properties)
                     propertyInput(pack, property)
@@ -23,7 +20,7 @@ fun HTML.packPropertiesHtml(pack: PackDescriptor) {
 }
 
 private fun FlowContent.propertyInput(pack: PackDescriptor, property: Property) {
-    val inputId = "property-${pack.id.group}-${pack.id.id}-${property.key}"
+    val inputId = "property/${pack.id}/${property.key}"
     div("field") {
         label {
             htmlFor = inputId
@@ -59,11 +56,15 @@ private fun FlowContent.propertyInput(pack: PackDescriptor, property: Property) 
             }
 
             is PropertyType.List -> {
-                // TODO
+                div {
+                    +"TODO"
+                }
             }
 
             is PropertyType.Object -> {
-                // TODO
+                div {
+                    +"TODO"
+                }
             }
         }
     }

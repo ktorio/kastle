@@ -3,9 +3,6 @@ package org.jetbrains.kastle.ui
 import kotlinx.html.*
 
 fun HTML.fileContentsHtml(name: String, contents: String) {
-    head {
-        title(name)
-    }
     body {
         pre {
             code(languageString(name)) {
