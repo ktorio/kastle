@@ -82,7 +82,7 @@ abstract class ProjectGeneratorTest {
     }
 
     @Test
-    fun `ktor server`() = runTest {
+    fun `ktor server gradle`() = runTest {
         generateWithPacks(
             "std/gradle",
             "io.ktor/server-core",
@@ -90,6 +90,20 @@ abstract class ProjectGeneratorTest {
         )
         assertFilesAreEqualWithSnapshot(
             "$resources/projects/ktor-server",
+            projectDir.toString(),
+            replace = replaceSnapshot,
+        )
+    }
+
+    @Test
+    fun `ktor server amper`() = runTest {
+        generateWithPacks(
+            "std/amper",
+            "io.ktor/server-core",
+            "io.ktor/server-cio",
+        )
+        assertFilesAreEqualWithSnapshot(
+            "$resources/projects/ktor-server-amper",
             projectDir.toString(),
             replace = replaceSnapshot,
         )

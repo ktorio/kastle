@@ -156,6 +156,12 @@ enum class SourceModuleType {
             else -> throw IllegalArgumentException("Invalid module type: $text")
         }
     }
+
+    override fun toString(): String =
+        when(this) {
+            LIB -> "lib"
+            APP -> "jvm/app" // TODO
+        }
 }
 
 fun SourceModule.tryMerge(other: SourceModule): SourceModule? {

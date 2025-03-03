@@ -13,6 +13,7 @@ val _properties: TemplateProperties = object : TemplateProperties {}
  */
 val _module: SourceModule = object: SourceModule {
     override val path: String = ""
+    override val type: String = "lib"
     override val defaultTarget: Target? = null
     override val targets: List<Target> = emptyList()
 
@@ -42,6 +43,7 @@ interface DependencyHolder {
 
 interface SourceModule: DependencyHolder {
     val path: String
+    val type: String
     val defaultTarget: Target?
     val targets: List<Target>
 }

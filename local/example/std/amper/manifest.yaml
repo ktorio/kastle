@@ -1,0 +1,7 @@
+id: std/amper
+name: Amper
+description: Adds the amper build system to the project
+version: 1.0.0
+sources:
+  - path: module.yaml.hbs
+    target: file:module.yaml

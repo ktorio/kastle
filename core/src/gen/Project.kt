@@ -80,6 +80,9 @@ fun Project.getVariables(pack: PackDescriptor): Variables {
 
 fun SourceModule.toVariableEntry(): Pair<String, Any?> =
     "_module" to mapOf(
+        "path" to path.toString(),
+        "type" to type.toString(),
+        "platforms" to platforms,
         "dependencies" to dependencies.map { it.toVariableMap() },
         "testDependencies" to testDependencies.map { it.toVariableMap() },
     )

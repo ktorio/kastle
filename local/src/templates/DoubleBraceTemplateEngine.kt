@@ -13,12 +13,13 @@ class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         private const val SLOT = "slot"
         private const val SLOTS = "slots"
         // TODO
+        private const val WHEN = "when"
         private const val ELSE = "else"
         private const val FOR = "for"
 
         private val bracesPattern = Regex("\\{\\{([^{}]*)}}")
-        private val wordPattern = Regex("\\w+")
-        private val forEachPattern = Regex("for\\s+(\\w+)\\s+in\\s+(\\w+)")
+        private val variablePattern = Regex("[\\w_.]+")
+        private val forEachPattern = Regex("for\\s+(\\w+)\\s+in\\s+([\\w_.]+)")
 
     }
 
@@ -47,7 +48,7 @@ class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
             for (match in matches) {
                 val text = match.groupValues[1].trim()
                 val indent = template.indentOf(match)
-                if (wordPattern.matches(text)) {
+                if (variablePattern.matches(text)) {
                     when(text) {
                         ELSE -> {
                             val previousIf = stack.removeLastOrNull()
@@ -114,7 +115,9 @@ class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                 body = SourcePosition.TopLevel(match.range.endInclusive + 1 .. endMatch.range.start - 1, indent),
             )
             FOR -> {
-                val (element, list) = forEachPattern.matchEntire(match.groupValues[1].trim())!!.destructured
+                val forMatch = forEachPattern.matchEntire(match.groupValues[1].trim())
+                require(forMatch != null) { "Invalid `for` block: ${match.groupValues[1].trim()}" }
+                val (element, list) = forMatch.destructured
                 EachBlock(
                     property = list,
                     position = SourcePosition.TopLevel(match.range.start..endMatch.range.endInclusive, indent),
