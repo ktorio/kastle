@@ -16,12 +16,14 @@ document.addEventListener('htmx:beforeRequest', (event) => {
     const triggeringElement = event.target;
     const swapId = triggeringElement.dataset.swapId;
     if (swapId) {
-        let existingElement = document.getElementById(swapId);
-        if (existingElement) {
-            if (triggeringElement.tagName === 'INPUT' && !triggeringElement.checked) {
-                existingElement.remove()
-            }
-            event.preventDefault(); // Prevent the request from being sent
+        const existingElement = document.getElementById(swapId)
+        if (triggeringElement.tagName === 'INPUT' && !triggeringElement.checked) {
+            // trigger is turned off, remove the element
+            existingElement?.remove()
+            event.preventDefault();
+        } else if (existingElement) {
+            // element already exists, prevent request
+            event.preventDefault();
         }
     }
 

@@ -174,7 +174,7 @@ private fun UL.packListItem(pack: PackDescriptor) {
             attributes.hx {
                 get = "/pack/${pack.id}/properties"
                 target = "#dynamic-properties"
-                trigger = "change"
+                trigger = "change, load"
                 swap = "afterend"
             }
         }

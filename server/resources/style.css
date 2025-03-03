@@ -265,6 +265,7 @@ main {
         gap: 1em;
         flex-wrap: wrap;
         align-items: flex-start;
+        justify-content: flex-start;
     }
 
     .properties {
@@ -272,6 +273,7 @@ main {
         display: flex;
         flex-direction: column;
         flex-wrap: wrap;
+        min-width: 120px;
         gap: 1.2rem;
         padding: 24px;
         border: 1px solid var(--secondary-text-color);

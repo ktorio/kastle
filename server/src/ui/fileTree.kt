@@ -34,7 +34,7 @@ private fun UL.buildTree(
                     val fullPath = (prefix + filePath).joinToString("/")
                     val inputId = "preview-file/$fullPath"
                     val selected = selectedFile == fullPath
-                    val updatePreviewTrigger = if (selected) "load change" else "change"
+                    val updatePreviewTrigger = if (selected) "load, change" else "change"
                     input(type = InputType.radio, name = "preview-file") {
                         id = inputId
                         checked = selected
