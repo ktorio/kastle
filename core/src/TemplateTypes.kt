@@ -49,7 +49,7 @@ sealed interface PropertyBlock: Block {
 
 @Serializable
 sealed interface DeclaringBlock: Block {
-    val variable: String
+    val variable: String?
 }
 
 @Serializable
@@ -118,7 +118,7 @@ data class ElseBlock(
 data class EachBlock(
     override val property: String,
     override val position: SourcePosition,
-    override val variable: String,
+    override val variable: String?,
     override val body: SourcePosition = position
 ): PropertyBlock, DeclaringBlock {
     override fun toString(): String = "each(\"$variable\" in \"$property\")"

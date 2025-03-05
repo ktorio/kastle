@@ -1,6 +1,6 @@
 product: {{ _module.type }}
 
 dependencies:
-  {{ for dependency in _module.dependencies }}
-  - {{ dependency.group }}:{{ dependency.artifact }}:{{ dependency.version }}
-  {{ /for }}
+  {{#each _module.dependencies}}
+  - {{ group }}:{{ artifact }}:{{ version }}
+  {{/each}}

@@ -8,9 +8,9 @@ import org.jetbrains.kastle.PropertyLiteral
 import org.jetbrains.kastle.RepeatingSlot
 import kotlin.test.*
 
-class DoubleBraceTemplateEngineTest {
+class HandlebarsTemplateEngineTest {
 
-    private val engine = DoubleBraceTemplateEngine()
+    private val engine = HandlebarsTemplateEngine()
     private val path = "templates/test.txt"
 
     @Test
@@ -28,9 +28,9 @@ class DoubleBraceTemplateEngineTest {
     @Test
     fun ifBlock() {
         val condition = """
-            {{ if someBooleanProperty }}
+            {{#if someBooleanProperty }}
             Hello, {{ someProperty }}!
-            {{ /if }}
+            {{/if }}
         """.trimIndent()
         val input = """
             Before blocks
@@ -57,11 +57,11 @@ class DoubleBraceTemplateEngineTest {
     @Test
     fun elseBlock() {
         val condition = """
-            {{ if someBooleanProperty }}
+            {{#if someBooleanProperty }}
             Hello, {{ someProperty }}!
-            {{ else }}
+            {{else}}
             Goodbye!
-            {{ /if }}
+            {{/if}}
         """.trimIndent()
         val input = """
             Before blocks
@@ -91,9 +91,9 @@ class DoubleBraceTemplateEngineTest {
     @Test
     fun forEach() {
         val loop = """
-            {{ for elem in aList }}
-            Hello, {{ elem }}!
-            {{ /for }}
+            {{#each aList}}
+            Hello, {{ this }}!
+            {{/each}}
         """.trimIndent()
         val input = """
             Before blocks
@@ -108,20 +108,20 @@ class DoubleBraceTemplateEngineTest {
 
         val (literal, forEach) = blocks
         assertIs<PropertyLiteral>(literal)
-        assertEquals("elem", literal.property)
-        assertEquals("{{ elem }}", input.substring(literal.position.range))
+        assertEquals("this", literal.property)
+        assertEquals("{{ this }}", input.substring(literal.position.range))
         assertEquals(loop, input.substring(forEach.position.range))
 
         assertIs<EachBlock>(forEach)
         assertEquals("aList", forEach.property)
-        assertEquals("elem", forEach.variable)
-        assertEquals("\nHello, {{ elem }}!\n", input.substring(forEach.body!!.range)) // TODO trim newlines
+        assertNull(forEach.variable)
+        assertEquals("\nHello, {{ this }}!\n", input.substring(forEach.body!!.range)) // TODO trim newlines
     }
 
     @Test
     fun slot() {
         val template = engine.read(path, """
-            Hello, {{ slot someSlot }}!
+            Hello, {{#slot someSlot}}!
         """.trimIndent())
 
         assertEquals(1, template.blocks?.size)
@@ -134,7 +134,7 @@ class DoubleBraceTemplateEngineTest {
     @Test
     fun repeatingSlot() {
         val template = engine.read(path, """
-            Hello, {{ slots someSlot }}!
+            Hello, {{#slots someSlot}}!
         """.trimIndent())
 
         assertEquals(1, template.blocks?.size)

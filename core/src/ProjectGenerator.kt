@@ -372,7 +372,14 @@ internal class ProjectGeneratorImpl(
                                 val trimStart = !loops.containsKey(block)
                                 val list = loops[block] ?: (value as? List<*>).orEmpty().toMutableList()
                                 if (list.isNotEmpty()) {
-                                    variables += block.variable to list.removeFirst()
+                                    val element = list.removeFirst()
+                                    when(val variable = block.variable) {
+                                        null -> {
+                                            val elementFields = element as? Map<String, Any> ?: emptyMap()
+                                            variables += mapOf("this" to element, *elementFields.toList().toTypedArray())
+                                        }
+                                        else -> variables += variable to element
+                                    }
                                     loops[block] = list
                                     append(source.text, block.bodyStart, end, indent, trimStart = trimStart, trimEnd = trimEnd)
                                 } else skipContents()

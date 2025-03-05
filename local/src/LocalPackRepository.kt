@@ -11,7 +11,7 @@ import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import org.jetbrains.kastle.io.*
-import org.jetbrains.kastle.templates.DoubleBraceTemplateEngine
+import org.jetbrains.kastle.templates.HandlebarsTemplateEngine
 import org.jetbrains.kastle.templates.KotlinDSLCompilerTemplateEngine
 import org.jetbrains.kastle.templates.TemplateFormat
 import org.jetbrains.kastle.templates.extensionFormat
@@ -30,7 +30,7 @@ class LocalPackRepository(
     private val fs: FileSystem = SystemFileSystem,
     remoteRepository: PackRepository = PackRepository.EMPTY,
 ): PackRepository {
-    private val textFileTemplateEngine = DoubleBraceTemplateEngine()
+    private val textFileTemplateEngine = HandlebarsTemplateEngine()
 
     constructor(root: String): this(Path(root))
 

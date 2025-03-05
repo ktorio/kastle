@@ -7,7 +7,7 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
 import org.jetbrains.kastle.*
 
-class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
+class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     companion object {
         private const val IF = "if"
         private const val SLOT = "slot"
@@ -15,11 +15,10 @@ class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         // TODO
         private const val WHEN = "when"
         private const val ELSE = "else"
-        private const val FOR = "for"
+        private const val EACH = "each"
 
-        private val bracesPattern = Regex("\\{\\{([^{}]*)}}")
+        private val bracesPattern = Regex("\\{\\{(?:#(?<helper>[\\w_]+))?(?<content>.*?)}}")
         private val variablePattern = Regex("[\\w_.]+")
-        private val forEachPattern = Regex("for\\s+(\\w+)\\s+in\\s+([\\w_.]+)")
 
     }
 
@@ -46,15 +45,16 @@ class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         val matches = bracesPattern.findAll(template)
         return sequence {
             for (match in matches) {
-                val text = match.groupValues[1].trim()
+                val helper = match.groups["helper"]?.value
+                val text = match.groups["content"]?.value.orEmpty().trim()
                 val indent = template.indentOf(match)
-                if (variablePattern.matches(text)) {
+                if (helper == null && variablePattern.matches(text)) {
                     when(text) {
                         ELSE -> {
                             val previousIf = stack.removeLastOrNull()
-                            require(previousIf?.keyword == IF) { "Unexpected else outside if" }
+                            require(previousIf?.helper == IF) { "Unexpected else outside if" }
                             yield(previousIf.toBlock(match))
-                            stack.add(BlockMatch(match, indent, property = previousIf.property))
+                            stack.add(BlockMatch(match, indent, helper = ELSE, property = previousIf.property))
                         }
                         else -> yield(PropertyLiteral(
                             property = text,
@@ -63,31 +63,33 @@ class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                     }
                 } else if (text.startsWith('/')) {
                     val parent = stack.removeLastOrNull() ?: error("Unexpected close term: $text")
-                    require(parent.keyword == text.drop(1) || (parent.keyword == ELSE && text.drop(1) == IF)) {
-                        "Unexpected close term: $text; expected /${parent.keyword}"
+                    require(parent.helper == text.drop(1) || (parent.helper == ELSE && text.drop(1) == IF)) {
+                        "Unexpected close term: $text; expected /${parent.helper}"
                     }
                     yield(parent.toBlock(match))
-                } else BlockMatch(match, indent).let { blockMatch ->
-                    when (blockMatch.keyword) {
-                        SLOT -> yield(
-                            NamedSlot(
-                                name = blockMatch.property
-                                    ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
-                                position = SourcePosition.TopLevel(match.range, indent),
+                } else if (helper != null) {
+                    BlockMatch(match, indent).let { blockMatch ->
+                        when (blockMatch.helper) {
+                            SLOT -> yield(
+                                NamedSlot(
+                                    name = blockMatch.property
+                                        ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
+                                    position = SourcePosition.TopLevel(match.range, indent),
+                                )
                             )
-                        )
 
-                        SLOTS -> yield(
-                            RepeatingSlot(
-                                name = blockMatch.property
-                                    ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
-                                position = SourcePosition.TopLevel(match.range, indent),
+                            SLOTS -> yield(
+                                RepeatingSlot(
+                                    name = blockMatch.property
+                                        ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
+                                    position = SourcePosition.TopLevel(match.range, indent),
+                                )
                             )
-                        )
 
-                        IF, FOR -> stack.add(blockMatch)
+                            IF, EACH -> stack.add(blockMatch)
+                        }
                     }
-                }
+                } else throw IllegalArgumentException("Unexpected handlebars block: ${match.value}")
             }
         }
     }
@@ -100,10 +102,10 @@ class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     data class BlockMatch(
         val match: MatchResult,
         val indent: Int,
-        val keyword: String = match.groupValues[1].trim().split(' ').first(),
-        val property: String? = match.groupValues.getOrNull(1)?.trim()?.split(' ')?.getOrNull(1)
+        val helper: String = match.groups["helper"]!!.value,
+        val property: String? = match.groups["content"]?.value?.trim()?.takeIf { it.isNotEmpty() }
     ) {
-        fun toBlock(endMatch: MatchResult): Block = when(keyword) {
+        fun toBlock(endMatch: MatchResult): Block = when(helper) {
             IF -> IfBlock(
                 property = property ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
                 position = SourcePosition.TopLevel(match.range.start..endMatch.range.endInclusive, indent),
@@ -114,18 +116,15 @@ class DoubleBraceTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                 position = SourcePosition.TopLevel(match.range.start..endMatch.range.endInclusive, indent),
                 body = SourcePosition.TopLevel(match.range.endInclusive + 1 .. endMatch.range.start - 1, indent),
             )
-            FOR -> {
-                val forMatch = forEachPattern.matchEntire(match.groupValues[1].trim())
-                require(forMatch != null) { "Invalid `for` block: ${match.groupValues[1].trim()}" }
-                val (element, list) = forMatch.destructured
+            EACH -> {
                 EachBlock(
-                    property = list,
+                    property = property ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
                     position = SourcePosition.TopLevel(match.range.start..endMatch.range.endInclusive, indent),
-                    variable = element,
+                    variable = null,
                     body = SourcePosition.TopLevel(match.range.endInclusive + 1 .. endMatch.range.start - 1, indent),
                 )
             }
-            else -> error("Unexpected keyword: $keyword")
+            else -> error("Unexpected keyword: $helper")
         }
     }
 
