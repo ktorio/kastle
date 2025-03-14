@@ -9,7 +9,7 @@ import org.jetbrains.kastle.utils.isTruthy
 fun HTML.packPropertiesHtml(pack: PackDescriptor) {
     body {
         if (pack.properties.isNotEmpty()) {
-            div("properties") {
+            div("properties ${pack.properties.shirtSize}") {
                 id = "properties/${pack.id}"
                 h3 { +pack.name }
                 for (property in pack.properties)
@@ -17,6 +17,13 @@ fun HTML.packPropertiesHtml(pack: PackDescriptor) {
             }
         }
     }
+}
+
+private val List<*>.shirtSize: String get() = when (size) {
+    0 -> "xs"
+    in 1..4 -> "sm"
+    in 5..8 -> "md"
+    else -> "lg"
 }
 
 private fun FlowContent.propertyInput(pack: PackDescriptor, property: Property) {

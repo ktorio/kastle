@@ -8,6 +8,11 @@ annotation class TemplateDsl
  */
 val _properties: TemplateProperties = object : TemplateProperties {}
 
+val _project = object {
+    val name: String = ""
+    val group: String = ""
+}
+
 /**
  * References the current module in the templated project.
  */
@@ -19,6 +24,7 @@ val _module: SourceModule = object: SourceModule {
 
     override val dependencies: Collection<BuildDependency> = emptyList()
     override val testDependencies: Collection<BuildDependency> = emptyList()
+    override val gradlePluginIds: Collection<String> = emptyList()
 }
 
 /**
@@ -46,6 +52,7 @@ interface SourceModule: DependencyHolder {
     val type: String
     val defaultTarget: Target?
     val targets: List<Target>
+    val gradlePluginIds: Collection<String>
 }
 
 @TemplateDsl

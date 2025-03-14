@@ -55,7 +55,9 @@ internal class ProjectGeneratorImpl(
                     continue
                 }
                 val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
-                val variables = project.getVariables(pack) + module.toVariableEntry()
+                val variables = project.getVariables(pack) +
+                        project.toVariableEntry() +
+                        module.toVariableEntry()
                 val path = source.target.relativeFile
                 emit(SourceFileEntry(path) {
                     writeSourceFile(source, variables) {

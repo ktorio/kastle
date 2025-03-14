@@ -143,6 +143,20 @@ data class SourceModule(
     val dependencies: List<Dependency> = emptyList(),
     val testDependencies: List<Dependency> = emptyList(),
     val sources: List<SourceTemplate> = emptyList(),
+    val gradle: GradleConfig = GradleConfig(),
+) {
+    val gradlePluginIds: List<String> get() = gradle.plugins.map { it.id }
+}
+
+@Serializable
+data class GradleConfig(
+    val plugins: List<GradlePlugin> = emptyList(),
+)
+
+@Serializable
+data class GradlePlugin(
+    val id: String,
+    val version: String? = null,
 )
 
 enum class SourceModuleType {
@@ -187,6 +201,7 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
                 }
             }
         },
+        gradle = GradleConfig((gradle.plugins + other.gradle.plugins).distinct()),
     )
 }
 

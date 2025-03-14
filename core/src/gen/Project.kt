@@ -34,7 +34,7 @@ class Project(
 suspend fun ProjectDescriptor.load(repository: PackRepository): Project {
     val packs = packs.map { repository.get(it) ?: throw MissingPackException(it) }
     val moduleSources = packs.asSequence()
-        .map { it.projectSources }
+        .map { it.modules }
         .reduceOrNull(ProjectModules::plus)
         ?: ProjectModules.Empty
     val slotSources: Map<Url, List<SourceTemplate>> = packs.asSequence()
@@ -42,7 +42,7 @@ suspend fun ProjectDescriptor.load(repository: PackRepository): Project {
         .filter { it.target.protocol == "slot" }
         .groupBy { it.target }
     val commonSourceFiles = packs
-        .flatMap { it.commonSources }
+        .flatMap { it.sources }
         .filter { it.target.protocol == "file" }
     val properties = packs.flatMap { pack ->
         pack.properties.map { property ->
@@ -78,6 +78,13 @@ fun Project.getVariables(pack: PackDescriptor): Variables {
     )
 }
 
+fun Project.toVariableEntry(): Pair<String, Any?> =
+    "_project" to mapOf(
+        "name" to name,
+        "group" to group,
+    )
+
+// TODO let's leverage serializers here
 fun SourceModule.toVariableEntry(): Pair<String, Any?> =
     "_module" to mapOf(
         "path" to path.toString(),
@@ -85,6 +92,7 @@ fun SourceModule.toVariableEntry(): Pair<String, Any?> =
         "platforms" to platforms,
         "dependencies" to dependencies.map { it.toVariableMap() },
         "testDependencies" to testDependencies.map { it.toVariableMap() },
+        "gradlePluginIds" to gradlePluginIds,
     )
 
 fun Dependency.toVariableMap() =

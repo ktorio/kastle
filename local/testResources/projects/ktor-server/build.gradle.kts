@@ -1,13 +1,14 @@
 plugins {
-    
+    id("io.ktor.plugin")
 }
 
-group = null
+group = "com.acme"
 version = "1.0.0-SNAPSHOT"
 
 
 
 repositories {
+    mavenCentral()
     
 }
 

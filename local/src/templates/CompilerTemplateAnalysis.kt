@@ -33,7 +33,6 @@ import org.jetbrains.kotlin.psi.KtForExpression
 import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.kotlin.psi.KtPropertyDelegate
 import org.jetbrains.kotlin.psi.KtQualifiedExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtTypeReference
@@ -42,7 +41,6 @@ import org.jetbrains.kotlin.psi.KtWhenExpression
 import org.jetbrains.kotlin.psi.psiUtil.parents
 import org.jetbrains.kotlin.utils.addToStdlib.indexOfOrNull
 import org.jetbrains.kotlin.utils.addToStdlib.lastIndexOfOrNull
-import kotlin.math.exp
 
 fun KtFile.endOfImports(): Int? =
     importDirectives.maxOfOrNull { it.textRange.endOffset }
@@ -288,16 +286,16 @@ sealed interface TemplateParentReference {
             when (reference.text) {
                 SLOT, SLOTS -> Slot(reference.parent as KtCallExpression)
                 PROPERTIES -> PropertyDelegate(reference.parent.parent as KtDeclaration)
-                MODULE -> {
+                MODULE, PROJECT -> {
                     val expression = reference.parent as KtDotQualifiedExpression
                     // TODO other kinds of module references
-                    Dependencies(expression)
+                    PropertyReferenceChain(expression)
                 }
                 else -> throw IllegalArgumentException("Unrecognized reference: ${reference.text}")
             }
     }
 
     data class PropertyDelegate(val declaration: KtDeclaration): TemplateParentReference
+    data class PropertyReferenceChain(val expression: KtDotQualifiedExpression): TemplateParentReference
     data class Slot(val expression: KtCallExpression): TemplateParentReference
-    data class Dependencies(val expression: KtDotQualifiedExpression): TemplateParentReference
 }

@@ -119,7 +119,7 @@ fun Application.endpoints() {
                         var first = true
                         writeByte('['.code.toByte())
                         repositories.map {
-                            it.copy(projectSources = ProjectModules.Empty)
+                            it.copy(modules = ProjectModules.Empty)
                         }.collect { descriptor ->
                             if (!first) writeByte(','.code.toByte())
                             else first = false

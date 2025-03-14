@@ -21,7 +21,6 @@ import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
@@ -139,8 +138,8 @@ internal class KotlinDSLCompilerTemplateEngine(
             ?.bodyExpression?.text?.trimBraces()?.trimIndent()?.trim()
 
     private fun KtFile.findBlocks(properties: MutableList<Property>): List<Block> {
-        // references to Project or Module
-        val templateReferences = findReferencesTo(PROPERTIES, SLOT, SLOTS, MODULE)
+        // references to project or module
+        val templateReferences = findReferencesTo(PROPERTIES, SLOT, SLOTS, MODULE, PROJECT)
             .map(TemplateParentReference.Companion::classify)
             .toList()
 
@@ -161,9 +160,9 @@ internal class KotlinDSLCompilerTemplateEngine(
             }
         }
 
-        // inline dependency references
-        val dependencyReferences = templateReferences
-            .filterIsInstance<TemplateParentReference.Dependencies>()
+        // inline reference chains
+        val chainedReferences = templateReferences
+            .filterIsInstance<TemplateParentReference.PropertyReferenceChain>()
             .flatMap { it.expression.readPropertyBlocks() }
 
         // slot references
@@ -175,7 +174,7 @@ internal class KotlinDSLCompilerTemplateEngine(
         // TODO bad abstraction
         properties.addAll(propertyDeclarations.map { it.asProperty() })
 
-        return declarationBlocks + propertyBlocks + dependencyReferences + slots
+        return declarationBlocks + propertyBlocks + chainedReferences + slots
     }
 
 }

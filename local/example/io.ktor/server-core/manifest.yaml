@@ -2,4 +2,5 @@ id: io.ktor/server-core
 name: Ktor Server
 description: Adds a Ktor server module
 version: 1.0.0
-module: server
+modules:
+  - path: server

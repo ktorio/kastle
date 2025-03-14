@@ -5,6 +5,7 @@ const val SLOTS = "_slots"
 const val PROPERTIES = "_properties"
 
 // module properties
+const val PROJECT = "_project"
 const val MODULE = "_module"
 // TODO module name, targets, etc.
 const val DEPENDENCIES = "dependencies"

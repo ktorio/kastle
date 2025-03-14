@@ -31,7 +31,7 @@ data class PackManifest(
     override val requires: List<PackId> = emptyList(),
     override val properties: List<Property> = emptyList(),
     override val repositories: List<Repository> = emptyList(),
-    val module: String = "",
+    val modules: List<SourceModule>? = null,
     val sources: List<SourceDefinition> = emptyList(),
 ): PackMetadata
 
@@ -50,9 +50,13 @@ data class PackDescriptor(
     override val properties: List<Property> = emptyList(),
     override val repositories: List<Repository> = emptyList(),
     val commonSources: List<SourceTemplate> = emptyList(),
-    val projectSources: ProjectModules = ProjectModules.Empty,
+    val modules: ProjectModules = ProjectModules.Empty,
 ): PackMetadata {
-    constructor(manifest: PackManifest, commonSources: List<SourceTemplate>, projectSources: ProjectModules) : this(
+    constructor(
+        manifest: PackManifest,
+        commonSources: List<SourceTemplate>,
+        projectSources: ProjectModules
+    ) : this(
         manifest.id,
         manifest.name,
         manifest.version,
@@ -66,14 +70,14 @@ data class PackDescriptor(
         manifest.properties,
         manifest.repositories,
         commonSources = commonSources,
-        projectSources = if (projectSources is ProjectModules.Single && projectSources.module.path.isEmpty())
-            projectSources.copy(module = projectSources.module.copy(path = manifest.module))
-        else projectSources
+        modules = manifest.modules?.let { modules ->
+            ProjectModules.fromList(modules) + projectSources
+        } ?: projectSources
     )
 }
 
 val PackDescriptor.sources: Sequence<SourceTemplate> get() =
-    commonSources.asSequence() + projectSources.modules.asSequence().flatMap { it.sources }
+    commonSources.asSequence() + modules.modules.asSequence().flatMap { it.sources }
 
 @Serializable
 data class Group(
