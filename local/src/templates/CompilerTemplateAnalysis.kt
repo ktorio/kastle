@@ -7,7 +7,11 @@ import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.descendantsOfType
 import org.jetbrains.kastle.Block
-import org.jetbrains.kastle.EachBlock
+import org.jetbrains.kastle.BlockPosition
+import org.jetbrains.kastle.BlockPosition.Companion.copy
+import org.jetbrains.kastle.BlockPosition.Companion.include
+import org.jetbrains.kastle.BlockPosition.Companion.toPosition
+import org.jetbrains.kastle.ForEachBlock
 import org.jetbrains.kastle.ElseBlock
 import org.jetbrains.kastle.IfBlock
 import org.jetbrains.kastle.NamedSlot
@@ -17,7 +21,6 @@ import org.jetbrains.kastle.PropertyLiteral
 import org.jetbrains.kastle.PropertyType
 import org.jetbrains.kastle.RepeatingSlot
 import org.jetbrains.kastle.Slot
-import org.jetbrains.kastle.SourcePosition
 import org.jetbrains.kastle.WhenBlock
 import org.jetbrains.kastle.utils.unwrapQuotes
 import org.jetbrains.kotlin.psi.KtBlockStringTemplateEntry
@@ -38,46 +41,60 @@ import org.jetbrains.kotlin.psi.KtStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.psi.KtWhenEntry
 import org.jetbrains.kotlin.psi.KtWhenExpression
-import org.jetbrains.kotlin.psi.psiUtil.parents
+import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.kotlin.utils.addToStdlib.indexOfOrNull
 import org.jetbrains.kotlin.utils.addToStdlib.lastIndexOfOrNull
 
 fun KtFile.endOfImports(): Int? =
     importDirectives.maxOfOrNull { it.textRange.endOffset }
 
-fun PsiElement.bodyPosition(): SourcePosition {
+// TODO outer
+fun PsiElement.blockPosition(
+    body: PsiElement = this,
+    also: PsiElement? = null,
+    start: Int? = null,
+): BlockPosition {
+    var range = blockRange()
+    if (also != null)
+        range = range include also.blockRange()
+    if (start != null)
+        range = range.copy(start = start)
+
+    return BlockPosition(
+        range = range,
+        outer = outerRange(range),
+        inner = body.bodyRange(),
+        indent = findIndent(),
+    )
+}
+
+fun PsiElement.blockRange(
+    trim: Boolean = false,
+): IntRange {
+    val range = textIntRange(trim)
+//    val receiver = parents.firstNotNullOfOrNull(::inlineContext)
+//    val indent = findIndent(this)
+    // TODO use receiver / context
+
+    return range
+}
+
+fun PsiElement.bodyRange(): IntRange {
     childrenOfType<KtContainerNodeForControlStructureBody>().firstOrNull()?.let { bodyElement ->
-        return bodyElement.bodyPosition()
+        return bodyElement.bodyRange()
     }
     // TODO when clause issue
     val start = text.indexOfOrNull('{')?.plus(1) ?: 0
     val length = text.lastIndexOfOrNull('}') ?: textRange.length
-    val range = (textRange.startOffset + start) until (textRange.startOffset + length)
-    val indent = findIndent(this)
+    val range = (textRange.startOffset + start)..(textRange.startOffset + length)
 
-    return SourcePosition.TopLevel(range, indent)
-}
-
-fun PsiElement.sourcePosition(
-    includeTrailingNewline: Boolean = false,
-    trim: Boolean = false,
-): SourcePosition {
-    val receiver = parents.firstNotNullOfOrNull(::inlineContext)
-    val range = textIntRange(includeTrailingNewline, trim)
-    val indent = findIndent(this)
-    if (receiver != null)
-        return SourcePosition.Inline(range, indent, receiver)
-
-    return SourcePosition.TopLevel(range, indent)
+    return range
 }
 
 fun PsiElement.textIntRange(
-    includeTrailingNewline: Boolean = false,
     trim: Boolean = false,
 ): IntRange =
-    if (includeTrailingNewline && hasWhitespaceSibling())
-        textRange.startOffset until nextSibling.textRange.endOffset
-    else if (trim) {
+    if (trim) {
         val (startWs, endWs) = text.takeWhile { it.isWhitespace() }.length to text.takeLastWhile { it.isWhitespace() }.length
         textRange.startOffset + startWs until textRange.endOffset - endWs
     }
@@ -87,7 +104,7 @@ fun PsiElement.hasWhitespaceSibling() =
     nextSibling is PsiWhiteSpace && nextSibling.text.all { it == '\n' }
 
 fun TextRange.toIntRange(): IntRange =
-    startOffset until endOffset
+    startOffset .. endOffset
 
 private fun inlineContext(parent: PsiElement): String? = when (parent) {
     is KtClass -> parent.name
@@ -136,11 +153,11 @@ fun KtCallExpression.readSlotBlock(): Slot {
     return when (functionName) {
         SLOT -> NamedSlot(
             slotName,
-            sourcePosition(),
+            blockPosition()
         )
         SLOTS -> RepeatingSlot(
             slotName,
-            sourcePosition(),
+            blockPosition()
         )
         else -> throw IllegalArgumentException("Unsupported template function: $functionName")
     }
@@ -167,7 +184,7 @@ private fun KtExpression.asLiteralReference(): Sequence<Block> =
     sequenceOf(
         PropertyLiteral(
             property = text,
-            position = sourcePosition(),
+            position = blockRange().toPosition(), // TODO
             embedded = false,
         )
     )
@@ -185,8 +202,7 @@ private fun KtWhenExpression.asWhenBlock(variableName: String): Sequence<Block> 
     yield(
         WhenBlock(
             property = variableName,
-            position = sourcePosition(),
-            body = bodyPosition()
+            position = blockPosition()
         )
     )
     for (child in childrenOfType<KtWhenEntry>()) {
@@ -195,13 +211,11 @@ private fun KtWhenExpression.asWhenBlock(variableName: String): Sequence<Block> 
             if (child.isElse)
                 ElseBlock(
                     property = variableName,
-                    position = child.sourcePosition(),
-                    body = child.children[1].bodyPosition(),
+                    position = child.blockPosition(body = child.children[1])
                 )
             else OneOfBlock(
                 value = child.conditions.map { it.text.unwrapQuotes() },
-                position = child.sourcePosition(),
-                body = child.children[1].bodyPosition(),
+                position = child.blockPosition(body = child.children[1])
             )
         )
     }
@@ -224,16 +238,12 @@ private fun KtIfExpression.asIfBlock(variableName: String): Sequence<Block> =
             IfBlock(
                 property = variableName,
                 // if expression includes else, so we trim to that
-                position = sourcePosition()
-                    .withBounds(end = then!!.textIntRange(trim = true).endInclusive),
-                body = then!!.bodyPosition(),
+                position = then!!.blockPosition(also = this)
             ),
-            `else`?.let {
+            `else`?.let { elseElem ->
                 ElseBlock(
                     property = variableName,
-                    position = it.sourcePosition()
-                        .withBounds(start = then!!.textIntRange().endInclusive + 1),
-                    body = it.bodyPosition(),
+                    position = elseElem.blockPosition(start = then!!.endOffset)
                 )
             }
         ).filterNotNull()
@@ -242,11 +252,10 @@ private fun KtIfExpression.asIfBlock(variableName: String): Sequence<Block> =
 private fun KtForExpression.asEachBlock(variableName: String): Sequence<Block> = sequence {
     val entryName = this@asEachBlock.loopParameter?.name ?: "it"
     yield(
-        EachBlock(
+        ForEachBlock(
             property = variableName,
-            position = this@asEachBlock.sourcePosition(),
+            position = this@asEachBlock.blockPosition(),
             variable = entryName,
-            body = this@asEachBlock.bodyPosition(),
         )
     )
     // include references to the element variable
@@ -260,14 +269,40 @@ private fun KtBlockStringTemplateEntry.asStringTemplateLiteral(variableName: Str
     sequenceOf(
         PropertyLiteral(
             variableName,
-            position = sourcePosition(),
-            body = childrenOfType<KtExpression>().first().sourcePosition(),
+            position = blockPosition(
+                body = childrenOfType<KtExpression>().first()
+            )
         )
     )
 
-private fun findIndent(element: PsiElement): Int {
-    val startOffset = element.textRange.startOffset
-    val fileText = element.containingFile.text
+/**
+ * When this block occupies a set of complete lines, we find the start and end of those lines.
+ */
+private fun PsiElement.outerRange(range: IntRange): IntRange {
+    val startOffset = range.first
+    val endOffset = range.last
+    val fileText = containingFile.text
+    val startOfFirstLine =
+        fileText
+            .lastIndexOf('\n', startOffset - 1)
+            .takeIf { i -> i != -1 && fileText.substring(i, startOffset).isBlank() }
+            ?: startOffset
+    val endOfLastLine =
+        fileText
+            .indexOf('\n', endOffset)
+            .takeIf { i -> i != -1 && fileText.substring(endOffset, i).isBlank() }
+            ?: endOffset
+
+    assert(startOfFirstLine <= endOfLastLine && startOfFirstLine <= startOffset && endOfLastLine >= endOffset) {
+        "Bad outer range ($startOffset, $endOffset) -> ($startOfFirstLine, $endOfLastLine)"
+    }
+
+    return startOfFirstLine.. endOfLastLine
+}
+
+private fun PsiElement.findIndent(): Int {
+    val startOffset = this.textRange.startOffset
+    val fileText = this.containingFile.text
     val lineStartOffset =
         fileText.lastIndexOf('\n', startOffset - 1)
             .takeIf { it != -1 }?.plus(1) ?: return 0

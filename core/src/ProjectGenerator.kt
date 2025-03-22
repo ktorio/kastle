@@ -9,9 +9,6 @@ import org.jetbrains.kastle.gen.getVariables
 import org.jetbrains.kastle.gen.load
 import org.jetbrains.kastle.gen.toVariableEntry
 import org.jetbrains.kastle.utils.*
-import org.jetbrains.kastle.utils.bodyEnd
-import org.jetbrains.kastle.utils.indent
-import org.jetbrains.kastle.utils.rangeEnd
 
 interface ProjectGenerator {
     companion object {
@@ -28,6 +25,7 @@ internal class ProjectGeneratorImpl(
 ) : ProjectGenerator {
     companion object {
         val startOfLine = Regex("\n\\s*")
+        val nonEmptyLine = Regex("\n[\t ]*\\S")
     }
 
     override suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
@@ -77,10 +75,10 @@ internal class ProjectGeneratorImpl(
                         forEachBlock(source.blocks) { block ->
                             log {
                                 buildString {
-                                    append("  ${block.position.range.toString().padEnd(12)} ")
-                                    append((block.position.indent.stringOf(' ') + block::class.simpleName).padEnd(30))
-                                    append(block.contents.replace("\n", "\\n").padEnd(100))
-                                    append(block.bodyContents?.replace("\n", "\\n"))
+                                    append("  ${block.range.toString().padEnd(12)} ")
+                                    append((block.indent.stringOf(' ') + block::class.simpleName).padEnd(30))
+                                    append("\"${block.outerContents.replace("\n", "\\n")}\"".padEnd(100))
+                                    append("\"${block.bodyContents?.replace("\n", "\\n")}\"")
                                 }
                             }
                         }
@@ -96,10 +94,10 @@ internal class ProjectGeneratorImpl(
                             }
 
                             // interstitial
-                            append(source.text, start, block.rangeStart, ancestor?.indent)
+                            append(source.text, start, block.outerStart, ancestor?.indent)
 
                             // current block
-                            appendBlockContents(
+                            val skipped = appendBlockContents(
                                 indent = ancestor?.indent ?: block.indent,
                                 block = block,
                                 source = source,
@@ -107,12 +105,26 @@ internal class ProjectGeneratorImpl(
                             )
 
                             // where to go next
-                            start = when (child) {
-                                null -> block.rangeEnd
-                                else -> {
+                            start = when {
+                                child != null -> {
                                     log { "  push $block" }
                                     stack += block
-                                    child!!.rangeStart
+                                    child!!.outerStart
+                                }
+                                else -> block.rangeEnd
+                            }
+
+                            // Remove empty lines after skipped blocks
+                            if (skipped) {
+                                val initial = start
+                                var next = source.text[start]
+                                if (next.isWhitespace()) {
+                                    while (next.isWhitespace() && start < source.text.length) {
+                                        next = source.text[++start]
+                                    }
+                                    while (next != '\n' && start > initial) {
+                                        next = source.text[--start]
+                                    }
                                 }
                             }
 
@@ -204,6 +216,8 @@ internal class ProjectGeneratorImpl(
         val buffer: Buffer = Buffer(),
     ): Appendable {
 
+        val Block.outerContents: String get() =
+            source.text.substring(outerStart, outerEnd)
         val Block.contents: String get() =
             source.text.substring(rangeStart, rangeEnd)
         val Block.bodyContents: String? get() =
@@ -283,10 +297,11 @@ internal class ProjectGeneratorImpl(
             val next: Block? get() = blocks.getOrNull(i + 1)
             val loops: MutableMap<DeclaringBlock, MutableList<*>> = mutableMapOf()
 
-            fun skipContents() {
+            fun skipContents(): Boolean {
                 val current = blocks[i]
                 while (next in current)
                     i++
+                return true
             }
 
             fun isLast() =
@@ -303,7 +318,7 @@ internal class ProjectGeneratorImpl(
                     return false
                 }
                 i = blocks.indexOf(this) - 1
-                start = rangeStart
+                start = outerStart
                 return true
             }
 
@@ -321,19 +336,21 @@ internal class ProjectGeneratorImpl(
                 block: Block,
                 source: SourceTemplate,
                 slots: List<SourceTemplate> = emptyList()
-            ) {
+            ): Boolean =
                 when (block) {
                     is SkipBlock -> skipContents()
 
                     is Slot -> {
                         val indentString = indent.stringOf(' ')
+                        append(source.text, block.outerStart, block.rangeStart)
                         append(slots.joinToString("\n\n$indentString") {
                             it.text.indent(indentString)
                         })
+                        slots.isEmpty()
                     }
 
                     is CompareBlock<*> -> {
-                        val end = child?.rangeStart ?: block.bodyEnd
+                        val end = child?.outerStart ?: block.bodyEnd
 
                         when (block) {
                             is OneOfBlock -> {
@@ -341,16 +358,17 @@ internal class ProjectGeneratorImpl(
                                     ?: error("when clause with no parent: $block")
                                 val value = variables[parent.property]
                                 // TODO types
-                                if (value in block.value)
+                                if (value in block.value) {
+                                    append(source.text, block.outerStart, block.rangeStart)
                                     append(source.text, block.bodyStart, end, indent)
-                                else skipContents()
+                                    false
+                                } else skipContents()
                             }
                         }
                     }
 
                     is PropertyBlock -> {
-                        val end = child?.rangeStart ?: block.bodyEnd
-                        val trimEnd = child == null
+                        val end = child?.outerStart ?: block.bodyEnd
                         val value = variables[block.property]
 
                         when (block) {
@@ -361,17 +379,23 @@ internal class ProjectGeneratorImpl(
                                         else -> value.toString()
                                     }
                                 )
+                                false
                             }
                             is IfBlock ->
-                                if (value.isTruthy())
-                                    append(source.text, block.bodyStart, end, indent, trimStart = true, trimEnd = trimEnd)
-                                else skipContents()
+                                if (value.isTruthy()) {
+                                    append(source.text, block.outerStart, block.rangeStart)
+                                    append(source.text, block.bodyStart, end, indent)
+                                    false
+                                } else skipContents()
                             is ElseBlock ->
                                 if (value.isTruthy())
                                     skipContents()
-                                else append(source.text, block.bodyStart, end, indent, trimStart = true, trimEnd = trimEnd)
-                            is EachBlock -> {
-                                val trimStart = !loops.containsKey(block)
+                                else {
+                                    append(source.text, block.outerStart, block.rangeStart)
+                                    append(source.text, block.bodyStart, end, indent)
+                                    false
+                                }
+                            is ForEachBlock -> {
                                 val list = loops[block] ?: (value as? List<*>).orEmpty().toMutableList()
                                 if (list.isNotEmpty()) {
                                     val element = list.removeFirst()
@@ -383,15 +407,15 @@ internal class ProjectGeneratorImpl(
                                         else -> variables += variable to element
                                     }
                                     loops[block] = list
-                                    append(source.text, block.bodyStart, end, indent, trimStart = trimStart, trimEnd = trimEnd)
+                                    append(source.text, block.bodyStart, end, indent)
+                                    false
                                 } else skipContents()
                             }
                             // contents provided by children
-                            is WhenBlock -> {}
+                            is WhenBlock -> false
                         }
                     }
                 }
-            }
         }
     }
 }

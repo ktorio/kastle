@@ -6,6 +6,7 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.BlockPosition.Companion.bumpEnd
 
 class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     companion object {
@@ -13,7 +14,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         private const val SLOT = "slot"
         private const val SLOTS = "slots"
         // TODO
-        private const val WHEN = "when"
+        // private const val WHEN = "when"
         private const val ELSE = "else"
         private const val EACH = "each"
 
@@ -45,6 +46,9 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         val matches = bracesPattern.findAll(template)
         return sequence {
             for (match in matches) {
+                val outerStart = template.lastIndexOf('\n', match.range.start)
+                    .takeIf { it >= 0 }
+                    ?: match.range.start
                 val helper = match.groups["helper"]?.value
                 val text = match.groups["content"]?.value.orEmpty().trim()
                 val indent = template.indentOf(match)
@@ -58,7 +62,10 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                         }
                         else -> yield(PropertyLiteral(
                             property = text,
-                            position = SourcePosition.TopLevel(match.range, indent),
+                            position = BlockPosition(
+                                range = match.range.bumpEnd(),
+                                indent = indent,
+                            ),
                         ))
                     }
                 } else if (text.startsWith('/')) {
@@ -68,13 +75,16 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                     }
                     yield(parent.toBlock(match))
                 } else if (helper != null) {
-                    BlockMatch(match, indent).let { blockMatch ->
+                    BlockMatch(match, indent, outerStart).let { blockMatch ->
                         when (blockMatch.helper) {
                             SLOT -> yield(
                                 NamedSlot(
                                     name = blockMatch.property
                                         ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
-                                    position = SourcePosition.TopLevel(match.range, indent),
+                                    position = BlockPosition(
+                                        range = match.range,
+                                        indent = indent,
+                                    ),
                                 )
                             )
 
@@ -82,7 +92,10 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                                 RepeatingSlot(
                                     name = blockMatch.property
                                         ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
-                                    position = SourcePosition.TopLevel(match.range, indent),
+                                    position = BlockPosition(
+                                        range = match.range,
+                                        indent = indent,
+                                    ),
                                 )
                             )
 
@@ -102,26 +115,39 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     data class BlockMatch(
         val match: MatchResult,
         val indent: Int,
+        val outerStart: Int = match.range.start,
         val helper: String = match.groups["helper"]!!.value,
         val property: String? = match.groups["content"]?.value?.trim()?.takeIf { it.isNotEmpty() }
     ) {
         fun toBlock(endMatch: MatchResult): Block = when(helper) {
             IF -> IfBlock(
                 property = property ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
-                position = SourcePosition.TopLevel(match.range.start..endMatch.range.endInclusive, indent),
-                body = SourcePosition.TopLevel(match.range.endInclusive + 1 .. endMatch.range.start - 1, indent),
+                position = BlockPosition(
+                    range = match.range.start .. endMatch.range.endInclusive + 1,
+                    outer = outerStart  .. endMatch.range.endInclusive + 1,
+                    inner = match.range.endInclusive + 1 .. endMatch.range.start,
+                    indent = indent,
+                ),
             )
             ELSE -> ElseBlock(
                 property = property ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
-                position = SourcePosition.TopLevel(match.range.start..endMatch.range.endInclusive, indent),
-                body = SourcePosition.TopLevel(match.range.endInclusive + 1 .. endMatch.range.start - 1, indent),
+                position = BlockPosition(
+                    range = match.range.start .. endMatch.range.endInclusive + 1,
+                    outer = outerStart  .. endMatch.range.endInclusive + 1,
+                    inner = match.range.endInclusive + 1 .. endMatch.range.start,
+                    indent = indent,
+                ),
             )
             EACH -> {
-                EachBlock(
+                ForEachBlock(
                     property = property ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
-                    position = SourcePosition.TopLevel(match.range.start..endMatch.range.endInclusive, indent),
+                    position = BlockPosition(
+                        range = match.range.start .. endMatch.range.endInclusive + 1,
+                        outer = outerStart  .. endMatch.range.endInclusive + 1,
+                        inner = match.range.endInclusive + 1 .. endMatch.range.start,
+                        indent = indent,
+                    ),
                     variable = null,
-                    body = SourcePosition.TopLevel(match.range.endInclusive + 1 .. endMatch.range.start - 1, indent),
                 )
             }
             else -> error("Unexpected keyword: $helper")

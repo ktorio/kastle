@@ -32,8 +32,58 @@ value class Snippet(
 
 @Serializable
 sealed interface Block {
-    val position: SourcePosition
-    val body: SourcePosition
+    val position: BlockPosition
+}
+
+@Serializable(BlockPositionSerializer::class)
+data class BlockPosition(
+    val range: IntRange,
+    val outer: IntRange = range,
+    val inner: IntRange = range,
+    val indent: Int = 0,
+    val context: SourceContext = SourceContext.TopLevel
+) {
+    companion object {
+        fun parse(text: String): BlockPosition {
+            var items = text.split(Regex("\\s*/\\s*"))
+            val (outer, range, inner) = items.take(3).map { item ->
+                val (first, last) = item.split(',').map { it.toInt() }
+                IntRange(first, last)
+            }
+            val indent = items[3].toInt()
+            val context = items[4].let(SourceContext::valueOf)
+
+            return BlockPosition(range, outer, inner, indent, context)
+        }
+
+        fun IntRange.toPosition() =
+            BlockPosition(this)
+
+        // expanded range to contain both
+        infix fun IntRange.include(range: IntRange): IntRange =
+            if (start < range.start) {
+                IntRange(start, range.endInclusive)
+            } else {
+                IntRange(range.start, endInclusive)
+            }
+
+        fun IntRange.copy(start: Int = this.start, end: Int = endInclusive) =
+            IntRange(start, end)
+
+        fun IntRange.bumpEnd() =
+            IntRange(start, endInclusive + 1)
+
+        fun IntRange.reduceEnd() =
+            IntRange(start, endInclusive - 1)
+    }
+
+    override fun toString(): String =
+        "${outer.first},${outer.last} / ${range.first},${range.last} / ${inner.first},${inner.last} / $indent / ${context.name}"
+}
+
+enum class SourceContext {
+    TopLevel,
+    Inline
 }
 
 @Serializable
@@ -60,9 +110,8 @@ sealed interface CompareBlock<T>: Block {
 @Serializable
 data class NamedSlot(
     override val name: String,
-    override val position: SourcePosition,
+    override val position: BlockPosition,
     override val requirement: Requirement = Requirement.OPTIONAL,
-    override val body: SourcePosition = position
 ): Slot {
     override fun toString(): String = "slots(\"$name\")"
 }
@@ -70,9 +119,8 @@ data class NamedSlot(
 @Serializable
 data class RepeatingSlot(
     override val name: String,
-    override val position: SourcePosition,
+    override val position: BlockPosition,
     override val requirement: Requirement = Requirement.OPTIONAL,
-    override val body: SourcePosition = position
 ): Slot {
     override fun toString(): String = "slots(\"$name\")"
 }
@@ -83,24 +131,21 @@ data class RepeatingSlot(
 @Serializable
 data class PropertyLiteral(
     override val property: String,
-    override val position: SourcePosition,
-    override val body: SourcePosition = position,
+    override val position: BlockPosition,
     val embedded: Boolean = true,
 ): PropertyBlock {
     override fun toString(): String = "property(\"$property\")"
 }
 
 @Serializable
-data class SkipBlock(override val position: SourcePosition): Block {
-    override val body: SourcePosition = position
+data class SkipBlock(override val position: BlockPosition): Block {
     override fun toString(): String = "skip"
 }
 
 @Serializable
 data class IfBlock(
     override val property: String,
-    override val position: SourcePosition,
-    override val body: SourcePosition = position
+    override val position: BlockPosition,
 ): PropertyBlock {
     override fun toString(): String = "if(\"$property\")"
 }
@@ -108,18 +153,16 @@ data class IfBlock(
 @Serializable
 data class ElseBlock(
     override val property: String,
-    override val position: SourcePosition,
-    override val body: SourcePosition = position
+    override val position: BlockPosition,
 ): PropertyBlock {
     override fun toString(): String = "else(\"$property\")"
 }
 
 @Serializable
-data class EachBlock(
+data class ForEachBlock(
     override val property: String,
-    override val position: SourcePosition,
+    override val position: BlockPosition,
     override val variable: String?,
-    override val body: SourcePosition = position
 ): PropertyBlock, DeclaringBlock {
     override fun toString(): String = "each(\"$variable\" in \"$property\")"
 }
@@ -127,8 +170,7 @@ data class EachBlock(
 @Serializable
 data class WhenBlock(
     override val property: String,
-    override val position: SourcePosition,
-    override val body: SourcePosition = position
+    override val position: BlockPosition,
 ): PropertyBlock {
     override fun toString(): String = "when(\"$property\")"
 }
@@ -137,8 +179,7 @@ data class WhenBlock(
 @Serializable
 data class OneOfBlock(
     override val value: List<String>,
-    override val position: SourcePosition,
-    override val body: SourcePosition = position
+    override val position: BlockPosition,
 ): CompareBlock<List<String>> {
     override fun toString(): String = "-> ${value.joinToString(", ") { "\"$it\"" }})"
 }

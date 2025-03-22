@@ -6,10 +6,11 @@ import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.util.descendantsOfType
 import kotlinx.io.files.Path
 import org.jetbrains.kastle.Block
+import org.jetbrains.kastle.BlockPosition
 import org.jetbrains.kastle.PackRepository
 import org.jetbrains.kastle.Property
 import org.jetbrains.kastle.SkipBlock
-import org.jetbrains.kastle.SourcePosition
+import org.jetbrains.kastle.SourceContext
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.utils.afterProtocol
@@ -113,12 +114,12 @@ internal class KotlinDSLCompilerTemplateEngine(
                 // TODO
                 val text = ktFile.firstFunctionBody()
                         ?: throw IllegalArgumentException("Expected single function body for targeting slot")
-                when(slot.position) {
-                    is SourcePosition.TopLevel -> ktFile.endOfImports()?.let { endOfImports ->
+                when(slot.position.context) {
+                    SourceContext.TopLevel -> ktFile.endOfImports()?.let { endOfImports ->
                         ktFile.text.substring(endOfImports)
                     } ?: ktFile.text
                     // TODO other positions, annotations, etc.
-                    is SourcePosition.Inline -> ktFile.firstFunctionBody()
+                    SourceContext.Inline -> ktFile.firstFunctionBody()
                         ?: throw IllegalArgumentException("Expected single function body for targeting slot")
                 }
                 SourceTemplate(
@@ -150,7 +151,11 @@ internal class KotlinDSLCompilerTemplateEngine(
 
         // remove all declarations
         val declarationBlocks = propertyDeclarations.map { declaration ->
-            SkipBlock(position = declaration.sourcePosition(includeTrailingNewline = true))
+            SkipBlock(position =
+                BlockPosition(
+                    declaration.blockRange()
+                ) // TODO
+            )
         }
 
         // inline blocks with references to properties

@@ -1,11 +1,14 @@
 package org.jetbrains.kastle.templates
 
-import org.jetbrains.kastle.EachBlock
+import org.jetbrains.kastle.BlockPosition.Companion.reduceEnd
+import org.jetbrains.kastle.ForEachBlock
 import org.jetbrains.kastle.ElseBlock
 import org.jetbrains.kastle.IfBlock
 import org.jetbrains.kastle.NamedSlot
 import org.jetbrains.kastle.PropertyLiteral
 import org.jetbrains.kastle.RepeatingSlot
+import org.jetbrains.kastle.utils.body
+import org.jetbrains.kastle.utils.range
 import kotlin.test.*
 
 class HandlebarsTemplateEngineTest {
@@ -46,12 +49,12 @@ class HandlebarsTemplateEngineTest {
 
         assertIs<PropertyLiteral>(literal)
         assertEquals("someProperty", literal.property)
-        assertEquals("{{ someProperty }}", input.substring(literal.position.range))
+        assertEquals("{{ someProperty }}", input.substringEx(literal.range))
 
         assertIs<IfBlock>(conditional)
-        assertEquals(condition, input.substring(conditional.position.range))
+        assertEquals(condition, input.substringEx(conditional.range))
         assertEquals("someBooleanProperty", conditional.property)
-        assertEquals("\nHello, {{ someProperty }}!\n", input.substring(conditional.body!!.range)) // TODO trim newlines
+        assertEquals("\nHello, {{ someProperty }}!\n", input.substringEx(conditional.body)) // TODO trim newlines
     }
 
     @Test
@@ -77,15 +80,15 @@ class HandlebarsTemplateEngineTest {
         val (literal, ifBlock, elseBlock) = blocks
         assertIs<PropertyLiteral>(literal)
         assertEquals("someProperty", literal.property)
-        assertEquals("{{ someProperty }}", input.substring(literal.position.range))
+        assertEquals("{{ someProperty }}", input.substringEx(literal.range))
 
         assertIs<IfBlock>(ifBlock)
         assertEquals("someBooleanProperty", ifBlock.property)
-        assertEquals("\nHello, {{ someProperty }}!\n", input.substring(ifBlock.body!!.range)) // TODO trim newlines
+        assertEquals("\nHello, {{ someProperty }}!\n", input.substringEx(ifBlock.body)) // TODO trim newlines
 
         assertIs<ElseBlock>(elseBlock)
         assertEquals("someBooleanProperty", elseBlock.property)
-        assertEquals("\nGoodbye!\n", input.substring(elseBlock.body!!.range)) // TODO trim newlines
+        assertEquals("\nGoodbye!\n", input.substringEx(elseBlock.body)) // TODO trim newlines
     }
 
     @Test
@@ -109,13 +112,13 @@ class HandlebarsTemplateEngineTest {
         val (literal, forEach) = blocks
         assertIs<PropertyLiteral>(literal)
         assertEquals("this", literal.property)
-        assertEquals("{{ this }}", input.substring(literal.position.range))
-        assertEquals(loop, input.substring(forEach.position.range))
+        assertEquals("{{ this }}", input.substringEx(literal.range))
+        assertEquals(loop, input.substringEx(forEach.range))
 
-        assertIs<EachBlock>(forEach)
+        assertIs<ForEachBlock>(forEach)
         assertEquals("aList", forEach.property)
         assertNull(forEach.variable)
-        assertEquals("\nHello, {{ this }}!\n", input.substring(forEach.body!!.range)) // TODO trim newlines
+        assertEquals("\nHello, {{ this }}!\n", input.substringEx(forEach.body)) // TODO trim newlines
     }
 
     @Test
@@ -143,5 +146,8 @@ class HandlebarsTemplateEngineTest {
         assertIs<RepeatingSlot>(slot)
         assertEquals("someSlot", slot.name)
     }
+
+    fun String.substringEx(intRange: IntRange) =
+        substring(intRange.first, intRange.endInclusive)
 
 }
