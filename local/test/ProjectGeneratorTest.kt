@@ -12,7 +12,7 @@ import kotlin.test.Test
 
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
-private const val replaceSnapshot = true
+private const val replaceSnapshot = false
 
 abstract class ProjectGeneratorTest {
     companion object {
@@ -90,6 +90,25 @@ abstract class ProjectGeneratorTest {
         )
         assertFilesAreEqualWithSnapshot(
             "$resources/projects/ktor-server",
+            projectDir.toString(),
+            replace = replaceSnapshot,
+        )
+    }
+
+    @Test
+    fun `ktor server gradle with catalog`() = runTest {
+        generate(
+            packs = listOf(
+                "std/gradle",
+                "io.ktor/server-core",
+                "io.ktor/server-cio",
+            ),
+            properties = mapOf(
+                VariableId.parse("std/gradle/versionCatalogEnabled") to "true",
+            )
+        )
+        assertFilesAreEqualWithSnapshot(
+            "$resources/projects/ktor-server-catalog",
             projectDir.toString(),
             replace = replaceSnapshot,
         )

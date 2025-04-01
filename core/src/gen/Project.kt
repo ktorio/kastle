@@ -2,6 +2,7 @@ package org.jetbrains.kastle.gen
 
 import org.jetbrains.kastle.ArtifactDependency
 import org.jetbrains.kastle.Dependency
+import org.jetbrains.kastle.GradlePlugin
 import org.jetbrains.kastle.MissingPackException
 import org.jetbrains.kastle.ModuleDependency
 import org.jetbrains.kastle.PackDescriptor
@@ -92,7 +93,7 @@ fun SourceModule.toVariableEntry(): Pair<String, Any?> =
         "platforms" to platforms,
         "dependencies" to dependencies.map { it.toVariableMap() },
         "testDependencies" to testDependencies.map { it.toVariableMap() },
-        "gradlePluginIds" to gradlePluginIds,
+        "gradlePlugins" to gradlePlugins.map { it.toVariableMap() },
     )
 
 fun Dependency.toVariableMap() =
@@ -106,3 +107,9 @@ fun Dependency.toVariableMap() =
             "module" to module
         )
     }
+
+fun GradlePlugin.toVariableMap() = mapOf(
+    "name" to id.split(".").last(), // TODO name
+    "id" to id,
+    "version" to version.toString(),
+)

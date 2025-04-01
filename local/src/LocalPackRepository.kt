@@ -135,7 +135,7 @@ class LocalPackRepository(
         // project-level sources are included in all modules,
         // except for slot targets, these are inserted into the first module
         val kotlinAnalyzer = KotlinDSLCompilerTemplateEngine(projectPath, repository)
-        val commonSources = manifest.sources.map { (path, text, target) ->
+        val commonSources = manifest.sources.map { (path, text, target, condition) ->
             require(target != null) { "Missing target for project-level source: ${path ?: text}" }
             val file = projectPath.resolve(path ?: "source.kt")
             val format = path?.extensionFormat
@@ -154,10 +154,17 @@ class LocalPackRepository(
                         templateContents
                     )
                     kotlinAnalyzer.read(Path(""), psiFile as KtFile, properties)
-                        .copy(packId = packId)
+                        .copy(
+                            packId = packId,
+                            condition = condition
+                        )
                 }
-                TemplateFormat.OTHER -> textFileTemplateEngine.read(target, templateContents)
-                    .copy(packId = packId)
+                TemplateFormat.OTHER ->
+                    textFileTemplateEngine.read(target, templateContents)
+                        .copy(
+                            packId = packId,
+                            condition = condition
+                        )
             }
         }
 

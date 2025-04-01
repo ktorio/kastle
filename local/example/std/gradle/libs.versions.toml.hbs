@@ -1,0 +1,14 @@
+[versions]
+{{#each _module.dependencies}}
+{{ artifact }} = "{{ version }}"
+{{/each}}
+
+[libraries]
+{{#each _module.dependencies}}
+{{ artifact }} = { module = "{{ group }}:{{ artifact }}", version.ref = "{{ artifact }}" }
+{{/each}}
+
+[plugins]
+{{#each _module.gradlePlugins}}
+{{ name }} = { id = "{{ id }}", version = "{{ version }}" }
+{{/each}}

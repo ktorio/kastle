@@ -7,6 +7,7 @@ data class SourceDefinition(
     val path: String? = null,
     val text: String? = null,
     val target: Url? = path?.let { "file:$path" },
+    val `if`: String? = null,
 )
 
 @Serializable
@@ -136,6 +137,14 @@ data class PropertyLiteral(
 ): PropertyBlock {
     override fun toString(): String = "property(\"$property\")"
 }
+
+/**
+ * Inject arbitrary strings as code.
+ */
+@Serializable
+data class UnsafeBlock(
+    override val position: BlockPosition,
+): Block
 
 @Serializable
 data class SkipBlock(override val position: BlockPosition): Block {

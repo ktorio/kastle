@@ -24,7 +24,7 @@ val _module: SourceModule = object: SourceModule {
 
     override val dependencies: Collection<BuildDependency> = emptyList()
     override val testDependencies: Collection<BuildDependency> = emptyList()
-    override val gradlePluginIds: Collection<String> = emptyList()
+    override val gradlePlugins: Collection<String> = emptyList()
 }
 
 /**
@@ -33,9 +33,11 @@ val _module: SourceModule = object: SourceModule {
 val _slot: (String) -> Slot? = { null }
 
 /**
- * Injects all slots targetting the given slot name.
+ * Injects all slots targeting the given slot name.
  */
 fun _slots(key: String): Sequence<Slot> = emptySequence()
+
+fun <E> String.unsafe(): E = TODO()
 
 interface TemplateProperties {
     operator fun <T> getValue(thisRef: Any?, property: KProperty<*>): T = TODO()
@@ -52,7 +54,7 @@ interface SourceModule: DependencyHolder {
     val type: String
     val defaultTarget: Target?
     val targets: List<Target>
-    val gradlePluginIds: Collection<String>
+    val gradlePlugins: Collection<String>
 }
 
 @TemplateDsl
@@ -87,3 +89,9 @@ data class BuildDependency(
     }
 
 }
+
+data class GradlePlugin(
+    val id: String,
+    val name: String,
+    val version: String
+)

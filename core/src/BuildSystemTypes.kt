@@ -145,7 +145,7 @@ data class SourceModule(
     val sources: List<SourceTemplate> = emptyList(),
     val gradle: GradleConfig = GradleConfig(),
 ) {
-    val gradlePluginIds: List<String> get() = gradle.plugins.map { it.id }
+    val gradlePlugins: List<GradlePlugin> get() = gradle.plugins
 }
 
 @Serializable

@@ -41,6 +41,24 @@ The contents of the switch entry will be used to populate the resulting source f
 This style of inline can also be performed with the `if`, `else`, and `for` control structures.  If the property
 is referenced from a location that cannot be inlined, it will be treated as a literal.
 
+## Unsafe
+
+You can use Kotlin's string templating to inject code from your variables.
+
+For example:
+
+```kotlin
+val variableName: String by _properties
+
+"$variableName.bark()".unsafe()
+```
+
+Will be rendered to the following when `variableName` is supplied as `fido`:
+
+```kotlin
+fido.bark()
+```
+
 ## Slots
 
 Template sources can be nested by exposing _slots_.

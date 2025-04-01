@@ -4,3 +4,6 @@ description: Adds the gradle build system to the project
 version: 1.0.0
 sources:
   - path: build.gradle.kts
+  - path: libs.versions.toml.hbs
+    target: file:gradle/libs.versions.toml
+    if: versionCatalogEnabled

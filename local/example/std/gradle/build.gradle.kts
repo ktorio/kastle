@@ -2,12 +2,12 @@ val versionCatalogEnabled: Boolean by _properties
 
 plugins {
     if (versionCatalogEnabled) {
-        for (item in _module.gradlePluginIds) {
-            alias(item)
+        for (item in _module.gradlePlugins) {
+            alias("libs.plugins.${item.name}".unsafe())
         }
     } else {
-        for (item in _module.gradlePluginIds) {
-            id(item)
+        for (item in _module.gradlePlugins) {
+            id(item.id)
         }
     }
 }
@@ -26,10 +26,10 @@ repositories {
 dependencies {
     if (versionCatalogEnabled) {
         for (dependency in _module.dependencies) {
-            implementation(dependency.catalogReference)
+            implementation("libs.${dependency.artifact}".unsafe())
         }
         for (dependency in _module.testDependencies) {
-            testImplementation(dependency.catalogReference)
+            testImplementation("libs.${dependency.artifact}".unsafe())
         }
     } else {
         for (dependency in _module.dependencies) {

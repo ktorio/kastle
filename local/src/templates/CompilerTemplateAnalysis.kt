@@ -21,6 +21,7 @@ import org.jetbrains.kastle.PropertyLiteral
 import org.jetbrains.kastle.PropertyType
 import org.jetbrains.kastle.RepeatingSlot
 import org.jetbrains.kastle.Slot
+import org.jetbrains.kastle.UnsafeBlock
 import org.jetbrains.kastle.WhenBlock
 import org.jetbrains.kastle.utils.unwrapQuotes
 import org.jetbrains.kotlin.psi.KtBlockStringTemplateEntry
@@ -38,6 +39,7 @@ import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtQualifiedExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateEntry
+import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.psi.KtWhenEntry
 import org.jetbrains.kotlin.psi.KtWhenExpression
@@ -82,6 +84,10 @@ fun PsiElement.blockRange(
 fun PsiElement.bodyRange(): IntRange {
     childrenOfType<KtContainerNodeForControlStructureBody>().firstOrNull()?.let { bodyElement ->
         return bodyElement.bodyRange()
+    }
+    // TODO hack for unsafe templates
+    if (this is KtStringTemplateExpression) {
+        return textRange.toIntRange()
     }
     // TODO when clause issue
     val start = text.indexOfOrNull('{')?.plus(1) ?: 0
@@ -265,15 +271,31 @@ private fun KtForExpression.asEachBlock(variableName: String): Sequence<Block> =
     }
 }
 
-private fun KtBlockStringTemplateEntry.asStringTemplateLiteral(variableName: String): Sequence<Block> =
-    sequenceOf(
+private fun KtBlockStringTemplateEntry.asStringTemplateLiteral(variableName: String): Sequence<Block> = sequence {
+    val grandParent = parent.parent
+    if (grandParent is KtDotQualifiedExpression && grandParent.selectorExpression is KtCallExpression) {
+        val selectorExpression = grandParent.selectorExpression as? KtCallExpression
+        val callReference = selectorExpression?.calleeExpression as? KtNameReferenceExpression
+        if (callReference?.text == UNSAFE) {
+            yield(
+                UnsafeBlock(
+                    grandParent.blockPosition(
+                        body = parent
+                    )
+                )
+            )
+        }
+    }
+    yield(
         PropertyLiteral(
             variableName,
             position = blockPosition(
                 body = childrenOfType<KtExpression>().first()
-            )
+            ),
+            embedded = true,
         )
     )
+}
 
 /**
  * When this block occupies a set of complete lines, we find the start and end of those lines.

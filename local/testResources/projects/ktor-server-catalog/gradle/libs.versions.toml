@@ -1,0 +1,10 @@
+[versions]
+ktor-server-core = "3.0.3"
+ktor-server-cio = "3.0.3"
+
+[libraries]
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor-server-core" }
+ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor-server-cio" }
+
+[plugins]
+plugin = { id = "io.ktor.plugin", version = "null" }

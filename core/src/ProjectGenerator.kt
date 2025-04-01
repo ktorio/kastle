@@ -45,7 +45,11 @@ internal class ProjectGeneratorImpl(
             }
         }
         for (module in project.moduleSources.modules) {
-            val moduleSources = (module.sources.filter { it.target.protocol == "file" } + project.commonSources).distinctBy { it.target }
+            val moduleSources = buildList {
+                addAll((module.sources.filter { it.target.protocol == "file" }))
+                addAll(project.commonSources)
+            }.distinctBy { it.target }
+
             for (source in moduleSources) {
                 val packId = source.packId
                 if (packId == null) {
@@ -56,6 +60,14 @@ internal class ProjectGeneratorImpl(
                 val variables = project.getVariables(pack) +
                         project.toVariableEntry() +
                         module.toVariableEntry()
+                if (source.condition != null) {
+                    val conditionValue = variables[source.condition]
+                    if (!conditionValue.isTruthy()) {
+                        log { "Skipping ${source.target}; condition ${source.condition} evaluated to $conditionValue" }
+                        continue
+                    }
+                }
+
                 val path = source.target.relativeFile
                 emit(SourceFileEntry(path) {
                     writeSourceFile(source, variables) {
@@ -365,6 +377,12 @@ internal class ProjectGeneratorImpl(
                                 } else skipContents()
                             }
                         }
+                    }
+
+                    is UnsafeBlock -> {
+                        append(source.text, block.outerStart, block.rangeStart)
+                        append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, indent)
+                        false
                     }
 
                     is PropertyBlock -> {
