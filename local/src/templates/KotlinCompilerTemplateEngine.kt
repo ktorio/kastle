@@ -39,7 +39,7 @@ import java.io.File
  * @property path The path to the Kotlin source files to be analyzed.
  * @property repository An optional pack repository for additional data or functionality.
  */
-internal class KotlinDSLCompilerTemplateEngine(
+internal class KotlinCompilerTemplateEngine(
     private val path: Path,
     private val repository: PackRepository = PackRepository.Companion.EMPTY,
     private val log: (() -> String) -> Unit = { println(it()) }
@@ -140,7 +140,7 @@ internal class KotlinDSLCompilerTemplateEngine(
 
     private fun KtFile.findBlocks(properties: MutableList<Property>): List<Block> {
         // references to project or module
-        val templateReferences = findReferencesTo(PROPERTIES, SLOT, SLOTS, MODULE, PROJECT)
+        val templateReferences = findReferencesTo(PROPERTIES, SLOT, SLOTS, MODULE, PROJECT, UNSAFE)
             .map(TemplateParentReference.Companion::classify)
             .toList()
 
@@ -175,11 +175,15 @@ internal class KotlinDSLCompilerTemplateEngine(
             .filterIsInstance<TemplateParentReference.Slot>()
             .map { it.expression.readSlotBlock() }
 
+        val unsafeBlocks = templateReferences
+            .filterIsInstance<TemplateParentReference.Unsafe>()
+            .map { it.expression.readUnsafeBlock() }
+
         // include discovered properties in the list of properties
         // TODO bad abstraction
         properties.addAll(propertyDeclarations.map { it.asProperty() })
 
-        return declarationBlocks + propertyBlocks + chainedReferences + slots
+        return declarationBlocks + propertyBlocks + chainedReferences + slots + unsafeBlocks
     }
 
 }

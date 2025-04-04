@@ -4,3 +4,8 @@ description: Adds a Ktor server module
 version: 1.0.0
 modules:
   - path: server
+    gradle:
+      plugins:
+        - id: io.ktor.plugin
+          name: ktor
+          version: 3.0.3

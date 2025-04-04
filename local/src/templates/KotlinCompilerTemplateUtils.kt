@@ -3,46 +3,14 @@ package org.jetbrains.kastle.templates
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.descendantsOfType
-import org.jetbrains.kastle.Block
-import org.jetbrains.kastle.BlockPosition
+import org.jetbrains.kastle.*
 import org.jetbrains.kastle.BlockPosition.Companion.copy
 import org.jetbrains.kastle.BlockPosition.Companion.include
 import org.jetbrains.kastle.BlockPosition.Companion.toPosition
-import org.jetbrains.kastle.ForEachBlock
-import org.jetbrains.kastle.ElseBlock
-import org.jetbrains.kastle.IfBlock
-import org.jetbrains.kastle.NamedSlot
-import org.jetbrains.kastle.OneOfBlock
-import org.jetbrains.kastle.Property
-import org.jetbrains.kastle.PropertyLiteral
-import org.jetbrains.kastle.PropertyType
-import org.jetbrains.kastle.RepeatingSlot
-import org.jetbrains.kastle.Slot
-import org.jetbrains.kastle.UnsafeBlock
-import org.jetbrains.kastle.WhenBlock
 import org.jetbrains.kastle.utils.unwrapQuotes
-import org.jetbrains.kotlin.psi.KtBlockStringTemplateEntry
-import org.jetbrains.kotlin.psi.KtCallExpression
-import org.jetbrains.kotlin.psi.KtClass
-import org.jetbrains.kotlin.psi.KtContainerNode
-import org.jetbrains.kotlin.psi.KtContainerNodeForControlStructureBody
-import org.jetbrains.kotlin.psi.KtDeclaration
-import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
-import org.jetbrains.kotlin.psi.KtExpression
-import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.psi.KtForExpression
-import org.jetbrains.kotlin.psi.KtIfExpression
-import org.jetbrains.kotlin.psi.KtNameReferenceExpression
-import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.kotlin.psi.KtQualifiedExpression
-import org.jetbrains.kotlin.psi.KtStringTemplateEntry
-import org.jetbrains.kotlin.psi.KtStringTemplateExpression
-import org.jetbrains.kotlin.psi.KtTypeReference
-import org.jetbrains.kotlin.psi.KtWhenEntry
-import org.jetbrains.kotlin.psi.KtWhenExpression
+import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.kotlin.utils.addToStdlib.indexOfOrNull
 import org.jetbrains.kotlin.utils.addToStdlib.lastIndexOfOrNull
@@ -85,10 +53,6 @@ fun PsiElement.bodyRange(): IntRange {
     childrenOfType<KtContainerNodeForControlStructureBody>().firstOrNull()?.let { bodyElement ->
         return bodyElement.bodyRange()
     }
-    // TODO hack for unsafe templates
-    if (this is KtStringTemplateExpression) {
-        return textRange.toIntRange()
-    }
     // TODO when clause issue
     val start = text.indexOfOrNull('{')?.plus(1) ?: 0
     val length = text.lastIndexOfOrNull('}') ?: textRange.length
@@ -105,9 +69,6 @@ fun PsiElement.textIntRange(
         textRange.startOffset + startWs until textRange.endOffset - endWs
     }
     else textRange.toIntRange()
-
-fun PsiElement.hasWhitespaceSibling() =
-    nextSibling is PsiWhiteSpace && nextSibling.text.all { it == '\n' }
 
 fun TextRange.toIntRange(): IntRange =
     startOffset .. endOffset
@@ -169,6 +130,17 @@ fun KtCallExpression.readSlotBlock(): Slot {
     }
 }
 
+fun KtCallExpression.readUnsafeBlock(): UnsafeBlock =
+    UnsafeBlock(blockPosition().copy(
+        // trim quotes from string argument
+        inner = valueArguments.first().textIntRange().let {
+            it.copy(
+                start = it.start + 1,
+                end = it.endInclusive - 1
+            )
+        }
+    ))
+
 /**
  * Reads logical expressions that can be inlined, or returns property literal match.
  */
@@ -177,7 +149,7 @@ fun KtExpression.readPropertyBlocks(): Sequence<Block> {
     var variableReference: KtExpression = this
     var ancestor: PsiElement? = parent
     while (ancestor is KtExpression || ancestor is KtContainerNode || ancestor is KtStringTemplateEntry) {
-        val blocks = ancestor.tryReadBlocks(variableReference.text)
+        val blocks = ancestor.tryReadBlocks()
         if (blocks != null)
             return blocks
         variableReference = ancestor as? KtQualifiedExpression ?: variableReference
@@ -188,78 +160,82 @@ fun KtExpression.readPropertyBlocks(): Sequence<Block> {
 
 private fun KtExpression.asLiteralReference(): Sequence<Block> =
     sequenceOf(
-        PropertyLiteral(
-            property = text,
+        ExpressionValue(
+            expression = toTemplateExpression(),
             position = blockRange().toPosition(), // TODO
             embedded = false,
         )
     )
 
-private fun PsiElement.tryReadBlocks(variableName: String): Sequence<Block>? =
+private fun PsiElement.tryReadBlocks(): Sequence<Block>? =
     when(this) {
-        is KtWhenExpression -> asWhenBlock(variableName)
-        is KtIfExpression -> asIfBlock(variableName)
-        is KtForExpression -> asEachBlock(variableName)
-        is KtBlockStringTemplateEntry -> asStringTemplateLiteral(variableName)
+        is KtWhenExpression -> asWhenBlock()
+        is KtIfExpression -> asIfBlock()
+        is KtForExpression -> asEachBlock()
+        is KtBlockStringTemplateEntry -> asStringTemplateLiteral()
         else -> null
     }
 
-private fun KtWhenExpression.asWhenBlock(variableName: String): Sequence<Block> = sequence {
-    yield(
-        WhenBlock(
-            property = variableName,
-            position = blockPosition()
-        )
-    )
-    for (child in childrenOfType<KtWhenEntry>()) {
+private fun KtWhenExpression.asWhenBlock(): Sequence<Block> {
+    val valueExpression = subjectExpression?.toTemplateExpression() ?: return emptySequence()
+
+    return sequence {
         yield(
-            // TODO
-            if (child.isElse)
-                ElseBlock(
-                    property = variableName,
-                    position = child.blockPosition(body = child.children[1])
-                )
-            else OneOfBlock(
-                value = child.conditions.map { it.text.unwrapQuotes() },
-                position = child.blockPosition(body = child.children[1])
+            WhenBlock(
+                expression = valueExpression,
+                position = blockPosition()
             )
         )
-    }
-    // include references to subject variable if present
-    this@asWhenBlock.subjectVariable?.let { subjectVariable ->
-        val subjectName = subjectVariable.name!!
-        this@asWhenBlock.findReferencesTo(subjectName).forEach { subjectReference ->
-            yieldAll(subjectReference.readPropertyBlocks())
+        for (child in childrenOfType<KtWhenEntry>()) {
+            yield(
+                // TODO
+                if (child.isElse)
+                    ElseBlock(position = child.blockPosition(body = child.children[1]))
+                else WhenClauseBlock(
+                    value = child.conditions.map {
+                        (it.children.single() as? KtExpression)?.toTemplateExpression()
+                            ?: throw IllegalArgumentException("Unsupported when condition: $it")
+                    },
+                    position = child.blockPosition(body = child.children[1])
+                )
+            )
+        }
+        // include references to subject variable if present
+        this@asWhenBlock.subjectVariable?.let { subjectVariable ->
+            val subjectName = subjectVariable.name!!
+            this@asWhenBlock.findReferencesTo(subjectName).forEach { subjectReference ->
+                yieldAll(subjectReference.readPropertyBlocks())
+            }
         }
     }
 }
 
 // TODO handle else-if
-// TODO trailing }
-private fun KtIfExpression.asIfBlock(variableName: String): Sequence<Block> =
+private fun KtIfExpression.asIfBlock(): Sequence<Block> =
     if (then == null)
         emptySequence()
     else {
         sequenceOf(
+            // wrapper element
+            ConditionalBlock(position = blockPosition()),
+            // first clause
             IfBlock(
-                property = variableName,
+                expression = condition.toTemplateExpression(),
                 // if expression includes else, so we trim to that
                 position = then!!.blockPosition(also = this)
             ),
+            // else
             `else`?.let { elseElem ->
-                ElseBlock(
-                    property = variableName,
-                    position = elseElem.blockPosition(start = then!!.endOffset)
-                )
+                ElseBlock(position = elseElem.blockPosition(start = then!!.endOffset))
             }
         ).filterNotNull()
     }
 
-private fun KtForExpression.asEachBlock(variableName: String): Sequence<Block> = sequence {
+private fun KtForExpression.asEachBlock(): Sequence<Block> = sequence {
     val entryName = this@asEachBlock.loopParameter?.name ?: "it"
     yield(
         ForEachBlock(
-            property = variableName,
+            expression = this@asEachBlock.loopRange.toTemplateExpression(),
             position = this@asEachBlock.blockPosition(),
             variable = entryName,
         )
@@ -271,7 +247,8 @@ private fun KtForExpression.asEachBlock(variableName: String): Sequence<Block> =
     }
 }
 
-private fun KtBlockStringTemplateEntry.asStringTemplateLiteral(variableName: String): Sequence<Block> = sequence {
+private fun KtBlockStringTemplateEntry.asStringTemplateLiteral(): Sequence<Block> = sequence {
+    // Check for unsafe call on string template
     val grandParent = parent.parent
     if (grandParent is KtDotQualifiedExpression && grandParent.selectorExpression is KtCallExpression) {
         val selectorExpression = grandParent.selectorExpression as? KtCallExpression
@@ -279,16 +256,22 @@ private fun KtBlockStringTemplateEntry.asStringTemplateLiteral(variableName: Str
         if (callReference?.text == UNSAFE) {
             yield(
                 UnsafeBlock(
-                    grandParent.blockPosition(
-                        body = parent
+                    grandParent.blockPosition().copy(
+                        // remove quotes from template
+                        inner = parent.textIntRange().let {
+                            it.copy(
+                                start = it.start + 1,
+                                end = it.endInclusive - 1
+                            )
+                        }
                     )
                 )
             )
         }
     }
     yield(
-        PropertyLiteral(
-            variableName,
+        ExpressionValue(
+            expression = this@asStringTemplateLiteral.expression.toTemplateExpression(),
             position = blockPosition(
                 body = childrenOfType<KtExpression>().first()
             ),
@@ -342,6 +325,7 @@ sealed interface TemplateParentReference {
         fun classify(reference: KtNameReferenceExpression): TemplateParentReference =
             when (reference.text) {
                 SLOT, SLOTS -> Slot(reference.parent as KtCallExpression)
+                UNSAFE -> Unsafe(reference.parent as KtCallExpression)
                 PROPERTIES -> PropertyDelegate(reference.parent.parent as KtDeclaration)
                 MODULE, PROJECT -> {
                     val expression = reference.parent as KtDotQualifiedExpression
@@ -355,4 +339,5 @@ sealed interface TemplateParentReference {
     data class PropertyDelegate(val declaration: KtDeclaration): TemplateParentReference
     data class PropertyReferenceChain(val expression: KtDotQualifiedExpression): TemplateParentReference
     data class Slot(val expression: KtCallExpression): TemplateParentReference
+    data class Unsafe(val expression: KtCallExpression): TemplateParentReference
 }

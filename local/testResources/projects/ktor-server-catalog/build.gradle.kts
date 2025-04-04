@@ -1,7 +1,8 @@
 
 plugins {
     
-    alias("libs.plugins.plugin")
+    
+    alias(libs.plugins.ktor)
 }
 
 group = "com.acme"
@@ -16,6 +17,7 @@ repositories {
 // TODO multiplatform
 dependencies {
     
-    implementation("libs.ktor-server-core")
-    implementation("libs.ktor-server-cio")
+    
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.cio)
 }

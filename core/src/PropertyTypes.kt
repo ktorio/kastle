@@ -1,7 +1,6 @@
 package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.utils.trimAngleBrackets
 import org.jetbrains.kastle.utils.trimBraces
@@ -34,6 +33,9 @@ private const val OBJECT = "object"
 sealed interface PropertyType {
     companion object {
         fun parse(text: kotlin.String): PropertyType {
+            if (text.endsWith('?'))
+                return Nullable(parse(text.removeSuffix("?")))
+
             val word = text.split(Regex("\\W"), 2).firstOrNull()
                 ?: throw IllegalArgumentException("Invalid property type: $text")
             val details by lazy { text.removePrefix(word).trim() }
@@ -53,7 +55,7 @@ sealed interface PropertyType {
         }
     }
 
-    fun parse(text: kotlin.String): Any
+    fun parse(text: kotlin.String): Any?
 
     data object String: PropertyType {
         override fun parse(text: kotlin.String) = text
@@ -110,5 +112,14 @@ sealed interface PropertyType {
                 }
             }
         override fun toString() = "object${Json.encodeToString<Map<String, PropertyType>>(properties)}"
+    }
+
+    data class Nullable(val type: PropertyType): PropertyType {
+        override fun parse(text: kotlin.String): Any? = when(text) {
+            "null" -> null
+            else -> type.parse(text)
+        }
+
+        override fun toString(): kotlin.String = "$type?"
     }
 }

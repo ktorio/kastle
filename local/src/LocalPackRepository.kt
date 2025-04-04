@@ -12,7 +12,7 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import org.jetbrains.kastle.io.*
 import org.jetbrains.kastle.templates.HandlebarsTemplateEngine
-import org.jetbrains.kastle.templates.KotlinDSLCompilerTemplateEngine
+import org.jetbrains.kastle.templates.KotlinCompilerTemplateEngine
 import org.jetbrains.kastle.templates.TemplateFormat
 import org.jetbrains.kastle.templates.extensionFormat
 import org.jetbrains.kastle.utils.protocol
@@ -108,7 +108,7 @@ class LocalPackRepository(
                     return@map SourceModule(sources = emptyList())
 
                 // Properties are supplied both from the manifest and from declarations in the source files
-                val kotlinAnalyzer = KotlinDSLCompilerTemplateEngine(sourceFolder, repository)
+                val kotlinAnalyzer = KotlinCompilerTemplateEngine(sourceFolder, repository)
                 sources += kotlinAnalyzer.ktFiles.map { sourceFile ->
                     kotlinAnalyzer.read(sourceFolder.relativeTo(modulePath), sourceFile, properties)
                         .copy(packId = packId)
@@ -134,7 +134,7 @@ class LocalPackRepository(
 
         // project-level sources are included in all modules,
         // except for slot targets, these are inserted into the first module
-        val kotlinAnalyzer = KotlinDSLCompilerTemplateEngine(projectPath, repository)
+        val kotlinAnalyzer = KotlinCompilerTemplateEngine(projectPath, repository)
         val commonSources = manifest.sources.map { (path, text, target, condition) ->
             require(target != null) { "Missing target for project-level source: ${path ?: text}" }
             val file = projectPath.resolve(path ?: "source.kt")

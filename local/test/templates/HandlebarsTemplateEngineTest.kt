@@ -1,12 +1,12 @@
 package org.jetbrains.kastle.templates
 
-import org.jetbrains.kastle.BlockPosition.Companion.reduceEnd
 import org.jetbrains.kastle.ForEachBlock
 import org.jetbrains.kastle.ElseBlock
 import org.jetbrains.kastle.IfBlock
 import org.jetbrains.kastle.NamedSlot
-import org.jetbrains.kastle.PropertyLiteral
+import org.jetbrains.kastle.ExpressionValue
 import org.jetbrains.kastle.RepeatingSlot
+import org.jetbrains.kastle.utils.Expression.VariableRef
 import org.jetbrains.kastle.utils.body
 import org.jetbrains.kastle.utils.range
 import kotlin.test.*
@@ -24,8 +24,10 @@ class HandlebarsTemplateEngineTest {
 
         assertEquals(1, template.blocks?.size)
         val literal = template.blocks!!.first()
-        assertIs<PropertyLiteral>(literal)
-        assertEquals("someProperty", literal.property)
+        assertIs<ExpressionValue>(literal)
+        val expression = literal.expression
+        assertIs<VariableRef>(expression)
+        assertEquals("someProperty", expression.name)
     }
 
     @Test
@@ -47,13 +49,23 @@ class HandlebarsTemplateEngineTest {
         assertEquals(2, blocks.size)
         val (literal, conditional) = blocks
 
-        assertIs<PropertyLiteral>(literal)
-        assertEquals("someProperty", literal.property)
-        assertEquals("{{ someProperty }}", input.substringEx(literal.range))
+        assertIs<ExpressionValue>(literal)
+        literal.expression.let { expression ->
+            assertIs<VariableRef>(expression)
+            assertEquals("someProperty", expression.name)
+            assertEquals("{{ someProperty }}", input.substringEx(literal.range))
+        }
 
         assertIs<IfBlock>(conditional)
         assertEquals(condition, input.substringEx(conditional.range))
-        assertEquals("someBooleanProperty", conditional.property)
+        literal.expression.let { expression ->
+            assertIs<VariableRef>(expression)
+            assertEquals("someBooleanProperty", expression.name)
+        }
+
+        val expression = literal.expression
+        assertIs<VariableRef>(expression)
+        assertEquals("someBooleanProperty", expression.name)
         assertEquals("\nHello, {{ someProperty }}!\n", input.substringEx(conditional.body)) // TODO trim newlines
     }
 
@@ -78,16 +90,25 @@ class HandlebarsTemplateEngineTest {
         assertEquals(3, blocks.size)
 
         val (literal, ifBlock, elseBlock) = blocks
-        assertIs<PropertyLiteral>(literal)
-        assertEquals("someProperty", literal.property)
+        assertIs<ExpressionValue>(literal)
+        literal.expression.let { expression ->
+            assertIs<VariableRef>(expression)
+            assertEquals("someProperty", expression.name)
+        }
         assertEquals("{{ someProperty }}", input.substringEx(literal.range))
 
         assertIs<IfBlock>(ifBlock)
-        assertEquals("someBooleanProperty", ifBlock.property)
+        literal.expression.let { expression ->
+            assertIs<VariableRef>(expression)
+            assertEquals("someBooleanProperty", expression.name)
+        }
         assertEquals("\nHello, {{ someProperty }}!\n", input.substringEx(ifBlock.body)) // TODO trim newlines
 
         assertIs<ElseBlock>(elseBlock)
-        assertEquals("someBooleanProperty", elseBlock.property)
+        literal.expression.let { expression ->
+            assertIs<VariableRef>(expression)
+            assertEquals("someBooleanProperty", expression.name)
+        }
         assertEquals("\nGoodbye!\n", input.substringEx(elseBlock.body)) // TODO trim newlines
     }
 
@@ -110,13 +131,19 @@ class HandlebarsTemplateEngineTest {
         assertEquals(2, blocks.size)
 
         val (literal, forEach) = blocks
-        assertIs<PropertyLiteral>(literal)
-        assertEquals("this", literal.property)
+        assertIs<ExpressionValue>(literal)
+        literal.expression.let { expression ->
+            assertIs<VariableRef>(expression)
+            assertEquals("this", expression.name)
+        }
         assertEquals("{{ this }}", input.substringEx(literal.range))
         assertEquals(loop, input.substringEx(forEach.range))
 
         assertIs<ForEachBlock>(forEach)
-        assertEquals("aList", forEach.property)
+        literal.expression.let { expression ->
+            assertIs<VariableRef>(expression)
+            assertEquals("aList", expression.name)
+        }
         assertNull(forEach.variable)
         assertEquals("\nHello, {{ this }}!\n", input.substringEx(forEach.body)) // TODO trim newlines
     }

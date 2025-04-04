@@ -308,6 +308,7 @@ internal class ProjectGeneratorImpl(
             val child: Block? get() = next?.takeIf { it in blocks[i] }
             val next: Block? get() = blocks.getOrNull(i + 1)
             val loops: MutableMap<DeclaringBlock, MutableList<*>> = mutableMapOf()
+            val conditions: MutableMap<Block, Boolean> = mutableMapOf()
 
             fun skipContents(): Boolean {
                 val current = blocks[i]
@@ -361,22 +362,19 @@ internal class ProjectGeneratorImpl(
                         slots.isEmpty()
                     }
 
-                    is CompareBlock<*> -> {
+                    is WhenClauseBlock -> {
                         val end = child?.outerStart ?: block.bodyEnd
 
-                        when (block) {
-                            is OneOfBlock -> {
-                                val parent = stack.lastOrNull() as? WhenBlock
-                                    ?: error("when clause with no parent: $block")
-                                val value = variables[parent.property]
-                                // TODO types
-                                if (value in block.value) {
-                                    append(source.text, block.outerStart, block.rangeStart)
-                                    append(source.text, block.bodyStart, end, indent)
-                                    false
-                                } else skipContents()
-                            }
-                        }
+                        val parent = stack.lastOrNull() as? WhenBlock
+                            ?: error("when clause with no parent: $block")
+                        val value = parent.expression.evaluate(variables)
+
+                        // TODO types?
+                        if (value in block.value.map { it.evaluate(variables) }) {
+                            append(source.text, block.outerStart, block.rangeStart)
+                            append(source.text, block.bodyStart, end, indent)
+                            false
+                        } else skipContents()
                     }
 
                     is UnsafeBlock -> {
@@ -385,12 +383,25 @@ internal class ProjectGeneratorImpl(
                         false
                     }
 
-                    is PropertyBlock -> {
-                        val end = child?.outerStart ?: block.bodyEnd
-                        val value = variables[block.property]
+                    is ConditionalBlock -> {
+                        append(source.text, block.outerStart, block.rangeStart)
+                        false
+                    }
+
+                    is ElseBlock -> {
+                        val parent = stack.lastOrNull() ?: error("else without parent: $block")
+                        if (conditions[parent] == false) {
+                            append(source.text, block.outerStart, block.rangeStart)
+                            append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, indent)
+                            false
+                        } else skipContents()
+                    }
+
+                    is ExpressionBlock -> {
+                        val value = block.expression.evaluate(variables)
 
                         when (block) {
-                            is PropertyLiteral -> {
+                            is ExpressionValue -> {
                                 append(
                                     when {
                                         value is String && !block.embedded -> "\"$value\""
@@ -399,20 +410,16 @@ internal class ProjectGeneratorImpl(
                                 )
                                 false
                             }
-                            is IfBlock ->
-                                if (value.isTruthy()) {
+                            is IfBlock -> {
+                                val parent = stack.lastOrNull() ?: error("if without parent: $block")
+                                val condition = value.isTruthy().also { conditions[parent] = it }
+                                if (condition) {
                                     append(source.text, block.outerStart, block.rangeStart)
-                                    append(source.text, block.bodyStart, end, indent)
+                                    append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, indent)
                                     false
                                 } else skipContents()
-                            is ElseBlock ->
-                                if (value.isTruthy())
-                                    skipContents()
-                                else {
-                                    append(source.text, block.outerStart, block.rangeStart)
-                                    append(source.text, block.bodyStart, end, indent)
-                                    false
-                                }
+                            }
+
                             is ForEachBlock -> {
                                 val list = loops[block] ?: (value as? List<*>).orEmpty().toMutableList()
                                 if (list.isNotEmpty()) {
@@ -425,7 +432,7 @@ internal class ProjectGeneratorImpl(
                                         else -> variables += variable to element
                                     }
                                     loops[block] = list
-                                    append(source.text, block.bodyStart, end, indent)
+                                    append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, indent)
                                     false
                                 } else skipContents()
                             }

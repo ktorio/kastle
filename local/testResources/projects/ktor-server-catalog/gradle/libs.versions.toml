@@ -7,4 +7,4 @@ ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor-se
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor-server-cio" }
 
 [plugins]
-plugin = { id = "io.ktor.plugin", version = "null" }
+ktor = { id = "io.ktor.plugin", version = "3.0.3" }

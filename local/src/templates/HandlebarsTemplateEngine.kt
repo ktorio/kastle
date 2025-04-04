@@ -7,6 +7,7 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.BlockPosition.Companion.bumpEnd
+import org.jetbrains.kastle.utils.Expression.VariableRef
 
 class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     companion object {
@@ -60,8 +61,8 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                             yield(previousIf.toBlock(match))
                             stack.add(BlockMatch(match, indent, helper = ELSE, property = previousIf.property))
                         }
-                        else -> yield(PropertyLiteral(
-                            property = text,
+                        else -> yield(ExpressionValue(
+                            expression = VariableRef(text),
                             position = BlockPosition(
                                 range = match.range.bumpEnd(),
                                 indent = indent,
@@ -121,7 +122,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     ) {
         fun toBlock(endMatch: MatchResult): Block = when(helper) {
             IF -> IfBlock(
-                property = property ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
+                expression = property?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
                 position = BlockPosition(
                     range = match.range.start .. endMatch.range.endInclusive + 1,
                     outer = outerStart  .. endMatch.range.endInclusive + 1,
@@ -130,7 +131,6 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                 ),
             )
             ELSE -> ElseBlock(
-                property = property ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
                 position = BlockPosition(
                     range = match.range.start .. endMatch.range.endInclusive + 1,
                     outer = outerStart  .. endMatch.range.endInclusive + 1,
@@ -140,7 +140,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
             )
             EACH -> {
                 ForEachBlock(
-                    property = property ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
+                    expression = property?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
                     position = BlockPosition(
                         range = match.range.start .. endMatch.range.endInclusive + 1,
                         outer = outerStart  .. endMatch.range.endInclusive + 1,

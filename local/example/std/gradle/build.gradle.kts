@@ -3,7 +3,7 @@ val versionCatalogEnabled: Boolean by _properties
 plugins {
     if (versionCatalogEnabled) {
         for (item in _module.gradlePlugins) {
-            alias("libs.plugins.${item.name}".unsafe())
+            alias(_unsafe("libs.plugins.${item.name}"))
         }
     } else {
         for (item in _module.gradlePlugins) {
@@ -26,10 +26,10 @@ repositories {
 dependencies {
     if (versionCatalogEnabled) {
         for (dependency in _module.dependencies) {
-            implementation("libs.${dependency.artifact}".unsafe())
+            implementation(_unsafe("libs.${dependency.artifact.replace('-','.')}"))
         }
         for (dependency in _module.testDependencies) {
-            testImplementation("libs.${dependency.artifact}".unsafe())
+            testImplementation(_unsafe("libs.${dependency.artifact.replace('-','.')}"))
         }
     } else {
         for (dependency in _module.dependencies) {

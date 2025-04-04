@@ -10,7 +10,6 @@ Below is a list of terms used to describe features in the KASTLE framework.
 | Term            | Description                                                                                           |
 |-----------------|-------------------------------------------------------------------------------------------------------|
 | pack            | A selectable unit for project generation logic.  It includes build dependencies and source templates. |
-| truthy / falsey | Lenient evaluation of a property value, similar to Javascript boolean casting.                        |
 
 ## Properties
 
@@ -41,6 +40,28 @@ The contents of the switch entry will be used to populate the resulting source f
 This style of inline can also be performed with the `if`, `else`, and `for` control structures.  If the property
 is referenced from a location that cannot be inlined, it will be treated as a literal.
 
+You can also use simple expressions in your template property references.  They will be evaluated during the templating
+to the correct value.
+
+For example, when providing a property "p1" as `listOf("world", "mars")`:
+
+```kotlin
+val p1: List<String> by _properties
+
+for (subject in p1.map { it.uppercase() }) {
+    println("Hello, $subject")
+}
+```
+
+This will generate the following source:
+
+```kotlin
+println("Hello, WORLD")
+println("Hello, MARS")
+```
+
+More information can be found in [properties.md](properties.md) regarding the supported types and operations.
+
 ## Unsafe
 
 You can use Kotlin's string templating to inject code from your variables.
@@ -50,7 +71,7 @@ For example:
 ```kotlin
 val variableName: String by _properties
 
-"$variableName.bark()".unsafe()
+_unsafe("$variableName.bark()")
 ```
 
 Will be rendered to the following when `variableName` is supplied as `fido`:
@@ -58,6 +79,7 @@ Will be rendered to the following when `variableName` is supplied as `fido`:
 ```kotlin
 fido.bark()
 ```
+
 
 ## Slots
 
@@ -81,8 +103,6 @@ Then the contents can be provided from a child pack using comments:
 /**
  * @target slot:/org.parent/parent/install
  */
-import java.nio.file.Paths
-
 fun Parent.install() {
     // child source here
     println("working dir: " + Paths.get("").toString())

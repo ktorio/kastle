@@ -1,6 +1,7 @@
 package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.kastle.utils.Expression
 
 @Serializable
 data class SourceDefinition(
@@ -94,18 +95,13 @@ sealed interface Slot: Block {
 }
 
 @Serializable
-sealed interface PropertyBlock: Block {
-    val property: String
+sealed interface ExpressionBlock: Block {
+    val expression: Expression
 }
 
 @Serializable
 sealed interface DeclaringBlock: Block {
     val variable: String?
-}
-
-@Serializable
-sealed interface CompareBlock<T>: Block {
-    val value: T
 }
 
 @Serializable
@@ -130,12 +126,12 @@ data class RepeatingSlot(
  * @param embedded this indicates the value should not be wrapped in quotes
  */
 @Serializable
-data class PropertyLiteral(
-    override val property: String,
+data class ExpressionValue(
+    override val expression: Expression,
     override val position: BlockPosition,
     val embedded: Boolean = true,
-): PropertyBlock {
-    override fun toString(): String = "property(\"$property\")"
+): ExpressionBlock {
+    override fun toString(): String = "property(\"$expression\")"
 }
 
 /**
@@ -151,45 +147,51 @@ data class SkipBlock(override val position: BlockPosition): Block {
     override fun toString(): String = "skip"
 }
 
+// Wrapper for If / Else blocks
+@Serializable
+data class ConditionalBlock(
+    override val position: BlockPosition,
+): Block
+
 @Serializable
 data class IfBlock(
-    override val property: String,
+    override val expression: Expression,
     override val position: BlockPosition,
-): PropertyBlock {
-    override fun toString(): String = "if(\"$property\")"
+): ExpressionBlock {
+    override fun toString(): String = "if(\"$expression\")"
 }
 
 @Serializable
 data class ElseBlock(
-    override val property: String,
+    // override val expression: Expression,
     override val position: BlockPosition,
-): PropertyBlock {
-    override fun toString(): String = "else(\"$property\")"
+): Block {
+    override fun toString(): String = "else"
 }
 
 @Serializable
 data class ForEachBlock(
-    override val property: String,
+    override val expression: Expression,
     override val position: BlockPosition,
     override val variable: String?,
-): PropertyBlock, DeclaringBlock {
-    override fun toString(): String = "each(\"$variable\" in \"$property\")"
+): ExpressionBlock, DeclaringBlock {
+    override fun toString(): String = "each(\"$variable\" in \"$expression\")"
 }
 
 @Serializable
 data class WhenBlock(
-    override val property: String,
+    override val expression: Expression,
     override val position: BlockPosition,
-): PropertyBlock {
-    override fun toString(): String = "when(\"$property\")"
+): ExpressionBlock {
+    override fun toString(): String = "when(\"$expression\")"
 }
 
-// TODO can include different conditions
+// TODO different condition types
 @Serializable
-data class OneOfBlock(
-    override val value: List<String>,
+data class WhenClauseBlock(
+    val value: List<Expression>,
     override val position: BlockPosition,
-): CompareBlock<List<String>> {
+): Block {
     override fun toString(): String = "-> ${value.joinToString(", ") { "\"$it\"" }})"
 }
 

@@ -6,13 +6,17 @@ package com.acme
 
 fun main() {
     
-    println("trueCondition is true")
+    
+    println("numberProperty is positive")
     
     
-    println("positiveCondition is true")
     
-    println("nullCondition else")
+    println("booleanProperty is true")
     
-    println("false condition else")
+    
+    println("nullProperty else")
+    
+    
+    println("missingProperty else")
     
 }

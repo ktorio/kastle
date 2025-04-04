@@ -1,23 +1,23 @@
-val trueCondition: Boolean by _properties
-val positiveCondition: Boolean by _properties
-val nullCondition: Boolean by _properties
-val falseCondition: Boolean by _properties
+val numberProperty: Int by _properties
+val booleanProperty: Boolean by _properties
+val nullProperty: String? by _properties
+val missingProperty: String? by _properties
 
 fun main() {
-    if (trueCondition) {
-        println("trueCondition is true")
+    if (numberProperty > 0) {
+        println("numberProperty is positive")
     }
-    if (positiveCondition) {
-        println("positiveCondition is true")
+    if (booleanProperty) {
+        println("booleanProperty is true")
     }
-    if (nullCondition) {
-        println("nullCondition is true")
+    if (nullProperty != null) {
+        println("nullProperty is true?")
     } else {
-        println("nullCondition else")
+        println("nullProperty else")
     }
-    if (falseCondition) {
-        println("falseCondition is true")
+    if (missingProperty != null) {
+        println("missingProperty is true?")
     } else {
-        println("false condition else")
+        println("missingProperty else")
     }
 }

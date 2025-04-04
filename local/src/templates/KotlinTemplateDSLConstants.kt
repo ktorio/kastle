@@ -3,7 +3,7 @@ package org.jetbrains.kastle.templates
 const val SLOT = "_slot"
 const val SLOTS = "_slots"
 const val PROPERTIES = "_properties"
-const val UNSAFE = "unsafe"
+const val UNSAFE = "_unsafe"
 
 // module properties
 const val PROJECT = "_project"

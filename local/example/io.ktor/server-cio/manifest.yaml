@@ -4,8 +4,5 @@ description: Adds the CIO engine to your Ktor server
 version: 1.0.0
 modules:
   - path: server
-    gradle:
-      plugins:
-        - id: io.ktor.plugin
 requires:
   - io.ktor/server-core

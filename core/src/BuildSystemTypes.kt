@@ -156,6 +156,7 @@ data class GradleConfig(
 @Serializable
 data class GradlePlugin(
     val id: String,
+    val name: String? = null,
     val version: String? = null,
 )
 

@@ -109,7 +109,7 @@ fun Dependency.toVariableMap() =
     }
 
 fun GradlePlugin.toVariableMap() = mapOf(
-    "name" to id.split(".").last(), // TODO name
+    "name" to name,
     "id" to id,
     "version" to version.toString(),
 )

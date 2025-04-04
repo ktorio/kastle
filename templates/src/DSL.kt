@@ -37,7 +37,10 @@ val _slot: (String) -> Slot? = { null }
  */
 fun _slots(key: String): Sequence<Slot> = emptySequence()
 
-fun <E> String.unsafe(): E = TODO()
+/**
+ * Inlines the string as raw code.
+ */
+fun <E> _unsafe(code: String): E = TODO()
 
 interface TemplateProperties {
     operator fun <T> getValue(thisRef: Any?, property: KProperty<*>): T = TODO()
