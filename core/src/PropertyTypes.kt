@@ -111,7 +111,9 @@ sealed interface PropertyType {
                     properties[key]?.parse(value.toString())
                 }
             }
-        override fun toString() = "object${Json.encodeToString<Map<String, PropertyType>>(properties)}"
+        override fun toString() = "object{${properties.entries.joinToString(", ") { (key, value) -> 
+            "$key: $value"}
+        }}"
     }
 
     data class Nullable(val type: PropertyType): PropertyType {

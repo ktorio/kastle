@@ -16,7 +16,7 @@ private const val replaceSnapshot = false
 
 abstract class ProjectGeneratorTest {
     companion object {
-        val resources = Path("testResources")
+        val snapshots = Path("testSnapshots")
     }
 
     private val projectDir = Path(SystemTemporaryDirectory, "packs")
@@ -34,7 +34,7 @@ abstract class ProjectGeneratorTest {
     fun `empty project`() = runTest {
         generateWithPacks("com.acme/empty")
         assertFilesAreEqualWithSnapshot(
-            "$resources/projects/empty",
+            "$snapshots/empty",
             projectDir.toString(),
         )
     }
@@ -46,7 +46,7 @@ abstract class ProjectGeneratorTest {
             "com.acme/child",
         )
         assertFilesAreEqualWithSnapshot(
-            "$resources/projects/parent-child",
+            "$snapshots/parent-child",
             projectDir.toString(),
         )
     }
@@ -59,7 +59,7 @@ abstract class ProjectGeneratorTest {
             "com.acme/child2",
         )
         assertFilesAreEqualWithSnapshot(
-            "$resources/projects/parent-child2",
+            "$snapshots/parent-child2",
             projectDir.toString(),
         )
     }
@@ -75,7 +75,7 @@ abstract class ProjectGeneratorTest {
             "literal" to "literal",
         ).mapKeys { (key) -> VariableId.parse("com.acme/properties/$key") })
         assertFilesAreEqualWithSnapshot(
-            "$resources/projects/properties",
+            "$snapshots/properties",
             projectDir.toString(),
             replace = replaceSnapshot,
         )
@@ -89,7 +89,7 @@ abstract class ProjectGeneratorTest {
             "io.ktor/server-cio",
         )
         assertFilesAreEqualWithSnapshot(
-            "$resources/projects/ktor-server",
+            "$snapshots/ktor-server",
             projectDir.toString(),
             replace = replaceSnapshot,
         )
@@ -108,7 +108,7 @@ abstract class ProjectGeneratorTest {
             )
         )
         assertFilesAreEqualWithSnapshot(
-            "$resources/projects/ktor-server-catalog",
+            "$snapshots/ktor-server-catalog",
             projectDir.toString(),
             replace = replaceSnapshot,
         )
@@ -122,7 +122,20 @@ abstract class ProjectGeneratorTest {
             "io.ktor/server-cio",
         )
         assertFilesAreEqualWithSnapshot(
-            "$resources/projects/ktor-server-amper",
+            "$snapshots/ktor-server-amper",
+            projectDir.toString(),
+            replace = replaceSnapshot,
+        )
+    }
+
+    @Test
+    fun `compose multiplatform`() = runTest {
+        generateWithPacks(
+            "std/amper",
+            "org.jetbrains/compose-multiplatform",
+        )
+        assertFilesAreEqualWithSnapshot(
+            "$snapshots/compose-multiplatform",
             projectDir.toString(),
             replace = replaceSnapshot,
         )

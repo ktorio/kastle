@@ -11,18 +11,36 @@ sealed interface Expression {
         override fun evaluate(variables: Variables): Any? = value
     }
 
+    @Serializable
     data class StringLiteral(override val value: String) : Literal<String>
-    data class NumberLiteral(override val value: Number) : Literal<Number>
+
+    @Serializable
+    data class DoubleLiteral(override val value: Double) : Literal<Double>
+
+    @Serializable
+    data class LongLiteral(override val value: Long) : Literal<Long>
+
+    @Serializable
     data class CharLiteral(override val value: Char) : Literal<Char>
+
+    @Serializable
     data class BooleanLiteral(override val value: Boolean) : Literal<Boolean>
+
+    @Serializable
     data object NullLiteral : Literal<Any?> { override val value: Any? = null }
+
+    @Serializable
     data class VariableRef(val name: String) : Expression {
         override fun evaluate(variables: Variables): Any? = variables[name]
     }
+
+    @Serializable
     data class BinaryOp(val op: Operator, val left: Expression, val right: Expression) : Expression {
         override fun evaluate(variables: Variables): Any? =
             op.evaluate(left.evaluate(variables), right.evaluate(variables))
     }
+
+    @Serializable
     data class Lambda(val paramNames: List<String>, val body: Expression) : Expression {
         override fun evaluate(variables: Variables): Any? {
             // Return a function that can be called later with arguments
@@ -44,6 +62,8 @@ sealed interface Expression {
 
         }
     }
+
+    @Serializable
     data class MethodCall(val receiver: Expression?, val methodName: String, val args: List<Expression>) : Expression {
         override fun evaluate(variables: Variables): Any? {
             val receiverValue = receiver?.evaluate(variables)

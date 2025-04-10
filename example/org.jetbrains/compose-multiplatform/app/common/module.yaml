@@ -1,0 +1,13 @@
+product:
+  type: lib
+  platforms: [jvm, android, wasm, iosArm64, iosSimulatorArm64, iosX64]
+
+dependencies:
+  - $compose.foundation
+  - $compose.material3
+
+settings:
+  compose:
+    enabled: true
+  kotlin:
+    serialization: json

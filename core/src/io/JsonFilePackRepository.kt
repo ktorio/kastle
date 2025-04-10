@@ -6,6 +6,7 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.PackDescriptor
 import org.jetbrains.kastle.PackRepository
+import kotlin.math.exp
 
 class JsonFilePackRepository(
     root: Path,
@@ -28,9 +29,15 @@ class JsonFilePackRepository(
             if (clear)
                 fs.deleteRecursively(path)
             fs.createDirectories(path)
-            return JsonFilePackRepository(path, fs, json).also { export ->
-                all().collect(export::add)
+            val export = JsonFilePackRepository(path, fs, json)
+            all().collect { pack ->
+                try {
+                    export.add(pack)
+                } catch (e: Exception) {
+                    println("Failed to export pack ${pack.id}: ${e.message}")
+                }
             }
+            return export
         }
     }
 }

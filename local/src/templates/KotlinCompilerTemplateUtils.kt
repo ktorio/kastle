@@ -160,7 +160,7 @@ fun KtExpression.readPropertyBlocks(): Sequence<Block> {
 
 private fun KtExpression.asLiteralReference(): Sequence<Block> =
     sequenceOf(
-        ExpressionValue(
+        InlineValue(
             expression = toTemplateExpression(),
             position = blockRange().toPosition(), // TODO
             embedded = false,
@@ -270,7 +270,7 @@ private fun KtBlockStringTemplateEntry.asStringTemplateLiteral(): Sequence<Block
         }
     }
     yield(
-        ExpressionValue(
+        InlineValue(
             expression = this@asStringTemplateLiteral.expression.toTemplateExpression(),
             position = blockPosition(
                 body = childrenOfType<KtExpression>().first()

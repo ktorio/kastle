@@ -47,9 +47,9 @@ fun KtExpression?.toTemplateExpression(): Expression {
                         else if (text.startsWith('\'') && text.endsWith('\''))
                             Expression.CharLiteral(text[1]) // TODO handle escape
                         else if (text.contains('.'))
-                            Expression.NumberLiteral(text.toDouble())
+                            Expression.DoubleLiteral(text.toDouble())
                         else
-                            Expression.NumberLiteral(text.toLong())
+                            Expression.LongLiteral(text.toLong())
                     } catch (e: NumberFormatException) {
                         // Fallback to string if not a valid number
                         Expression.StringLiteral(text)

@@ -126,7 +126,7 @@ data class RepeatingSlot(
  * @param embedded this indicates the value should not be wrapped in quotes
  */
 @Serializable
-data class ExpressionValue(
+data class InlineValue(
     override val expression: Expression,
     override val position: BlockPosition,
     val embedded: Boolean = true,

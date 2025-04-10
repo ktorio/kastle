@@ -9,4 +9,4 @@ ktor:
         port: 8080
 
 repository:
-  dir: server/json
+  dir: json

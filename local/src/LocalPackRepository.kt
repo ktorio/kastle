@@ -7,10 +7,13 @@ import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
 import kotlinx.coroutines.flow.*
+import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.readString
 import org.jetbrains.kastle.io.*
+import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.templates.HandlebarsTemplateEngine
 import org.jetbrains.kastle.templates.KotlinCompilerTemplateEngine
 import org.jetbrains.kastle.templates.TemplateFormat
@@ -20,6 +23,7 @@ import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtFile
+import org.tomlj.Toml
 import kotlin.collections.*
 
 private const val MANIFEST_YAML = "manifest.yaml"
@@ -33,6 +37,8 @@ class LocalPackRepository(
     private val textFileTemplateEngine = HandlebarsTemplateEngine()
 
     constructor(root: String): this(Path(root))
+
+    private val versionsLookup: Map<String, Dependency> by lazy { readVersionCatalogs() }
 
     private val repository: PackRepository = object : PackRepository {
         private val cache = mutableMapOf<PackId, PackDescriptor>()
@@ -61,12 +67,17 @@ class LocalPackRepository(
 
     override fun packIds(): Flow<PackId> =
         fs.list(root).flatMap { groupPath ->
+            if (!groupPath.isDir())
+                return@flatMap emptyList()
             fs.list(groupPath)
         }.asFlow().mapNotNull { path ->
-            if (fs.metadataOrNull(path)?.isDirectory == true)
+            if (path.isDir())
                 PackId.parse("${path.parent!!.name}/${path.name}")
             else null
         }
+
+    private fun Path.isDir(): Boolean =
+        fs.metadataOrNull(this)?.isDirectory == true
 
     override suspend fun get(packId: PackId): PackDescriptor? {
         val projectPath = root.resolve(packId.toString())
@@ -77,7 +88,9 @@ class LocalPackRepository(
 
         val projectSources = projectPath.moduleFolders().asFlow().map { modulePath ->
             val relativeModulePath = modulePath.relativeTo(projectPath).toString()
+            val manifestYaml = modulePath.resolve("module-manifest.yaml").readYaml<ModuleManifest>()
             val amperYaml = modulePath.resolve("module.yaml").readYamlNode()?.yamlMap
+
             // TODO not entirely correct
             val (moduleType, platforms) = when(val productNode = amperYaml?.get<YamlNode>("product")) {
                 is YamlScalar -> SourceModuleType.parse(productNode.content) to listOf("jvm")
@@ -88,11 +101,21 @@ class LocalPackRepository(
                 }
                 else -> SourceModuleType.LIB to listOf("jvm")
             }
+
             fun YamlMap?.readDependencies(key: String) =
                 this?.get<YamlList>(key)
-                    ?.items?.map { it.yamlScalar.content }
-                    ?.filter { !it.startsWith("..") }
-                    ?.map(Dependency::parse).orEmpty()
+                    ?.items?.asSequence()?.map { it.yamlScalar.content }.orEmpty()
+                    .filter { !it.startsWith("..") }
+                    .map(Dependency::parse)
+                    .map { dependency ->
+                        when(dependency) {
+                            is ArtifactDependency, is ModuleDependency -> dependency
+                            is CatalogReference -> versionsLookup[dependency.key]
+                                ?: throw IllegalArgumentException("Missing version for dependency: ${dependency.key}")
+                        }
+                    }
+                    .toList()
+
             val dependencies = amperYaml.readDependencies("dependencies")
             val testDependencies = amperYaml.readDependencies("testDependencies")
 
@@ -120,6 +143,14 @@ class LocalPackRepository(
                             .copy(packId = packId)
                     }
                 }
+            }
+
+            // additional sources defined for module use only the text file templating engine
+            for (manifestSource in manifestYaml?.sources.orEmpty()) {
+                sources += when(val text = manifestSource.text) {
+                    null -> textFileTemplateEngine.read(modulePath.resolve(manifestSource.path!!))
+                    else -> textFileTemplateEngine.read(manifestSource.target!!, text)
+                }.copy(packId = packId)
             }
 
             SourceModule(
@@ -190,12 +221,37 @@ class LocalPackRepository(
         }
     }
 
+    /**
+     * Recursively find all modules, based on Amper conventions.
+     */
     private fun Path.moduleFolders(): Sequence<Path> =
-        if (fs.exists(resolve("src")))
+        if (fs.metadataOrNull(this)?.isDirectory != true)
+            emptySequence()
+        else if (isModuleFolder())
             sequenceOf(this)
-        else fs.list(this).asSequence().filter { file ->
-            fs.metadataOrNull(file)?.isDirectory == true &&
-                fs.exists(file.resolve("src"))
+        else fs.list(this).asSequence()
+            .flatMap { it.moduleFolders() }
+
+    private fun Path.isModuleFolder(): Boolean =
+        fs.exists(resolve("src")) ||
+            fs.exists(resolve("module.yaml")) ||
+            fs.exists(resolve("module-manifest.yaml"))
+
+    private fun readVersionCatalogs(): Map<String, Dependency> = fs.list(root).filter {
+        it.name.endsWith(".versions.toml")
+    }.mapNotNull { file ->
+        try {
+            val contents = fs.source(file).buffered().readString()
+            val catalog = Toml.parse(contents)
+            val libraries = catalog.getTable("libraries") ?: return@mapNotNull null
+            val dependencies = libraries.dottedKeySet().map { key ->
+                key to Dependency.parse(libraries[key] as String)
+            }
+            dependencies
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
+    }.flatten().toMap()
 }
 

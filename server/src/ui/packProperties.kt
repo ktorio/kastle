@@ -62,6 +62,12 @@ private fun FlowContent.propertyInput(pack: PackDescriptor, property: Property) 
                 }
             }
 
+            is PropertyType.Nullable -> {
+                div {
+                    +"TODO"
+                }
+            }
+
             is PropertyType.List -> {
                 div {
                     +"TODO"

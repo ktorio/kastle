@@ -5,10 +5,9 @@ import kotlin.test.Test
 
 class LocalProjectGeneratorTest: ProjectGeneratorTest() {
     override fun createRepository(): PackRepository =
-        LocalPackRepository(Path("example"))
+        LocalPackRepository(Path("../example"))
 
+    // Needed for Intellij
     @Test
-    fun doATest() {
-        // this is here to trick the IDE into running this test
-    }
+    fun test() {}
 }

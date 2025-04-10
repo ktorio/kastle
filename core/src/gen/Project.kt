@@ -1,6 +1,7 @@
 package org.jetbrains.kastle.gen
 
 import org.jetbrains.kastle.ArtifactDependency
+import org.jetbrains.kastle.CatalogReference
 import org.jetbrains.kastle.Dependency
 import org.jetbrains.kastle.GradlePlugin
 import org.jetbrains.kastle.MissingPackException
@@ -101,10 +102,14 @@ fun Dependency.toVariableMap() =
         is ArtifactDependency -> mapOf(
             "group" to group,
             "artifact" to artifact,
-            "version" to version.toString(),
+            "version" to version,
         )
         is ModuleDependency -> mapOf(
             "module" to module
+        )
+        // TODO find artifact from catalog
+        is CatalogReference -> mapOf(
+            "key" to key
         )
     }
 

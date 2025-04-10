@@ -1,6 +1,6 @@
 id: std/gradle
 name: Gradle
-description: Adds the gradle build system to the project
+description: An extensible build system for JVM languages
 version: 1.0.0
 sources:
   - path: build.gradle.kts

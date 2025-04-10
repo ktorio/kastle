@@ -36,6 +36,11 @@ data class PackManifest(
 ): PackMetadata
 
 @Serializable
+data class ModuleManifest(
+    val sources: List<SourceDefinition> = emptyList(),
+)
+
+@Serializable
 data class PackDescriptor(
     override val id: PackId,
     override val name: String,

@@ -4,5 +4,6 @@ modules:
   - server
   - local
   - templates
-  - scripts
+  - tasks/bundle
   - local/example/*/*
+  - local/example/*/*/*/*

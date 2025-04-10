@@ -1,0 +1,7 @@
+type: jvm/external-task
+
+module: ../tasks/bundle
+
+programArguments:
+  - --input-dir=../example
+  - --output-dir=./json

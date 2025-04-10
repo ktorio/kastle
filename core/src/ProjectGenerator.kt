@@ -127,7 +127,7 @@ internal class ProjectGeneratorImpl(
                             }
 
                             // Remove empty lines after skipped blocks
-                            if (skipped) {
+                            if (skipped && start < source.text.length) {
                                 val initial = start
                                 var next = source.text[start]
                                 if (next.isWhitespace()) {
@@ -401,7 +401,7 @@ internal class ProjectGeneratorImpl(
                         val value = block.expression.evaluate(variables)
 
                         when (block) {
-                            is ExpressionValue -> {
+                            is InlineValue -> {
                                 append(
                                     when {
                                         value is String && !block.embedded -> "\"$value\""

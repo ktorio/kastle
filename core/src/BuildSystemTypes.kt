@@ -212,11 +212,21 @@ sealed interface Dependency {
     companion object {
         // TODO make gud
         fun parse(text: String): Dependency {
-            val (group, artifact, version) = text.split(':', limit = 3)
+            if (text.startsWith("$"))
+                return CatalogReference(text.substring(1))
+
+            val segments = text.split(':', limit = 3)
+            require(segments.size == 3) { "Invalid dependency string: $text" }
+            val (group, artifact, version) = segments
             return ArtifactDependency(group, artifact, version)
         }
     }
 }
+
+@Serializable
+data class CatalogReference(
+    val key: String,
+): Dependency
 
 @Serializable
 data class ArtifactDependency(

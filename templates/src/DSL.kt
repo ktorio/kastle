@@ -38,6 +38,13 @@ val _slot: (String) -> Slot? = { null }
 fun _slots(key: String): Sequence<Slot> = emptySequence()
 
 /**
+ * Returns true when the project config includes a source targeting this slot.
+ *
+ * Useful for when there is some wrapping content around some slots.
+ */
+fun _hasSlot(key: String): Boolean = false
+
+/**
  * Inlines the string as raw code.
  */
 fun <E> _unsafe(code: String): E = TODO()

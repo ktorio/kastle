@@ -1,0 +1,14 @@
+product: android/app
+
+dependencies:
+  - androidx.activity:activity-compose:1.8.2
+  - androidx.appcompat:appcompat:1.6.1
+  - androidx.collection:collection-ktx:1.4.0
+  - $compose.foundation
+  - $compose.material3
+  - ../common
+
+settings:
+  compose: enabled
+  android:
+    namespace: io.ktor.chat.app.android

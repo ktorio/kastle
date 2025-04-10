@@ -19,7 +19,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         private const val ELSE = "else"
         private const val EACH = "each"
 
-        private val bracesPattern = Regex("\\{\\{(?:#(?<helper>[\\w_]+))?(?<content>.*?)}}")
+        private val bracesPattern = Regex("\\{\\{(?:#?(?<helper>[\\w_]+)\\s+)?(?<content>.*?)}}")
         private val variablePattern = Regex("[\\w_.]+")
 
     }
@@ -56,12 +56,12 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                 if (helper == null && variablePattern.matches(text)) {
                     when(text) {
                         ELSE -> {
-                            val previousIf = stack.removeLastOrNull()
-                            require(previousIf?.helper == IF) { "Unexpected else outside if" }
+                            val previousIf = stack.removeLast()
+                            require(previousIf.helper == IF) { "Unexpected else outside if" }
                             yield(previousIf.toBlock(match))
                             stack.add(BlockMatch(match, indent, helper = ELSE, property = previousIf.property))
                         }
-                        else -> yield(ExpressionValue(
+                        else -> yield(InlineValue(
                             expression = VariableRef(text),
                             position = BlockPosition(
                                 range = match.range.bumpEnd(),
@@ -101,6 +101,8 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                             )
 
                             IF, EACH -> stack.add(blockMatch)
+
+                            else -> throw IllegalArgumentException("Unexpected handlebars block: ${match.value}")
                         }
                     }
                 } else throw IllegalArgumentException("Unexpected handlebars block: ${match.value}")
