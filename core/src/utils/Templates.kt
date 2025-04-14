@@ -7,6 +7,12 @@ import org.jetbrains.kastle.SourceTemplate
 val SourceTemplate.slots: Sequence<Slot> get() =
     blocks?.asSequence()?.filterIsInstance<Slot>().orEmpty()
 
+fun SourceTemplate.isFile(): Boolean =
+    target.protocol == "file"
+
+fun SourceTemplate.isSlot(): Boolean =
+    target.protocol == "slot"
+
 val Block.range: IntRange get() =
     position.range
 

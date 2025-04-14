@@ -47,7 +47,8 @@ internal class ProjectGeneratorImpl(
         for (module in project.moduleSources.modules) {
             val moduleSources = buildList {
                 addAll((module.sources.filter { it.target.protocol == "file" }))
-                addAll(project.commonSources)
+                if (!module.ignoreCommon)
+                    addAll(project.commonSources)
             }.distinctBy { it.target }
 
             for (source in moduleSources) {
@@ -61,14 +62,14 @@ internal class ProjectGeneratorImpl(
                         project.toVariableEntry() +
                         module.toVariableEntry()
                 if (source.condition != null) {
-                    val conditionValue = variables[source.condition]
+                    val conditionValue = source.condition.evaluate(variables)
                     if (!conditionValue.isTruthy()) {
                         log { "Skipping ${source.target}; condition ${source.condition} evaluated to $conditionValue" }
                         continue
                     }
                 }
 
-                val path = source.target.relativeFile
+                val path = module.path.appendPath(source.target.relativeFile)
                 emit(SourceFileEntry(path) {
                     writeSourceFile(source, variables) {
                         writeSourcePreamble(

@@ -2,7 +2,7 @@ id: std/gradle
 name: Gradle
 description: An extensible build system for JVM languages
 version: 1.0.0
-sources:
+commonSources:
   - path: build.gradle.kts
   - path: libs.versions.toml.hbs
     target: file:gradle/libs.versions.toml

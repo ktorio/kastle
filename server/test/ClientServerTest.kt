@@ -3,24 +3,18 @@ package org.jetbrains.kastle.server
 import io.ktor.server.config.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.flow.toList
+import kotlinx.io.files.Path
 import org.jetbrains.kannotator.client.asRepository
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.io.JsonFilePackRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// TODO replace static expected
-private const val expectedPlugins = """
-    com.acme/child
-    com.acme/child2
-    com.acme/empty
-    com.acme/parent
-    com.acme/properties
-    io.ktor/server-cio
-    io.ktor/server-core
-    std/gradle
-"""
-
 class ClientServerTest {
+
+    private val backingRepository by lazy {
+        JsonFilePackRepository(Path("./json"))
+    }
 
     @Test
     fun `get pack IDs`() = testApplication {
@@ -28,10 +22,16 @@ class ClientServerTest {
             config = ApplicationConfig("application.yaml")
         }
         val repository = client.asRepository()
-        val packs = repository.packIds().toList()
+
+        val expected = backingRepository.packIds().toList()
             .sortedBy { it.toString() }
             .joinToString("\n")
-        assertEquals(expectedPlugins.trimIndent(), packs)
+
+        val actual = repository.packIds().toList()
+            .sortedBy { it.toString() }
+            .joinToString("\n")
+
+        assertEquals(expected, actual)
     }
 
     @Test

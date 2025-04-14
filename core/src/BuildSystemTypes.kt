@@ -1,7 +1,11 @@
 package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.kastle.ProjectModules.Multi
+import org.jetbrains.kastle.ProjectModules.Single
+import org.jetbrains.kastle.ProjectModules.Empty
 import org.jetbrains.kastle.utils.protocol
+import kotlin.collections.plus
 
 
 @Serializable(RevisionSerializer::class)
@@ -96,43 +100,57 @@ sealed interface ProjectModules {
 
     val modules: List<SourceModule>
 
-    operator fun plus(other: ProjectModules): ProjectModules
-
     @Serializable
     data object Empty: ProjectModules {
         override val modules: List<SourceModule> = emptyList()
-        override fun plus(other: ProjectModules) = other
     }
     @Serializable
     data class Single(val module: SourceModule): ProjectModules {
-        override fun plus(other: ProjectModules): ProjectModules =
-            when(other) {
-                is Empty -> this
-                is Single -> module.tryMerge(other.module)?.let(::Single) ?: Multi(listOf(module, other.module))
-                is Multi -> Multi(listOf(module) + other.modules)
-            }
         override val modules: List<SourceModule> = listOf(module)
     }
     @Serializable
-    data class Multi(override val modules: List<SourceModule>): ProjectModules {
-        override fun plus(other: ProjectModules): ProjectModules {
-            val modules = modules.toMutableList()
-            val otherModules = other.modules.toMutableList()
-            for (i in modules.indices) {
-                for (j in otherModules.indices) {
-                    when (val merged = modules[i].tryMerge(otherModules[j])) {
-                        null -> {}
-                        else -> {
-                            modules[i] = merged
-                            otherModules.removeAt(j)
-                            break
-                        }
-                    }
-                }
-            }
-            return Multi(modules + otherModules)
+    data class Multi(override val modules: List<SourceModule>): ProjectModules
+}
+
+operator fun ProjectModules.plus(other: ProjectModules): ProjectModules =
+    if (this is Empty) other
+    else if (other is Empty) this
+    else if (this is Single && other is Single) {
+        Single(this.module.tryMerge(other.module)
+            ?: throw IllegalArgumentException("Cannot merge modules"))
+    }
+    else merge(this.modules, other.modules)
+
+fun ProjectModules.flatten(): ProjectModules =
+    when (this) {
+        is Empty -> this
+        is Single -> Single(module.copy(path = ""))
+        is Multi -> {
+            val path = modules.first().path
+            val slashIndex = path.indexOf('/', 1) // ignore starting slash
+            val firstSegment = if (slashIndex == -1) return this else path.substring(0, slashIndex) + '/'
+            if (modules.all { it.path.startsWith(firstSegment) })
+                Multi(modules.map { it.copy(path = it.path.substring(firstSegment.length)) })
+            else this
         }
     }
+
+private fun merge(modules: List<SourceModule>, other: List<SourceModule>): Multi {
+    val modules = modules.toMutableList()
+    val otherModules = other.toMutableList()
+    for (i in modules.indices) {
+        for (j in otherModules.indices) {
+            when (val merged = modules[i].tryMerge(otherModules[j])) {
+                null -> {}
+                else -> {
+                    modules[i] = merged
+                    otherModules.removeAt(j)
+                    break
+                }
+            }
+        }
+    }
+    return Multi(modules + otherModules)
 }
 
 @Serializable
@@ -144,6 +162,7 @@ data class SourceModule(
     val testDependencies: List<Dependency> = emptyList(),
     val sources: List<SourceTemplate> = emptyList(),
     val gradle: GradleConfig = GradleConfig(),
+    val ignoreCommon: Boolean = false,
 ) {
     val gradlePlugins: List<GradlePlugin> get() = gradle.plugins
 }
@@ -165,6 +184,8 @@ enum class SourceModuleType {
     APP;
 
     companion object {
+        val DEFAULT = LIB
+
         fun parse(text: String) = when {
             text == "lib" -> LIB
             text.endsWith("app") -> APP
@@ -182,8 +203,8 @@ enum class SourceModuleType {
 fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
     return SourceModule(
         type = when {
-            other.type == SourceModuleType.LIB || type == other.type -> type
-            type == SourceModuleType.LIB -> other.type
+            other.type == SourceModuleType.DEFAULT || type == other.type -> type
+            type == SourceModuleType.DEFAULT -> other.type
             else -> return null
         },
         path = when {

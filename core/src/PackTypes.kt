@@ -32,7 +32,8 @@ data class PackManifest(
     override val properties: List<Property> = emptyList(),
     override val repositories: List<Repository> = emptyList(),
     val modules: List<SourceModule>? = null,
-    val sources: List<SourceDefinition> = emptyList(),
+    val commonSources: List<SourceDefinition> = emptyList(),
+    val rootSources: List<SourceDefinition> = emptyList(),
 ): PackMetadata
 
 @Serializable
@@ -55,11 +56,13 @@ data class PackDescriptor(
     override val properties: List<Property> = emptyList(),
     override val repositories: List<Repository> = emptyList(),
     val commonSources: List<SourceTemplate> = emptyList(),
+    val rootSources: List<SourceTemplate> = emptyList(),
     val modules: ProjectModules = ProjectModules.Empty,
 ): PackMetadata {
     constructor(
         manifest: PackManifest,
         commonSources: List<SourceTemplate>,
+        rootSources: List<SourceTemplate>,
         projectSources: ProjectModules
     ) : this(
         manifest.id,
@@ -75,14 +78,17 @@ data class PackDescriptor(
         manifest.properties,
         manifest.repositories,
         commonSources = commonSources,
+        rootSources = rootSources,
         modules = manifest.modules?.let { modules ->
             ProjectModules.fromList(modules) + projectSources
         } ?: projectSources
     )
 }
 
-val PackDescriptor.sources: Sequence<SourceTemplate> get() =
-    commonSources.asSequence() + modules.modules.asSequence().flatMap { it.sources }
+val PackDescriptor.allSources: Sequence<SourceTemplate> get() =
+    commonSources.asSequence() +
+        rootSources.asSequence() +
+        modules.modules.asSequence().flatMap { it.sources }
 
 @Serializable
 data class Group(

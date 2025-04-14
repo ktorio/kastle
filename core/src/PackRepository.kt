@@ -22,7 +22,7 @@ interface PackRepository {
     suspend fun getAll(packIds: Collection<PackId>): Flow<PackDescriptor> =
         packIds.asFlow().mapNotNull(::get)
     suspend fun slot(slotId: SlotId): SlotDescriptor? =
-        get(slotId.pack)?.sources?.asSequence()
+        get(slotId.pack)?.allSources?.asSequence()
             ?.firstNotNullOfOrNull { source ->
                 source.slots
                     .find { slot -> slot.name == slotId.name }

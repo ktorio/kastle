@@ -22,7 +22,7 @@ data class SourceTemplate(
     val target: Url,
     val imports: List<String>? = null,
     val blocks: List<Block>? = null,
-    val condition: String? = null,
+    val condition: Expression? = null,
     val packId: PackId? = null,
 ): SourceText
 

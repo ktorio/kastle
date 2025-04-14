@@ -16,6 +16,7 @@ import org.jetbrains.kastle.io.*
 import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.templates.HandlebarsTemplateEngine
 import org.jetbrains.kastle.templates.KotlinCompilerTemplateEngine
+import org.jetbrains.kastle.templates.KotlinExpressionParser
 import org.jetbrains.kastle.templates.TemplateFormat
 import org.jetbrains.kastle.templates.extensionFormat
 import org.jetbrains.kastle.utils.protocol
@@ -52,7 +53,7 @@ class LocalPackRepository(
             }
 
         override suspend fun slot(slotId: SlotId): SlotDescriptor? =
-            this.get(slotId.pack)?.sources
+            this.get(slotId.pack)?.allSources
                 ?.firstNotNullOfOrNull { source ->
                     source.blocks
                         ?.filterIsInstance<Slot>()
@@ -127,8 +128,16 @@ class LocalPackRepository(
             }
 
             for (sourceFolder in sourceFolders) {
-                if (!fs.exists(sourceFolder))
-                    return@map SourceModule(sources = emptyList())
+                if (!fs.exists(sourceFolder)) {
+                    return@map SourceModule(
+                        type = moduleType,
+                        path = relativeModulePath,
+                        platforms = platforms,
+                        dependencies = dependencies,
+                        testDependencies = testDependencies,
+                        sources = emptyList(),
+                    )
+                }
 
                 // Properties are supplied both from the manifest and from declarations in the source files
                 val kotlinAnalyzer = KotlinCompilerTemplateEngine(sourceFolder, repository)
@@ -163,10 +172,9 @@ class LocalPackRepository(
             )
         }.toList().let(ProjectModules::fromList)
 
-        // project-level sources are included in all modules,
-        // except for slot targets, these are inserted into the first module
         val kotlinAnalyzer = KotlinCompilerTemplateEngine(projectPath, repository)
-        val commonSources = manifest.sources.map { (path, text, target, condition) ->
+        val expressionParser = KotlinExpressionParser(kotlinAnalyzer.psiFileFactory)
+        val readSource: suspend (SourceDefinition) -> SourceTemplate = { (path, text, target, condition) ->
             require(target != null) { "Missing target for project-level source: ${path ?: text}" }
             val file = projectPath.resolve(path ?: "source.kt")
             val format = path?.extensionFormat
@@ -177,6 +185,8 @@ class LocalPackRepository(
                 text != null -> text
                 else -> throw IllegalArgumentException("Missing path or text in source definition")
             }
+            val conditionExpression = condition?.let(expressionParser::parse)
+
             when(format) {
                 TemplateFormat.KOTLIN -> {
                     val psiFile = kotlinAnalyzer.psiFileFactory.createFileFromText(
@@ -187,17 +197,24 @@ class LocalPackRepository(
                     kotlinAnalyzer.read(Path(""), psiFile as KtFile, properties)
                         .copy(
                             packId = packId,
-                            condition = condition
+                            condition = conditionExpression
                         )
                 }
                 TemplateFormat.OTHER ->
                     textFileTemplateEngine.read(target, templateContents)
                         .copy(
                             packId = packId,
-                            condition = condition
+                            condition = conditionExpression
                         )
             }
         }
+
+        // project-level sources are included in all modules,
+        // except for slot targets, these are inserted into the first module
+        val commonSources = manifest.commonSources.map { readSource(it) }
+
+        // root sources are included at the repository-level root, like .gitignore
+        val rootSources = manifest.rootSources.map { readSource(it) }
 
         return PackDescriptor(
             manifest.copy(
@@ -206,6 +223,7 @@ class LocalPackRepository(
                 documentation = documentation,
             ),
             commonSources = commonSources,
+            rootSources = rootSources,
             projectSources = projectSources,
         )
     }

@@ -10,13 +10,19 @@ import org.jetbrains.kastle.PackDescriptor
 import org.jetbrains.kastle.PackRepository
 import org.jetbrains.kastle.ProjectDescriptor
 import org.jetbrains.kastle.ProjectModules
+import org.jetbrains.kastle.ProjectModules.Empty.modules
 import org.jetbrains.kastle.SourceModule
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.Url
 import org.jetbrains.kastle.VariableId
-import org.jetbrains.kastle.sources
+import org.jetbrains.kastle.flatten
+import org.jetbrains.kastle.plus
+import org.jetbrains.kastle.allSources
 import org.jetbrains.kastle.utils.Variables
+import org.jetbrains.kastle.utils.isFile
+import org.jetbrains.kastle.utils.isSlot
 import org.jetbrains.kastle.utils.protocol
+import kotlin.sequences.filter
 
 class Project(
     val descriptor: ProjectDescriptor,
@@ -38,14 +44,17 @@ suspend fun ProjectDescriptor.load(repository: PackRepository): Project {
     val moduleSources = packs.asSequence()
         .map { it.modules }
         .reduceOrNull(ProjectModules::plus)
-        ?: ProjectModules.Empty
+        ?.flatten() ?: ProjectModules.Empty
     val slotSources: Map<Url, List<SourceTemplate>> = packs.asSequence()
-        .flatMap { it.sources }
-        .filter { it.target.protocol == "slot" }
+        .flatMap { it.allSources }
+        .filter { it.isSlot() }
         .groupBy { it.target }
     val commonSourceFiles = packs
-        .flatMap { it.sources }
-        .filter { it.target.protocol == "file" }
+        .flatMap { it.commonSources }
+        .filter { it.isFile() }
+    val rootSourceFiles = packs
+        .flatMap { it.rootSources }
+        .filter { it.isFile() }
     val properties = packs.flatMap { pack ->
         pack.properties.map { property ->
             VariableId(pack.id, property.key).let { variableId ->
@@ -61,10 +70,22 @@ suspend fun ProjectDescriptor.load(repository: PackRepository): Project {
         packs = packs,
         properties = properties,
         slotSources = slotSources,
-        moduleSources = moduleSources,
+        moduleSources = moduleSources + rootSourceFiles,
         commonSources = commonSourceFiles,
     )
 }
+
+// Add root sources
+private operator fun ProjectModules.plus(rootSources: List<SourceTemplate>): ProjectModules =
+    when (this) {
+        is ProjectModules.Empty ->
+            ProjectModules.Single(SourceModule(sources = rootSources, ignoreCommon = true))
+        is ProjectModules.Single ->
+            copy(module = module.copy(sources = module.sources + rootSources))
+        is ProjectModules.Multi ->
+            // TODO check for root
+            copy(modules = modules + SourceModule(sources = rootSources, ignoreCommon = true))
+    }
 
 /**
  * Replace full variable ID keys with local variable names for referencing from template.
@@ -84,18 +105,21 @@ fun Project.toVariableEntry(): Pair<String, Any?> =
     "_project" to mapOf(
         "name" to name,
         "group" to group,
+        "modules" to moduleSources.modules.map { it.toVariableMap() },
     )
 
 // TODO let's leverage serializers here
 fun SourceModule.toVariableEntry(): Pair<String, Any?> =
-    "_module" to mapOf(
-        "path" to path.toString(),
-        "type" to type.toString(),
-        "platforms" to platforms,
-        "dependencies" to dependencies.map { it.toVariableMap() },
-        "testDependencies" to testDependencies.map { it.toVariableMap() },
-        "gradlePlugins" to gradlePlugins.map { it.toVariableMap() },
-    )
+    "_module" to toVariableMap()
+
+private fun SourceModule.toVariableMap(): Map<String, Any> = mapOf(
+    "path" to path,
+    "type" to type.toString(),
+    "platforms" to platforms,
+    "dependencies" to dependencies.map { it.toVariableMap() },
+    "testDependencies" to testDependencies.map { it.toVariableMap() },
+    "gradlePlugins" to gradlePlugins.map { it.toVariableMap() },
+)
 
 fun Dependency.toVariableMap() =
     when(this) {

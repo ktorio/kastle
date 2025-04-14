@@ -18,7 +18,7 @@ import kotlin.test.assertNotNull
 
 class LocalPackRepositoryTest {
 
-    private val root = "example"
+    private val root = "../example"
     private val exportDir = Path(SystemTemporaryDirectory, "packs" + Random.nextInt(9999))
     private val repository = LocalPackRepository(root)
     private val json = Json { prettyPrint = true }
