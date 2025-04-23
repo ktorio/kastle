@@ -9,3 +9,5 @@ rootSources:
   - path: project.yaml.hbs
     target: file:project.yaml
     if: _project.modules.size() > 1
+  - path: amper
+  - path: amper.bat

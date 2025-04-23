@@ -2,11 +2,11 @@ val versionCatalogEnabled: Boolean by _properties
 
 plugins {
     if (versionCatalogEnabled) {
-        for (item in _module.gradlePlugins) {
+        for (item in _module.gradle.plugins) {
             alias(_unsafe("libs.plugins.${item.name}"))
         }
     } else {
-        for (item in _module.gradlePlugins) {
+        for (item in _module.gradle.plugins) {
             id(item.id)
         }
     }

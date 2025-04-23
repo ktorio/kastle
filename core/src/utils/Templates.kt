@@ -42,7 +42,7 @@ val Block.bodyEnd: Int get() =
     position.inner.last
 
 fun Int.stringOf(char: Char) =
-    CharArray(this) { char }.concatToString()
+    if (this <= 0) "" else CharArray(this) { char }.concatToString()
 
 fun String.indent(indent: String) =
     lines().joinToString("\n$indent")

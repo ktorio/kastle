@@ -58,7 +58,9 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                         ELSE -> {
                             val previousIf = stack.removeLast()
                             require(previousIf.helper == IF) { "Unexpected else outside if" }
-                            yield(previousIf.toBlock(match))
+                            val ifBlock = previousIf.toBlock(match)
+                            yield(ConditionalBlock(ifBlock.position)) // TODO position not right...
+                            yield(ifBlock)
                             stack.add(BlockMatch(match, indent, helper = ELSE, property = previousIf.property))
                         }
                         else -> yield(InlineValue(
@@ -74,7 +76,10 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                     require(parent.helper == text.drop(1) || (parent.helper == ELSE && text.drop(1) == IF)) {
                         "Unexpected close term: $text; expected /${parent.helper}"
                     }
-                    yield(parent.toBlock(match))
+                    val block = parent.toBlock(match)
+                    if (block is IfBlock)
+                        yield(ConditionalBlock(block.position))
+                    yield(block)
                 } else if (helper != null) {
                     BlockMatch(match, indent, outerStart).let { blockMatch ->
                         when (blockMatch.helper) {
@@ -129,7 +134,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                     range = match.range.start .. endMatch.range.endInclusive + 1,
                     outer = outerStart  .. endMatch.range.endInclusive + 1,
                     inner = match.range.endInclusive + 1 .. endMatch.range.start,
-                    indent = indent,
+                    // indent = indent,
                 ),
             )
             ELSE -> ElseBlock(
@@ -137,7 +142,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                     range = match.range.start .. endMatch.range.endInclusive + 1,
                     outer = outerStart  .. endMatch.range.endInclusive + 1,
                     inner = match.range.endInclusive + 1 .. endMatch.range.start,
-                    indent = indent,
+                    // indent = indent,
                 ),
             )
             EACH -> {
@@ -147,7 +152,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                         range = match.range.start .. endMatch.range.endInclusive + 1,
                         outer = outerStart  .. endMatch.range.endInclusive + 1,
                         inner = match.range.endInclusive + 1 .. endMatch.range.start,
-                        indent = indent,
+                        // indent = indent,
                     ),
                     variable = null,
                 )

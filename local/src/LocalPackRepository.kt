@@ -1,5 +1,6 @@
 package org.jetbrains.kastle
 
+import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
@@ -91,6 +92,9 @@ class LocalPackRepository(
             val relativeModulePath = modulePath.relativeTo(projectPath).toString()
             val manifestYaml = modulePath.resolve("module-manifest.yaml").readYaml<ModuleManifest>()
             val amperYaml = modulePath.resolve("module.yaml").readYamlNode()?.yamlMap
+            val amperSettings = amperYaml?.get<YamlMap>("settings")?.let { node ->
+                Yaml.default.decodeFromYamlNode<AmperSettings>(node)
+            }
 
             // TODO not entirely correct
             val (moduleType, platforms) = when(val productNode = amperYaml?.get<YamlNode>("product")) {
@@ -128,16 +132,8 @@ class LocalPackRepository(
             }
 
             for (sourceFolder in sourceFolders) {
-                if (!fs.exists(sourceFolder)) {
-                    return@map SourceModule(
-                        type = moduleType,
-                        path = relativeModulePath,
-                        platforms = platforms,
-                        dependencies = dependencies,
-                        testDependencies = testDependencies,
-                        sources = emptyList(),
-                    )
-                }
+                if (!fs.exists(sourceFolder))
+                    continue
 
                 // Properties are supplied both from the manifest and from declarations in the source files
                 val kotlinAnalyzer = KotlinCompilerTemplateEngine(sourceFolder, repository)
@@ -169,6 +165,8 @@ class LocalPackRepository(
                 dependencies = dependencies,
                 testDependencies = testDependencies,
                 sources = sources + resources,
+                amper = amperSettings ?: AmperSettings(),
+                // TODO gradle settings
             )
         }.toList().let(ProjectModules::fromList)
 

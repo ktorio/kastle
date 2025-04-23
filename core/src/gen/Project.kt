@@ -1,8 +1,10 @@
 package org.jetbrains.kastle.gen
 
+import org.jetbrains.kastle.AmperSettings
 import org.jetbrains.kastle.ArtifactDependency
 import org.jetbrains.kastle.CatalogReference
 import org.jetbrains.kastle.Dependency
+import org.jetbrains.kastle.GradleSettings
 import org.jetbrains.kastle.GradlePlugin
 import org.jetbrains.kastle.MissingPackException
 import org.jetbrains.kastle.ModuleDependency
@@ -10,7 +12,6 @@ import org.jetbrains.kastle.PackDescriptor
 import org.jetbrains.kastle.PackRepository
 import org.jetbrains.kastle.ProjectDescriptor
 import org.jetbrains.kastle.ProjectModules
-import org.jetbrains.kastle.ProjectModules.Empty.modules
 import org.jetbrains.kastle.SourceModule
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.Url
@@ -21,7 +22,6 @@ import org.jetbrains.kastle.allSources
 import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.isFile
 import org.jetbrains.kastle.utils.isSlot
-import org.jetbrains.kastle.utils.protocol
 import kotlin.sequences.filter
 
 class Project(
@@ -118,7 +118,8 @@ private fun SourceModule.toVariableMap(): Map<String, Any> = mapOf(
     "platforms" to platforms,
     "dependencies" to dependencies.map { it.toVariableMap() },
     "testDependencies" to testDependencies.map { it.toVariableMap() },
-    "gradlePlugins" to gradlePlugins.map { it.toVariableMap() },
+    "gradle" to gradle.toVariableMap(),
+    "amper" to amper.toVariableMap(),
 )
 
 fun Dependency.toVariableMap() =
@@ -137,8 +138,18 @@ fun Dependency.toVariableMap() =
         )
     }
 
+fun GradleSettings.toVariableMap() = mapOf(
+    "plugins" to plugins.map { it.toVariableMap() },
+)
+
 fun GradlePlugin.toVariableMap() = mapOf(
     "name" to name,
     "id" to id,
     "version" to version.toString(),
 )
+
+fun AmperSettings.toVariableMap(): Map<String, String?> = mapOf(
+    "compose" to compose
+).filterValues {
+    it != null
+}

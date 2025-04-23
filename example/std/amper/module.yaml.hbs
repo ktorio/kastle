@@ -4,3 +4,10 @@ dependencies:
   {{#each _module.dependencies}}
   - {{ group }}:{{ artifact }}:{{ version }}
   {{/each}}
+
+{{#if _module.amper}}
+settings:
+  {{#each _module.amper.entries}}
+    {{ key }}: {{ value }}
+  {{/each}}
+{{/if}}

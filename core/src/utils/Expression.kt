@@ -31,7 +31,8 @@ sealed interface Expression {
 
     @Serializable
     data class VariableRef(val name: String) : Expression {
-        override fun evaluate(variables: Variables): Any? = variables[name]
+        override fun evaluate(variables: Variables): Any? =
+            variables[name]
     }
 
     @Serializable
@@ -231,6 +232,7 @@ sealed interface Expression {
             return when (methodName) {
                 "size" -> receiver.size
                 "isEmpty" -> receiver.isEmpty()
+                "isNotEmpty" -> receiver.isNotEmpty()
                 "containsKey" -> {
                     val key = args.firstOrNull() ?: throw IllegalArgumentException("containsKey requires a key argument")
                     receiver.containsKey(key)

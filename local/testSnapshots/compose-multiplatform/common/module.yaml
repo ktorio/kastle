@@ -2,4 +2,12 @@ product: lib
 
 dependencies:
   - org.jetbrains.compose.foundation:foundation:1.6.10
+  
   - org.jetbrains.compose.material3:material3:1.6.10
+  
+
+
+
+settings:
+    compose: enabled
+  

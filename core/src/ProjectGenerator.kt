@@ -9,6 +9,7 @@ import org.jetbrains.kastle.gen.getVariables
 import org.jetbrains.kastle.gen.load
 import org.jetbrains.kastle.gen.toVariableEntry
 import org.jetbrains.kastle.utils.*
+import kotlin.collections.emptyList
 
 interface ProjectGenerator {
     companion object {
@@ -248,7 +249,7 @@ internal class ProjectGeneratorImpl(
          */
         fun append(csq: CharSequence?, start: Int, end: Int, indent: Int?, trimStart: Boolean = false, trimEnd: Boolean = false): java.lang.Appendable {
             when(indent) {
-                null -> append(csq, start, end)
+                null, -1 -> append(csq, start, end)
                 else -> {
                     val indentString = indent.stringOf(' ')
                     var matchStart = start
@@ -339,7 +340,9 @@ internal class ProjectGeneratorImpl(
             // TODO the indent should be based on this block's parents
             fun Block.close(indent: Int) {
                 log { "  pop $this" }
-                append(source.text, start, bodyEnd, indent, trimEnd = true)
+                if (start < bodyEnd) {
+                    append(source.text, start, bodyEnd, indent, trimEnd = true)
+                }
                 start = rangeEnd
                 // TODO synchronize push/pop
                 // variables.pop()
@@ -422,7 +425,7 @@ internal class ProjectGeneratorImpl(
                             }
 
                             is ForEachBlock -> {
-                                val list = loops[block] ?: (value as? List<*>).orEmpty().toMutableList()
+                                val list = loops[block] ?: (value as? Iterable<*> ?: emptyList<Any>()).toMutableList()
                                 if (list.isNotEmpty()) {
                                     val element = list.removeFirst()
                                     when(val variable = block.variable) {

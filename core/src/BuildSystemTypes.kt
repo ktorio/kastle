@@ -161,14 +161,20 @@ data class SourceModule(
     val dependencies: List<Dependency> = emptyList(),
     val testDependencies: List<Dependency> = emptyList(),
     val sources: List<SourceTemplate> = emptyList(),
-    val gradle: GradleConfig = GradleConfig(),
+    val gradle: GradleSettings = GradleSettings(),
+    val amper: AmperSettings = AmperSettings(),
     val ignoreCommon: Boolean = false,
 ) {
     val gradlePlugins: List<GradlePlugin> get() = gradle.plugins
 }
 
 @Serializable
-data class GradleConfig(
+data class AmperSettings(
+    val compose: String? = null,
+)
+
+@Serializable
+data class GradleSettings(
     val plugins: List<GradlePlugin> = emptyList(),
 )
 
@@ -223,7 +229,8 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
                 }
             }
         },
-        gradle = GradleConfig((gradle.plugins + other.gradle.plugins).distinct()),
+        gradle = GradleSettings((gradle.plugins + other.gradle.plugins).distinct()),
+        amper = AmperSettings(amper.compose ?: other.amper.compose),
     )
 }
 

@@ -9,6 +9,6 @@
 {{/each}}
 
 [plugins]
-{{#each _module.gradlePlugins}}
+{{#each _module.gradle.plugins}}
 {{ name }} = { id = "{{ id }}", version = "{{ version }}" }
 {{/each}}

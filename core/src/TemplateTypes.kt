@@ -37,12 +37,15 @@ sealed interface Block {
     val position: BlockPosition
 }
 
+@Serializable
+sealed interface StructuralBlock: Block
+
 @Serializable(BlockPositionSerializer::class)
 data class BlockPosition(
     val range: IntRange,
     val outer: IntRange = range,
     val inner: IntRange = range,
-    val indent: Int = 0,
+    val indent: Int = -1,
     val context: SourceContext = SourceContext.TopLevel
 ) {
     companion object {
@@ -151,13 +154,13 @@ data class SkipBlock(override val position: BlockPosition): Block {
 @Serializable
 data class ConditionalBlock(
     override val position: BlockPosition,
-): Block
+): StructuralBlock
 
 @Serializable
 data class IfBlock(
     override val expression: Expression,
     override val position: BlockPosition,
-): ExpressionBlock {
+): ExpressionBlock, StructuralBlock {
     override fun toString(): String = "if(\"$expression\")"
 }
 
@@ -165,7 +168,7 @@ data class IfBlock(
 data class ElseBlock(
     // override val expression: Expression,
     override val position: BlockPosition,
-): Block {
+): StructuralBlock {
     override fun toString(): String = "else"
 }
 
@@ -174,7 +177,7 @@ data class ForEachBlock(
     override val expression: Expression,
     override val position: BlockPosition,
     override val variable: String?,
-): ExpressionBlock, DeclaringBlock {
+): ExpressionBlock, DeclaringBlock, StructuralBlock {
     override fun toString(): String = "each(\"$variable\" in \"$expression\")"
 }
 
@@ -182,7 +185,7 @@ data class ForEachBlock(
 data class WhenBlock(
     override val expression: Expression,
     override val position: BlockPosition,
-): ExpressionBlock {
+): ExpressionBlock, StructuralBlock {
     override fun toString(): String = "when(\"$expression\")"
 }
 
@@ -191,7 +194,7 @@ data class WhenBlock(
 data class WhenClauseBlock(
     val value: List<Expression>,
     override val position: BlockPosition,
-): Block {
+): Block, StructuralBlock {
     override fun toString(): String = "-> ${value.joinToString(", ") { "\"$it\"" }})"
 }
 

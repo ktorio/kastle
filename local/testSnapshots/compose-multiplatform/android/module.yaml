@@ -1,8 +1,11 @@
 product: jvm/app
 
 dependencies:
-  - androidx.activity:activity-compose:1.8.2
-  - androidx.appcompat:appcompat:1.6.1
-  - androidx.collection:collection-ktx:1.4.0
-  - org.jetbrains.compose.foundation:foundation:1.6.10
-  - org.jetbrains.compose.material3:material3:1.6.10
+  - org.jetbrains.compose.desktop:desktop-jvm-macos-arm64:1.6.10
+  
+
+
+
+settings:
+    compose: enabled
+  
