@@ -7,21 +7,24 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.BlockPosition.Companion.bumpEnd
+import org.jetbrains.kastle.utils.Expression.StringLiteral
 import org.jetbrains.kastle.utils.Expression.VariableRef
+import org.jetbrains.kastle.utils.ListStack
+import org.jetbrains.kastle.utils.indentAt
+import org.jetbrains.kastle.utils.startOfLine
+import org.jetbrains.kastle.utils.unwrapQuotes
 
 class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     companion object {
         private const val IF = "if"
         private const val SLOT = "slot"
         private const val SLOTS = "slots"
-        // TODO
-        // private const val WHEN = "when"
+        private const val WHEN = "when"
         private const val ELSE = "else"
         private const val EACH = "each"
 
         private val bracesPattern = Regex("\\{\\{(?:#?(?<helper>[\\w_]+)\\s+)?(?<content>.*?)}}")
         private val variablePattern = Regex("[\\w_.]+")
-
     }
 
     fun read(file: Path): SourceTemplate {
@@ -43,25 +46,27 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         )
 
     private fun findBlocks(template: String): Sequence<Block> {
-        val stack = mutableListOf<BlockMatch>()
+        val stack = ListStack<BlockMatch>()
         val matches = bracesPattern.findAll(template)
         return sequence {
             for (match in matches) {
-                val outerStart = template.lastIndexOf('\n', match.range.start)
-                    .takeIf { it >= 0 }
-                    ?: match.range.start
                 val helper = match.groups["helper"]?.value
+                val startOfLine = // template.startOfLine(match.range.start) ?: match.range.start
+                     if (helper != null) template.startOfLine(match.range.start) ?: match.range.start else match.range.start
                 val text = match.groups["content"]?.value.orEmpty().trim()
-                val indent = template.indentOf(match)
+                val indent = stack.top?.takeIf {
+                    template.substring(it.match.range.endInclusive + 1, match.range.start).isBlank()
+                }?.indent ?: template.indentAt(match.range.start) ?: -1
+
                 if (helper == null && variablePattern.matches(text)) {
                     when(text) {
                         ELSE -> {
-                            val previousIf = stack.removeLast()
+                            val previousIf = stack.pop() ?: error("Unexpected else outside if")
                             require(previousIf.helper == IF) { "Unexpected else outside if" }
                             val ifBlock = previousIf.toBlock(match)
                             yield(ConditionalBlock(ifBlock.position)) // TODO position not right...
                             yield(ifBlock)
-                            stack.add(BlockMatch(match, indent, helper = ELSE, property = previousIf.property))
+                            stack += BlockMatch(match, indent, helper = ELSE, expression = previousIf.expression)
                         }
                         else -> yield(InlineValue(
                             expression = VariableRef(text),
@@ -72,20 +77,31 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                         ))
                     }
                 } else if (text.startsWith('/')) {
-                    val parent = stack.removeLastOrNull() ?: error("Unexpected close term: $text")
-                    require(parent.helper == text.drop(1) || (parent.helper == ELSE && text.drop(1) == IF)) {
-                        "Unexpected close term: $text; expected /${parent.helper}"
+                    val parent = stack.pop() ?: error("Unexpected close term: $text")
+                    val block = parent.toBlock(match, parent.helper !in setOf(null, WHEN))
+                    when(text.drop(1)) {
+                        IF -> {
+                            // conditional wrapper
+                            require(parent.helper in setOf(IF, ELSE)) { "Unexpected close term: $text" }
+                            yield(ConditionalBlock(block.position))
+                        }
+                        WHEN -> {
+                            require(parent.helper == null) { "Unexpected close term: $text" }
+                            val whenParent = stack.pop() ?: error("Expected when clause: $text")
+                            require(whenParent.helper == WHEN) { "Unexpected close term: $text" }
+                            yield(whenParent.toBlock(match))
+                        }
+                        parent.helper -> {}
+                        else -> error("Unexpected close term: $text")
                     }
-                    val block = parent.toBlock(match)
-                    if (block is IfBlock)
-                        yield(ConditionalBlock(block.position))
+
                     yield(block)
-                } else if (helper != null) {
-                    BlockMatch(match, indent, outerStart).let { blockMatch ->
+                } else {
+                    BlockMatch(match, indent, startOfLine).let { blockMatch ->
                         when (blockMatch.helper) {
                             SLOT -> yield(
                                 NamedSlot(
-                                    name = blockMatch.property
+                                    name = blockMatch.expression
                                         ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
                                     position = BlockPosition(
                                         range = match.range,
@@ -96,7 +112,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
 
                             SLOTS -> yield(
                                 RepeatingSlot(
-                                    name = blockMatch.property
+                                    name = blockMatch.expression
                                         ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
                                     position = BlockPosition(
                                         range = match.range,
@@ -105,60 +121,77 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                                 )
                             )
 
-                            IF, EACH -> stack.add(blockMatch)
+                            IF, EACH, WHEN -> stack += blockMatch
 
-                            else -> throw IllegalArgumentException("Unexpected handlebars block: ${match.value}")
+                            else -> {
+                                // Value expression can only be used for when clauses
+                                val parent = stack.top ?: error("Unexpected expression: ${blockMatch.match.value}")
+                                when(parent.helper) {
+                                    null -> {
+                                        val previousValue = stack.pop() ?: error("Unexpected expression: ${blockMatch.match.value}")
+                                        require(stack.top?.helper == WHEN) { "Unexpected expression: ${blockMatch.match.value}" }
+                                        yield(previousValue.toBlock(match, inclusive = false))
+                                        stack += blockMatch
+                                    }
+                                    WHEN -> stack += blockMatch
+                                    else -> error("Unexpected expression: ${blockMatch.match.value}")
+                                }
+                            }
                         }
                     }
-                } else throw IllegalArgumentException("Unexpected handlebars block: ${match.value}")
+                }
             }
         }
     }
-
-    private fun String.indentOf(match: MatchResult): Int =
-        lastIndexOf('\n', match.range.start).takeIf { it >= 0 }?.let { newLineIndex ->
-            subSequence(newLineIndex, match.range.start).count { it == ' ' }
-        } ?: 0
 
     data class BlockMatch(
         val match: MatchResult,
         val indent: Int,
         val outerStart: Int = match.range.start,
-        val helper: String = match.groups["helper"]!!.value,
-        val property: String? = match.groups["content"]?.value?.trim()?.takeIf { it.isNotEmpty() }
+        val helper: String? = match.groups["helper"]?.value,
+        val expression: String? = match.groups["content"]?.value?.trim()?.takeIf { it.isNotEmpty() }
     ) {
-        fun toBlock(endMatch: MatchResult): Block = when(helper) {
+        // TODO parse expression; not always variables
+        fun toBlock(endMatch: MatchResult, inclusive: Boolean = true): Block = when(helper) {
             IF -> IfBlock(
-                expression = property?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
-                position = BlockPosition(
-                    range = match.range.start .. endMatch.range.endInclusive + 1,
-                    outer = outerStart  .. endMatch.range.endInclusive + 1,
-                    inner = match.range.endInclusive + 1 .. endMatch.range.start,
-                    // indent = indent,
-                ),
+                expression = expression?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
+                position = position(endMatch, inclusive),
             )
             ELSE -> ElseBlock(
-                position = BlockPosition(
-                    range = match.range.start .. endMatch.range.endInclusive + 1,
-                    outer = outerStart  .. endMatch.range.endInclusive + 1,
-                    inner = match.range.endInclusive + 1 .. endMatch.range.start,
-                    // indent = indent,
-                ),
+                position = position(endMatch, inclusive),
             )
+            WHEN -> {
+                WhenBlock(
+                    expression = expression?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
+                    position = position(endMatch, inclusive),
+                )
+            }
             EACH -> {
                 ForEachBlock(
-                    expression = property?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
-                    position = BlockPosition(
-                        range = match.range.start .. endMatch.range.endInclusive + 1,
-                        outer = outerStart  .. endMatch.range.endInclusive + 1,
-                        inner = match.range.endInclusive + 1 .. endMatch.range.start,
-                        // indent = indent,
-                    ),
+                    expression = expression?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
+                    position = position(endMatch, inclusive),
                     variable = null,
+                )
+            }
+            null -> {
+                // TODO parse expression; not always string literal
+                val value = expression?.let {
+                    StringLiteral(it.unwrapQuotes())
+                } ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}")
+                WhenClauseBlock(
+                    value = listOf(value),
+                    position = position(endMatch, inclusive),
                 )
             }
             else -> error("Unexpected keyword: $helper")
         }
+
+        private fun position(endMatch: MatchResult, inclusive: Boolean): BlockPosition = BlockPosition(
+            range = outerStart..if (inclusive) endMatch.range.endInclusive + 1 else endMatch.range.start,
+            outer = outerStart..if (inclusive) endMatch.range.endInclusive + 1 else endMatch.range.start,
+            inner = match.range.endInclusive + 1..endMatch.range.start,
+            indent = indent,
+        )
     }
 
 }

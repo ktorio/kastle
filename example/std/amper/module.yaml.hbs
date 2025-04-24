@@ -1,8 +1,19 @@
-product: {{ _module.type }}
+product:
+  type: {{ _module.type }}
+  {{#if _module.platforms}}
+  platforms: {{ _module.platforms }}
+  {{/if}}
 
 dependencies:
   {{#each _module.dependencies}}
-  - {{ group }}:{{ artifact }}:{{ version }}
+    {{#when type}}
+    {{ "maven" }}
+    - {{ group }}:{{ artifact }}:{{ version }}
+    {{ "project" }}
+    - {{ path }}
+    {{ "catalog" }}
+    - ${{ key }}
+    {{/when}}
   {{/each}}
 
 {{#if _module.amper}}

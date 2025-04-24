@@ -34,7 +34,7 @@ value class Snippet(
 
 @Serializable
 sealed interface Block {
-    val position: BlockPosition
+    var position: BlockPosition
 }
 
 @Serializable
@@ -110,7 +110,7 @@ sealed interface DeclaringBlock: Block {
 @Serializable
 data class NamedSlot(
     override val name: String,
-    override val position: BlockPosition,
+    override var position: BlockPosition,
     override val requirement: Requirement = Requirement.OPTIONAL,
 ): Slot {
     override fun toString(): String = "slots(\"$name\")"
@@ -119,7 +119,7 @@ data class NamedSlot(
 @Serializable
 data class RepeatingSlot(
     override val name: String,
-    override val position: BlockPosition,
+    override var position: BlockPosition,
     override val requirement: Requirement = Requirement.OPTIONAL,
 ): Slot {
     override fun toString(): String = "slots(\"$name\")"
@@ -131,7 +131,7 @@ data class RepeatingSlot(
 @Serializable
 data class InlineValue(
     override val expression: Expression,
-    override val position: BlockPosition,
+    override var position: BlockPosition,
     val embedded: Boolean = true,
 ): ExpressionBlock {
     override fun toString(): String = "property(\"$expression\")"
@@ -142,24 +142,24 @@ data class InlineValue(
  */
 @Serializable
 data class UnsafeBlock(
-    override val position: BlockPosition,
+    override var position: BlockPosition,
 ): Block
 
 @Serializable
-data class SkipBlock(override val position: BlockPosition): Block {
+data class SkipBlock(override var position: BlockPosition): Block {
     override fun toString(): String = "skip"
 }
 
 // Wrapper for If / Else blocks
 @Serializable
 data class ConditionalBlock(
-    override val position: BlockPosition,
+    override var position: BlockPosition,
 ): StructuralBlock
 
 @Serializable
 data class IfBlock(
     override val expression: Expression,
-    override val position: BlockPosition,
+    override var position: BlockPosition,
 ): ExpressionBlock, StructuralBlock {
     override fun toString(): String = "if(\"$expression\")"
 }
@@ -167,7 +167,7 @@ data class IfBlock(
 @Serializable
 data class ElseBlock(
     // override val expression: Expression,
-    override val position: BlockPosition,
+    override var position: BlockPosition,
 ): StructuralBlock {
     override fun toString(): String = "else"
 }
@@ -175,7 +175,7 @@ data class ElseBlock(
 @Serializable
 data class ForEachBlock(
     override val expression: Expression,
-    override val position: BlockPosition,
+    override var position: BlockPosition,
     override val variable: String?,
 ): ExpressionBlock, DeclaringBlock, StructuralBlock {
     override fun toString(): String = "each(\"$variable\" in \"$expression\")"
@@ -184,7 +184,7 @@ data class ForEachBlock(
 @Serializable
 data class WhenBlock(
     override val expression: Expression,
-    override val position: BlockPosition,
+    override var position: BlockPosition,
 ): ExpressionBlock, StructuralBlock {
     override fun toString(): String = "when(\"$expression\")"
 }
@@ -193,7 +193,7 @@ data class WhenBlock(
 @Serializable
 data class WhenClauseBlock(
     val value: List<Expression>,
-    override val position: BlockPosition,
+    override var position: BlockPosition,
 ): Block, StructuralBlock {
     override fun toString(): String = "-> ${value.joinToString(", ") { "\"$it\"" }})"
 }

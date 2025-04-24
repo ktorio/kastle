@@ -2,5 +2,5 @@ package com.acme
 
 
 fun main() {
-        println("property is yes")
+    println("property is yes")
 }

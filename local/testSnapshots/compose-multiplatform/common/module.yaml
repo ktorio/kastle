@@ -1,13 +1,10 @@
-product: lib
+product:
+  type: lib
+  platforms: [jvm, android]
 
 dependencies:
-  - org.jetbrains.compose.foundation:foundation:1.6.10
-  
-  - org.jetbrains.compose.material3:material3:1.6.10
-  
-
-
+    - $compose.foundation
+    - $compose.material3
 
 settings:
-    compose: enabled
-  
+  compose: enabled

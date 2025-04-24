@@ -40,7 +40,7 @@ class LocalPackRepository(
 
     constructor(root: String): this(Path(root))
 
-    private val versionsLookup: Map<String, Dependency> by lazy { readVersionCatalogs() }
+    private val versionsLookup: Map<String, ArtifactDependency> by lazy { readVersionCatalogs() }
 
     private val repository: PackRepository = object : PackRepository {
         private val cache = mutableMapOf<PackId, PackDescriptor>()
@@ -107,16 +107,18 @@ class LocalPackRepository(
                 else -> SourceModuleType.LIB to listOf("jvm")
             }
 
+            // TODO replace with correct library reference
+            val isNotTemplateDSL: (String) -> Boolean = { !it.endsWith("/templates") }
+
             fun YamlMap?.readDependencies(key: String) =
                 this?.get<YamlList>(key)
                     ?.items?.asSequence()?.map { it.yamlScalar.content }.orEmpty()
-                    .filter { !it.startsWith("..") }
+                    .filter(isNotTemplateDSL)
                     .map(Dependency::parse)
                     .map { dependency ->
                         when(dependency) {
                             is ArtifactDependency, is ModuleDependency -> dependency
-                            is CatalogReference -> versionsLookup[dependency.key]
-                                ?: throw IllegalArgumentException("Missing version for dependency: ${dependency.key}")
+                            is CatalogReference -> dependency.copy(artifact = versionsLookup[dependency.key])
                         }
                     }
                     .toList()
@@ -253,7 +255,7 @@ class LocalPackRepository(
             fs.exists(resolve("module.yaml")) ||
             fs.exists(resolve("module-manifest.yaml"))
 
-    private fun readVersionCatalogs(): Map<String, Dependency> = fs.list(root).filter {
+    private fun readVersionCatalogs(): Map<String, ArtifactDependency> = fs.list(root).filter {
         it.name.endsWith(".versions.toml")
     }.mapNotNull { file ->
         try {
@@ -261,7 +263,7 @@ class LocalPackRepository(
             val catalog = Toml.parse(contents)
             val libraries = catalog.getTable("libraries") ?: return@mapNotNull null
             val dependencies = libraries.dottedKeySet().map { key ->
-                key to Dependency.parse(libraries[key] as String)
+                key to Dependency.parse(libraries[key] as String) as ArtifactDependency
             }
             dependencies
         } catch (e: Exception) {

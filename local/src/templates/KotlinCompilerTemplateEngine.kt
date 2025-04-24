@@ -6,7 +6,6 @@ import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.util.descendantsOfType
 import kotlinx.io.files.Path
 import org.jetbrains.kastle.Block
-import org.jetbrains.kastle.BlockPosition
 import org.jetbrains.kastle.PackRepository
 import org.jetbrains.kastle.Property
 import org.jetbrains.kastle.SkipBlock
@@ -14,7 +13,9 @@ import org.jetbrains.kastle.SourceContext
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.utils.afterProtocol
+import org.jetbrains.kastle.utils.contains
 import org.jetbrains.kastle.utils.protocol
+import org.jetbrains.kastle.utils.rangeStart
 import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.trimBraces
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
@@ -149,32 +150,29 @@ internal class KotlinCompilerTemplateEngine(
             .filterIsInstance<TemplateParentReference.PropertyDelegate>()
             .map { it.declaration }
 
-        // remove all declarations
+        // strip declarations using skip blocks
         val declarationBlocks = propertyDeclarations.map { declaration ->
-            SkipBlock(position =
-                BlockPosition(
-                    declaration.blockRange()
-                ) // TODO
-            )
+            SkipBlock(position = declaration.blockPosition())
         }
 
         // inline blocks with references to properties
-        val propertyBlocks = propertyDeclarations.asSequence().flatMap { declaration ->
+        val propertyBlocks = propertyDeclarations.flatMap { declaration ->
             declaration.findReferences().flatMap { reference ->
-                reference.readPropertyBlocks()
+                reference.readReferenceBlocks()
             }
         }
 
         // inline reference chains
         val chainedReferences = templateReferences
             .filterIsInstance<TemplateParentReference.PropertyReferenceChain>()
-            .flatMap { it.expression.readPropertyBlocks() }
+            .flatMap { it.expression.readReferenceBlocks() }
 
         // slot references
         val slots = templateReferences
             .filterIsInstance<TemplateParentReference.Slot>()
             .map { it.expression.readSlotBlock() }
 
+        // unsafe blocks
         val unsafeBlocks = templateReferences
             .filterIsInstance<TemplateParentReference.Unsafe>()
             .map { it.expression.readUnsafeBlock() }
@@ -183,7 +181,41 @@ internal class KotlinCompilerTemplateEngine(
         // TODO bad abstraction
         properties.addAll(propertyDeclarations.map { it.asProperty() })
 
-        return declarationBlocks + propertyBlocks + chainedReferences + slots + unsafeBlocks
+        // sort, indent logic
+        var blocks = declarationBlocks +
+                propertyBlocks +
+                chainedReferences +
+                slots +
+                unsafeBlocks
+
+        blocks = blocks.sortedBy { it.rangeStart }
+
+        return collect(
+    declarationBlocks,
+            propertyBlocks,
+            chainedReferences,
+            slots,
+            unsafeBlocks,
+        )
     }
 
+}
+
+private fun collect(vararg lists: Collection<out Block>): List<Block> {
+    val blocks = mutableListOf<Block>()
+    for (list in lists)
+        blocks += list
+    blocks.sortBy { it.rangeStart }
+
+    // inherit indentation for nested blocks
+    for (i in blocks.indices) {
+        if (i == 0) continue
+        val current = blocks[i]
+        val previous = blocks[i - 1]
+        if (current !in previous) continue
+        // TODO maybe unwanted
+
+        current.position = current.position.copy(indent = previous.position.indent)
+    }
+    return blocks
 }

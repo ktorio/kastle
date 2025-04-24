@@ -242,6 +242,8 @@ sealed interface Dependency {
         fun parse(text: String): Dependency {
             if (text.startsWith("$"))
                 return CatalogReference(text.substring(1))
+            if (!text.contains(":"))
+                return ModuleDependency(text)
 
             val segments = text.split(':', limit = 3)
             require(segments.size == 3) { "Invalid dependency string: $text" }
@@ -254,6 +256,7 @@ sealed interface Dependency {
 @Serializable
 data class CatalogReference(
     val key: String,
+    val artifact: ArtifactDependency? = null,
 ): Dependency
 
 @Serializable
@@ -268,7 +271,7 @@ data class ArtifactDependency(
 
 @Serializable
 data class ModuleDependency(
-    val module: String,
+    val path: String,
 ): Dependency {
-    override fun toString(): String = module
+    override fun toString(): String = path
 }

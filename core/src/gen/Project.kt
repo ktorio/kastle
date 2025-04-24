@@ -125,15 +125,18 @@ private fun SourceModule.toVariableMap(): Map<String, Any> = mapOf(
 fun Dependency.toVariableMap() =
     when(this) {
         is ArtifactDependency -> mapOf(
+            "type" to "maven",
             "group" to group,
             "artifact" to artifact,
             "version" to version,
         )
         is ModuleDependency -> mapOf(
-            "module" to module
+            "type" to "project",
+            "path" to path,
         )
         // TODO find artifact from catalog
         is CatalogReference -> mapOf(
+            "type" to "catalog",
             "key" to key
         )
     }

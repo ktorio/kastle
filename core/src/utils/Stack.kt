@@ -17,17 +17,18 @@ interface Stack<E>: Iterable<E> {
     fun copy(): Stack<E>
 }
 
-class ListStack<E>(private val list: MutableList<E>) : Stack<E> {
+class ListStack<E>(private val list: MutableList<E> = mutableListOf()) : Stack<E> {
     override val top: E? get() = list.lastOrNull()
     override fun isEmpty(): Boolean = list.isEmpty()
     override fun pop(): E? = list.removeLastOrNull()
+
     override fun plusAssign(element: E) {
         list.add(element)
     }
     override fun iterator(): Iterator<E> =
         list.asReversed().iterator()
     override fun copy(): Stack<E> =
-        ListStack(ArrayList<E>(list))
+        ListStack(ArrayList(list))
 }
 
 inline fun <E> Stack<E>.popUntil(

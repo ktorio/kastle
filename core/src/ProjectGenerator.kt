@@ -100,19 +100,18 @@ internal class ProjectGeneratorImpl(
 
                         forEachBlock(source.blocks) { block ->
                             // exited blocks
-                            val ancestor = stack.findLast { block in it }
-                            stack.popUntil({ block in it }) { parent ->
-                                parent.close(ancestor?.indent ?: block.indent)
+                            val parent = stack.popUntil({ block in it }) { parent ->
+                                parent.close(parent.indent)
                                 if (parent.tryLoopBack())
                                     return@forEachBlock
                             }
 
                             // interstitial
-                            append(source.text, start, block.outerStart, ancestor?.indent)
+                            append(source.text, start, block.outerStart, parent?.indent)
 
                             // current block
                             val skipped = appendBlockContents(
-                                indent = ancestor?.indent ?: block.indent,
+                                indent = block.indent,
                                 block = block,
                                 source = source,
                                 slots = project.slotSources.lookup(pack.id, block)
@@ -247,7 +246,14 @@ internal class ProjectGeneratorImpl(
          * Replaces any currently indented lines with the new indent.
          * TODO need to find baseline first then replace only that much
          */
-        fun append(csq: CharSequence?, start: Int, end: Int, indent: Int?, trimStart: Boolean = false, trimEnd: Boolean = false): java.lang.Appendable {
+        fun append(
+            csq: CharSequence?,
+            start: Int,
+            end: Int,
+            indent: Int?,
+            trimStart: Boolean = false,
+            trimEnd: Boolean = false
+        ): java.lang.Appendable {
             when(indent) {
                 null, -1 -> append(csq, start, end)
                 else -> {
@@ -272,10 +278,11 @@ internal class ProjectGeneratorImpl(
         }
 
         override fun append(csq: CharSequence?, start: Int, end: Int): java.lang.Appendable {
-            if (csq == null) return this
-            require(start <= end) {
-                "Overlap $start > $end: ${csq.substring(end, start)}"
-            }
+            if (csq == null || start > end) return this
+            // TODO shouldn't be overlapping
+//            require(start <= end) {
+//                "Overlap $start > $end: ${csq.substring(end, start)}"
+//            }
             buffer.writeString(csq, start, end)
             return this
         }
@@ -369,13 +376,13 @@ internal class ProjectGeneratorImpl(
                     is WhenClauseBlock -> {
                         val end = child?.outerStart ?: block.bodyEnd
 
-                        val parent = stack.lastOrNull() as? WhenBlock
+                        val parent = stack.top as? WhenBlock
                             ?: error("when clause with no parent: $block")
                         val value = parent.expression.evaluate(variables)
 
                         // TODO types?
                         if (value in block.value.map { it.evaluate(variables) }) {
-                            append(source.text, block.outerStart, block.rangeStart)
+                            append(source.text, block.outerStart, block.rangeStart, indent)
                             append(source.text, block.bodyStart, end, indent)
                             false
                         } else skipContents()
@@ -406,6 +413,7 @@ internal class ProjectGeneratorImpl(
 
                         when (block) {
                             is InlineValue -> {
+                                // TODO fail on nulls?
                                 append(
                                     when {
                                         value is String && !block.embedded -> "\"$value\""

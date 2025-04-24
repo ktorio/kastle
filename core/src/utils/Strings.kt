@@ -32,3 +32,40 @@ fun String.appendPath(vararg paths: String): String =
         .filter(String::isNotEmpty)
         .map { it.trim('/') }
         .joinToString("/")
+
+fun String.startOfLine(index: Int): Int? {
+    for (i in index - 1 downTo 0) {
+        val ch = get(i)
+        if (ch == '\n')
+            return i
+        else if (ch.isWhitespace())
+            continue
+        return null
+    }
+    return null
+}
+
+fun String.endOfLine(index: Int): Int? {
+    for (i in index + 1 until length) {
+        val ch = get(i)
+        if (ch == '\n')
+            return i
+        else if (ch.isWhitespace())
+            continue
+        return null
+    }
+    return null
+}
+
+fun String.indentAt(index: Int): Int? {
+    var lastNonWhitespace = index
+    for (i in index - 1 downTo 0) {
+        val ch = get(i)
+        if (ch == '\n')
+            return lastNonWhitespace - i - 1
+        else if (ch.isWhitespace())
+            continue
+        lastNonWhitespace = i
+    }
+    return null
+}

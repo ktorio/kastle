@@ -9,6 +9,10 @@ import org.jetbrains.kastle.*
 import org.jetbrains.kastle.BlockPosition.Companion.copy
 import org.jetbrains.kastle.BlockPosition.Companion.include
 import org.jetbrains.kastle.BlockPosition.Companion.toPosition
+import org.jetbrains.kastle.utils.endOfLine
+import org.jetbrains.kastle.utils.indent
+import org.jetbrains.kastle.utils.indentAt
+import org.jetbrains.kastle.utils.startOfLine
 import org.jetbrains.kastle.utils.unwrapQuotes
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
@@ -23,6 +27,7 @@ fun PsiElement.blockPosition(
     body: PsiElement = this,
     also: PsiElement? = null,
     start: Int? = null,
+    indent: Int? = null,
 ): BlockPosition {
     var range = blockRange()
     if (also != null)
@@ -34,7 +39,7 @@ fun PsiElement.blockPosition(
         range = range,
         outer = outerRange(range),
         inner = body.bodyRange(),
-        indent = findIndent(),
+        indent = indent ?: findIndent(),
     )
 }
 
@@ -144,7 +149,7 @@ fun KtCallExpression.readUnsafeBlock(): UnsafeBlock =
 /**
  * Reads logical expressions that can be inlined, or returns property literal match.
  */
-fun KtExpression.readPropertyBlocks(): Sequence<Block> {
+fun KtExpression.readReferenceBlocks(): Sequence<Block> {
     // handles deep references (i.e., foo.bar)
     var variableReference: KtExpression = this
     var ancestor: PsiElement? = parent
@@ -180,23 +185,31 @@ private fun KtWhenExpression.asWhenBlock(): Sequence<Block> {
     val valueExpression = subjectExpression?.toTemplateExpression() ?: return emptySequence()
 
     return sequence {
-        yield(
-            WhenBlock(
-                expression = valueExpression,
-                position = blockPosition()
-            )
+        val whenBlock = WhenBlock(
+            expression = valueExpression,
+            position = blockPosition()
         )
+        yield(whenBlock)
         for (child in childrenOfType<KtWhenEntry>()) {
             yield(
                 // TODO
-                if (child.isElse)
-                    ElseBlock(position = child.blockPosition(body = child.children[1]))
+                if (child.isElse) {
+                    ElseBlock(
+                        position = child.blockPosition(
+                            body = child.children[1],
+                            indent = whenBlock.indent,
+                        )
+                    )
+                }
                 else WhenClauseBlock(
                     value = child.conditions.map {
                         (it.children.single() as? KtExpression)?.toTemplateExpression()
                             ?: throw IllegalArgumentException("Unsupported when condition: $it")
                     },
-                    position = child.blockPosition(body = child.children[1])
+                    position = child.blockPosition(
+                        body = child.children[1],
+                        indent = whenBlock.indent,
+                    )
                 )
             )
         }
@@ -204,32 +217,31 @@ private fun KtWhenExpression.asWhenBlock(): Sequence<Block> {
         this@asWhenBlock.subjectVariable?.let { subjectVariable ->
             val subjectName = subjectVariable.name!!
             this@asWhenBlock.findReferencesTo(subjectName).forEach { subjectReference ->
-                yieldAll(subjectReference.readPropertyBlocks())
+                yieldAll(subjectReference.readReferenceBlocks())
             }
         }
     }
 }
 
 // TODO handle else-if
-private fun KtIfExpression.asIfBlock(): Sequence<Block> =
+private fun KtIfExpression.asIfBlock(): Sequence<Block> {
     if (then == null)
-        emptySequence()
-    else {
-        sequenceOf(
-            // wrapper element
-            ConditionalBlock(position = blockPosition()),
-            // first clause
-            IfBlock(
-                expression = condition.toTemplateExpression(),
-                // if expression includes else, so we trim to that
-                position = then!!.blockPosition(also = this)
-            ),
-            // else
-            `else`?.let { elseElem ->
-                ElseBlock(position = elseElem.blockPosition(start = then!!.endOffset))
-            }
-        ).filterNotNull()
-    }
+        return emptySequence()
+    return sequenceOf(
+        // wrapper element
+        ConditionalBlock(position = blockPosition()),
+        // first clause
+        IfBlock(
+            expression = condition.toTemplateExpression(),
+            // if expression includes else, so we trim to that
+            position = then!!.blockPosition(also = this)
+        ),
+        // else
+        `else`?.let { elseElem ->
+            ElseBlock(position = elseElem.blockPosition(start = then!!.endOffset))
+        }
+    ).filterNotNull()
+}
 
 private fun KtForExpression.asEachBlock(): Sequence<Block> = sequence {
     val entryName = this@asEachBlock.loopParameter?.name ?: "it"
@@ -243,7 +255,7 @@ private fun KtForExpression.asEachBlock(): Sequence<Block> = sequence {
     // include references to the element variable
     val bodyNode = childrenOfType<KtContainerNodeForControlStructureBody>().first()
     for (entryReference in bodyNode.findReferencesTo(entryName)) {
-        yieldAll(entryReference.readPropertyBlocks())
+        yieldAll(entryReference.readReferenceBlocks())
     }
 }
 
@@ -287,16 +299,8 @@ private fun PsiElement.outerRange(range: IntRange): IntRange {
     val startOffset = range.first
     val endOffset = range.last
     val fileText = containingFile.text
-    val startOfFirstLine =
-        fileText
-            .lastIndexOf('\n', startOffset - 1)
-            .takeIf { i -> i != -1 && fileText.substring(i, startOffset).isBlank() }
-            ?: startOffset
-    val endOfLastLine =
-        fileText
-            .indexOf('\n', endOffset)
-            .takeIf { i -> i != -1 && fileText.substring(endOffset, i).isBlank() }
-            ?: endOffset
+    val startOfFirstLine = fileText.startOfLine(startOffset) ?: startOffset
+    val endOfLastLine = fileText.endOfLine(endOffset) ?: endOffset
 
     assert(startOfFirstLine <= endOfLastLine && startOfFirstLine <= startOffset && endOfLastLine >= endOffset) {
         "Bad outer range ($startOffset, $endOffset) -> ($startOfFirstLine, $endOfLastLine)"
@@ -306,17 +310,7 @@ private fun PsiElement.outerRange(range: IntRange): IntRange {
 }
 
 private fun PsiElement.findIndent(): Int {
-    val startOffset = this.textRange.startOffset
-    val fileText = this.containingFile.text
-    val lineStartOffset =
-        fileText.lastIndexOf('\n', startOffset - 1)
-            .takeIf { it != -1 }?.plus(1) ?: return 0
-    val whiteSpaceCountAfterLineStart =
-        fileText.subSequence(lineStartOffset, startOffset + 1)
-            .indexOfFirst { !it.isWhitespace() }
-            .takeIf { it != -1 } ?: return 0
-
-    return whiteSpaceCountAfterLineStart
+    return containingFile.text.indentAt(textRange.startOffset) ?: -1
 }
 
 // TODO validation, unchecked casts
