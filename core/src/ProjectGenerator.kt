@@ -379,9 +379,10 @@ internal class ProjectGeneratorImpl(
                         val parent = stack.top as? WhenBlock
                             ?: error("when clause with no parent: $block")
                         val value = parent.expression.evaluate(variables)
+                        val matched = value in block.value.map { it.evaluate(variables) } // TODO types?
+                        conditions[parent] = matched || conditions[parent] ?: false
 
-                        // TODO types?
-                        if (value in block.value.map { it.evaluate(variables) }) {
+                        if (matched) {
                             append(source.text, block.outerStart, block.rangeStart, indent)
                             append(source.text, block.bodyStart, end, indent)
                             false

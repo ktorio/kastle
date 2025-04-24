@@ -185,25 +185,21 @@ data class GradlePlugin(
     val version: String? = null,
 )
 
-enum class SourceModuleType {
-    LIB,
-    APP;
+enum class SourceModuleType(val code: String) {
+    LIB("lib"),
+    JVM_APP("jvm/app"),
+    ANDROID_APP("android/app"),
+    IOS_APP("ios/app");
 
     companion object {
         val DEFAULT = LIB
 
-        fun parse(text: String) = when {
-            text == "lib" -> LIB
-            text.endsWith("app") -> APP
-            else -> throw IllegalArgumentException("Invalid module type: $text")
-        }
+        fun parse(text: String) = entries
+            .firstOrNull { it.code == text }
+            ?: throw IllegalArgumentException("Invalid module type: $text")
     }
 
-    override fun toString(): String =
-        when(this) {
-            LIB -> "lib"
-            APP -> "jvm/app" // TODO
-        }
+    override fun toString(): String = code
 }
 
 fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
@@ -239,31 +235,37 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
 sealed interface Dependency {
     companion object {
         // TODO make gud
-        fun parse(text: String): Dependency {
+        fun parse(input: String): Dependency {
+            val exported = input.endsWith(":exported")
+            val text = if (exported) input.substringBeforeLast(":exported") else input
             if (text.startsWith("$"))
-                return CatalogReference(text.substring(1))
+                return CatalogReference(text.substring(1), exported = exported)
             if (!text.contains(":"))
-                return ModuleDependency(text)
+                return ModuleDependency(text, exported = exported)
 
             val segments = text.split(':', limit = 3)
             require(segments.size == 3) { "Invalid dependency string: $text" }
             val (group, artifact, version) = segments
-            return ArtifactDependency(group, artifact, version)
+            return ArtifactDependency(group, artifact, version, exported = exported)
         }
     }
+
+    val exported: Boolean
 }
 
 @Serializable
 data class CatalogReference(
     val key: String,
     val artifact: ArtifactDependency? = null,
+    override val exported: Boolean = false,
 ): Dependency
 
 @Serializable
 data class ArtifactDependency(
     val group: String,
     val artifact: String,
-    val version: String
+    val version: String,
+    override val exported: Boolean = false,
 ): Dependency {
     override fun toString(): String =
         "$group:$artifact:$version"
@@ -272,6 +274,7 @@ data class ArtifactDependency(
 @Serializable
 data class ModuleDependency(
     val path: String,
+    override val exported: Boolean = false,
 ): Dependency {
     override fun toString(): String = path
 }

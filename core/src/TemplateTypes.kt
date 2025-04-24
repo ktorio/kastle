@@ -164,9 +164,9 @@ data class IfBlock(
     override fun toString(): String = "if(\"$expression\")"
 }
 
+// Used in both if/when, evaluated from context
 @Serializable
 data class ElseBlock(
-    // override val expression: Expression,
     override var position: BlockPosition,
 ): StructuralBlock {
     override fun toString(): String = "else"

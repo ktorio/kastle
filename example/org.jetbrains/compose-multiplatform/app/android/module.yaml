@@ -2,7 +2,7 @@ product: android/app
 
 dependencies:
   - ../common
-  - $compose.desktop.currentOs
+  - androidx.activity:activity-compose:1.7.2
 
 settings:
   compose: enabled

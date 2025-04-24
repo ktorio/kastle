@@ -33,26 +33,24 @@ fun String.appendPath(vararg paths: String): String =
         .map { it.trim('/') }
         .joinToString("/")
 
-fun String.startOfLine(index: Int): Int? {
+fun String.startOfLine(index: Int, ignoreNonWhitespace: Boolean = false): Int? {
     for (i in index - 1 downTo 0) {
         val ch = get(i)
         if (ch == '\n')
             return i
-        else if (ch.isWhitespace())
-            continue
-        return null
+        else if (!ch.isWhitespace() && !ignoreNonWhitespace)
+            return null
     }
     return null
 }
 
-fun String.endOfLine(index: Int): Int? {
+fun String.endOfLine(index: Int, ignoreNonWhitespace: Boolean = false): Int? {
     for (i in index + 1 until length) {
         val ch = get(i)
         if (ch == '\n')
             return i
-        else if (ch.isWhitespace())
-            continue
-        return null
+        else if (!ch.isWhitespace() && !ignoreNonWhitespace)
+            return null
     }
     return null
 }

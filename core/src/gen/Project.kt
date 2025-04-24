@@ -129,15 +129,18 @@ fun Dependency.toVariableMap() =
             "group" to group,
             "artifact" to artifact,
             "version" to version,
+            "exported" to exported,
         )
         is ModuleDependency -> mapOf(
             "type" to "project",
             "path" to path,
+            "exported" to exported,
         )
         // TODO find artifact from catalog
         is CatalogReference -> mapOf(
             "type" to "catalog",
-            "key" to key
+            "key" to key,
+            "exported" to exported,
         )
     }
 

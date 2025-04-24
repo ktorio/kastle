@@ -1,32 +1,24 @@
 package org.jetbrains.kastle
 
 import com.charleskorn.kaml.Yaml
-import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
-import com.charleskorn.kaml.YamlNode
-import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlMap
-import com.charleskorn.kaml.yamlScalar
 import kotlinx.coroutines.flow.*
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readString
+import org.jetbrains.kastle.amper.readDependencies
+import org.jetbrains.kastle.amper.readHeader
 import org.jetbrains.kastle.io.*
-import org.jetbrains.kastle.io.resolve
-import org.jetbrains.kastle.templates.HandlebarsTemplateEngine
-import org.jetbrains.kastle.templates.KotlinCompilerTemplateEngine
-import org.jetbrains.kastle.templates.KotlinExpressionParser
-import org.jetbrains.kastle.templates.TemplateFormat
-import org.jetbrains.kastle.templates.extensionFormat
+import org.jetbrains.kastle.templates.*
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtFile
 import org.tomlj.Toml
-import kotlin.collections.*
 
 private const val MANIFEST_YAML = "manifest.yaml"
 private const val GROUP_YAML = "group.yaml"
@@ -96,35 +88,9 @@ class LocalPackRepository(
                 Yaml.default.decodeFromYamlNode<AmperSettings>(node)
             }
 
-            // TODO not entirely correct
-            val (moduleType, platforms) = when(val productNode = amperYaml?.get<YamlNode>("product")) {
-                is YamlScalar -> SourceModuleType.parse(productNode.content) to listOf("jvm")
-                is YamlMap -> {
-                    val productType = SourceModuleType.parse(productNode.get<YamlScalar>("type")?.content ?: "lib")
-                    val platforms = productNode.get<YamlList>("platforms")?.items?.map { it.yamlScalar.content }.orEmpty()
-                    productType to platforms
-                }
-                else -> SourceModuleType.LIB to listOf("jvm")
-            }
-
-            // TODO replace with correct library reference
-            val isNotTemplateDSL: (String) -> Boolean = { !it.endsWith("/templates") }
-
-            fun YamlMap?.readDependencies(key: String) =
-                this?.get<YamlList>(key)
-                    ?.items?.asSequence()?.map { it.yamlScalar.content }.orEmpty()
-                    .filter(isNotTemplateDSL)
-                    .map(Dependency::parse)
-                    .map { dependency ->
-                        when(dependency) {
-                            is ArtifactDependency, is ModuleDependency -> dependency
-                            is CatalogReference -> dependency.copy(artifact = versionsLookup[dependency.key])
-                        }
-                    }
-                    .toList()
-
-            val dependencies = amperYaml.readDependencies("dependencies")
-            val testDependencies = amperYaml.readDependencies("testDependencies")
+            val (moduleType, platforms) = amperYaml.readHeader()
+            val dependencies = amperYaml.readDependencies("dependencies", versionsLookup)
+            val testDependencies = amperYaml.readDependencies("testDependencies", versionsLookup)
 
             val sources = mutableListOf<SourceTemplate>()
             val resources = mutableListOf<SourceTemplate>()
@@ -137,17 +103,24 @@ class LocalPackRepository(
                 if (!fs.exists(sourceFolder))
                     continue
 
-                // Properties are supplied both from the manifest and from declarations in the source files
+                // properties are supplied both from the manifest and from declarations in the source files
                 val kotlinAnalyzer = KotlinCompilerTemplateEngine(sourceFolder, repository)
                 sources += kotlinAnalyzer.ktFiles.map { sourceFile ->
                     kotlinAnalyzer.read(sourceFolder.relativeTo(modulePath), sourceFile, properties)
                         .copy(packId = packId)
                 }
+
+                // include non-kotlin files as hbs templates
+                sources += fs.list(sourceFolder).filter {
+                    !it.name.endsWith(".kt")
+                }.map { file ->
+                    textFileTemplateEngine.read(modulePath, file).copy(packId = packId)
+                }
+
                 val resourcesFolder = modulePath.resolve("resources")
                 if (fs.exists(resourcesFolder)) {
                     resources += fs.list(resourcesFolder).map { file ->
-                        textFileTemplateEngine.read(file)
-                            .copy(packId = packId)
+                        textFileTemplateEngine.read(modulePath, file).copy(packId = packId)
                     }
                 }
             }
@@ -155,7 +128,7 @@ class LocalPackRepository(
             // additional sources defined for module use only the text file templating engine
             for (manifestSource in manifestYaml?.sources.orEmpty()) {
                 sources += when(val text = manifestSource.text) {
-                    null -> textFileTemplateEngine.read(modulePath.resolve(manifestSource.path!!))
+                    null -> textFileTemplateEngine.read(modulePath, modulePath.resolve(manifestSource.path!!))
                     else -> textFileTemplateEngine.read(manifestSource.target!!, text)
                 }.copy(packId = packId)
             }

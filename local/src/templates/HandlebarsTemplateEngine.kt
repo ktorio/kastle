@@ -7,6 +7,7 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.BlockPosition.Companion.bumpEnd
+import org.jetbrains.kastle.io.relativeTo
 import org.jetbrains.kastle.utils.Expression.StringLiteral
 import org.jetbrains.kastle.utils.Expression.VariableRef
 import org.jetbrains.kastle.utils.ListStack
@@ -27,13 +28,13 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         private val variablePattern = Regex("[\\w_.]+")
     }
 
-    fun read(file: Path): SourceTemplate {
+    fun read(modulePath: Path, file: Path): SourceTemplate {
         val template = fs.source(file).buffered()
             .readByteArray()
             .decodeToString()
         return SourceTemplate(
             text = template,
-            target = "file:$file",
+            target = "file:${file.relativeTo(modulePath).toString().removeSuffix(".hbs")}",
             blocks = findBlocks(template).toList(),
         )
     }
@@ -54,19 +55,28 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                 val startOfLine = // template.startOfLine(match.range.start) ?: match.range.start
                      if (helper != null) template.startOfLine(match.range.start) ?: match.range.start else match.range.start
                 val text = match.groups["content"]?.value.orEmpty().trim()
-                val indent = stack.top?.takeIf {
-                    template.substring(it.match.range.endInclusive + 1, match.range.start).isBlank()
+                // if when clause or empty lines from parent
+                val indent = stack.top?.takeIf { parent ->
+                    parent.helper == null || isEmptyLines(template, parent, match)
                 }?.indent ?: template.indentAt(match.range.start) ?: -1
 
                 if (helper == null && variablePattern.matches(text)) {
                     when(text) {
                         ELSE -> {
-                            val previousIf = stack.pop() ?: error("Unexpected else outside if")
-                            require(previousIf.helper == IF) { "Unexpected else outside if" }
-                            val ifBlock = previousIf.toBlock(match)
-                            yield(ConditionalBlock(ifBlock.position)) // TODO position not right...
-                            yield(ifBlock)
-                            stack += BlockMatch(match, indent, helper = ELSE, expression = previousIf.expression)
+                            val parent = stack.pop() ?: error("Bad else placement: missing parent")
+                            when(parent.helper) {
+                                IF -> {
+                                    val ifBlock = parent.toBlock(match)
+                                    yield(ConditionalBlock(ifBlock.position)) // TODO position not right...
+                                    yield(ifBlock)
+                                    stack += BlockMatch(match, indent, helper = ELSE)
+                                }
+                                null -> {
+                                    require(stack.top?.helper == WHEN) { "Bad else placement: missing when parent" }
+                                    yield(parent.toBlock(match, inclusive = false))
+                                    stack += BlockMatch(match, indent, helper = ELSE)
+                                }
+                            }
                         }
                         else -> yield(InlineValue(
                             expression = VariableRef(text),
@@ -84,18 +94,18 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                             // conditional wrapper
                             require(parent.helper in setOf(IF, ELSE)) { "Unexpected close term: $text" }
                             yield(ConditionalBlock(block.position))
+                            yield(block)
                         }
                         WHEN -> {
-                            require(parent.helper == null) { "Unexpected close term: $text" }
+                            require(parent.helper == null || parent.helper == ELSE) { "Unexpected close term: $text" }
                             val whenParent = stack.pop() ?: error("Expected when clause: $text")
                             require(whenParent.helper == WHEN) { "Unexpected close term: $text" }
                             yield(whenParent.toBlock(match))
+                            yield(block)
                         }
-                        parent.helper -> {}
+                        parent.helper -> yield(block)
                         else -> error("Unexpected close term: $text")
                     }
-
-                    yield(block)
                 } else {
                     BlockMatch(match, indent, startOfLine).let { blockMatch ->
                         when (blockMatch.helper) {
@@ -144,6 +154,13 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         }
     }
 
+    private fun isEmptyLines(template: String, parent: BlockMatch, child: MatchResult): Boolean {
+        val endOfParent = parent.match.range.endInclusive + 1
+        val startOfLine = template.startOfLine(child.range.start, ignoreNonWhitespace = true) ?: return false
+        if (startOfLine <= endOfParent) return true
+        return template.substring(endOfParent, startOfLine).isBlank()
+    }
+
     data class BlockMatch(
         val match: MatchResult,
         val indent: Int,
@@ -178,6 +195,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                 val value = expression?.let {
                     StringLiteral(it.unwrapQuotes())
                 } ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}")
+
                 WhenClauseBlock(
                     value = listOf(value),
                     position = position(endMatch, inclusive),

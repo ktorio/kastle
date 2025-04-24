@@ -1,10 +1,10 @@
-product:
-  type: jvm/app
-  platforms: [jvm]
+
+product: android/app
+
 
 dependencies:
-    - ../common
-    - $compose.desktop.currentOs
+  - ../common
+  - androidx.activity:activity-compose:1.7.2
 
 settings:
   compose: enabled

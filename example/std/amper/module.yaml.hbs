@@ -1,18 +1,21 @@
+{{#when _module.type }}
+{{ "lib" }}
 product:
-  type: {{ _module.type }}
-  {{#if _module.platforms}}
+  type: lib
   platforms: {{ _module.platforms }}
-  {{/if}}
+{{ else }}
+product: {{ _module.type }}
+{{/when}}
 
 dependencies:
   {{#each _module.dependencies}}
     {{#when type}}
     {{ "maven" }}
-    - {{ group }}:{{ artifact }}:{{ version }}
+    - {{ group }}:{{ artifact }}:{{ version }}{{#if exported}}: exported{{/if}}
     {{ "project" }}
-    - {{ path }}
+    - {{ path }}{{#if exported}}: exported{{/if}}
     {{ "catalog" }}
-    - ${{ key }}
+    - ${{ key }}{{#if exported}}: exported{{/if}}
     {{/when}}
   {{/each}}
 
