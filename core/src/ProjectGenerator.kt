@@ -5,16 +5,17 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.io.Buffer
 import kotlinx.io.writeCodePointValue
 import kotlinx.io.writeString
+import org.jetbrains.kastle.gen.ProjectResolver
 import org.jetbrains.kastle.gen.getVariables
-import org.jetbrains.kastle.gen.load
+import org.jetbrains.kastle.gen.plus
 import org.jetbrains.kastle.gen.toVariableEntry
+import org.jetbrains.kastle.gradle.GradleTransformation
 import org.jetbrains.kastle.utils.*
-import kotlin.collections.emptyList
 
 interface ProjectGenerator {
     companion object {
         fun fromRepository(repository: PackRepository): ProjectGenerator =
-            ProjectGeneratorImpl(repository)
+            ProjectGeneratorImpl(repository, ProjectResolver.Default + GradleTransformation)
     }
 
     suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry>
@@ -22,6 +23,7 @@ interface ProjectGenerator {
 
 internal class ProjectGeneratorImpl(
     private val repository: PackRepository,
+    private val projectResolver: ProjectResolver,
     private val log: (() -> String) -> Unit = { println(it()) }
 ) : ProjectGenerator {
     companion object {
@@ -30,7 +32,7 @@ internal class ProjectGeneratorImpl(
     }
 
     override suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
-        val project = projectDescriptor.load(repository)
+        val project = projectResolver.resolve(projectDescriptor, repository)
         log { project.name }
         log {
             buildString {
@@ -366,10 +368,12 @@ internal class ProjectGeneratorImpl(
 
                     is Slot -> {
                         val indentString = indent.stringOf(' ')
-                        append(source.text, block.outerStart, block.rangeStart)
-                        append(slots.joinToString("\n\n$indentString") {
-                            it.text.indent(indentString)
-                        })
+                        if (slots.isNotEmpty()) {
+                            append(source.text, block.outerStart, block.rangeStart)
+                            append(slots.joinToString("\n\n$indentString") {
+                                it.text.indent(indentString)
+                            })
+                        }
                         slots.isEmpty()
                     }
 
@@ -415,12 +419,10 @@ internal class ProjectGeneratorImpl(
                         when (block) {
                             is InlineValue -> {
                                 // TODO fail on nulls?
-                                append(
-                                    when {
-                                        value is String && !block.embedded -> "\"$value\""
-                                        else -> value.toString()
-                                    }
-                                )
+                                when {
+                                    value is String && !block.embedded -> append("\"$value\"")
+                                    else -> append(value.toString())
+                                }
                                 false
                             }
                             is IfBlock -> {

@@ -211,11 +211,17 @@ private fun collect(vararg lists: Collection<out Block>): List<Block> {
     for (i in blocks.indices) {
         if (i == 0) continue
         val current = blocks[i]
-        val previous = blocks[i - 1]
-        if (current !in previous) continue
-        // TODO maybe unwanted
 
-        current.position = current.position.copy(indent = previous.position.indent)
+        // TODO not always applicable, check content
+        for (j in i - 1 downTo 0) {
+            val previous = blocks[j]
+            if (current in previous) {
+                current.position = current.position.copy(
+                    indent = previous.position.indent
+                )
+                break
+            }
+        }
     }
     return blocks
 }

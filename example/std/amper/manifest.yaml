@@ -2,12 +2,12 @@ id: std/amper
 name: Amper
 description: A simple Kotlin build system
 version: 1.0.0
-commonSources:
-  - path: module.yaml.hbs
-    target: file:module.yaml
 rootSources:
   - path: project.yaml.hbs
     target: file:project.yaml
     if: _project.modules.size() > 1
   - path: amper
   - path: amper.bat
+commonSources:
+  - path: module.yaml.hbs
+    target: file:module.yaml

@@ -1,6 +1,7 @@
 
 product: jvm/app
 
+
 dependencies:
   - io.ktor:ktor-server-core:3.0.3
   - io.ktor:ktor-server-cio:3.0.3

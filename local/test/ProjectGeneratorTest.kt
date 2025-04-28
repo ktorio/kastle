@@ -129,13 +129,31 @@ abstract class ProjectGeneratorTest {
     }
 
     @Test
-    fun `compose multiplatform`() = runTest {
+    fun `compose multiplatform gradle`() = runTest {
+        generate(
+            packs = listOf(
+                "std/gradle",
+                "org.jetbrains/compose-multiplatform",
+            ),
+            properties = mapOf(
+                VariableId.parse("std/gradle/versionCatalogEnabled") to "true",
+            )
+        )
+        assertFilesAreEqualWithSnapshot(
+            "$snapshots/cmp-gradle",
+            projectDir.toString(),
+            replace = replaceSnapshot,
+        )
+    }
+
+    @Test
+    fun `compose multiplatform amper`() = runTest {
         generateWithPacks(
             "std/amper",
             "org.jetbrains/compose-multiplatform",
         )
         assertFilesAreEqualWithSnapshot(
-            "$snapshots/compose-multiplatform",
+            "$snapshots/cmp-amper",
             projectDir.toString(),
             replace = replaceSnapshot,
         )

@@ -40,9 +40,9 @@ class LocalPackRepository(
         override fun packIds(): Flow<PackId> =
             remoteRepository.packIds()
 
-        override suspend fun get(id: PackId): PackDescriptor? =
-            cache[id] ?: fromLocalOrRemote(id)?.also {
-                cache[id] = it
+        override suspend fun get(packId: PackId): PackDescriptor? =
+            cache[packId] ?: fromLocalOrRemote(packId)?.also {
+                cache[packId] = it
             }
 
         override suspend fun slot(slotId: SlotId): SlotDescriptor? =
@@ -170,6 +170,7 @@ class LocalPackRepository(
                     kotlinAnalyzer.read(Path(""), psiFile as KtFile, properties)
                         .copy(
                             packId = packId,
+                            target = target,
                             condition = conditionExpression
                         )
                 }

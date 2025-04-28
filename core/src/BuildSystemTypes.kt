@@ -121,6 +121,13 @@ operator fun ProjectModules.plus(other: ProjectModules): ProjectModules =
     }
     else merge(this.modules, other.modules)
 
+fun ProjectModules.map(mapping: (SourceModule) -> SourceModule): ProjectModules =
+    when (this) {
+        is Empty -> this
+        is Single -> Single(mapping(module))
+        is Multi -> Multi(modules.map { mapping(it) })
+    }
+
 fun ProjectModules.flatten(): ProjectModules =
     when (this) {
         is Empty -> this

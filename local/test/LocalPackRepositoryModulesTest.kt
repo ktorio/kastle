@@ -2,7 +2,7 @@ package org.jetbrains.kastle
 
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.kastle.gen.Project
-import org.jetbrains.kastle.gen.load
+import org.jetbrains.kastle.gen.ProjectResolver
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -38,7 +38,7 @@ class LocalPackRepositoryModulesTest {
             properties = properties,
             packs = packs.map(PackId::parse),
         )
-        return descriptor.load(repository)
+        return ProjectResolver.Default.resolve(descriptor, repository)
     }
 
 }

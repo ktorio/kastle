@@ -20,8 +20,9 @@ operator fun Variables.get(key: String): Any? {
         if (referenceChain.head !in map) continue
         var value = map[referenceChain.remove()]
         while (!referenceChain.isEmpty()) {
-            val mapValue = value as? Map<*, *> ?: return null
+            val mapValue = value.asMap() ?: return null
             val key = referenceChain.remove() ?: return null
+            println(mapValue.toString())
             value = mapValue.getCustom(key)
         }
         return value
@@ -29,8 +30,17 @@ operator fun Variables.get(key: String): Any? {
     return null
 }
 
+private fun Any?.asMap(): Map<*, *>? =
+    when(this) {
+        is Map<*, *> -> this
+        is Collection<*> -> mapOf<String, Any>("size" to size)
+        is String -> mapOf<String, Any>("length" to length)
+        // TODO other stuff
+        else -> null
+    }
+
 private fun Map<*, *>.getCustom(key: String): Any? =
-    when(key) {
+    get(key) ?: when(key) {
         "entries" -> entries.map {
             mapOf(
                 "key" to it.key,
