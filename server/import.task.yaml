@@ -3,5 +3,5 @@ type: jvm/external-task
 module: ../tasks/bundle
 
 programArguments:
-  - --input-dir=../example
+  - --input-dir=../repository
   - --output-dir=./json

@@ -1,4 +1,4 @@
-package org.jetbrains.kastle.ui
+package org.jetbrains.kastle.server.ui
 
 import io.ktor.htmx.ExperimentalHtmxApi
 import io.ktor.htmx.html.hx
@@ -46,99 +46,89 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
             }
         }
         main {
-            collapsibleSection(id = "form-panel", title = "Settings", checked = true) {
-                id = "form-panel-contents"
+            tabList("main-tabs") {
+                tab(id = "form-panel", title = "Settings", checked = true) {
+                    id = "form-panel-contents"
 
-                form {
-                    div("properties") {
-                        h3 {
-                            +"Project"
+                    form {
+                        div("properties") {
+                            h3 {
+                                +"Project"
+                            }
+                            div("field") {
+                                label {
+                                    htmlFor = "group-name"
+                                    +"Group"
+                                }
+                                input(type = InputType.text) {
+                                    id = "group-name"
+                                    name = "group"
+                                    placeholder = "com.example"
+                                    value = "com.example"
+                                }
+                            }
+                            div("field") {
+                                label {
+                                    htmlFor = "project-name"
+                                    +"Artifact"
+                                }
+                                input(type = InputType.text) {
+                                    id = "project-name"
+                                    name = "name"
+                                    placeholder = "generated"
+                                    value = "generated"
+                                }
+                            }
                         }
-                        div("field") {
-                            label {
-                                htmlFor = "group-name"
-                                +"Group"
-                            }
-                            input(type = InputType.text) {
-                                id = "group-name"
-                                name = "group"
-                                placeholder = "com.example"
-                                value = "com.example"
-                            }
+                        div {
+                            id = "dynamic-properties"
                         }
-                        div("field") {
-                            label {
-                                htmlFor = "project-name"
-                                +"Artifact"
-                            }
-                            input(type = InputType.text) {
-                                id = "project-name"
-                                name = "name"
-                                placeholder = "generated"
-                                value = "generated"
-                            }
+                        div {
+                            id = "selected-packs-config"
                         }
-                    }
-                    div {
-                        id = "dynamic-properties"
-                    }
-                    div {
-                        id = "selected-packs-config"
                     }
                 }
-            }
-            collapsibleSection(id = "pack-details", title = "Module Details") {
-                id = "pack-details-docs"
-                attributes.hx {
-                    get = "/pack/docs"
-                    trigger = "load"
-                }
+                tab(id = "pack-details", title = "Module Details") {
+                    id = "pack-details-docs"
 
-                +"No details available."
-            }
-            collapsibleSection(id = "preview-panel", title = "Preview") {
-                div {
-                    id = "preview-panel-controls"
-                    button {
-                        attributes.hx {
-                            get = "/project/listing"
-                            target = "#preview-panel-tree"
-                            trigger = "click"
-                        }
-                        +"Refresh"
-                    }
-                }
-                div {
-                    id = "preview-panel-tree"
+                    attributes["data-tab"] = "pack-details-tab"
                     attributes.hx {
-                        get = "/project/listing"
+                        get = "/pack/docs"
                         trigger = "load"
                     }
-                }
-                div {
-                    id = "preview-panel-contents"
-                }
-            }
-        }
-    }
-}
 
-private fun FlowContent.collapsibleSection(id: String, title: String, checked: Boolean = false, contents: DIV.() -> Unit) {
-    section("collapsible") {
-        this.id = id
-        input(type = InputType.checkBox) {
-            this.id = "$id-checkbox"
-            this.checked = checked
-        }
-        label {
-            htmlFor = "$id-checkbox"
-            div {
-                +title
+                    +"No details available."
+                }
+                tab(id = "preview-panel", title = "Preview") {
+                    div {
+                        id = "preview-panel-container"
+
+                        div {
+                            id = "preview-panel-controls"
+
+                            button {
+                                attributes.hx {
+                                    get = "/project/listing"
+                                    target = "#preview-panel-tree"
+                                    trigger = "click"
+                                }
+                                +"Refresh"
+                            }
+                        }
+                        div {
+                            id = "preview-panel-tree"
+
+                            attributes.hx {
+                                get = "/project/listing"
+                                trigger = "load"
+                            }
+                        }
+                        div {
+                            id = "preview-panel-contents"
+                        }
+                    }
+                }
             }
-            div("icon") {}
-        }
-        div("contents") {
-            contents()
         }
     }
 }
@@ -157,8 +147,7 @@ private fun UL.packListItem(pack: PackDescriptor) {
             this.id = inputId
             this.value = pack.id.toString()
         }
-        label {
-            htmlFor = inputId
+        verticalNavLabel(inputId, "pack-list") {
             div {
                 +pack.name
             }

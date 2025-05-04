@@ -1,8 +1,9 @@
-package org.jetbrains.kastle.ui
+package org.jetbrains.kastle.server.ui
 
 import io.ktor.htmx.ExperimentalHtmxApi
 import io.ktor.htmx.html.hx
 import kotlinx.html.*
+import kotlin.collections.iterator
 
 fun HTML.fileTreeHtml(fileNames: List<String>, selectedFile: String? = null) {
     body {
@@ -44,8 +45,7 @@ private fun UL.buildTree(
                             trigger = updatePreviewTrigger
                         }
                     }
-                    label {
-                        htmlFor = inputId
+                    verticalNavLabel(inputId, "preview-file-nav") {
                         +filePath.first()
                     }
                 }
@@ -54,13 +54,13 @@ private fun UL.buildTree(
             // Handle folders with nested contents
             li("preview-folder") {
                 val folderPath = (prefix + key).joinToString("/")
-                val inputId = "preview-folder/$key"
+                val inputId = "preview-folder/$folderPath"
                 val parentOfSelected = selectedFile?.startsWith(folderPath) == true
                 input(type = InputType.checkBox) {
                     id = inputId
                     checked = parentOfSelected
                 }
-                label {
+                verticalNavLabel(inputId, "preview-file-nav") {
                     htmlFor = inputId
                     +key
                 }

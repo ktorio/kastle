@@ -265,7 +265,18 @@ data class CatalogReference(
     val key: String,
     val artifact: ArtifactDependency? = null,
     override val exported: Boolean = false,
-): Dependency
+): Dependency {
+    override fun toString(): String = buildString {
+        append('$')
+        append(key)
+// TODO artifact
+//        if (artifact != null) {
+//            append(":")
+//            append(artifact)
+//        }
+        if (exported) append(":exported")
+    }
+}
 
 @Serializable
 data class ArtifactDependency(
@@ -274,8 +285,10 @@ data class ArtifactDependency(
     val version: String,
     override val exported: Boolean = false,
 ): Dependency {
-    override fun toString(): String =
-        "$group:$artifact:$version"
+    override fun toString(): String = buildString {
+        append("$group:$artifact:$version")
+        if (exported) append(":exported")
+    }
 }
 
 @Serializable
@@ -283,5 +296,8 @@ data class ModuleDependency(
     val path: String,
     override val exported: Boolean = false,
 ): Dependency {
-    override fun toString(): String = path
+    override fun toString(): String = buildString {
+        append(path)
+        if (exported) append(":exported")
+    }
 }

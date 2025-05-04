@@ -1,4 +1,4 @@
-package org.jetbrains.kannotator.client
+package org.jetbrains.kastle.client
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -27,7 +27,7 @@ fun HttpClient.asRepository(url: String? = null): RemoteRepository =
         }
     })
 
-class RemoteRepository constructor(private val client: HttpClient): PackRepository {
+class RemoteRepository(private val client: HttpClient): PackRepository {
     constructor(url: Url) : this(HttpClient {
         install(DefaultRequest) {
             url(url)

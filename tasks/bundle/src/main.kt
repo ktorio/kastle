@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.io.JsonFilePackRepository.Companion.exportToJson
+import org.jetbrains.kastle.logging.ConsoleLogger
 import java.io.File
 
 fun main(args: Array<String>) =
@@ -23,8 +24,10 @@ class CompileLocalRepository : CliktCommand() {
         .file()
         .default(File("build/repository"))
 
+    val logger = ConsoleLogger()
+
     override fun run() {
-        println("Compiling local repository from ${inputDir.absolutePath} to ${outputDir.absolutePath}")
+        logger.info { "Compiling local repository from ${inputDir.absolutePath} to ${outputDir.absolutePath}" }
         runBlocking {
             LocalPackRepository(Path(inputDir.absolutePath))
                 .exportToJson(Path(outputDir.absolutePath), json = Json {

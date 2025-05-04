@@ -1,4 +1,4 @@
-package org.jetbrains.kastle.ui
+package org.jetbrains.kastle.server.ui
 
 import kotlinx.html.*
 import org.jetbrains.kastle.PackDescriptor

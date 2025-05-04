@@ -1,11 +1,14 @@
 package org.jetbrains.kastle.io
 
+import kotlinx.coroutines.flow.filter
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.PackDescriptor
 import org.jetbrains.kastle.PackRepository
+import org.jetbrains.kastle.logging.ConsoleLogger
+import org.jetbrains.kastle.logging.Logger
 import kotlin.math.exp
 
 class JsonFilePackRepository(
@@ -25,6 +28,7 @@ class JsonFilePackRepository(
             clear: Boolean = true,
             fs: FileSystem = SystemFileSystem,
             json: Json = Json,
+            logger: Logger = ConsoleLogger(),
         ): JsonFilePackRepository {
             if (clear)
                 fs.deleteRecursively(path)
@@ -34,7 +38,7 @@ class JsonFilePackRepository(
                 try {
                     export.add(pack)
                 } catch (e: Exception) {
-                    println("Failed to export pack ${pack.id}: ${e.message}")
+                    logger.info { "Failed to export pack ${pack.id}: ${e.message}" }
                 }
             }
             return export

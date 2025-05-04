@@ -25,7 +25,7 @@ fun interface ProjectResolver {
             val properties = packs.flatMap { pack ->
                 pack.properties.map { property ->
                     VariableId(pack.id, property.key).let { variableId ->
-                        variableId to (descriptor.properties[variableId] ?: property.default)?.let(property.type::parse)
+                        variableId to readValue(descriptor, variableId, property)
                     }
                 }
             }.toMap()
@@ -38,6 +38,19 @@ fun interface ProjectResolver {
                 moduleSources = moduleSources + rootSourceFiles,
                 commonSources = commonSourceFiles,
             )
+        }
+
+        private fun readValue(
+            descriptor: ProjectDescriptor,
+            variableId: VariableId,
+            property: Property
+        ): Any? {
+            try {
+                val value = descriptor.properties[variableId] ?: property.default
+                return value?.let(property.type::parse)
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Failed to read property $variableId: ${e.message}", e)
+            }
         }
 
         // Add root sources

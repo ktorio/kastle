@@ -1,13 +1,13 @@
-package org.jetbrains.kastle.ui
+package org.jetbrains.kastle.server.ui
 
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 
 object Markdown {
-    val parser by lazy {
+    val parser: Parser by lazy {
         Parser.builder().build()
     }
-    val renderer by lazy {
+    val renderer: HtmlRenderer by lazy {
         HtmlRenderer.builder().build()
     }
 }

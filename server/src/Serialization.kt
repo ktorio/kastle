@@ -1,4 +1,4 @@
-package org.jetbrains.kastle
+package org.jetbrains.kastle.server
 
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*

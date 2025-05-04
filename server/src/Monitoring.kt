@@ -1,4 +1,4 @@
-package org.jetbrains.kastle
+package org.jetbrains.kastle.server
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.install

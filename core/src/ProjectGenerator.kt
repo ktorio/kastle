@@ -10,8 +10,10 @@ import org.jetbrains.kastle.gen.getVariables
 import org.jetbrains.kastle.gen.plus
 import org.jetbrains.kastle.gen.toVariableEntry
 import org.jetbrains.kastle.gradle.GradleTransformation
+import org.jetbrains.kastle.logging.ConsoleLogger
+import org.jetbrains.kastle.logging.LogLevel
+import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.*
-
 interface ProjectGenerator {
     companion object {
         fun fromRepository(repository: PackRepository): ProjectGenerator =
@@ -21,10 +23,10 @@ interface ProjectGenerator {
     suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry>
 }
 
-internal class ProjectGeneratorImpl(
+class ProjectGeneratorImpl(
     private val repository: PackRepository,
     private val projectResolver: ProjectResolver,
-    private val log: (() -> String) -> Unit = { println(it()) }
+    private val log: Logger = ConsoleLogger(),
 ) : ProjectGenerator {
     companion object {
         val startOfLine = Regex("\n\\s*")
@@ -33,8 +35,8 @@ internal class ProjectGeneratorImpl(
 
     override suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
         val project = projectResolver.resolve(projectDescriptor, repository)
-        log { project.name }
-        log {
+        log.trace { project.name }
+        log.trace {
             buildString {
                 for (module in project.moduleSources.modules) {
                     appendLine("  ${module.path.ifEmpty { "<root>" }}")
@@ -57,7 +59,7 @@ internal class ProjectGeneratorImpl(
             for (source in moduleSources) {
                 val packId = source.packId
                 if (packId == null) {
-                    log { "Skipping ${source.target}; missing pack ID" }
+                    log.warn { "Skipping ${source.target}; missing pack ID" }
                     continue
                 }
                 val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
@@ -67,7 +69,7 @@ internal class ProjectGeneratorImpl(
                 if (source.condition != null) {
                     val conditionValue = source.condition.evaluate(variables)
                     if (!conditionValue.isTruthy()) {
-                        log { "Skipping ${source.target}; condition ${source.condition} evaluated to $conditionValue" }
+                        log.debug { "Skipping ${source.target}; condition ${source.condition} evaluated to $conditionValue" }
                         continue
                     }
                 }
@@ -81,24 +83,26 @@ internal class ProjectGeneratorImpl(
                             project.slotSources,
                             projectDescriptor
                         )
-                        log { source.target }
+                        log.trace { source.target }
                         if (source.blocks.isNullOrEmpty()) {
                             append(source.text)
                             return@writeSourceFile
                         }
 
                         // print debug info to logs
-                        forEachBlock(source.blocks) { block ->
-                            log {
-                                buildString {
-                                    append("  ${block.range.toString().padEnd(12)} ")
-                                    append((block.indent.stringOf(' ') + block::class.simpleName).padEnd(30))
-                                    append("\"${block.outerContents.replace("\n", "\\n")}\"".padEnd(100))
-                                    append("\"${block.bodyContents?.replace("\n", "\\n")}\"")
+                        if (log.level == LogLevel.TRACE) {
+                            forEachBlock(source.blocks) { block ->
+                                log.trace {
+                                    buildString {
+                                        append("  ${block.range.toString().padEnd(12)} ")
+                                        append((block.indent.stringOf(' ') + block::class.simpleName).padEnd(30))
+                                        append("\"${block.outerContents.replace("\n", "\\n")}\"".padEnd(100))
+                                        append("\"${block.bodyContents?.replace("\n", "\\n")}\"")
+                                    }
                                 }
                             }
+                            log.trace { "" } // log empty line
                         }
-                        log { "" } // log empty line
 
                         forEachBlock(source.blocks) { block ->
                             // exited blocks
@@ -122,7 +126,7 @@ internal class ProjectGeneratorImpl(
                             // where to go next
                             start = when {
                                 child != null -> {
-                                    log { "  push $block" }
+                                    log.trace { "  push $block" }
                                     stack += block
                                     child!!.outerStart
                                 }
@@ -348,7 +352,7 @@ internal class ProjectGeneratorImpl(
 
             // TODO the indent should be based on this block's parents
             fun Block.close(indent: Int) {
-                log { "  pop $this" }
+                log.trace { "  pop $this" }
                 if (start < bodyEnd) {
                     append(source.text, start, bodyEnd, indent, trimEnd = true)
                 }

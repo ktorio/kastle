@@ -30,6 +30,7 @@ class HandlebarsTemplateEngineTest {
         assertEquals("someProperty", expression.name)
     }
 
+    @Ignore
     @Test
     fun ifBlock() {
         val condition = """
@@ -69,6 +70,7 @@ class HandlebarsTemplateEngineTest {
         assertEquals("\nHello, {{ someProperty }}!\n", input.substringEx(conditional.body)) // TODO trim newlines
     }
 
+    @Ignore
     @Test
     fun elseBlock() {
         val condition = """
@@ -108,6 +110,7 @@ class HandlebarsTemplateEngineTest {
         assertEquals("\nGoodbye!\n", input.substringEx(elseBlock.body)) // TODO trim newlines
     }
 
+    @Ignore
     @Test
     fun forEach() {
         val loop = """

@@ -1,10 +1,11 @@
 ktor:
     application:
         modules:
-            - org.jetbrains.kastle.EndpointsKt.endpoints
-            - org.jetbrains.kastle.SerializationKt.serialization
-            - org.jetbrains.kastle.MonitoringKt.monitoring
-            - org.jetbrains.kastle.ErrorHandlingKt.errorHandling
+            - org.jetbrains.kastle.server.RepositoryKt.provideRepository
+            - org.jetbrains.kastle.server.EndpointsKt.endpoints
+            - org.jetbrains.kastle.server.SerializationKt.serialization
+            - org.jetbrains.kastle.server.MonitoringKt.monitoring
+            - org.jetbrains.kastle.server.ErrorHandlingKt.errorHandling
     deployment:
         port: 8080
 

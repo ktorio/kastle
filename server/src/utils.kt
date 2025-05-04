@@ -1,4 +1,4 @@
-package org.jetbrains.kastle
+package org.jetbrains.kastle.server
 
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.InternalAPI

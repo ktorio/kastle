@@ -1,9 +1,10 @@
 modules:
   - core
+  - test
   - client
   - server
   - local
   - templates
   - tasks/bundle
-  - local/example/*/*
-  - local/example/*/*/*/*
+  - repository/*/*
+  - repository/*/*/*/*

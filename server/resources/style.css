@@ -5,6 +5,7 @@
     --text-color: #121212;
     --text-color-strong: #000000;
     --secondary-text-color: #686868;
+    --link-color: #007faa;
 }
 
 /* Reset CSS for lists */
@@ -25,6 +26,10 @@ button {
         transform: scale(1.05);
         text-shadow: 0 1px 2px var(--highlight-background-color);
     }
+}
+
+a {
+    color: var(--link-color);
 }
 
 /* Global stuff */
@@ -51,6 +56,7 @@ body {
         --secondary-text-color: #aaaaaa;
         --layer-background-color: #2b2b2b;
         --highlight-background-color: rgba(216, 255, 255, 0.2);
+        --link-color: #48b1d5;
     }
 }
 
@@ -71,6 +77,54 @@ pre {
 .spaced {
     letter-spacing: 0.1em;
 }
+.tabs {
+    > input[type="radio"] {
+        display: none;
+    }
+
+    > .tabs-header {
+        display: flex;
+        gap: 0.5rem;
+
+        > label {
+            display: block;
+            position: relative;
+            bottom: 0;
+            padding: 0.5em 1rem;
+            border: 1px solid var(--secondary-text-color);
+            background-color: var(--layer-background-color);
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+        }
+    }
+
+    > .tabs-content {
+        border: 1px solid var(--secondary-text-color);
+        min-height: 100px;
+        border-radius: 0 4px 4px 4px;
+        background-color: var(--layer-background-color);
+    }
+
+    .tab-content {
+        position: relative;
+        display: none;
+    }
+}
+.tabs > input[type="radio"]:nth-of-type(1):checked ~ .tabs-header > label:nth-of-type(1),
+.tabs > input[type="radio"]:nth-of-type(2):checked ~ .tabs-header > label:nth-of-type(2),
+.tabs > input[type="radio"]:nth-of-type(3):checked ~ .tabs-header > label:nth-of-type(3),
+.tabs > input[type="radio"]:nth-of-type(4):checked ~ .tabs-header > label:nth-of-type(4) {
+    bottom: -1px;
+}
+.tabs > input[type="radio"]:nth-of-type(1):checked ~ .tabs-content > .tab-content:nth-of-type(1),
+.tabs > input[type="radio"]:nth-of-type(2):checked ~ .tabs-content > .tab-content:nth-of-type(2),
+.tabs > input[type="radio"]:nth-of-type(3):checked ~ .tabs-content > .tab-content:nth-of-type(3),
+.tabs > input[type="radio"]:nth-of-type(4):checked ~ .tabs-content > .tab-content:nth-of-type(4) {
+    display: block;
+}
+
+
 .collapsible {
     display: flex;
     flex-direction: column;
@@ -211,7 +265,7 @@ form {
 #packs {
     box-sizing: border-box;
     grid-area: nav;
-    padding: 8px 0 8px;
+    padding: 8px 3px 8px 8px;
     overflow-y: auto;
 
     li {
@@ -250,16 +304,13 @@ main {
     box-sizing: border-box;
     grid-area: main;
     padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
     max-width: calc(100vw - 280px);
 
     > section {
         background-color: var(--layer-background-color);
     }
 }
-#form-panel {
+#form-panel-contents {
     form {
         display: flex;
         gap: 1em;
@@ -309,7 +360,11 @@ main {
     padding: 12px 24px 16px 24px;
 }
 
-#preview-panel > input:checked ~ .contents {
+#preview-panel-container {
+    display: flex;
+}
+
+#preview-panel-tree input:checked ~ .contents {
     position: relative;
     display: grid;
     grid-template-columns: 225px 1fr;
@@ -320,6 +375,10 @@ main {
     top: 12px;
     right: 16px;
     display: inline-block;
+}
+#preview-panel-container {
+    display: grid;
+    grid-template-columns: 225px 1fr;
 }
 #preview-panel-tree {
     overflow: auto;

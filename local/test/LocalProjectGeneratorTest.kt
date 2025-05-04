@@ -4,8 +4,8 @@ import kotlinx.io.files.Path
 import kotlin.test.Test
 
 class LocalProjectGeneratorTest: ProjectGeneratorTest() {
-    override fun createRepository(): PackRepository =
-        LocalPackRepository(Path("../example"))
+    override suspend fun createRepository(): PackRepository =
+        LocalPackRepository(Path("../repository"))
 
     // Needed for Intellij
     @Test

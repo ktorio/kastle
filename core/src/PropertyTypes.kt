@@ -10,12 +10,12 @@ data class Property(
     val key: String,
     val type: PropertyType = PropertyType.String,
     val default: String? = null,
-    val description: String? = null,
+    val label: String? = null,
 ) {
     override fun toString(): String = buildString {
         append("$key: $type")
         if (default != null) append(" = $default")
-        if (description != null) append(" /* $description */")
+        if (label != null) append(" /* $label */")
     }
 }
 

@@ -1,4 +1,4 @@
-package org.jetbrains.kastle
+package org.jetbrains.kastle.server
 
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode

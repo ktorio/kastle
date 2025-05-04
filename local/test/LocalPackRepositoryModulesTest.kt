@@ -11,7 +11,7 @@ private const val defaultGroup = "com.acme"
 
 class LocalPackRepositoryModulesTest {
 
-    private val root = "../example"
+    private val root = "../repository"
     private val repository = LocalPackRepository(root)
 
     @Test
@@ -21,7 +21,7 @@ class LocalPackRepositoryModulesTest {
             "org.jetbrains/compose-multiplatform",
         ))
         assertEquals(
-            listOf("android", "common", "desktop"),
+            listOf("android", "desktop", "shared"),
             project.moduleSources.modules.mapNotNull {
                 it.path.takeIf(String::isNotEmpty)
             }.sorted()

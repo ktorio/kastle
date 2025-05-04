@@ -4,7 +4,7 @@ import io.ktor.server.config.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.flow.toList
 import kotlinx.io.files.Path
-import org.jetbrains.kannotator.client.asRepository
+import org.jetbrains.kastle.client.asRepository
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.JsonFilePackRepository
 import kotlin.test.Test

@@ -22,7 +22,6 @@ operator fun Variables.get(key: String): Any? {
         while (!referenceChain.isEmpty()) {
             val mapValue = value.asMap() ?: return null
             val key = referenceChain.remove() ?: return null
-            println(mapValue.toString())
             value = mapValue.getCustom(key)
         }
         return value

@@ -1,4 +1,4 @@
-package org.jetbrains.kastle.ui
+package org.jetbrains.kastle.server.ui
 
 object Resources {
     val css: String by lazy {

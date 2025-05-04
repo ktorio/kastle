@@ -4,16 +4,16 @@ product:
 
 dependencies:
   - ../core: exported
-  - org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0: exported
-  - org.jetbrains.kotlinx:kotlinx-io-core:0.5.4: exported
-  - com.charleskorn.kaml:kaml:0.62.1
-  - org.jetbrains.kotlin:kotlin-compiler:2.0.21
-  - org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0
-  - org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3
-  - org.jetbrains.kotlinx:kotlinx-serialization-json-io:1.7.3
-  - org.jetbrains.kotlinx:kotlinx-io-core:0.5.4
-  - org.tomlj:tomlj:1.1.1
+  - $libs.kotlinx.coroutines: exported
+  - $libs.kotlinx.io.core: exported
+  - $libs.kaml
+  - $libs.kotlin.compiler
+  - $libs.kotlinx.coroutines
+  - $libs.kotlinx.serialization.json
+  - $libs.kotlinx.serialization.json.io
+  - $libs.kotlinx.io.core
+  - $libs.tomlj
 
 test-dependencies:
   - ../templates
-  - org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0
+  - ../test

@@ -1,10 +1,14 @@
-package org.jetbrains.kastle
+package org.jetbrains.kastle.server
 
 import io.ktor.htmx.*
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.config.property
 import io.ktor.server.html.*
 import io.ktor.server.http.content.*
+import io.ktor.server.plugins.di.dependencies
+import io.ktor.server.plugins.di.provideDelegate
+import io.ktor.server.plugins.di.resolve
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -17,19 +21,19 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.io.asSink
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
+import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.JsonFilePackRepository
-import org.jetbrains.kastle.ui.fileContentsHtml
-import org.jetbrains.kastle.ui.indexHtml
-import org.jetbrains.kastle.ui.packDetailsHtml
-import org.jetbrains.kastle.ui.fileTreeHtml
-import org.jetbrains.kastle.ui.packPropertiesHtml
+import org.jetbrains.kastle.server.ui.fileContentsHtml
+import org.jetbrains.kastle.server.ui.indexHtml
+import org.jetbrains.kastle.server.ui.packDetailsHtml
+import org.jetbrains.kastle.server.ui.fileTreeHtml
+import org.jetbrains.kastle.server.ui.packPropertiesHtml
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 @OptIn(ExperimentalHtmxApi::class)
 fun Application.endpoints() {
-    val root = Path(environment.config.property("repository.dir").getString())
-    val repository = JsonFilePackRepository(root)
+    val repository: PackRepository by dependencies
     val generator = ProjectGenerator.fromRepository(repository)
     val json = Json {
         encodeDefaults = false
@@ -39,7 +43,9 @@ fun Application.endpoints() {
     routing {
         // front end
         get {
-            val packs = repository.all().toList()
+            val packs = repository.all()
+                .toList()
+                .sortedBy { it.name }
 
             call.respondHtml {
                 indexHtml(packs)

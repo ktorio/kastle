@@ -67,3 +67,9 @@ fun String.indentAt(index: Int): Int? {
     }
     return null
 }
+
+fun String.previousLine(index: Int): String? {
+    val currentLineStart = startOfLine(index) ?: return null
+    val previousLineStart = startOfLine(currentLineStart) ?: 0
+    return substring(previousLineStart, currentLineStart)
+}

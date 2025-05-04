@@ -4,7 +4,14 @@ product:
 
 dependencies:
   - ../core: exported
-  - io.ktor:ktor-client-core:3.0.3: exported
-  - io.ktor:ktor-client-cio:3.0.3: exported
-  - io.ktor:ktor-client-content-negotiation:3.0.3: exported
-  - io.ktor:ktor-serialization-kotlinx-json:3.0.3: exported
+  - $libs.ktor.client.core: exported
+  - $libs.ktor.client.cio: exported
+  - $libs.ktor.client.content.negotiation: exported
+  - $libs.ktor.json: exported
+
+test-dependencies:
+  - ../test
+  - ../server
+  - ../local
+  - $libs.ktor.server.test.host
+  - $libs.ktor.server.di

@@ -1,0 +1,8 @@
+id: io.ktor/server-cio
+name: Ktor Server CIO Engine
+description: Configures your Ktor server to use the CIO engine
+version: 1.0.0
+modules:
+  - path: server
+requires:
+  - io.ktor/server-core

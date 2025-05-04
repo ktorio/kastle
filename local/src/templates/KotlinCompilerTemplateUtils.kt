@@ -12,6 +12,7 @@ import org.jetbrains.kastle.BlockPosition.Companion.toPosition
 import org.jetbrains.kastle.utils.endOfLine
 import org.jetbrains.kastle.utils.indent
 import org.jetbrains.kastle.utils.indentAt
+import org.jetbrains.kastle.utils.previousLine
 import org.jetbrains.kastle.utils.startOfLine
 import org.jetbrains.kastle.utils.unwrapQuotes
 import org.jetbrains.kotlin.psi.*
@@ -97,15 +98,17 @@ fun KtDeclaration.asProperty(): Property {
         "Missing type on template property declaration: $text"
     }
 
-    // TODO fixup
-    val comment = descendantsOfType<PsiComment>()
-        .firstOrNull()?.text?.trimStart('/')?.trim()
+    // TODO only supports single-line comments
+    // TODO needs to use other lines for details
+    val commentText =
+        descendantsOfType<PsiComment>().firstOrNull()?.text?.trimStart('/')?.trim()
+            ?: containingFile.text.previousLine(textRange.startOffset)?.trimStart()?.takeIf { it.startsWith("//") }?.trimStart('/')?.trim()
 
     return Property(
         key = variableName,
         type = PropertyType.Companion.parse(typeReference.text),
         default = null, // TODO
-        description = comment,
+        label = commentText,
     )
 }
 

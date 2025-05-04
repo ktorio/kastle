@@ -12,6 +12,8 @@ import org.jetbrains.kastle.SkipBlock
 import org.jetbrains.kastle.SourceContext
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.io.resolve
+import org.jetbrains.kastle.logging.ConsoleLogger
+import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.afterProtocol
 import org.jetbrains.kastle.utils.contains
 import org.jetbrains.kastle.utils.protocol
@@ -42,8 +44,8 @@ import java.io.File
  */
 internal class KotlinCompilerTemplateEngine(
     private val path: Path,
-    private val repository: PackRepository = PackRepository.Companion.EMPTY,
-    private val log: (() -> String) -> Unit = { println(it()) }
+    private val repository: PackRepository = PackRepository.EMPTY,
+    private val log: Logger = ConsoleLogger()
 
 ) {
     companion object {
@@ -100,7 +102,7 @@ internal class KotlinCompilerTemplateEngine(
                 targetRegex.find(it.text)?.groupValues?.getOrNull(1)
             }
         val target = targetFromHeader ?: "file:${sourcePath.resolve(ktFile.name)}"
-        log { "Target: $target" }
+        log.debug { "Compiling $target..." }
 
         return when (target.protocol) {
             "file" -> SourceTemplate(
