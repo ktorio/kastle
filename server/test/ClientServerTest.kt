@@ -23,11 +23,11 @@ class ClientServerTest {
         }
         val repository = client.asRepository()
 
-        val expected = backingRepository.packIds().toList()
+        val expected = backingRepository.ids().toList()
             .sortedBy { it.toString() }
             .joinToString("\n")
 
-        val actual = repository.packIds().toList()
+        val actual = repository.ids().toList()
             .sortedBy { it.toString() }
             .joinToString("\n")
 

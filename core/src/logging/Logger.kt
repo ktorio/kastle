@@ -43,9 +43,8 @@ class ConsoleLogger(
             append(" [")
             append(level.name)
             append("] ")
-            repeat(6 - level.name.length) {
+            if (level.name.length < 5)
                 append(' ')
-            }
             append(message())
         })
     }

@@ -6,12 +6,18 @@ import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.readByteArray
 import kotlinx.io.readString
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.cbor.Cbor
+import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.io.decodeFromSource
 import kotlinx.serialization.json.io.encodeToSink
+import kotlin.math.log10
+import kotlin.math.pow
 
 fun Path.resolve(subPath: String) = Path(this, subPath)
 
@@ -27,6 +33,29 @@ fun Path.readText(fs: FileSystem = SystemFileSystem): String? {
 fun Path.relativeTo(base: Path): Path =
     Path(toString().removePrefix(base.toString()))
 
+@OptIn(ExperimentalSerializationApi::class)
+inline fun <reified T: Any> Path.readCbor(
+    fs: FileSystem = SystemFileSystem,
+    cbor: Cbor = Cbor.Default,
+): T? {
+    if (!fs.exists(this)) return null
+    return fs.source(this).use {
+        cbor.decodeFromByteArray(it.buffered().readByteArray())
+    }
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+inline fun <reified T> Path.writeCbor(
+    item: T,
+    fs: FileSystem = SystemFileSystem,
+    cbor: Cbor = Cbor.Default
+) {
+    fs.sink(this).use { rs ->
+        rs.buffered().use { sink ->
+            sink.write(cbor.encodeToByteArray(item))
+        }
+    }
+}
 @OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T: Any> Path.readJson(
     fs: FileSystem = SystemFileSystem,
@@ -84,3 +113,31 @@ fun FileSystem.deleteRecursively(path: Path) {
 
 fun FileSystem.isDirectory(path: Path): Boolean =
     metadataOrNull(path)?.isDirectory == true
+
+fun FileSystem.calculateDirectorySize(path: Path): Long =
+    if (!exists(path) || !isDirectory(path)) {
+        0L
+    } else {
+        list(path).sumOf { file ->
+            when {
+                isDirectory(file) -> calculateDirectorySize(file)
+                else -> metadataOrNull(file)?.size ?: 0L
+            }
+        }
+    }
+
+fun Long.formatToByteSize(): String {
+    val units = arrayOf("B", "KB", "MB", "GB", "TB", "PB", "EB")
+
+    if (this <= 0) return "0 B"
+
+    // Calculate the power of 1024 that fits our bytes
+    val digitGroups = (log10(toDouble()) / log10(1024.0)).toInt()
+
+    // Format the number with up to 2 decimal places and the appropriate suffix
+    return String.format(
+        "%.2f %s",
+        this / 1024.0.pow(digitGroups.toDouble()),
+        units[digitGroups]
+    ).trimEnd('0').trimEnd('.')  // Remove trailing zeros and decimal point if whole number
+}

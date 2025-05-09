@@ -46,6 +46,17 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
             }
         }
         main {
+            div {
+                id = "download-form"
+                div { id = "download-button-loader" }
+                div { id = "download-button-progress" }
+                button {
+                    id = "download-button"
+                    onClick = "downloadProject()"
+                    +"Download ⤓"
+                }
+            }
+
             tabList("main-tabs") {
                 tab(id = "form-panel", title = "Settings", checked = true) {
                     id = "form-panel-contents"
@@ -88,7 +99,7 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
                         }
                     }
                 }
-                tab(id = "pack-details", title = "Module Details") {
+                tab(id = "pack-details", title = "About") {
                     id = "pack-details-docs"
 
                     attributes["data-tab"] = "pack-details-tab"

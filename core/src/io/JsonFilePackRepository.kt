@@ -1,15 +1,10 @@
 package org.jetbrains.kastle.io
 
-import kotlinx.coroutines.flow.filter
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.PackDescriptor
-import org.jetbrains.kastle.PackRepository
-import org.jetbrains.kastle.logging.ConsoleLogger
-import org.jetbrains.kastle.logging.Logger
-import kotlin.math.exp
 
 class JsonFilePackRepository(
     root: Path,
@@ -21,27 +16,4 @@ class JsonFilePackRepository(
     ext = "json",
     read = { it.readJson<PackDescriptor>(fs, json) },
     write = { path, descriptor -> path.writeJson(descriptor, fs, json) }
-) {
-    companion object {
-        suspend fun PackRepository.exportToJson(
-            path: Path,
-            clear: Boolean = true,
-            fs: FileSystem = SystemFileSystem,
-            json: Json = Json,
-            logger: Logger = ConsoleLogger(),
-        ): JsonFilePackRepository {
-            if (clear)
-                fs.deleteRecursively(path)
-            fs.createDirectories(path)
-            val export = JsonFilePackRepository(path, fs, json)
-            all().collect { pack ->
-                try {
-                    export.add(pack)
-                } catch (e: Exception) {
-                    logger.info { "Failed to export pack ${pack.id}: ${e.message}" }
-                }
-            }
-            return export
-        }
-    }
-}
+)

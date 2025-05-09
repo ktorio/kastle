@@ -37,7 +37,7 @@ class RemoteRepository(private val client: HttpClient): PackRepository {
         }
     })
 
-    override fun packIds(): Flow<PackId> = flow {
+    override fun ids(): Flow<PackId> = flow {
         emitAll(client.get("/api/packIds").body<List<PackId>>().asFlow())
     }
 

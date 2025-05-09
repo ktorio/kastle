@@ -37,8 +37,8 @@ class LocalPackRepository(
     private val repository: PackRepository = object : PackRepository {
         private val cache = mutableMapOf<PackId, PackDescriptor>()
 
-        override fun packIds(): Flow<PackId> =
-            remoteRepository.packIds()
+        override fun ids(): Flow<PackId> =
+            remoteRepository.ids()
 
         override suspend fun get(packId: PackId): PackDescriptor? =
             cache[packId] ?: fromLocalOrRemote(packId)?.also {
@@ -59,7 +59,7 @@ class LocalPackRepository(
 
     }
 
-    override fun packIds(): Flow<PackId> =
+    override fun ids(): Flow<PackId> =
         fs.list(root).flatMap { groupPath ->
             if (!groupPath.isDir())
                 return@flatMap emptyList()

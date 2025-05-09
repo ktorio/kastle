@@ -14,13 +14,14 @@ import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
 import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.*
+
 interface ProjectGenerator {
     companion object {
-        fun fromRepository(repository: PackRepository): ProjectGenerator =
-            ProjectGeneratorImpl(repository, ProjectResolver.Default + GradleTransformation)
+        fun fromRepository(repository: PackRepository, projectResolver: ProjectResolver = ProjectResolver.Default + GradleTransformation): ProjectGenerator =
+            ProjectGeneratorImpl(repository, projectResolver)
     }
 
-    suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry>
+    fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry>
 }
 
 class ProjectGeneratorImpl(
@@ -33,7 +34,7 @@ class ProjectGeneratorImpl(
         val nonEmptyLine = Regex("\n[\t ]*\\S")
     }
 
-    override suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
+    override fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
         val project = projectResolver.resolve(projectDescriptor, repository)
         log.trace { project.name }
         log.trace {

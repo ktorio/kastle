@@ -4,4 +4,4 @@ module: ../tasks/bundle
 
 programArguments:
   - --input-dir=../repository
-  - --output-dir=./json
+  - --output-dir=./export

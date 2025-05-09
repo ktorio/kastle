@@ -17,7 +17,7 @@ _**K**otlin **A**ll-Purpose **S**ourcecode **T**emplating and **L**ayout **E**ng
 
 - [How it works](docs/overview.md)
 - [Publishing guide](docs/publishing.md)
-- [DSL Reference](docs/dsl.md)
+- [Template DSL Reference](docs/dsl.md)
 
 ## Building
 

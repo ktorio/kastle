@@ -6,6 +6,7 @@ dependencies:
   - $libs.kaml: exported
   - $libs.kotlinx.coroutines: exported
   - $kotlin.serialization.core: exported
+  - $kotlin.serialization.cbor: exported
   - $kotlin.serialization.json: exported
   - $libs.kotlinx.serialization.json.io: exported
   - $libs.kotlinx.io.core: exported

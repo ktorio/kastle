@@ -5,10 +5,12 @@ Content-Type: application/json
 {
   "name": "abrakadabra",
   "group": "wizards.rule",
-  "properties": {},
-  "features": [
-    "acme/parent",
-    "acme/child",
-    "acme/properties"
+  "properties": {
+    "acme/properties/booleanProperty": true
+  },
+  "packs": [
+    "com.acme/parent",
+    "com.acme/child",
+    "com.acme/properties"
   ]
 }

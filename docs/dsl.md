@@ -109,4 +109,4 @@ fun Parent.install() {
 }
 ```
 
-This will automatically extract the function body, and transfer any unique imports to the generated source files.
+This will automatically extract the function body and transfer any unique imports to the generated source files.

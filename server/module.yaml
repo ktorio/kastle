@@ -8,6 +8,7 @@ dependencies:
   - $libs.ktor.server.config.yaml
   - $libs.ktor.server.content.negotiation
   - $libs.ktor.server.status.pages
+  - $libs.ktor.server.sse
   - $libs.ktor.server.htmx
   - $libs.ktor.server.di
   - $libs.ktor.htmx.html
@@ -15,6 +16,7 @@ dependencies:
   - $libs.ktor.json
   - $libs.logback.classic
   - $libs.commonmark
+  - $libs.mcp.sdk
 
 test-dependencies:
   - ../client

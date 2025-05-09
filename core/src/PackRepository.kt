@@ -9,18 +9,20 @@ import org.jetbrains.kastle.utils.slots
 interface PackRepository {
     companion object {
         val EMPTY = object : PackRepository {
-            override fun packIds(): Flow<PackId> = emptyFlow()
+            override fun ids(): Flow<PackId> = emptyFlow()
             override suspend fun get(packId: PackId): PackDescriptor? = null
             override suspend fun slot(slotId: SlotId): SlotDescriptor? = null
         }
     }
-    fun packIds(): Flow<PackId>
-    fun all(): Flow<PackDescriptor> =
-        packIds().mapNotNull(::get)
+    fun ids(): Flow<PackId>
+
+    fun all(): Flow<PackDescriptor> = ids().mapNotNull(::get)
 
     suspend fun get(packId: PackId): PackDescriptor?
+
     suspend fun getAll(packIds: Collection<PackId>): Flow<PackDescriptor> =
         packIds.asFlow().mapNotNull(::get)
+
     suspend fun slot(slotId: SlotId): SlotDescriptor? =
         get(slotId.pack)?.allSources?.asSequence()
             ?.firstNotNullOfOrNull { source ->

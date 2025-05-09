@@ -1,5 +1,5 @@
 [versions]
-ktor = "3.2.0-eap-1293"
+ktor = "3.2.0-eap-1313"
 kotlin = "2.1.20"
 logback = "1.5.17"
 kotlinx-datetime = "0.6.2"
@@ -8,6 +8,7 @@ kotlinx-coroutines = "1.10.1"
 kotlinx-io = "0.5.4"
 tomlj = "1.1.1"
 kaml = "0.62.1"
+mcp-sdk = "0.5.0"
 
 [libraries]
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
@@ -21,6 +22,7 @@ ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = 
 ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
 ktor-server-sse = { module = "io.ktor:ktor-server-sse", version.ref = "ktor" }
+ktor-server-websockets = { module = "io.ktor:ktor-server-websockets", version.ref = "ktor" }
 ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 ktor-server-di = { module = "io.ktor:ktor-server-di", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -28,6 +30,7 @@ ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlinx-serialization-cbor = { module = "org.jetbrains.kotlinx:kotlinx-serialization-cbor", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json-io = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-io", version.ref = "kotlinx-serialization" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
@@ -41,5 +44,6 @@ kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version
 commonmark = "org.commonmark:commonmark:0.24.0"
 kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
 tomlj = { module = "org.tomlj:tomlj", version.ref = "tomlj" }
-kotlin-compiler = "org.jetbrains.kotlin:kotlin-compiler:2.0.21"
+kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "kotlin" }
 kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }
+mcp-sdk = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp-sdk" }

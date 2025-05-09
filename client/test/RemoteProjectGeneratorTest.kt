@@ -8,7 +8,7 @@ import kotlinx.io.files.Path
 import org.jetbrains.kastle.LocalPackRepository
 import org.jetbrains.kastle.PackRepository
 import org.jetbrains.kastle.ProjectGeneratorTest
-import org.jetbrains.kastle.server.endpoints
+import org.jetbrains.kastle.server.routing
 import org.jetbrains.kastle.server.errorHandling
 import org.jetbrains.kastle.server.monitoring
 import org.jetbrains.kastle.server.serialization
@@ -29,7 +29,7 @@ class RemoteProjectGeneratorTest: ProjectGeneratorTest() {
                         dependencies.provide<PackRepository> {
                             LocalPackRepository(Path("../repository"))
                         }
-                        endpoints()
+                        routing()
                         serialization()
                         monitoring()
                         errorHandling()
