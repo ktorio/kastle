@@ -1,15 +1,7 @@
 package org.jetbrains.kastle.logging
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.LocalTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format
-import kotlinx.datetime.format.DateTimeComponents
+import kotlinx.datetime.*
 import kotlinx.datetime.format.DateTimeFormat
-import kotlinx.datetime.toLocalDateTime
-import java.io.PrintStream
-import java.time.format.DateTimeFormatter
 
 interface Logger {
     companion object {
@@ -39,10 +31,10 @@ class ConsoleLogger(
     ) {
         if (level < this.level) return
         println(buildString {
-            append(clock.now().toLocalDateTime(timeZone).time.format(timeFormat))
-            append(" [")
+            append(clock.now().toLocalDateTime(timeZone).time.format(timeFormat).padEnd(15, '0'))
+            append(' ')
             append(level.name)
-            append("] ")
+            append(' ')
             if (level.name.length < 5)
                 append(' ')
             append(message())

@@ -3,4 +3,4 @@ product:
   platforms: [jvm]
 
 dependencies:
-  - ../../../../templates
+  - ../../../templates

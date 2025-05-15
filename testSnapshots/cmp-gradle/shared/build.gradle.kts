@@ -1,12 +1,13 @@
-// Use version catalog
+
+    plugins {
+            alias(libs.plugins.kotlin.multiplatform)
+        
+            alias(libs.plugins.android.library)
+        
+    }
 
 
-group = "com.acme"
-version = "1.0.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-}
 
 dependencies {
      implementation(compose.foundation) 

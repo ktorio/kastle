@@ -1,10 +1,10 @@
 
     
     
-include(":desktop")
-    
-    
 include(":shared")
+    
+    
+include(":desktop")
     
     
 include(":android")

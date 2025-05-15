@@ -12,11 +12,14 @@ interface PackRepository {
             override fun ids(): Flow<PackId> = emptyFlow()
             override suspend fun get(packId: PackId): PackDescriptor? = null
             override suspend fun slot(slotId: SlotId): SlotDescriptor? = null
+            override suspend fun versions(): VersionsCatalog = VersionsCatalog.Empty
         }
     }
     fun ids(): Flow<PackId>
 
     fun all(): Flow<PackDescriptor> = ids().mapNotNull(::get)
+
+    suspend fun versions(): VersionsCatalog
 
     suspend fun get(packId: PackId): PackDescriptor?
 
@@ -24,7 +27,7 @@ interface PackRepository {
         packIds.asFlow().mapNotNull(::get)
 
     suspend fun slot(slotId: SlotId): SlotDescriptor? =
-        get(slotId.pack)?.allSources?.asSequence()
+        get(slotId.pack)?.allSources
             ?.firstNotNullOfOrNull { source ->
                 source.slots
                     .find { slot -> slot.name == slotId.name }
@@ -38,4 +41,5 @@ suspend fun PackRepository.get(packId: String): PackDescriptor? =
 interface MutablePackRepository : PackRepository {
     suspend fun add(descriptor: PackDescriptor)
     suspend fun remove(id: PackId)
+    suspend fun versions(versions: VersionsCatalog)
 }

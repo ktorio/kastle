@@ -6,6 +6,7 @@ import org.jetbrains.kastle.CatalogReference
 import org.jetbrains.kastle.Dependency
 import org.jetbrains.kastle.ModuleDependency
 import org.jetbrains.kastle.SourceModuleType
+import org.jetbrains.kastle.VersionsCatalog
 
 // TODO not entirely correct
 fun YamlMap?.readHeader(): Pair<SourceModuleType, List<String>> =
@@ -19,7 +20,7 @@ fun YamlMap?.readHeader(): Pair<SourceModuleType, List<String>> =
         else -> SourceModuleType.LIB to listOf("jvm")
     }
 
-fun YamlMap?.readDependencies(key: String, versionsLookup: Map<String, ArtifactDependency>) =
+fun YamlMap?.readDependencies(key: String, versionsLookup: VersionsCatalog) =
     this?.get<YamlList>(key)?.items?.asSequence()
         ?.map(::dependencyString)
         .orEmpty()
@@ -28,7 +29,7 @@ fun YamlMap?.readDependencies(key: String, versionsLookup: Map<String, ArtifactD
         .map { dependency ->
             when(dependency) {
                 is ArtifactDependency, is ModuleDependency -> dependency
-                is CatalogReference -> dependency.copy(artifact = versionsLookup[dependency.key])
+                is CatalogReference -> dependency.resolve(versionsLookup)
             }
         }
         .toList()

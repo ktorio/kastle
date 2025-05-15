@@ -17,7 +17,7 @@ class LocalPackRepositoryModulesTest {
     @Test
     fun `compose multiplatform`() = runTest {
         val project = loadProjectDetails(packs = listOf(
-            "std/amper",
+            "org.jetbrains/amper",
             "org.jetbrains/compose-multiplatform",
         ))
         assertEquals(

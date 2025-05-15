@@ -1,5 +1,6 @@
 package org.jetbrains.kastle.io
 
+import com.akuleshov7.ktoml.Toml
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlNode
 import kotlinx.io.buffered
@@ -31,7 +32,7 @@ fun Path.readText(fs: FileSystem = SystemFileSystem): String? {
 
 // TODO
 fun Path.relativeTo(base: Path): Path =
-    Path(toString().removePrefix(base.toString()))
+    Path(toString().removePrefix(base.toString()).removePrefix("/"))
 
 @OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T: Any> Path.readCbor(
@@ -40,7 +41,7 @@ inline fun <reified T: Any> Path.readCbor(
 ): T? {
     if (!fs.exists(this)) return null
     return fs.source(this).use {
-        cbor.decodeFromByteArray(it.buffered().readByteArray())
+        cbor.decodeFromByteArray<T>(it.buffered().readByteArray())
     }
 }
 
@@ -63,7 +64,7 @@ inline fun <reified T: Any> Path.readJson(
 ): T? {
     if (!fs.exists(this)) return null
     return fs.source(this).use {
-        json.decodeFromSource(it.buffered())
+        json.decodeFromSource<T>(it.buffered())
     }
 }
 
@@ -75,7 +76,7 @@ inline fun <reified T> Path.writeJson(
 ) {
     fs.sink(this).use { rs ->
         rs.buffered().use { sink ->
-            json.encodeToSink(item, sink)
+            json.encodeToSink<T>(item, sink)
         }
     }
 }
@@ -86,7 +87,7 @@ inline fun <reified T: Any> Path.readYaml(
 ): T? {
     if (!fs.exists(this)) return null
     return fs.source(this).buffered().readString().let {
-        yaml.decodeFromString(it)
+        yaml.decodeFromString<T>(it)
     }
 }
 
@@ -100,6 +101,16 @@ fun Path.readYamlNode(
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
+inline fun <reified T: Any> Path.readToml(
+    fs: FileSystem = SystemFileSystem,
+    toml: Toml = Toml,
+): T? {
+    if (!fs.exists(this)) return null
+    return fs.source(this).buffered().readString().let { text ->
+        toml.decodeFromString<T>(text)
+    }
+}
 
 fun FileSystem.deleteRecursively(path: Path) {
     if (isDirectory(path)) {

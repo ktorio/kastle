@@ -1,0 +1,9 @@
+[versions]
+{{#each _project.versions.entries }}
+{{ key }} = "{{ value }}"
+{{/each}}
+
+[libraries]
+{{#each _project.libraries.entries }}
+{{ key }} = { module = "{{ value.module }}", version.ref = "{{ value.version.ref }}" }
+{{/each}}

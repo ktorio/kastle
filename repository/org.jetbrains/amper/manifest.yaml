@@ -1,4 +1,4 @@
-id: std/amper
+id: org.jetbrains/amper
 name: Amper
 description: A simple Kotlin build system
 version: 1.0.0
@@ -8,6 +8,8 @@ rootSources:
     if: _project.modules.size() > 1
   - path: amper
   - path: amper.bat
+  - path: libs.versions.toml.hbs
+    target: file:gradle/libs.versions.toml
 commonSources:
   - path: module.yaml.hbs
     target: file:module.yaml

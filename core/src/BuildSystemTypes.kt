@@ -173,6 +173,7 @@ data class SourceModule(
     val ignoreCommon: Boolean = false,
 ) {
     val gradlePlugins: List<GradlePlugin> get() = gradle.plugins
+    val allDependencies: List<Dependency> get() = dependencies + testDependencies
 }
 
 @Serializable
@@ -263,9 +264,23 @@ sealed interface Dependency {
 @Serializable
 data class CatalogReference(
     val key: String,
-    val artifact: ArtifactDependency? = null,
+    val group: String? = null,
+    val artifact: String? = null,
+    val version: CatalogVersion? = null,
     override val exported: Boolean = false,
 ): Dependency {
+    val lookupKey: String get() =
+        key.removePrefix("libs.").replace('.', '-')
+
+    fun resolve(catalog: VersionsCatalog): CatalogReference {
+        val library = catalog.libraries[lookupKey] ?: return this
+        return copy(
+            group = library.module,
+            artifact = library.artifact,
+            version = library.version,
+        )
+    }
+
     override fun toString(): String = buildString {
         append('$')
         append(key)
@@ -278,13 +293,22 @@ data class CatalogReference(
     }
 }
 
-@Serializable
+@Serializable(ArtifactDependencySerializer::class)
 data class ArtifactDependency(
     val group: String,
     val artifact: String,
     val version: String,
     override val exported: Boolean = false,
 ): Dependency {
+    companion object {
+        fun parse(text: String): ArtifactDependency {
+            val segments = text.split(':', limit = 3)
+            require(segments.size == 3) { "Invalid dependency string: $text" }
+            val (group, artifact, version) = segments
+            return ArtifactDependency(group, artifact, version)
+        }
+    }
+
     override fun toString(): String = buildString {
         append("$group:$artifact:$version")
         if (exported) append(":exported")
@@ -300,4 +324,48 @@ data class ModuleDependency(
         append(path)
         if (exported) append(":exported")
     }
+}
+
+@Serializable
+data class VersionsCatalog(
+    val versions: Map<String, String> = emptyMap(),
+    val libraries: Map<String, CatalogArtifact> = emptyMap(),
+) {
+    companion object {
+        val Empty = VersionsCatalog()
+    }
+
+    fun isEmpty() = versions.isEmpty() && libraries.isEmpty()
+
+    operator fun plus(other: VersionsCatalog): VersionsCatalog =
+        if (this.isEmpty()) other
+        else if (other.isEmpty()) this
+        else VersionsCatalog(
+            versions = (versions + other.versions).toSortedMap(),
+            libraries = (libraries + other.libraries).toSortedMap(),
+        )
+
+    operator fun get(key: String): CatalogArtifact? =
+        libraries[key]
+}
+
+@Serializable
+data class CatalogArtifact(
+    val module: String,
+    val version: CatalogVersion,
+    val builtIn: Boolean = false,
+) {
+    val group: String get() = module.substringBeforeLast(':')
+    val artifact: String get() = module.substringAfterLast(':')
+}
+
+@Serializable(CatalogVersionSerializer::class)
+sealed interface CatalogVersion {
+
+    @Serializable
+    data class Ref(val ref: String): CatalogVersion
+
+    @JvmInline
+    @Serializable
+    value class Number(val number: String): CatalogVersion
 }

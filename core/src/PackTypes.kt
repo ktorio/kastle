@@ -2,6 +2,7 @@ package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
 
+@Serializable
 sealed interface PackMetadata {
     val id: PackId
     val name: String
@@ -10,6 +11,7 @@ sealed interface PackMetadata {
     val description: String?
     val license: String?
     val group: Group?
+    val categories: List<String>
     val links: PackLinks?
     val documentation: String?
     val requires: List<PackId>
@@ -23,6 +25,7 @@ data class PackManifest(
     override val name: String,
     override val version: SemanticVersion,
     override val group: Group? = null,
+    override val categories: List<String> = emptyList(),
     override val license: String? = null,
     override val icon: String? = null,
     override val description: String? = null,
@@ -43,52 +46,36 @@ data class ModuleManifest(
 
 @Serializable
 data class PackDescriptor(
-    override val id: PackId,
-    override val name: String,
-    override val version: SemanticVersion,
-    override val group: Group? = null,
-    override val license: String? = null,
-    override val icon: String? = null,
-    override val description: String? = null,
-    override val links: PackLinks? = null,
-    override val documentation: String? = null,
-    override val requires: List<PackId> = emptyList(),
-    override val properties: List<Property> = emptyList(),
-    override val repositories: List<Repository> = emptyList(),
-    val commonSources: List<SourceTemplate> = emptyList(),
-    val rootSources: List<SourceTemplate> = emptyList(),
+    val info: PackMetadata,
+    val sources: PackSources,
+): PackMetadata by info {
+    val commonSources: List<SourceTemplate> get() = sources.common
+    val rootSources: List<SourceTemplate> get() = sources.root
+    val sourceModules: List<SourceModule> get() = sources.modules.modules
+}
+
+/**
+ * Templates for a PACK.
+ *
+ * @property common templates that are repeated in every module
+ * @property root templates that are defined in the project root
+ * @property modules regular project sources, organized by module
+ */
+@Serializable
+data class PackSources(
+    val common: List<SourceTemplate> = emptyList(),
+    val root: List<SourceTemplate> = emptyList(),
     val modules: ProjectModules = ProjectModules.Empty,
-): PackMetadata {
-    constructor(
-        manifest: PackManifest,
-        commonSources: List<SourceTemplate>,
-        rootSources: List<SourceTemplate>,
-        projectSources: ProjectModules
-    ) : this(
-        manifest.id,
-        manifest.name,
-        manifest.version,
-        manifest.group,
-        manifest.license,
-        manifest.icon,
-        manifest.description,
-        manifest.links,
-        manifest.documentation,
-        manifest.requires,
-        manifest.properties,
-        manifest.repositories,
-        commonSources = commonSources,
-        rootSources = rootSources,
-        modules = manifest.modules?.let { modules ->
-            ProjectModules.fromList(modules) + projectSources
-        } ?: projectSources
-    )
+) {
+    companion object {
+        val Empty = PackSources()
+    }
 }
 
 val PackDescriptor.allSources: Sequence<SourceTemplate> get() =
     commonSources.asSequence() +
         rootSources.asSequence() +
-        modules.modules.asSequence().flatMap { it.sources }
+        sourceModules.asSequence().flatMap { it.sources }
 
 @Serializable
 data class Group(

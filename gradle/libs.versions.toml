@@ -3,12 +3,15 @@ ktor = "3.2.0-eap-1313"
 kotlin = "2.1.20"
 logback = "1.5.17"
 kotlinx-datetime = "0.6.2"
-kotlinx-serialization = "1.8.1"
+kotlinx-serialization = "1.8.0"
 kotlinx-coroutines = "1.10.1"
 kotlinx-io = "0.5.4"
-tomlj = "1.1.1"
+android-lifecycle = "2.8.2"
+android-activity-compose = "1.7.2"
+ktoml = "0.7.0"
 kaml = "0.62.1"
 mcp-sdk = "0.5.0"
+commonmark = "0.24.0"
 
 [libraries]
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
@@ -41,9 +44,10 @@ androidx-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecy
 androidx-lifecycle-viewmodel-savedstate = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-savedstate", version.ref = "android-lifecycle" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
-commonmark = "org.commonmark:commonmark:0.24.0"
+commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
 kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
-tomlj = { module = "org.tomlj:tomlj", version.ref = "tomlj" }
 kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "kotlin" }
 kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }
 mcp-sdk = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp-sdk" }
+ktoml = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
+android-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "android-activity-compose" }

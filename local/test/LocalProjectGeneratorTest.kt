@@ -10,4 +10,9 @@ class LocalProjectGeneratorTest: ProjectGeneratorTest() {
     // Needed for Intellij
     @Test
     fun test() {}
+
+    @Test
+    override fun `compose multiplatform gradle`() {
+        super.`compose multiplatform gradle`()
+    }
 }

@@ -2,6 +2,7 @@ package org.jetbrains.kastle.gen
 
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.utils.Variables
+import kotlin.io.path.Path
 
 data class Project(
     val descriptor: ProjectDescriptor,
@@ -10,6 +11,9 @@ data class Project(
     val slotSources: Map<Url, List<SourceTemplate>>,
     val moduleSources: ProjectModules,
     val commonSources: List<SourceTemplate>,
+    val versions: Map<String, String>,
+    val libraries: Map<String, CatalogArtifact>,
+    val gradle: GradleSettings,
 ) {
     val name: String get() = descriptor.name
     val group: String get() = descriptor.group
@@ -21,6 +25,9 @@ fun Project.toVariableEntry(): Pair<String, Any?> =
         "name" to name,
         "group" to group,
         "modules" to moduleSources.modules.map { it.toVariableMap() },
+        "versions" to versions,
+        "libraries" to libraries.mapValues { (_, value) -> value.toVariableMap() },
+        "gradle" to gradle.toVariableMap(),
     )
 
 /**
@@ -44,13 +51,13 @@ private fun SourceModule.toVariableMap(): Map<String, Any> = mapOf(
     "path" to path,
     "type" to type.toString(),
     "platforms" to platforms,
-    "dependencies" to dependencies.map { it.toVariableMap() },
-    "testDependencies" to testDependencies.map { it.toVariableMap() },
+    "dependencies" to dependencies.map { it.toVariableMap(path) },
+    "testDependencies" to testDependencies.map { it.toVariableMap(path) },
     "gradle" to gradle.toVariableMap(),
     "amper" to amper.toVariableMap(),
 )
 
-fun Dependency.toVariableMap() =
+fun Dependency.toVariableMap(modulePath: String) =
     when(this) {
         is ArtifactDependency -> mapOf(
             "type" to "maven",
@@ -62,6 +69,7 @@ fun Dependency.toVariableMap() =
         is ModuleDependency -> mapOf(
             "type" to "project",
             "path" to path,
+            "gradlePath" to gradlePath(modulePath),
             "exported" to exported,
         )
         // TODO find artifact from catalog
@@ -71,6 +79,12 @@ fun Dependency.toVariableMap() =
             "exported" to exported,
         )
     }
+
+private fun ModuleDependency.gradlePath(modulePath: String): String = buildString {
+    val actualPath = Path(modulePath).resolve(path).normalize()
+    append(':')
+    append(actualPath.toString().replace('/', ':'))
+}
 
 fun GradleSettings.toVariableMap() = mapOf(
     "plugins" to plugins.map { it.toVariableMap() },
@@ -87,3 +101,21 @@ fun AmperSettings.toVariableMap(): Map<String, String?> = mapOf(
 ).filterValues {
     it != null
 }
+
+fun CatalogReference.toVariableMap() = mapOf(
+    "key" to "key",
+    "group" to group,
+    "artifact" to artifact,
+    "version" to version,
+    "exported" to exported,
+)
+
+fun CatalogArtifact.toVariableMap() = mapOf(
+    "module" to module,
+    "group" to group,
+    "artifact" to artifact,
+    "version" to when(version) {
+        is CatalogVersion.Ref -> mapOf("ref" to version.ref)
+        is CatalogVersion.Number -> mapOf("number" to version.number)
+    },
+)

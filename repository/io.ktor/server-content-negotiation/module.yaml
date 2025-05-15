@@ -1,0 +1,6 @@
+product: jvm/app
+
+dependencies:
+  - ../../../templates
+  - $libs.ktor.server.core
+  - $libs.ktor.server.content.negotiation

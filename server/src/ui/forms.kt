@@ -5,6 +5,7 @@ import org.jetbrains.kastle.PackDescriptor
 import org.jetbrains.kastle.Property
 import org.jetbrains.kastle.PropertyType
 import org.jetbrains.kastle.utils.isTruthy
+
 fun HTML.packPropertiesHtml(pack: PackDescriptor) {
     body {
         if (pack.properties.isNotEmpty()) {

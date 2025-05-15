@@ -7,16 +7,11 @@ import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import org.jetbrains.kastle.PackDescriptor
-import org.jetbrains.kastle.PackId
-import org.jetbrains.kastle.MutablePackRepository
-import org.jetbrains.kastle.PackRepository
+import org.jetbrains.kastle.*
+import org.jetbrains.kastle.io.FileFormat.CBOR
+import org.jetbrains.kastle.io.FileFormat.JSON
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.Logger
-import org.jetbrains.kastle.io.FileFormat.JSON
-import org.jetbrains.kastle.io.FileFormat.CBOR
-import java.text.Format
 
 open class FileSystemPackRepository(
     val root: Path,
@@ -24,6 +19,8 @@ open class FileSystemPackRepository(
     val ext: String,
     val read: (Path) -> PackDescriptor?,
     val write: (Path, PackDescriptor) -> Unit,
+    val readVersions: (Path) -> VersionsCatalog,
+    val writeVersions: (Path, VersionsCatalog) -> Unit,
 ) : MutablePackRepository {
     companion object {
         @OptIn(ExperimentalSerializationApi::class)
@@ -40,6 +37,7 @@ open class FileSystemPackRepository(
                 JSON -> JsonFilePackRepository(path, fs)
                 CBOR -> CborFilePackRepository(path, fs)
             }
+            export.versions(versions())
             all().collect { pack ->
                 try {
                     export.add(pack)
@@ -73,4 +71,10 @@ open class FileSystemPackRepository(
         fs.delete(root.resolve("$id.$ext"))
     }
 
+    override suspend fun versions(): VersionsCatalog =
+        readVersions(root.resolve("libs.versions.$ext"))
+
+    override suspend fun versions(versions: VersionsCatalog) {
+        writeVersions(root.resolve("libs.versions.$ext"), versions() + versions)
+    }
 }

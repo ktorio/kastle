@@ -1,5 +1,5 @@
 product: jvm/app
 
 dependencies:
-  - ../../../../templates
-  - io.ktor:ktor-server-core:3.0.3
+  - ../../../templates
+  - $libs.ktor.server.core

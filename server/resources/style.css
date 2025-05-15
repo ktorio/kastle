@@ -322,7 +322,11 @@ main {
     position: absolute;
     top: 12px;
     right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 1em;
 }
+
 #download-button {
     background-color: var(--download-button-color);
     padding: 8px 12px;

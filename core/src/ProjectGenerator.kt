@@ -14,11 +14,14 @@ import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
 import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.*
+import org.jetbrains.kastle.utils.extension
 
 interface ProjectGenerator {
     companion object {
-        fun fromRepository(repository: PackRepository, projectResolver: ProjectResolver = ProjectResolver.Default + GradleTransformation): ProjectGenerator =
-            ProjectGeneratorImpl(repository, projectResolver)
+        fun fromRepository(
+            repository: PackRepository,
+            projectResolver: ProjectResolver = ProjectResolver.Default + GradleTransformation
+        ): ProjectGenerator = ProjectGeneratorImpl(repository, projectResolver)
     }
 
     fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry>
@@ -76,16 +79,22 @@ class ProjectGeneratorImpl(
                 }
 
                 val path = module.path.appendPath(source.target.relativeFile)
+
                 emit(SourceFileEntry(path) {
                     writeSourceFile(source, variables) {
-                        writeSourcePreamble(
-                            pack.id,
-                            source,
-                            project.slotSources,
-                            projectDescriptor
-                        )
-                        log.trace { source.target }
+                        log.trace { path }
+                        val slots = source.blocks?.asSequence().orEmpty()
+                            .flatMap { project.slotSources.lookup(pack.id, it) }
+                            .toList()
+                        when (source.target.extension) {
+                            "kt" -> writeKotlinSourcePreamble(
+                                projectDescriptor,
+                                slots
+                            )
+                        }
+
                         if (source.blocks.isNullOrEmpty()) {
+                            log.trace { "  Not templated; returning verbatim" }
                             append(source.text)
                             return@writeSourceFile
                         }
@@ -131,6 +140,7 @@ class ProjectGeneratorImpl(
                                     stack += block
                                     child!!.outerStart
                                 }
+
                                 else -> block.rangeEnd
                             }
 
@@ -163,20 +173,6 @@ class ProjectGeneratorImpl(
                     }
                 })
             }
-        }
-    }
-
-    private fun Appendable.writeSourcePreamble(
-        packId: PackId,
-        source: SourceTemplate,
-        slotSources: Map<Url, List<SourceTemplate>>,
-        project: ProjectDescriptor
-    ) {
-        val slots = source.blocks?.asSequence().orEmpty()
-            .flatMap { slotSources.lookup(packId, it) }
-            .toList()
-        when (source.target.extension) {
-            "kt" -> writeKotlinSourcePreamble(project, slots)
         }
     }
 

@@ -9,7 +9,7 @@ fun interface ProjectResolver {
         val Default = ProjectResolver { descriptor, repository ->
             val packs = descriptor.packs.map { repository.get(it) ?: throw MissingPackException(it) }
             val moduleSources = packs.asSequence()
-                .map { it.modules }
+                .map { it.sources.modules }
                 .reduceOrNull(ProjectModules::plus)
                 ?.flatten() ?: ProjectModules.Empty
             val slotSources: Map<Url, List<SourceTemplate>> = packs.asSequence()
@@ -29,6 +29,27 @@ fun interface ProjectResolver {
                     }
                 }
             }.toMap()
+            val repositoryCatalog = repository.versions()
+            val versions = mutableMapOf<String, String>()
+            val libraries = mutableMapOf<String, CatalogArtifact>()
+            for (dependency in moduleSources.modules.flatMap { it.allDependencies }) {
+                if (dependency !is CatalogReference) continue
+                val version = dependency.version
+                // TODO allow non-refs?
+                val versionRef = (version as? CatalogVersion.Ref)?.ref ?: continue
+                val versionValue = repositoryCatalog.versions[versionRef]
+                if (versionValue != null)
+                    versions[versionRef] = versionValue
+                val library = repositoryCatalog.libraries[dependency.lookupKey]
+                if (library != null)
+                    libraries[dependency.lookupKey] = library
+            }
+            val gradleSettings = GradleSettings(
+                moduleSources.modules.flatMap { module ->
+                    module.gradlePlugins
+                }
+            )
+
             // TODO validate structure, check for collisions, etc.
             Project(
                 descriptor = descriptor,
@@ -37,6 +58,9 @@ fun interface ProjectResolver {
                 slotSources = slotSources,
                 moduleSources = moduleSources + rootSourceFiles,
                 commonSources = commonSourceFiles,
+                versions = versions,
+                libraries = libraries,
+                gradle = gradleSettings,
             )
         }
 

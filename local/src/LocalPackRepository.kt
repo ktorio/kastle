@@ -3,12 +3,16 @@ package org.jetbrains.kastle
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.yamlMap
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
-import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
-import kotlinx.io.readString
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.amper.readDependencies
 import org.jetbrains.kastle.amper.readHeader
 import org.jetbrains.kastle.io.*
@@ -18,7 +22,6 @@ import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtFile
-import org.tomlj.Toml
 
 private const val MANIFEST_YAML = "manifest.yaml"
 private const val GROUP_YAML = "group.yaml"
@@ -31,8 +34,6 @@ class LocalPackRepository(
     private val textFileTemplateEngine = HandlebarsTemplateEngine()
 
     constructor(root: String): this(Path(root))
-
-    private val versionsLookup: Map<String, ArtifactDependency> by lazy { readVersionCatalogs() }
 
     private val repository: PackRepository = object : PackRepository {
         private val cache = mutableMapOf<PackId, PackDescriptor>()
@@ -57,6 +58,8 @@ class LocalPackRepository(
         private suspend fun fromLocalOrRemote(id: PackId): PackDescriptor? =
             this@LocalPackRepository.get(id) ?: remoteRepository.get(id)
 
+        override suspend fun versions(): VersionsCatalog =
+            remoteRepository.versions() + this@LocalPackRepository.versions()
     }
 
     override fun ids(): Flow<PackId> =
@@ -88,9 +91,11 @@ class LocalPackRepository(
                 Yaml.default.decodeFromYamlNode<AmperSettings>(node)
             }
 
+            // TODO cache versions
+            val catalog = versions()
             val (moduleType, platforms) = amperYaml.readHeader()
-            val dependencies = amperYaml.readDependencies("dependencies", versionsLookup)
-            val testDependencies = amperYaml.readDependencies("testDependencies", versionsLookup)
+            val dependencies = amperYaml.readDependencies("dependencies", catalog)
+            val testDependencies = amperYaml.readDependencies("testDependencies", catalog)
 
             val sources = mutableListOf<SourceTemplate>()
             val resources = mutableListOf<SourceTemplate>()
@@ -125,7 +130,7 @@ class LocalPackRepository(
                 }
             }
 
-            // additional sources defined for module use only the text file templating engine
+            // additional sources defined for module; use only the text file templating engine
             for (manifestSource in manifestYaml?.sources.orEmpty()) {
                 sources += when(val text = manifestSource.text) {
                     null -> textFileTemplateEngine.read(modulePath, modulePath.resolve(manifestSource.path!!))
@@ -150,6 +155,9 @@ class LocalPackRepository(
         val readSource: suspend (SourceDefinition) -> SourceTemplate = { (path, text, target, condition) ->
             require(target != null) { "Missing target for project-level source: ${path ?: text}" }
             val file = projectPath.resolve(path ?: "source.kt")
+            if (!fs.exists(file))
+                throw IllegalArgumentException("Missing source file: $file")
+
             val format = path?.extensionFormat
                 ?: target.takeIfSlot()?.getExtensionFromSlot()
                 ?: target.extensionFormat
@@ -183,23 +191,46 @@ class LocalPackRepository(
             }
         }
 
-        // project-level sources are included in all modules,
-        // except for slot targets, these are inserted into the first module
-        val commonSources = manifest.commonSources.map { readSource(it) }
-
-        // root sources are included at the repository-level root, like .gitignore
-        val rootSources = manifest.rootSources.map { readSource(it) }
-
         return PackDescriptor(
-            manifest.copy(
+            info = manifest.copy(
                 group = group,
                 properties = properties.distinctBy { it.key },
                 documentation = documentation,
             ),
-            commonSources = commonSources,
-            rootSources = rootSources,
-            projectSources = projectSources,
+            sources = PackSources(
+                common = manifest.commonSources.map { readSource(it) },
+                root = manifest.rootSources.map { readSource(it) },
+                modules = manifest.modules?.let { modules ->
+                    ProjectModules.fromList(modules) + projectSources
+                } ?: projectSources,
+            )
         )
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    override suspend fun versions(): VersionsCatalog {
+        val builtInArtifacts =
+            fs.list(root).filter {
+                it.name.endsWith(".versions.toml")
+            }.mapNotNull { file ->
+                file.readToml<BuiltInToml>(fs)?.libraries
+            }.reduce { left, right -> left + right }
+
+        val builtInCatalog = VersionsCatalog(
+            libraries = builtInArtifacts.mapValues { (_, artifact) ->
+                val (group, artifact, version) = artifact
+                CatalogArtifact(
+                    "$group:$artifact",
+                    CatalogVersion.Number(version),
+                    builtIn = true
+                )
+            }
+        )
+
+        val gradleCatalog = root.resolve("../gradle/libs.versions.toml")
+            .readToml<VersionsCatalog>(fs) ?: return builtInCatalog
+
+        return builtInCatalog + gradleCatalog
     }
 
     private suspend fun Url.getExtensionFromSlot(): TemplateFormat {
@@ -229,21 +260,10 @@ class LocalPackRepository(
             fs.exists(resolve("module.yaml")) ||
             fs.exists(resolve("module-manifest.yaml"))
 
-    private fun readVersionCatalogs(): Map<String, ArtifactDependency> = fs.list(root).filter {
-        it.name.endsWith(".versions.toml")
-    }.mapNotNull { file ->
-        try {
-            val contents = fs.source(file).buffered().readString()
-            val catalog = Toml.parse(contents)
-            val libraries = catalog.getTable("libraries") ?: return@mapNotNull null
-            val dependencies = libraries.dottedKeySet().map { key ->
-                key to Dependency.parse(libraries[key] as String) as ArtifactDependency
-            }
-            dependencies
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }.flatten().toMap()
+
+    @Serializable
+    data class BuiltInToml(
+        val libraries: Map<String, ArtifactDependency>,
+    )
 }
 

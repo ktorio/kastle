@@ -3,7 +3,7 @@ package org.jetbrains.kastle.server
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.plugins.di.annotations.*
-import io.ktor.server.routing.routing
+import io.ktor.server.routing.*
 import io.ktor.utils.io.*
 import io.modelcontextprotocol.kotlin.sdk.*
 import io.modelcontextprotocol.kotlin.sdk.server.Server
@@ -17,9 +17,9 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.files.SystemTemporaryDirectory
 import kotlinx.serialization.json.*
 import org.jetbrains.kastle.PackRepository
+import org.jetbrains.kastle.PackSources
 import org.jetbrains.kastle.ProjectDescriptor
 import org.jetbrains.kastle.ProjectGenerator
-import org.jetbrains.kastle.ProjectModules
 import org.jetbrains.kastle.io.deleteRecursively
 import org.jetbrains.kastle.io.resolve
 
@@ -77,9 +77,7 @@ fun Application.agentAPI(
                 ) { request ->
                     val packListContent = repository.all().map { pack ->
                         val json = json.encodeToString(pack.copy(
-                            modules = ProjectModules.Empty,
-                            commonSources = emptyList(),
-                            rootSources = emptyList()
+                            sources = PackSources.Empty,
                         ))
                         TextResourceContents(
                             json,

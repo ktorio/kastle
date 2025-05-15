@@ -6,7 +6,7 @@ import org.jetbrains.kastle.gen.ProjectMapping
 import org.jetbrains.kastle.map
 import org.jetbrains.kastle.utils.protocol
 
-private val GRADLE_PACK_ID = PackId("std", "gradle")
+private val GRADLE_PACK_ID = PackId("org.gradle", "gradle")
 private val regex = Regex("(src|test|resources|testResources)(?:@(\\w+))?/")
 
 /**

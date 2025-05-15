@@ -1,15 +1,18 @@
-// Use version catalog
+
+    plugins {
+            alias(libs.plugins.kotlin.jvm)
+        
+            alias(libs.plugins.jetbrains.compose)
+        
+            alias(libs.plugins.compose.compiler)
+        
+    }
 
 
-group = "com.acme"
-version = "1.0.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-}
 
 dependencies {
-     testImplementation(project("../shared")) 
+     implementation(project(":shared")) 
      implementation(compose.desktop.currentOs) 
 
 }

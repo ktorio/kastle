@@ -12,12 +12,12 @@ import org.jetbrains.kastle.io.export
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
 import kotlin.io.path.ExperimentalPathApi
-import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
-private const val replaceSnapshot = false
+private const val replaceSnapshot = true
 
 abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots")) {
     protected val projectDir = Path(SystemTemporaryDirectory, "packs")
@@ -31,7 +31,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
     abstract suspend fun createRepository(): PackRepository
 
     @OptIn(ExperimentalPathApi::class)
-    @AfterTest
+    @BeforeTest
     fun cleanup() {
         SystemFileSystem.deleteRecursively(projectDir)
     }
@@ -90,7 +90,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
     @Test
     fun `ktor server gradle`() = runTest {
         generateWithPacks(
-            "std/gradle",
+            "org.gradle/gradle",
             "io.ktor/server-core",
             "io.ktor/server-cio",
         )
@@ -105,12 +105,12 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
     fun `ktor server gradle with catalog`() = runTest {
         generate(
             packs = listOf(
-                "std/gradle",
+                "org.gradle/gradle",
                 "io.ktor/server-core",
                 "io.ktor/server-cio",
             ),
             properties = mapOf(
-                VariableId.Companion.parse("std/gradle/versionCatalogEnabled") to "true",
+                VariableId.Companion.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
             )
         )
         assertFilesAreEqualWithSnapshot(
@@ -123,7 +123,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
     @Test
     fun `ktor server amper`() = runTest {
         generateWithPacks(
-            "std/amper",
+            "org.jetbrains/amper",
             "io.ktor/server-core",
             "io.ktor/server-cio",
         )
@@ -135,14 +135,14 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
     }
 
     @Test
-    fun `compose multiplatform gradle`() = runTest {
+    open fun `compose multiplatform gradle`() = runTest {
         generate(
             packs = listOf(
-                "std/gradle",
+                "org.gradle/gradle",
                 "org.jetbrains/compose-multiplatform",
             ),
             properties = mapOf(
-                VariableId.Companion.parse("std/gradle/versionCatalogEnabled") to "true",
+                VariableId.Companion.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
             )
         )
         assertFilesAreEqualWithSnapshot(
@@ -155,7 +155,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
     @Test
     fun `compose multiplatform amper`() = runTest {
         generateWithPacks(
-            "std/amper",
+            "org.jetbrains/amper",
             "org.jetbrains/compose-multiplatform",
         )
         assertFilesAreEqualWithSnapshot(
