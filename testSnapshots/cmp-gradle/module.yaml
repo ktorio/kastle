@@ -1,7 +1,0 @@
-
-product: jvm/app
-
-
-dependencies:
-  - $libs.ktor.server.core
-  - $libs.ktor.server.cio

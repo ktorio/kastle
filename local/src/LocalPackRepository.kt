@@ -94,8 +94,16 @@ class LocalPackRepository(
             // TODO cache versions
             val catalog = versions()
             val (moduleType, platforms) = amperYaml.readHeader()
-            val dependencies = amperYaml.readDependencies("dependencies", catalog)
-            val testDependencies = amperYaml.readDependencies("testDependencies", catalog)
+
+            // TODO verify this is correct
+            fun readDependencies(dependencies: String): DependenciesMap = platforms.singleOrNull()?.let {
+                mapOf(it to amperYaml.readDependencies(dependencies, catalog))
+            } ?: (platforms.associateWith { platform ->
+                amperYaml.readDependencies("$dependencies@$platform", catalog)
+            } + (Platform.COMMON to amperYaml.readDependencies(dependencies, catalog)))
+
+            val dependencies = readDependencies("dependencies")
+            val testDependencies = readDependencies("testDependencies")
 
             val sources = mutableListOf<SourceTemplate>()
             val resources = mutableListOf<SourceTemplate>()

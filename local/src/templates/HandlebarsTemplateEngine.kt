@@ -114,7 +114,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                                     name = blockMatch.expression
                                         ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
                                     position = BlockPosition(
-                                        range = match.range,
+                                        range = match.range.bumpEnd(),
                                         indent = indent,
                                     ),
                                 )
@@ -125,7 +125,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                                     name = blockMatch.expression
                                         ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
                                     position = BlockPosition(
-                                        range = match.range,
+                                        range = match.range.bumpEnd(),
                                         indent = indent,
                                     ),
                                 )

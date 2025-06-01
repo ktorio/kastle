@@ -5,18 +5,19 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.descendantsOfType
+import com.intellij.psi.util.elementType
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.BlockPosition.Companion.copy
 import org.jetbrains.kastle.BlockPosition.Companion.include
 import org.jetbrains.kastle.BlockPosition.Companion.toPosition
 import org.jetbrains.kastle.utils.endOfLine
 import org.jetbrains.kastle.utils.indent
-import org.jetbrains.kastle.utils.indentAt
 import org.jetbrains.kastle.utils.previousLine
 import org.jetbrains.kastle.utils.startOfLine
 import org.jetbrains.kastle.utils.unwrapQuotes
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
+import org.jetbrains.kotlin.psi.psiUtil.parents
 import org.jetbrains.kotlin.utils.addToStdlib.indexOfOrNull
 import org.jetbrains.kotlin.utils.addToStdlib.lastIndexOfOrNull
 
@@ -28,7 +29,7 @@ fun PsiElement.blockPosition(
     body: PsiElement = this,
     also: PsiElement? = null,
     start: Int? = null,
-    indent: Int? = null,
+    indent: Int? = null, // TODO remove
 ): BlockPosition {
     var range = blockRange()
     if (also != null)
@@ -40,7 +41,7 @@ fun PsiElement.blockPosition(
         range = range,
         outer = outerRange(range),
         inner = body.bodyRange(),
-        indent = indent ?: findIndent(),
+        indent = findIndent(),
     )
 }
 
@@ -313,7 +314,33 @@ private fun PsiElement.outerRange(range: IntRange): IntRange {
 }
 
 private fun PsiElement.findIndent(): Int {
-    return containingFile.text.indentAt(textRange.startOffset) ?: -1
+    // we count the number of parent structural elements on separate lines, then multiply by 4
+    var indent = 0
+    val fileText = containingFile.text
+    // var previousLineNumber = fileText.startOfLine(textRange.startOffset) ?: 0
+
+    for (element in parents) {
+        // val lineStart = fileText.startOfLine(element.textRange.startOffset) ?: 0
+
+        // Only count indent for elements on different lines
+        when(element.elementType.toString()) {
+            "SCRIPT_INITIALIZER" -> break
+            "BLOCK" -> {
+                indent++
+                // previousLineNumber = lineStart
+            }
+        }
+    }
+    if (indent > 0) {
+        println("$elementType x $indent -> ${parents.joinToString { it.elementType.toString() }}")
+        for (block in parents) {
+            if (block is KtScriptInitializer)
+                break
+            if (block.elementType.toString() == "BLOCK")
+                println("    $block: ${block.text.replace("\n", "\\n").trim()}")
+        }
+    }
+    return indent * 4
 }
 
 // TODO validation, unchecked casts

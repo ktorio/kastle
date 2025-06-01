@@ -20,7 +20,7 @@ private const val defaultGroup = "com.acme"
 private const val replaceSnapshot = true
 
 abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots")) {
-    protected val projectDir = Path(SystemTemporaryDirectory, "packs")
+    protected val outputDir = Path(SystemTemporaryDirectory, "generated")
     private lateinit var repository: PackRepository
     private suspend fun getRepository(): PackRepository {
         if (!this::repository.isInitialized)
@@ -33,7 +33,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
     @OptIn(ExperimentalPathApi::class)
     @BeforeTest
     fun cleanup() {
-        SystemFileSystem.deleteRecursively(projectDir)
+        SystemFileSystem.deleteRecursively(outputDir)
     }
 
     @Test
@@ -41,7 +41,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         generateWithPacks("com.acme/empty")
         assertFilesAreEqualWithSnapshot(
             "$snapshots/empty",
-            projectDir.toString(),
+            outputDir.toString(),
         )
     }
 
@@ -53,7 +53,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
         assertFilesAreEqualWithSnapshot(
             "$snapshots/parent-child",
-            projectDir.toString(),
+            outputDir.toString(),
         )
     }
 
@@ -66,7 +66,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
         assertFilesAreEqualWithSnapshot(
             "$snapshots/parent-child2",
-            projectDir.toString(),
+            outputDir.toString(),
         )
     }
 
@@ -82,7 +82,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         ).mapKeys { (key) -> VariableId.Companion.parse("com.acme/properties/$key") })
         assertFilesAreEqualWithSnapshot(
             "$snapshots/properties",
-            projectDir.toString(),
+            outputDir.toString(),
             replace = replaceSnapshot,
         )
     }
@@ -96,7 +96,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
         assertFilesAreEqualWithSnapshot(
             "$snapshots/ktor-server",
-            projectDir.toString(),
+            outputDir.toString(),
             replace = replaceSnapshot,
         )
     }
@@ -115,7 +115,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
         assertFilesAreEqualWithSnapshot(
             "$snapshots/ktor-server-catalog",
-            projectDir.toString(),
+            outputDir.toString(),
             replace = replaceSnapshot,
         )
     }
@@ -129,7 +129,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
         assertFilesAreEqualWithSnapshot(
             "$snapshots/ktor-server-amper",
-            projectDir.toString(),
+            outputDir.toString(),
             replace = replaceSnapshot,
         )
     }
@@ -142,12 +142,12 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
                 "org.jetbrains/compose-multiplatform",
             ),
             properties = mapOf(
-                VariableId.Companion.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
+                VariableId.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
             )
         )
         assertFilesAreEqualWithSnapshot(
             "$snapshots/cmp-gradle",
-            projectDir.toString(),
+            outputDir.toString(),
             replace = replaceSnapshot,
         )
     }
@@ -160,7 +160,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
         assertFilesAreEqualWithSnapshot(
             "$snapshots/cmp-amper",
-            projectDir.toString(),
+            outputDir.toString(),
             replace = replaceSnapshot,
         )
     }
@@ -182,6 +182,6 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
             properties = properties,
             packs = packs.map(PackId.Companion::parse),
         )
-    ).export(projectDir)
+    ).export(outputDir)
 
 }

@@ -32,10 +32,6 @@ class ProjectGeneratorImpl(
     private val projectResolver: ProjectResolver,
     private val log: Logger = ConsoleLogger(),
 ) : ProjectGenerator {
-    companion object {
-        val startOfLine = Regex("\n\\s*")
-        val nonEmptyLine = Regex("\n[\t ]*\\S")
-    }
 
     override fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
         val project = projectResolver.resolve(projectDescriptor, repository)
@@ -136,7 +132,7 @@ class ProjectGeneratorImpl(
                             // where to go next
                             start = when {
                                 child != null -> {
-                                    log.trace { "  push $block" }
+                                    // log.trace { "  push $block" }
                                     stack += block
                                     child!!.outerStart
                                 }
@@ -257,24 +253,33 @@ class ProjectGeneratorImpl(
             trimStart: Boolean = false,
             trimEnd: Boolean = false
         ): java.lang.Appendable {
+            if (start == end) return this
             when(indent) {
                 null, -1 -> append(csq, start, end)
                 else -> {
                     val indentString = indent.stringOf(' ')
-                    var matchStart = start
-                    for (lineStart in startOfLine.findAll(source.text, start)) {
-                        if (lineStart.range.first >= end) break
-                        if (trimStart && lineStart.range.first == start) {
-                            matchStart = lineStart.range.last + 1
-                            continue
-                        }
-                        append(source.text, matchStart, lineStart.range.first)
-                        if (trimEnd && lineStart.range.last == end - 1) return this
-                        append('\n').append(indentString)
-                        matchStart = lineStart.range.last + 1
+                    var newLineIndex = source.text.indexOf('\n', start)
+                    var segmentIndentSize: Int? = null
+                    var index = start
+                    while (newLineIndex in start..<end) {
+                        // TODO
+//                        if (trimStart && newLineIndex == start) {
+//                            matchStart = lineStart.range.last + 1
+//                            continue
+//                        }
+                        append(source.text, index, newLineIndex)
+                        // TODO
+                        // if (trimEnd && lineStart.range.last == end - 1) return this
+                        append('\n')
+                        append(indentString)
+
+                        if (segmentIndentSize == null)
+                            segmentIndentSize = maxOf(0, source.text.subSequence(newLineIndex + 1, end).indexOfFirst { it != ' ' })
+                        index = newLineIndex + segmentIndentSize + 1
+                        newLineIndex = source.text.indexOf('\n', index)
                     }
-                    if (matchStart < end)
-                        append(source.text, matchStart, end)
+                    if (index in start..<end)
+                        append(source.text, index, end)
                 }
             }
             return this
@@ -349,7 +354,7 @@ class ProjectGeneratorImpl(
 
             // TODO the indent should be based on this block's parents
             fun Block.close(indent: Int) {
-                log.trace { "  pop $this" }
+                // log.trace { "  pop $this" }
                 if (start < bodyEnd) {
                     append(source.text, start, bodyEnd, indent, trimEnd = true)
                 }
@@ -395,7 +400,7 @@ class ProjectGeneratorImpl(
                     }
 
                     is UnsafeBlock -> {
-                        append(source.text, block.outerStart, block.rangeStart)
+                        // append(source.text, block.outerStart, block.rangeStart)
                         append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, indent)
                         false
                     }
