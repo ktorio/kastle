@@ -77,11 +77,11 @@ sealed interface Expression {
 
             return when (receiverValue) {
                 is String -> evaluateStringMethod(receiverValue, methodName, evaluatedArgs)
-                is List<*> -> evaluateListMethod(receiverValue, methodName, evaluatedArgs)
+                is Collection<*> -> evaluateListMethod(receiverValue, methodName, evaluatedArgs)
                 is Map<*, *> -> evaluateMapMethod(receiverValue, methodName, evaluatedArgs)
                 is Number -> evaluateNumberMethod(receiverValue, methodName, evaluatedArgs)
                 is Boolean -> evaluateBooleanMethod(receiverValue, methodName, evaluatedArgs)
-                else -> throw IllegalArgumentException("Unsupported receiver type: $receiverValue")
+                else -> throw IllegalArgumentException("Unsupported receiver type: ${receiverValue::class}, $receiverValue")
             }
         }
 
@@ -148,19 +148,11 @@ sealed interface Expression {
             }
         }
 
-        private fun evaluateListMethod(receiver: List<*>, methodName: String, args: List<Any?>): Any? {
+        private fun evaluateListMethod(receiver: Collection<*>, methodName: String, args: List<Any?>): Any? {
             return when (methodName) {
                 "size" -> receiver.size
                 "isEmpty" -> receiver.isEmpty()
                 "isNotEmpty" -> receiver.isNotEmpty()
-                "get" -> {
-                    val index = (args.firstOrNull() as? Number)?.toInt()
-                        ?: throw IllegalArgumentException("get requires an integer index")
-                    if (index < 0 || index >= receiver.size) {
-                        throw IndexOutOfBoundsException("Index $index is out of bounds for list of size ${receiver.size}")
-                    }
-                    receiver[index]
-                }
                 "contains" -> {
                     val element = args.firstOrNull() ?: throw IllegalArgumentException("contains requires an argument")
                     receiver.contains(element)
@@ -169,10 +161,8 @@ sealed interface Expression {
                     val element = args.firstOrNull() ?: throw IllegalArgumentException("indexOf requires an argument")
                     receiver.indexOf(element)
                 }
-                "first" -> {
-                    if (receiver.isEmpty()) throw NoSuchElementException("List is empty")
-                    receiver.first()
-                }
+                "first" -> receiver.first()
+                "single" -> receiver.single()
                 "last" -> {
                     if (receiver.isEmpty()) throw NoSuchElementException("List is empty")
                     receiver.last()
@@ -190,6 +180,10 @@ sealed interface Expression {
                 "joinToString" -> {
                     val separator = (args.getOrNull(0) as? String) ?: ", "
                     receiver.joinToString(separator)
+                }
+                "flatten" -> {
+                    receiver as? Collection<Collection<*>> ?: error("flatten requires a List<Collection<*>> receiver")
+                    receiver.flatten()
                 }
                 "map" -> {
                     val mapper = args.firstOrNull()

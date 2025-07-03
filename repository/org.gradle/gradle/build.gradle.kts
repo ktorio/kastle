@@ -18,20 +18,58 @@ if (_project.modules.size == 1) {
 
 _slots("gradleConfigurations")
 
-dependencies {
-    for (dependency in _module.dependencies) {
-        when(dependency.type) {
-            "maven" ->   { implementation("${dependency.group}:${dependency.artifact}:${dependency.version}") }
-            "project" -> { implementation(project(dependency.gradlePath)) }
-            "catalog" -> { implementation(_unsafe("${dependency.key}")) }
+if (_module.platforms.size > 1) {
+    kotlin {
+        sourceSets {
+            for (e in _module.dependencies.entries) {
+                if (e.value.isNotEmpty()) {
+                    _unsafe("${e.key}Main").dependencies {
+                        for (dependency in e.value) {
+                            when (dependency.type) {
+                                "maven" -> {
+                                    implementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                                }
+                                "project" -> {
+                                    implementation(project(dependency.gradlePath))
+                                }
+                                "catalog" -> {
+                                    implementation(_unsafe("${dependency.key}"))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
+} else {
+    dependencies {
+        for (dependency in _module.dependencies.values.flatten()) {
+            when (dependency.type) {
+                "maven" -> {
+                    implementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                }
+                "project" -> {
+                    implementation(project(dependency.gradlePath))
+                }
+                "catalog" -> {
+                    implementation(_unsafe("${dependency.key}"))
+                }
+            }
+        }
 
-    for (dependency in _module.testDependencies) {
-        when(dependency.type) {
-            "maven" ->   { testImplementation("${dependency.group}:${dependency.artifact}:${dependency.version}") }
-            "project" -> { testImplementation(project(dependency.gradlePath)) }
-            "catalog" -> { testImplementation(_unsafe("${dependency.key}")) }
+        for (dependency in _module.testDependencies) {
+            when (dependency.type) {
+                "maven" -> {
+                    testImplementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                }
+                "project" -> {
+                    testImplementation(project(dependency.gradlePath))
+                }
+                "catalog" -> {
+                    testImplementation(_unsafe("${dependency.key}"))
+                }
+            }
         }
     }
 }

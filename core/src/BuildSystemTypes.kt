@@ -164,16 +164,40 @@ private fun merge(modules: List<SourceModule>, other: List<SourceModule>): Multi
 data class SourceModule(
     val type: SourceModuleType = SourceModuleType.LIB,
     val path: String = "",
-    val platforms: List<String> = emptyList(),
-    val dependencies: List<Dependency> = emptyList(),
-    val testDependencies: List<Dependency> = emptyList(),
+    val platforms: List<Platform> = emptyList(),
+    val dependencies: DependenciesMap = emptyMap(),
+    val testDependencies: DependenciesMap = emptyMap(),
     val sources: List<SourceTemplate> = emptyList(),
     val gradle: GradleSettings = GradleSettings(),
     val amper: AmperSettings = AmperSettings(),
-    val ignoreCommon: Boolean = false,
 ) {
+    val allDependencies: Set<Dependency> =
+        (dependencies.values.flatten() + testDependencies.values.flatten()).toSet()
+
     val gradlePlugins: List<GradlePlugin> get() = gradle.plugins
-    val allDependencies: List<Dependency> get() = dependencies + testDependencies
+}
+
+typealias DependenciesMap = Map<Platform, Set<Dependency>>
+
+operator fun DependenciesMap.plus(other: DependenciesMap): DependenciesMap =
+    (keys + other.keys).associateWith { platform ->
+        this[platform].orEmpty() + other[platform].orEmpty()
+    }
+
+enum class Platform(val code: String) {
+    COMMON("common"),
+    JVM("jvm"),
+    ANDROID("android"),
+    IOS("ios"),
+    WASM("wasmJs");
+
+    companion object {
+        fun parse(text: String): Platform =
+            entries.firstOrNull { it.code == text }
+                ?: throw IllegalArgumentException("Invalid platform: $text")
+    }
+
+    override fun toString(): String = code
 }
 
 @Serializable
@@ -223,8 +247,8 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
             else -> return null
         },
         platforms = (platforms + other.platforms).distinct(),
-        dependencies = (dependencies + other.dependencies).distinct(),
-        testDependencies = (testDependencies + other.testDependencies).distinct(),
+        dependencies = dependencies + other.dependencies,
+        testDependencies = testDependencies + other.testDependencies,
         sources = (sources + other.sources).also { mergedSources ->
             val uniquePaths = mutableSetOf<Url>()
             mergedSources.forEach {

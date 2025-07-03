@@ -8,10 +8,7 @@ import com.intellij.psi.util.descendantsOfType
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.BlockPosition.Companion.copy
 import org.jetbrains.kastle.BlockPosition.Companion.include
-import org.jetbrains.kastle.BlockPosition.Companion.toPosition
 import org.jetbrains.kastle.utils.endOfLine
-import org.jetbrains.kastle.utils.indent
-import org.jetbrains.kastle.utils.indentAt
 import org.jetbrains.kastle.utils.previousLine
 import org.jetbrains.kastle.utils.startOfLine
 import org.jetbrains.kastle.utils.unwrapQuotes
@@ -28,7 +25,6 @@ fun PsiElement.blockPosition(
     body: PsiElement = this,
     also: PsiElement? = null,
     start: Int? = null,
-    indent: Int? = null,
 ): BlockPosition {
     var range = blockRange()
     if (also != null)
@@ -40,19 +36,13 @@ fun PsiElement.blockPosition(
         range = range,
         outer = outerRange(range),
         inner = body.bodyRange(),
-        indent = indent ?: findIndent(),
     )
 }
 
 fun PsiElement.blockRange(
     trim: Boolean = false,
 ): IntRange {
-    val range = textIntRange(trim)
-//    val receiver = parents.firstNotNullOfOrNull(::inlineContext)
-//    val indent = findIndent(this)
-    // TODO use receiver / context
-
-    return range
+    return textIntRange(trim)
 }
 
 fun PsiElement.bodyRange(): IntRange {
@@ -78,12 +68,6 @@ fun PsiElement.textIntRange(
 
 fun TextRange.toIntRange(): IntRange =
     startOffset .. endOffset
-
-private fun inlineContext(parent: PsiElement): String? = when (parent) {
-    is KtClass -> parent.name
-    is KtNamedFunction -> parent.receiverTypeReference?.name
-    else -> null
-}
 
 fun KtDeclaration.asProperty(): Property {
     val variableName = name
@@ -170,7 +154,7 @@ private fun KtExpression.asLiteralReference(): Sequence<Block> =
     sequenceOf(
         InlineValue(
             expression = toTemplateExpression(),
-            position = blockRange().toPosition(), // TODO
+            position = blockPosition(),
             embedded = false,
         )
     )
@@ -200,7 +184,6 @@ private fun KtWhenExpression.asWhenBlock(): Sequence<Block> {
                     ElseBlock(
                         position = child.blockPosition(
                             body = child.children[1],
-                            indent = whenBlock.indent,
                         )
                     )
                 }
@@ -211,7 +194,6 @@ private fun KtWhenExpression.asWhenBlock(): Sequence<Block> {
                     },
                     position = child.blockPosition(
                         body = child.children[1],
-                        indent = whenBlock.indent,
                     )
                 )
             )
@@ -310,10 +292,6 @@ private fun PsiElement.outerRange(range: IntRange): IntRange {
     }
 
     return startOfFirstLine.. endOfLastLine
-}
-
-private fun PsiElement.findIndent(): Int {
-    return containingFile.text.indentAt(textRange.startOffset) ?: -1
 }
 
 // TODO validation, unchecked casts

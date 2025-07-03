@@ -45,7 +45,7 @@ data class BlockPosition(
     val range: IntRange,
     val outer: IntRange = range,
     val inner: IntRange = range,
-    val indent: Int = -1,
+    val level: Int = 0,
     val context: SourceContext = SourceContext.TopLevel
 ) {
     companion object {
@@ -55,14 +55,11 @@ data class BlockPosition(
                 val (first, last) = item.split(',').map { it.toInt() }
                 IntRange(first, last)
             }
-            val indent = items[3].toInt()
+            val level = items[3].toInt()
             val context = items[4].let(SourceContext::valueOf)
 
-            return BlockPosition(range, outer, inner, indent, context)
+            return BlockPosition(range, outer, inner, level, context)
         }
-
-        fun IntRange.toPosition() =
-            BlockPosition(this)
 
         // expanded range to contain both
         infix fun IntRange.include(range: IntRange): IntRange =
@@ -83,7 +80,7 @@ data class BlockPosition(
     }
 
     override fun toString(): String =
-        "${outer.first},${outer.last} / ${range.first},${range.last} / ${inner.first},${inner.last} / $indent / ${context.name}"
+        "${outer.first},${outer.last} / ${range.first},${range.last} / ${inner.first},${inner.last} / $level / ${context.name}"
 }
 
 enum class SourceContext {
@@ -154,7 +151,7 @@ data class SkipBlock(override var position: BlockPosition): Block {
 @Serializable
 data class ConditionalBlock(
     override var position: BlockPosition,
-): StructuralBlock
+): Block
 
 @Serializable
 data class IfBlock(

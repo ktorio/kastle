@@ -81,12 +81,12 @@ fun interface ProjectResolver {
         private operator fun ProjectModules.plus(rootSources: List<SourceTemplate>): ProjectModules =
             when (this) {
                 is ProjectModules.Empty ->
-                    ProjectModules.Single(SourceModule(sources = rootSources, ignoreCommon = true))
+                    ProjectModules.Single(SourceModule(sources = rootSources))
                 is ProjectModules.Single ->
                     copy(module = module.copy(sources = module.sources + rootSources))
                 is ProjectModules.Multi ->
                     // TODO check for root
-                    copy(modules = modules + SourceModule(sources = rootSources, ignoreCommon = true))
+                    copy(modules = modules + SourceModule(sources = rootSources))
             }
     }
 

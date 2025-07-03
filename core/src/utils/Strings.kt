@@ -73,3 +73,63 @@ fun String.previousLine(index: Int): String? {
     val previousLineStart = startOfLine(currentLineStart) ?: 0
     return substring(previousLineStart, currentLineStart)
 }
+
+fun CharSequence.firstNonSpace(start: Int = 0, limit: Int = length): Int {
+    for (i in start until limit) {
+        if (get(i) != ' ')
+            return i
+    }
+    return limit
+}
+
+fun CharSequence.lastNonWhitespace(start: Int = length, limit: Int = 0): Int {
+    for (i in start - 1  downTo limit) {
+        if (!get(i).isWhitespace())
+            return i + 1
+    }
+    return limit
+}
+
+fun CharSequence.newLineIndices(
+    start: Int = 0,
+    limit: Int = length,
+): Sequence<Int> = sequence {
+    var index = start
+    while (true) {
+        index = indexOf('\n', index)
+        if (index < 0 || index >= limit)
+            break
+        yield(index)
+        index++
+    }
+}
+
+/**
+ * Removes line indents by the factor provided, multiplied by 4.
+ */
+fun Appendable.append(
+    csq: CharSequence,
+    start: Int,
+    end: Int,
+    level: Int,
+): java.lang.Appendable {
+    if (level <= 0) return append(csq, start, end)
+    if (start == end) return this
+    val skipIndent = level * 4
+
+    var index = start
+    for (newLineIndex in csq.newLineIndices(start, end)) {
+        append(csq, index, newLineIndex)
+        append('\n')
+
+        index = minOf(
+            csq.firstNonSpace(newLineIndex + 1, end),
+            newLineIndex + 1 + skipIndent,
+        )
+    }
+    if (index >= end)
+        return this
+
+    append(csq, index, end)
+    return this
+}

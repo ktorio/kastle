@@ -9,6 +9,7 @@ interface Stack<E>: Iterable<E> {
         fun <E> Collection<E>.toStack() = ListStack(toMutableList())
     }
 
+    val size: Int
     val top: E?
     fun isEmpty(): Boolean = top == null
     fun pop(): E?
@@ -18,6 +19,7 @@ interface Stack<E>: Iterable<E> {
 }
 
 class ListStack<E>(private val list: MutableList<E> = mutableListOf()) : Stack<E> {
+    override val size: Int get() = list.size
     override val top: E? get() = list.lastOrNull()
     override fun isEmpty(): Boolean = list.isEmpty()
     override fun pop(): E? = list.removeLastOrNull()

@@ -8,6 +8,8 @@ rootSources:
   - path: gradle/wrapper/gradle-wrapper.jar
   - path: gradle/wrapper/gradle-wrapper.properties
   - path: settings.gradle.kts
+  - path: gradle.properties.hbs
+    target: file:gradle.properties
   - path: root.build.gradle.kts
     target: file:build.gradle.kts
     if: _project.modules.size > 1

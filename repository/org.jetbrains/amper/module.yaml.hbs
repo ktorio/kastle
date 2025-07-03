@@ -7,17 +7,19 @@ product:
 product: {{ _module.type }}
 {{/when}}
 
+{{#if _module.dependencies.common.size }}
 dependencies:
-  {{#each _module.dependencies}}
-    {{#when type}}
-    {{ "maven" }}
-    - {{ group }}:{{ artifact }}:{{ version }}{{#if exported}}: exported{{/if}}
-    {{ "project" }}
-    - {{ path }}{{#if exported}}: exported{{/if}}
-    {{ "catalog" }}
-    - ${{ key }}{{#if exported}}: exported{{/if}}
-    {{/when}}
+  {{#each _module.dependencies.common}}
+  {{#when type}}
+  {{ "maven" }}
+  - {{ group }}:{{ artifact }}:{{ version }}{{#if exported}}: exported{{/if}}
+  {{ "project" }}
+  - {{ path }}{{#if exported}}: exported{{/if}}
+  {{ "catalog" }}
+  - ${{ key }}{{#if exported}}: exported{{/if}}
+  {{/when}}
   {{/each}}
+{{/if}}
 
 {{#if _module.amper}}
 settings:

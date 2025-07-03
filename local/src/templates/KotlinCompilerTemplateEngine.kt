@@ -5,21 +5,11 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.util.descendantsOfType
 import kotlinx.io.files.Path
-import org.jetbrains.kastle.Block
-import org.jetbrains.kastle.PackRepository
-import org.jetbrains.kastle.Property
-import org.jetbrains.kastle.SkipBlock
-import org.jetbrains.kastle.SourceContext
-import org.jetbrains.kastle.SourceTemplate
+import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.Logger
-import org.jetbrains.kastle.utils.afterProtocol
-import org.jetbrains.kastle.utils.contains
-import org.jetbrains.kastle.utils.protocol
-import org.jetbrains.kastle.utils.rangeStart
-import org.jetbrains.kastle.utils.slotId
-import org.jetbrains.kastle.utils.trimBraces
+import org.jetbrains.kastle.utils.*
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
@@ -184,45 +174,45 @@ internal class KotlinCompilerTemplateEngine(
         properties.addAll(propertyDeclarations.map { it.asProperty() })
 
         // sort, indent logic
-        var blocks = declarationBlocks +
-                propertyBlocks +
-                chainedReferences +
-                slots +
-                unsafeBlocks
-
-        blocks = blocks.sortedBy { it.rangeStart }
-
-        return collect(
-    declarationBlocks,
+        val allBlocks = collect(
+            declarationBlocks,
             propertyBlocks,
             chainedReferences,
             slots,
             unsafeBlocks,
         )
+//        val text = containingFile.text
+//        for (block in allBlocks) {
+//            println("${" ".repeat(maxOf(0, block.indent))}${block}\t${text.substring(block.rangeStart, block.rangeEnd).replace("\n", "\\n")}")
+//        }
+
+        return allBlocks
     }
 
 }
 
+/**
+ * Sort all blocks and correct indentations based on inlining.
+ */
 private fun collect(vararg lists: Collection<out Block>): List<Block> {
-    val blocks = mutableListOf<Block>()
-    for (list in lists)
-        blocks += list
-    blocks.sortBy { it.rangeStart }
+    val blocks = lists.toList()
+        .flatten()
+        .sortedBy { it.rangeStart }
+        .distinct()
 
     // inherit indentation for nested blocks
     for (i in blocks.indices) {
         if (i == 0) continue
         val current = blocks[i]
 
-        // TODO not always applicable, check content
+        var nesting = if (current is StructuralBlock) 1 else 0
         for (j in i - 1 downTo 0) {
-            val previous = blocks[j]
-            if (current in previous) {
-                current.position = current.position.copy(
-                    indent = previous.position.indent
-                )
-                break
-            }
+            val previous = blocks[j] as? StructuralBlock ?: continue
+            if (current in previous)
+                nesting++
+        }
+        if (nesting > 0) {
+            current.position = current.position.copy(level = nesting)
         }
     }
     return blocks

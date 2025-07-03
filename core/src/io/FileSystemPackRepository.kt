@@ -51,14 +51,16 @@ open class FileSystemPackRepository(
 
     override fun ids(): Flow<PackId> =
         fs.list(root).flatMap { groupPath ->
-            fs.list(groupPath)
+            if (fs.isDirectory(groupPath)) {
+                fs.list(groupPath)
+            } else emptyList()
         }.asFlow().mapNotNull { path ->
             if (!path.toString().endsWith(ext)) return@mapNotNull null
             PackId.parse("${path.parent!!.name}/${path.name.removeSuffix(".${ext}")}")
         }
 
-    override suspend fun get(id: PackId): PackDescriptor? {
-        return read(root.resolve("$id.$ext"))
+    override suspend fun get(packId: PackId): PackDescriptor? {
+        return read(root.resolve("$packId.$ext"))
     }
 
     override suspend fun add(descriptor: PackDescriptor) {

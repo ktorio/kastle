@@ -51,8 +51,12 @@ private fun SourceModule.toVariableMap(): Map<String, Any> = mapOf(
     "path" to path,
     "type" to type.toString(),
     "platforms" to platforms,
-    "dependencies" to dependencies.map { it.toVariableMap(path) },
-    "testDependencies" to testDependencies.map { it.toVariableMap(path) },
+    "dependencies" to dependencies.asSequence().associate { (platform, deps) ->
+        platform.code to deps.map { it.toVariableMap(path) }
+    },
+    "testDependencies" to testDependencies.asSequence().associate { (platform, deps) ->
+        platform.code to deps.map { it.toVariableMap(path) }
+    },
     "gradle" to gradle.toVariableMap(),
     "amper" to amper.toVariableMap(),
 )
