@@ -5,25 +5,11 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.util.descendantsOfType
 import kotlinx.io.files.Path
-import org.jetbrains.kastle.Block
-import org.jetbrains.kastle.ConditionalBlock
-import org.jetbrains.kastle.PackRepository
-import org.jetbrains.kastle.Property
-import org.jetbrains.kastle.SkipBlock
-import org.jetbrains.kastle.SourceContext
-import org.jetbrains.kastle.SourceTemplate
-import org.jetbrains.kastle.WhenBlock
+import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.Logger
-import org.jetbrains.kastle.utils.afterProtocol
-import org.jetbrains.kastle.utils.contains
-import org.jetbrains.kastle.utils.indent
-import org.jetbrains.kastle.utils.protocol
-import org.jetbrains.kastle.utils.rangeEnd
-import org.jetbrains.kastle.utils.rangeStart
-import org.jetbrains.kastle.utils.slotId
-import org.jetbrains.kastle.utils.trimBraces
+import org.jetbrains.kastle.utils.*
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
@@ -35,7 +21,8 @@ import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import java.io.File
-import kotlin.reflect.jvm.jvmName
+
+public const val INDENT = 4
 
 /**
  * Provides analysis capabilities for Kotlin source files within a specified path.
@@ -196,10 +183,10 @@ internal class KotlinCompilerTemplateEngine(
             slots,
             unsafeBlocks,
         )
-        val text = containingFile.text
-        for (block in allBlocks) {
-            println("${" ".repeat(maxOf(0, block.indent))}${block}\t${text.substring(block.rangeStart, block.rangeEnd).replace("\n", "\\n")}")
-        }
+//        val text = containingFile.text
+//        for (block in allBlocks) {
+//            println("${" ".repeat(maxOf(0, block.indent))}${block}\t${text.substring(block.rangeStart, block.rangeEnd).replace("\n", "\\n")}")
+//        }
 
         return allBlocks
     }
@@ -227,6 +214,7 @@ private fun collect(vararg lists: Collection<out Block>): List<Block> {
                 when (previous) {
                     // ignore blocks that are not inlined
                     is ConditionalBlock,
+                    is UnsafeBlock,
                     is WhenBlock -> continue
                     else -> nesting++
                 }
@@ -234,7 +222,7 @@ private fun collect(vararg lists: Collection<out Block>): List<Block> {
         }
         if (nesting > 0) {
             current.position = current.position.copy(
-                indent = maxOf(0, current.position.indent - nesting * 4)
+                indent = maxOf(0, current.position.indent - nesting * INDENT)
             )
         }
     }

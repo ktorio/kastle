@@ -15,3 +15,6 @@ test-dependencies:
   - ../local
   - $libs.ktor.server.test.host
   - $libs.ktor.server.di
+
+repositories:
+  - https://maven.pkg.jetbrains.space/public/p/ktor/eap

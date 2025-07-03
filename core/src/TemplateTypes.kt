@@ -45,7 +45,7 @@ data class BlockPosition(
     val range: IntRange,
     val outer: IntRange = range,
     val inner: IntRange = range,
-    val indent: Int = -1,
+    val indent: Int,
     val context: SourceContext = SourceContext.TopLevel
 ) {
     companion object {
@@ -60,9 +60,6 @@ data class BlockPosition(
 
             return BlockPosition(range, outer, inner, indent, context)
         }
-
-        fun IntRange.toPosition() =
-            BlockPosition(this)
 
         // expanded range to contain both
         infix fun IntRange.include(range: IntRange): IntRange =

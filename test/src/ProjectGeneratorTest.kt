@@ -2,17 +2,13 @@ package org.jetbrains.kastle
 
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.files.Path
-import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.files.SystemTemporaryDirectory
 import org.jetbrains.kastle.gen.ProjectResolver
 import org.jetbrains.kastle.gen.plus
 import org.jetbrains.kastle.gradle.GradleTransformation
-import org.jetbrains.kastle.io.deleteRecursively
 import org.jetbrains.kastle.io.export
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 private const val defaultName = "sample"
@@ -20,7 +16,6 @@ private const val defaultGroup = "com.acme"
 private const val replaceSnapshot = true
 
 abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots")) {
-    protected val outputDir = Path(SystemTemporaryDirectory, "generated")
     private lateinit var repository: PackRepository
     private suspend fun getRepository(): PackRepository {
         if (!this::repository.isInitialized)
@@ -30,24 +25,18 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     abstract suspend fun createRepository(): PackRepository
 
-    @OptIn(ExperimentalPathApi::class)
-    @BeforeTest
-    fun cleanup() {
-        SystemFileSystem.deleteRecursively(outputDir)
-    }
-
     @Test
     fun `empty project`() = runTest {
-        generateWithPacks("com.acme/empty")
-        assertFilesAreEqualWithSnapshot(
-            "$snapshots/empty",
-            outputDir.toString(),
-        )
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "empty")
+        generateWithPacks(outputDir, "com.acme/empty")
+        assertFilesAreEqualWithSnapshot( "$snapshots/empty", outputDir.toString())
     }
 
     @Test
     fun `with slot`() = runTest {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child")
         generateWithPacks(
+            outputDir,
             "com.acme/parent",
             "com.acme/child",
         )
@@ -59,7 +48,9 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     fun `with slot and two children`() = runTest {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child2")
         generateWithPacks(
+            outputDir,
             "com.acme/parent",
             "com.acme/child",
             "com.acme/child2",
@@ -72,7 +63,8 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     fun `with properties`() = runTest {
-        generate(packs = listOf("com.acme/properties"), properties = mapOf(
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "properties")
+        generate(outputDir, packs = listOf("com.acme/properties"), properties = mapOf(
             "numberProperty" to "1",
             "booleanProperty" to "true",
             "nullProperty" to "null",
@@ -89,7 +81,9 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     fun `ktor server gradle`() = runTest {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server")
         generateWithPacks(
+            outputDir,
             "org.gradle/gradle",
             "io.ktor/server-core",
             "io.ktor/server-cio",
@@ -102,15 +96,17 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
     }
 
     @Test
-    fun `ktor server gradle with catalog`() = runTest {
+    open fun `ktor server gradle with catalog`() = runTest {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-catalog")
         generate(
+            outputDir,
             packs = listOf(
                 "org.gradle/gradle",
                 "io.ktor/server-core",
                 "io.ktor/server-cio",
             ),
             properties = mapOf(
-                VariableId.Companion.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
+                VariableId.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
             )
         )
         assertFilesAreEqualWithSnapshot(
@@ -122,7 +118,9 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     fun `ktor server amper`() = runTest {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-amper")
         generateWithPacks(
+            outputDir,
             "org.jetbrains/amper",
             "io.ktor/server-core",
             "io.ktor/server-cio",
@@ -136,7 +134,9 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     open fun `compose multiplatform gradle`() = runTest {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-gradle")
         generate(
+            outputDir,
             packs = listOf(
                 "org.gradle/gradle",
                 "org.jetbrains/compose-multiplatform",
@@ -154,7 +154,9 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     fun `compose multiplatform amper`() = runTest {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-amper")
         generateWithPacks(
+            outputDir,
             "org.jetbrains/amper",
             "org.jetbrains/compose-multiplatform",
         )
@@ -165,10 +167,11 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
     }
 
-    private suspend fun generateWithPacks(vararg packs: String) =
-        generate(packs = packs.toList())
+    private suspend fun generateWithPacks(outputDir: Path, vararg packs: String) =
+        generate(outputDir, packs = packs.toList())
 
     private suspend fun generate(
+        outputDir: Path,
         properties: Map<VariableId, String> = emptyMap(),
         packs: List<String>
     ) = ProjectGeneratorImpl(

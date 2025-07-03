@@ -5,8 +5,6 @@ product:
 
 
 dependencies:
-  - $compose.foundation: exported
-  - $compose.material3: exported
-
 settings:
   compose: enabled
+  

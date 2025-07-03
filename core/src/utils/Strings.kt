@@ -73,3 +73,76 @@ fun String.previousLine(index: Int): String? {
     val previousLineStart = startOfLine(currentLineStart) ?: 0
     return substring(previousLineStart, currentLineStart)
 }
+
+fun CharSequence.firstNonSpace(start: Int = 0, limit: Int = length): Int {
+    for (i in start until limit) {
+        if (get(i) != ' ')
+            return i
+    }
+    return limit
+}
+
+fun CharSequence.lastNonSpace(start: Int = length, limit: Int = 0): Int {
+    for (i in start - 1  downTo limit) {
+        if (get(i) != ' ')
+            return i + 1
+    }
+    return limit
+}
+
+fun CharSequence.newLineIndices(
+    start: Int = 0,
+    limit: Int = length,
+): Sequence<Int> = sequence {
+    var index = start
+    while (true) {
+        index = indexOf('\n', index)
+        if (index < 0 || index >= limit)
+            break
+        yield(index)
+        index++
+    }
+}
+
+/**
+ * Replaces any currently indented lines with the new indent.
+ *
+ * To do this, we infer the baseline indent from newlines in the string, then write each line with the new indent.
+ *
+ * Empty lines are ignored.
+ */
+fun Appendable.append(
+    csq: CharSequence,
+    start: Int,
+    end: Int,
+    indent: Int,
+): java.lang.Appendable {
+    if (indent < 0) return append(csq, start, end)
+    if (start == end) return this
+    val indentString = indent.stringOf(' ')
+    val newLineIndices = csq.newLineIndices(start, end).toList().let { newLineIndices ->
+        // ignore empty lines
+        newLineIndices.filterIndexed { i, newLineIndex ->
+            (newLineIndices.getOrNull(i + 1) ?: end) > newLineIndex + 1
+        }
+    }
+    val indentBaseline: Int = newLineIndices.minOfOrNull { newLineIndex ->
+        val startOfLine = newLineIndex + 1
+        val indentSize = csq.firstNonSpace(startOfLine, end) - startOfLine
+        indentSize
+    } ?: return append(csq, start, end)
+
+    var index = start
+    for (newLineIndex in newLineIndices) {
+        append(csq, index, newLineIndex)
+        append('\n')
+        append(indentString)
+
+        index = newLineIndex + indentBaseline + 1
+    }
+    if (index >= end)
+        return this
+
+    append(csq, index, end)
+    return this
+}
