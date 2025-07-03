@@ -309,7 +309,7 @@ class ProjectGeneratorImpl(
 
             fun Block.close(level: Int) {
                 if (start < bodyEnd) {
-                    val trimmedEnd = source.text.lastNonSpace(bodyEnd, start)
+                    val trimmedEnd = source.text.lastNonWhitespace(bodyEnd, start)
                     append(source.text, start, trimmedEnd, level)
                 }
                 start = rangeEnd
@@ -317,6 +317,7 @@ class ProjectGeneratorImpl(
                 // variables.pop()
             }
 
+            @Suppress("UNCHECKED_CAST")
             fun appendBlockContents(
                 block: Block,
                 source: SourceTemplate,
@@ -338,8 +339,6 @@ class ProjectGeneratorImpl(
                     }
 
                     is WhenClauseBlock -> {
-                        val end = child?.outerStart ?: block.bodyEnd
-
                         val parent = stack.top as? WhenBlock
                             ?: error("when clause with no parent: $block")
                         val value = parent.expression.evaluate(variables)
@@ -347,8 +346,7 @@ class ProjectGeneratorImpl(
                         conditions[parent] = matched || conditions[parent] ?: false
 
                         if (matched) {
-                            append(source.text, block.outerStart, block.rangeStart, block.level)
-                            append(source.text, block.bodyStart, end, block.level)
+                            append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
                             false
                         } else skipContents()
                     }
@@ -411,8 +409,9 @@ class ProjectGeneratorImpl(
                                     false
                                 } else skipContents()
                             }
+
                             // contents provided by children
-                            is WhenBlock -> false
+                            is WhenBlock -> true
                         }
                     }
                 }

@@ -69,12 +69,6 @@ fun PsiElement.textIntRange(
 fun TextRange.toIntRange(): IntRange =
     startOffset .. endOffset
 
-private fun inlineContext(parent: PsiElement): String? = when (parent) {
-    is KtClass -> parent.name
-    is KtNamedFunction -> parent.receiverTypeReference?.name
-    else -> null
-}
-
 fun KtDeclaration.asProperty(): Property {
     val variableName = name
     require(variableName != null) {

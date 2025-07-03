@@ -1,6 +1,5 @@
 [versions]
 ktor = "3.2.0-eap-1313"
 
-
 [libraries]
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }

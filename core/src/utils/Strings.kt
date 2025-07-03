@@ -82,9 +82,9 @@ fun CharSequence.firstNonSpace(start: Int = 0, limit: Int = length): Int {
     return limit
 }
 
-fun CharSequence.lastNonSpace(start: Int = length, limit: Int = 0): Int {
+fun CharSequence.lastNonWhitespace(start: Int = length, limit: Int = 0): Int {
     for (i in start - 1  downTo limit) {
-        if (get(i) != ' ')
+        if (!get(i).isWhitespace())
             return i + 1
     }
     return limit
