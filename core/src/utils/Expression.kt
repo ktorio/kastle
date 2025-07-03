@@ -1,6 +1,7 @@
 package org.jetbrains.kastle.utils
 
 import kotlinx.serialization.Serializable
+import kotlin.toString
 
 @Serializable
 sealed interface Expression {
@@ -12,33 +13,47 @@ sealed interface Expression {
     }
 
     @Serializable
-    data class StringLiteral(override val value: String) : Literal<String>
+    data class StringLiteral(override val value: String) : Literal<String> {
+        override fun toString(): String = "\"$value\""
+    }
 
     @Serializable
-    data class DoubleLiteral(override val value: Double) : Literal<Double>
+    data class DoubleLiteral(override val value: Double) : Literal<Double> {
+        override fun toString(): String = value.toString()
+    }
 
     @Serializable
-    data class LongLiteral(override val value: Long) : Literal<Long>
+    data class LongLiteral(override val value: Long) : Literal<Long> {
+        override fun toString(): String = value.toString()
+    }
 
     @Serializable
-    data class CharLiteral(override val value: Char) : Literal<Char>
+    data class CharLiteral(override val value: Char) : Literal<Char> {
+        override fun toString(): String = "'$value'"
+    }
 
     @Serializable
-    data class BooleanLiteral(override val value: Boolean) : Literal<Boolean>
+    data class BooleanLiteral(override val value: Boolean) : Literal<Boolean> {
+        override fun toString(): String = value.toString()
+    }
 
     @Serializable
-    data object NullLiteral : Literal<Any?> { override val value: Any? = null }
+    data object NullLiteral : Literal<Any?> {
+        override val value: Any? = null
+        override fun toString(): String = "null"
+
+    }
 
     @Serializable
     data class VariableRef(val name: String) : Expression {
-        override fun evaluate(variables: Variables): Any? =
-            variables[name]
+        override fun evaluate(variables: Variables): Any? = variables[name]
+        override fun toString(): String = name
     }
 
     @Serializable
     data class BinaryOp(val op: Operator, val left: Expression, val right: Expression) : Expression {
-        override fun evaluate(variables: Variables): Any? =
-            op.evaluate(left.evaluate(variables), right.evaluate(variables))
+        override fun evaluate(variables: Variables): Any? = op.evaluate(left.evaluate(variables), right.evaluate(variables))
+        override fun toString(): String = "$left ${op.name} $right"
     }
 
     @Serializable
@@ -60,20 +75,22 @@ sealed interface Expression {
                     variables.pop()
                 }
             }
-
         }
+
+        override fun toString(): String = "{ ${paramNames.joinToString()} -> $body }"
     }
 
     @Serializable
     data class MethodCall(val receiver: Expression?, val methodName: String, val args: List<Expression>) : Expression {
         override fun evaluate(variables: Variables): Any? {
-            val receiverValue = receiver?.evaluate(variables)
             val evaluatedArgs = args.map { it.evaluate(variables) }
 
             // Handle static-like utility functions if no receiver
-            if (receiverValue == null) {
+            if (receiver == null) {
                 return evaluateStaticMethod(methodName, evaluatedArgs)
             }
+
+            val receiverValue = receiver.evaluate(variables) ?: error("null receiver $receiver for method call $methodName")
 
             return when (receiverValue) {
                 is String -> evaluateStringMethod(receiverValue, methodName, evaluatedArgs)
@@ -147,6 +164,9 @@ sealed interface Expression {
                 else -> throw IllegalArgumentException("Unsupported String method: $methodName")
             }
         }
+
+        override fun toString(): String =
+            "${receiver?.let { "$receiver." } ?: ""}$methodName(${args.joinToString()})"
 
         private fun evaluateListMethod(receiver: Collection<*>, methodName: String, args: List<Any?>): Any? {
             return when (methodName) {

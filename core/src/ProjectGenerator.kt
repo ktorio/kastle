@@ -84,7 +84,8 @@ class ProjectGeneratorImpl(
                         when (source.target.extension) {
                             "kt" -> writeKotlinSourcePreamble(
                                 projectDescriptor,
-                                slots
+                                source.target,
+                                slots,
                             )
                         }
 
@@ -113,8 +114,7 @@ class ProjectGeneratorImpl(
                         forEachBlock(source.blocks) { block ->
                             // exited blocks
                             val parent = stack.popUntil({ block in it }) { parent ->
-                                // log.trace { "  pop $parent (${block.range} !in ${parent.range})" }
-                                parent.close(parent.level)
+                                parent.close()
                                 if (parent.tryLoopBack())
                                     return@forEachBlock
                             }
@@ -132,7 +132,6 @@ class ProjectGeneratorImpl(
                             // where to go next
                             start = when {
                                 child != null -> {
-                                    // log.trace { "  push $block" }
                                     stack += block
                                     child!!.outerStart
                                 }
@@ -157,8 +156,7 @@ class ProjectGeneratorImpl(
                             if (isLast()) {
                                 // trailing ancestors
                                 stack.popSequence().forEach { parent ->
-                                    // log.trace { "  pop $parent" }
-                                    parent.close(parent.level) // TODO use ancestor
+                                    parent.close()
                                     if (parent.tryLoopBack())
                                         return@forEachBlock
                                 }
@@ -175,12 +173,17 @@ class ProjectGeneratorImpl(
 
     private fun Appendable.writeKotlinSourcePreamble(
         project: ProjectDescriptor,
-        blocks: List<SourceTemplate>
+        target: Url,
+        blocks: List<SourceTemplate>,
     ) {
         // TODO replace existing package in template if present
         //      include sub-packages when present in the target file
-        append("package ${project.group}")
-        append("\n\n")
+        val dir = target.parentPath
+            .replace(Regex("^/?/?(?:src(?:@\\w+)?)?(?:/\\w*(?:main|test)/\\w+)?/?", RegexOption.IGNORE_CASE), "")
+            .replace('/', '.')
+        val pkg = if (dir.isEmpty()) project.group else "${project.group}.$dir"
+
+        append("package $pkg\n\n")
 
         val imports: List<String> = blocks.asSequence()
             .flatMap { it.imports.orEmpty() }
@@ -241,8 +244,7 @@ class ProjectGeneratorImpl(
         }
 
         override fun append(csq: CharSequence?, start: Int, end: Int): java.lang.Appendable {
-            if (csq == null || start > end) return this
-            // TODO shouldn't be overlapping
+            if (csq == null) return this
             require(start <= end) {
                 "Overlap $start > $end: ${csq.substring(end, start)}"
             }
@@ -307,14 +309,16 @@ class ProjectGeneratorImpl(
                 return true
             }
 
-            fun Block.close(level: Int) {
+            fun Block.close() {
                 if (start < bodyEnd) {
+                    // trim the contents of structural blocks when inlined, else extra whitespace will appear
                     val trimmedEnd = source.text.lastNonWhitespace(bodyEnd, start)
                     append(source.text, start, trimmedEnd, level)
                 }
                 start = rangeEnd
-                // TODO synchronize push/pop
-                // variables.pop()
+
+                if (this is DeclaringBlock)
+                    variables.pop()
             }
 
             @Suppress("UNCHECKED_CAST")
@@ -358,25 +362,26 @@ class ProjectGeneratorImpl(
                         false
                     }
 
-                    is ConditionalBlock -> {
-                        false
-                    }
-
                     is ElseBlock -> {
                         val parent = stack.lastOrNull() ?: error("else without parent: $block")
                         if (conditions[parent] == false) {
-                            // TODO append(source.text, block.outerStart, block.rangeStart)
                             append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
                             false
                         } else skipContents()
                     }
 
+                    // details handled by children
+                    is ConditionalBlock -> false
+
                     is ExpressionBlock -> {
-                        val value = block.expression.evaluate(variables)
+                        val value = try {
+                            block.expression.evaluate(variables)
+                        } catch (e: Exception) {
+                            throw IllegalArgumentException("Failed to evaluate expression `${block.expression}` in ${source.target}", e)
+                        }
 
                         when (block) {
                             is InlineValue -> {
-                                // TODO fail on nulls?
                                 when {
                                     value is String && !block.embedded -> append("\"$value\"")
                                     else -> append(value.toString())
@@ -387,12 +392,10 @@ class ProjectGeneratorImpl(
                                 val parent = stack.lastOrNull() ?: error("if without parent: $block")
                                 val condition = value.isTruthy().also { conditions[parent] = it }
                                 if (condition) {
-                                    // TODO append(source.text, block.outerStart, block.rangeStart)
                                     append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
                                     false
                                 } else skipContents()
                             }
-
                             is ForEachBlock -> {
                                 val list = loops[block] ?: (value as? Iterable<*> ?: emptyList<Any>()).toMutableList()
                                 if (list.isNotEmpty()) {
@@ -409,9 +412,8 @@ class ProjectGeneratorImpl(
                                     false
                                 } else skipContents()
                             }
-
-                            // contents provided by children
-                            is WhenBlock -> true
+                            // details handled by direct children
+                            is WhenBlock -> false
                         }
                     }
                 }

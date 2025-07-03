@@ -34,7 +34,8 @@ fun interface ProjectResolver {
             val libraries = mutableMapOf<String, CatalogArtifact>()
             for (dependency in moduleSources.modules.flatMap { it.allDependencies }) {
                 if (dependency !is CatalogReference) continue
-                val version = dependency.version
+                val artifact = repositoryCatalog.libraries[dependency.lookupKey] ?: missingDependency(dependency)
+                val version = artifact.version
                 // TODO allow non-refs?
                 val versionRef = (version as? CatalogVersion.Ref)?.ref ?: continue
                 val versionValue = repositoryCatalog.versions[versionRef]
@@ -88,6 +89,9 @@ fun interface ProjectResolver {
                     // TODO check for root
                     copy(modules = modules + SourceModule(sources = rootSources))
             }
+
+        private fun missingDependency(dependency: Dependency): Nothing =
+            throw IllegalArgumentException("Missing dependency $dependency")
     }
 
     suspend fun resolve(

@@ -18,7 +18,7 @@ if (_project.modules.size == 1) {
 
 _slots("gradleConfigurations")
 
-if (_module.platforms.size > 1) {
+if (_module.platforms.size() > 1) {
     kotlin {
         sourceSets {
             for (e in _module.dependencies.entries) {

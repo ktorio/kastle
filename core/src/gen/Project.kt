@@ -106,14 +106,6 @@ fun AmperSettings.toVariableMap(): Map<String, String?> = mapOf(
     it != null
 }
 
-fun CatalogReference.toVariableMap() = mapOf(
-    "key" to "key",
-    "group" to group,
-    "artifact" to artifact,
-    "version" to version,
-    "exported" to exported,
-)
-
 fun CatalogArtifact.toVariableMap() = mapOf(
     "module" to module,
     "group" to group,

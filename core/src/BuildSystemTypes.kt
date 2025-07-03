@@ -67,8 +67,17 @@ data class SemanticVersion(
         if (qualifier == null && other.qualifier == null) return patchCompare
         if (qualifier == null) return 1
         if (other.qualifier == null) return -1
-        return 0 // TODO beta, snapshot, etc.
+        return qualifierRank.compareTo(other.qualifierRank)
     }
+
+    private val qualifierRank: Int get() =
+        when(qualifier?.lowercase()?.replace(Regex("(\\p{Alpha}).*"), "$1")) {
+            "alpha" -> 1
+            "beta" -> 2
+            "rc" -> 3
+            "snapshot" -> 4
+            else -> 0
+        }
 
     override fun toString(): String =
         "$major.$minor.$patch" + (qualifier?.let { "-$it" } ?: "")
@@ -262,7 +271,6 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
     )
 }
 
-// TODO catalog references, variables, etc.
 @Serializable(DependencySerializer::class)
 sealed interface Dependency {
     companion object {
@@ -289,30 +297,14 @@ sealed interface Dependency {
 data class CatalogReference(
     val key: String,
     val group: String? = null,
-    val artifact: String? = null,
-    val version: CatalogVersion? = null,
     override val exported: Boolean = false,
 ): Dependency {
     val lookupKey: String get() =
         key.removePrefix("libs.").replace('.', '-')
 
-    fun resolve(catalog: VersionsCatalog): CatalogReference {
-        val library = catalog.libraries[lookupKey] ?: return this
-        return copy(
-            group = library.module,
-            artifact = library.artifact,
-            version = library.version,
-        )
-    }
-
     override fun toString(): String = buildString {
         append('$')
         append(key)
-// TODO artifact
-//        if (artifact != null) {
-//            append(":")
-//            append(artifact)
-//        }
         if (exported) append(":exported")
     }
 }

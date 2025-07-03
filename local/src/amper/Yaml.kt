@@ -27,12 +27,12 @@ fun YamlMap?.readDependencies(key: String, versionsLookup: VersionsCatalog): Set
         .orEmpty()
         .filter(isNotTemplateDSL)
         .map(Dependency::parse)
-        .map { dependency ->
-            when(dependency) {
-                is ArtifactDependency, is ModuleDependency -> dependency
-                is CatalogReference -> dependency.resolve(versionsLookup)
-            }
-        }
+//        .map { dependency ->
+//            when(dependency) {
+//                is ArtifactDependency, is ModuleDependency -> dependency
+//                is CatalogReference -> dependency.resolve(versionsLookup)
+//            }
+//        }
         .toSet()
 
 private fun dependencyString(node: YamlNode): String = when (node) {
