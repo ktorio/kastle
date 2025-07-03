@@ -13,12 +13,12 @@ kotlin {
 
 
         commonMain.dependencies {
-            
+        
             implementation(compose.foundation)
 
 
 
-            
+        
             implementation(compose.material3)
 
 

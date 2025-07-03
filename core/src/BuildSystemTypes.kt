@@ -170,7 +170,6 @@ data class SourceModule(
     val sources: List<SourceTemplate> = emptyList(),
     val gradle: GradleSettings = GradleSettings(),
     val amper: AmperSettings = AmperSettings(),
-    val ignoreCommon: Boolean = false,
 ) {
     val allDependencies: Set<Dependency> =
         (dependencies.values.flatten() + testDependencies.values.flatten()).toSet()

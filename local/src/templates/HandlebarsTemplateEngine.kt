@@ -11,7 +11,6 @@ import org.jetbrains.kastle.io.relativeTo
 import org.jetbrains.kastle.utils.Expression.StringLiteral
 import org.jetbrains.kastle.utils.Expression.VariableRef
 import org.jetbrains.kastle.utils.ListStack
-import org.jetbrains.kastle.utils.indentAt
 import org.jetbrains.kastle.utils.startOfLine
 import org.jetbrains.kastle.utils.unwrapQuotes
 
@@ -55,10 +54,6 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                 val startOfLine = // template.startOfLine(match.range.start) ?: match.range.start
                      if (helper != null) template.startOfLine(match.range.start) ?: match.range.start else match.range.start
                 val text = match.groups["content"]?.value.orEmpty().trim()
-                // if when clause or empty lines from parent
-                val indent = stack.top?.takeIf { parent ->
-                    parent.helper == null || isEmptyLines(template, parent, match)
-                }?.indent ?: template.indentAt(match.range.start) ?: -1
 
                 if (helper == null && variablePattern.matches(text)) {
                     when(text) {
@@ -69,12 +64,12 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                                     val ifBlock = parent.toBlock(match)
                                     yield(ConditionalBlock(ifBlock.position)) // TODO position not right...
                                     yield(ifBlock)
-                                    stack += BlockMatch(match, indent, helper = ELSE)
+                                    stack += BlockMatch(match, helper = ELSE)
                                 }
                                 null -> {
                                     require(stack.top?.helper == WHEN) { "Bad else placement: missing when parent" }
                                     yield(parent.toBlock(match, inclusive = false))
-                                    stack += BlockMatch(match, indent, helper = ELSE)
+                                    stack += BlockMatch(match, helper = ELSE)
                                 }
                             }
                         }
@@ -82,7 +77,6 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                             expression = VariableRef(text),
                             position = BlockPosition(
                                 range = match.range.bumpEnd(),
-                                indent = indent,
                             ),
                         ))
                     }
@@ -107,7 +101,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                         else -> error("Unexpected close term: $text")
                     }
                 } else {
-                    BlockMatch(match, indent, startOfLine).let { blockMatch ->
+                    BlockMatch(match, startOfLine).let { blockMatch ->
                         when (blockMatch.helper) {
                             SLOT -> yield(
                                 NamedSlot(
@@ -115,7 +109,6 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                                         ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
                                     position = BlockPosition(
                                         range = match.range.bumpEnd(),
-                                        indent = indent,
                                     ),
                                 )
                             )
@@ -126,7 +119,6 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                                         ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
                                     position = BlockPosition(
                                         range = match.range.bumpEnd(),
-                                        indent = indent,
                                     ),
                                 )
                             )
@@ -163,7 +155,6 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
 
     data class BlockMatch(
         val match: MatchResult,
-        val indent: Int,
         val outerStart: Int = match.range.start,
         val helper: String? = match.groups["helper"]?.value,
         val expression: String? = match.groups["content"]?.value?.trim()?.takeIf { it.isNotEmpty() }
@@ -208,7 +199,6 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
             range = outerStart..if (inclusive) endMatch.range.endInclusive + 1 else endMatch.range.start,
             outer = outerStart..if (inclusive) endMatch.range.endInclusive + 1 else endMatch.range.start,
             inner = match.range.endInclusive + 1..endMatch.range.start,
-            indent = indent,
         )
     }
 

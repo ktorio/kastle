@@ -52,8 +52,7 @@ class ProjectGeneratorImpl(
         for (module in project.moduleSources.modules) {
             val moduleSources = buildList {
                 addAll((module.sources.filter { it.target.protocol == "file" }))
-                if (!module.ignoreCommon)
-                    addAll(project.commonSources)
+                addAll(project.commonSources)
             }.distinctBy { it.target }
 
             for (source in moduleSources) {
@@ -100,8 +99,9 @@ class ProjectGeneratorImpl(
                             forEachBlock(source.blocks) { block ->
                                 log.trace {
                                     buildString {
-                                        append("  ${block.range.toString().padEnd(12)} ")
-                                        append((block.indent.stringOf(' ') + block::class.simpleName).padEnd(30))
+                                        append("  ${(block.range.toString()).padEnd(10)} ")
+                                        append("(${block.level})  ")
+                                        append(((block.level * 2).stringOf(' ') + block::class.simpleName).padEnd(30))
                                         append("\"${block.outerContents.replace("\n", "\\n")}\"".padEnd(100))
                                         append("\"${block.bodyContents?.replace("\n", "\\n")}\"")
                                     }
@@ -113,14 +113,14 @@ class ProjectGeneratorImpl(
                         forEachBlock(source.blocks) { block ->
                             // exited blocks
                             val parent = stack.popUntil({ block in it }) { parent ->
-                                log.trace { "  pop $parent (${block.range} !in ${parent.range})" }
-                                parent.close(parent.indent)
+                                // log.trace { "  pop $parent (${block.range} !in ${parent.range})" }
+                                parent.close(parent.level)
                                 if (parent.tryLoopBack())
                                     return@forEachBlock
                             }
 
                             // interstitial
-                            append(source.text, start, block.outerStart, parent?.indent ?: 0)
+                            append(source.text, start, block.outerStart, parent?.level ?: 0)
 
                             // current block
                             val skipped = appendBlockContents(
@@ -132,7 +132,7 @@ class ProjectGeneratorImpl(
                             // where to go next
                             start = when {
                                 child != null -> {
-                                    log.trace { "  push $block" }
+                                    // log.trace { "  push $block" }
                                     stack += block
                                     child!!.outerStart
                                 }
@@ -157,8 +157,8 @@ class ProjectGeneratorImpl(
                             if (isLast()) {
                                 // trailing ancestors
                                 stack.popSequence().forEach { parent ->
-                                    log.trace { "  pop $parent" }
-                                    parent.close(parent.indent) // TODO use ancestor
+                                    // log.trace { "  pop $parent" }
+                                    parent.close(parent.level) // TODO use ancestor
                                     if (parent.tryLoopBack())
                                         return@forEachBlock
                                 }
@@ -307,11 +307,10 @@ class ProjectGeneratorImpl(
                 return true
             }
 
-            // TODO the indent should be based on this block's parents
-            fun Block.close(indent: Int) {
+            fun Block.close(level: Int) {
                 if (start < bodyEnd) {
                     val trimmedEnd = source.text.lastNonSpace(bodyEnd, start)
-                    append(source.text, start, trimmedEnd, indent)
+                    append(source.text, start, trimmedEnd, level)
                 }
                 start = rangeEnd
                 // TODO synchronize push/pop
@@ -327,9 +326,10 @@ class ProjectGeneratorImpl(
                     is SkipBlock -> skipContents()
 
                     is Slot -> {
-                        val indentString = block.indent.stringOf(' ')
+                        // TODO verify
+                        val indentString = (source.text.indentAt(block.rangeStart) ?: 0).stringOf(' ')
                         if (slots.isNotEmpty()) {
-                            append(source.text, block.outerStart, block.rangeStart, block.indent)
+                            append(source.text, block.outerStart, block.rangeStart, block.level)
                             append(slots.joinToString("\n\n$indentString") {
                                 it.text.indent(indentString)
                             })
@@ -347,16 +347,16 @@ class ProjectGeneratorImpl(
                         conditions[parent] = matched || conditions[parent] ?: false
 
                         if (matched) {
-                            append(source.text, block.outerStart, block.rangeStart, block.indent)
-                            append(source.text, block.bodyStart, end, block.indent)
+                            append(source.text, block.outerStart, block.rangeStart, block.level)
+                            append(source.text, block.bodyStart, end, block.level)
                             false
                         } else skipContents()
                     }
 
                     is UnsafeBlock -> {
                         log.trace { "unsafe $block" }
-                        append(source.text, block.outerStart, block.rangeStart, block.indent)
-                        append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.indent)
+                        append(source.text, block.outerStart, block.rangeStart, block.level)
+                        append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
                         false
                     }
 
@@ -368,7 +368,7 @@ class ProjectGeneratorImpl(
                         val parent = stack.lastOrNull() ?: error("else without parent: $block")
                         if (conditions[parent] == false) {
                             // TODO append(source.text, block.outerStart, block.rangeStart)
-                            append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.indent)
+                            append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
                             false
                         } else skipContents()
                     }
@@ -390,7 +390,7 @@ class ProjectGeneratorImpl(
                                 val condition = value.isTruthy().also { conditions[parent] = it }
                                 if (condition) {
                                     // TODO append(source.text, block.outerStart, block.rangeStart)
-                                    append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.indent)
+                                    append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
                                     false
                                 } else skipContents()
                             }
@@ -407,7 +407,7 @@ class ProjectGeneratorImpl(
                                         else -> variables += variable to element
                                     }
                                     loops[block] = list
-                                    append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.indent)
+                                    append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
                                     false
                                 } else skipContents()
                             }

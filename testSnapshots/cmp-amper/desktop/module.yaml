@@ -2,7 +2,7 @@
 product: jvm/app
 
 
-dependencies:
+
 settings:
-  compose: enabled
-  
+    compose: enabled
+

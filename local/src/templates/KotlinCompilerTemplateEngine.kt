@@ -22,8 +22,6 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import java.io.File
 
-public const val INDENT = 4
-
 /**
  * Provides analysis capabilities for Kotlin source files within a specified path.
  * This class utilizes Kotlin compiler's source analysis with a predefined environment setup.
@@ -207,23 +205,14 @@ private fun collect(vararg lists: Collection<out Block>): List<Block> {
         if (i == 0) continue
         val current = blocks[i]
 
-        var nesting = 0
+        var nesting = if (current is StructuralBlock) 1 else 0
         for (j in i - 1 downTo 0) {
-            val previous = blocks[j]
-            if (current in previous) {
-                when (previous) {
-                    // ignore blocks that are not inlined
-                    is ConditionalBlock,
-                    is UnsafeBlock,
-                    is WhenBlock -> continue
-                    else -> nesting++
-                }
-            }
+            val previous = blocks[j] as? StructuralBlock ?: continue
+            if (current in previous)
+                nesting++
         }
         if (nesting > 0) {
-            current.position = current.position.copy(
-                indent = maxOf(0, current.position.indent - nesting * INDENT)
-            )
+            current.position = current.position.copy(level = nesting)
         }
     }
     return blocks

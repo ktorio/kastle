@@ -16,7 +16,7 @@ class SourceFileWriterTest {
         """.trimIndent()
 
         val actual = StringBuilder()
-            .append(testString, 0, testString.length, indent = 0)
+            .append(testString, 0, testString.length, level = 0)
             .toString()
         assertEquals(testString, actual)
     }

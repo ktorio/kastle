@@ -1,11 +1,10 @@
 modules:
-    - shared
-  
-  
-    - desktop
-  
-  
-    - android
-  
-  
-  
+  - shared
+
+
+  - desktop
+
+
+  - android
+
+

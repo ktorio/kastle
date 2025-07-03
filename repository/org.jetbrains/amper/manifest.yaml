@@ -13,3 +13,4 @@ rootSources:
 commonSources:
   - path: module.yaml.hbs
     target: file:module.yaml
+    if: _module.platforms.size() > 0

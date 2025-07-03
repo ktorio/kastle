@@ -9,6 +9,7 @@ import org.jetbrains.kastle.gradle.GradleTransformation
 import org.jetbrains.kastle.io.export
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
+import kotlin.random.Random
 import kotlin.test.Test
 
 private const val defaultName = "sample"
@@ -25,16 +26,19 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     abstract suspend fun createRepository(): PackRepository
 
+    private fun randomString() =
+        Random(System.currentTimeMillis()).nextLong(111, 999).toString(36)
+
     @Test
     fun `empty project`() = runTest {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "empty")
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "empty", randomString())
         generateWithPacks(outputDir, "com.acme/empty")
         assertFilesAreEqualWithSnapshot( "$snapshots/empty", outputDir.toString())
     }
 
     @Test
     fun `with slot`() = runTest {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child")
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child", randomString())
         generateWithPacks(
             outputDir,
             "com.acme/parent",
@@ -48,7 +52,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     fun `with slot and two children`() = runTest {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child2")
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child2", randomString())
         generateWithPacks(
             outputDir,
             "com.acme/parent",
@@ -63,7 +67,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     fun `with properties`() = runTest {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "properties")
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "properties", randomString())
         generate(outputDir, packs = listOf("com.acme/properties"), properties = mapOf(
             "numberProperty" to "1",
             "booleanProperty" to "true",
@@ -81,7 +85,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     fun `ktor server gradle`() = runTest {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server")
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server", randomString())
         generateWithPacks(
             outputDir,
             "org.gradle/gradle",
@@ -97,7 +101,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     open fun `ktor server gradle with catalog`() = runTest {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-catalog")
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-catalog", randomString())
         generate(
             outputDir,
             packs = listOf(
@@ -118,7 +122,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     fun `ktor server amper`() = runTest {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-amper")
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-amper", randomString())
         generateWithPacks(
             outputDir,
             "org.jetbrains/amper",
@@ -134,7 +138,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
 
     @Test
     open fun `compose multiplatform gradle`() = runTest {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-gradle")
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-gradle", randomString())
         generate(
             outputDir,
             packs = listOf(
@@ -153,8 +157,8 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
     }
 
     @Test
-    fun `compose multiplatform amper`() = runTest {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-amper")
+    open fun `compose multiplatform amper`() = runTest {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-amper", randomString())
         generateWithPacks(
             outputDir,
             "org.jetbrains/amper",

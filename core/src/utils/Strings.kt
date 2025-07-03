@@ -105,40 +105,27 @@ fun CharSequence.newLineIndices(
 }
 
 /**
- * Replaces any currently indented lines with the new indent.
- *
- * To do this, we infer the baseline indent from newlines in the string, then write each line with the new indent.
- *
- * Empty lines are ignored.
+ * Removes line indents by the factor provided, multiplied by 4.
  */
 fun Appendable.append(
     csq: CharSequence,
     start: Int,
     end: Int,
-    indent: Int,
+    level: Int,
 ): java.lang.Appendable {
-    if (indent < 0) return append(csq, start, end)
+    if (level <= 0) return append(csq, start, end)
     if (start == end) return this
-    val indentString = indent.stringOf(' ')
-    val newLineIndices = csq.newLineIndices(start, end).toList().let { newLineIndices ->
-        // ignore empty lines
-        newLineIndices.filterIndexed { i, newLineIndex ->
-            (newLineIndices.getOrNull(i + 1) ?: end) > newLineIndex + 1
-        }
-    }
-    val indentBaseline: Int = newLineIndices.minOfOrNull { newLineIndex ->
-        val startOfLine = newLineIndex + 1
-        val indentSize = csq.firstNonSpace(startOfLine, end) - startOfLine
-        indentSize
-    } ?: return append(csq, start, end)
+    val skipIndent = level * 4
 
     var index = start
-    for (newLineIndex in newLineIndices) {
+    for (newLineIndex in csq.newLineIndices(start, end)) {
         append(csq, index, newLineIndex)
         append('\n')
-        append(indentString)
 
-        index = newLineIndex + indentBaseline + 1
+        index = minOf(
+            csq.firstNonSpace(newLineIndex + 1, end),
+            newLineIndex + 1 + skipIndent,
+        )
     }
     if (index >= end)
         return this

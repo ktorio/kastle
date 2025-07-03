@@ -26,8 +26,8 @@ val Block.outerEnd: Int get() =
     position.outer.last
 
 // TODO
-val Block.indent: Int get() =
-    position.indent
+val Block.level: Int get() =
+    position.level
 
 val Block.rangeEnd: Int get() =
     range.last

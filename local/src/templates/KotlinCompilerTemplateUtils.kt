@@ -5,18 +5,15 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.descendantsOfType
-import com.intellij.psi.util.elementType
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.BlockPosition.Companion.copy
 import org.jetbrains.kastle.BlockPosition.Companion.include
 import org.jetbrains.kastle.utils.endOfLine
-import org.jetbrains.kastle.utils.indent
 import org.jetbrains.kastle.utils.previousLine
 import org.jetbrains.kastle.utils.startOfLine
 import org.jetbrains.kastle.utils.unwrapQuotes
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
-import org.jetbrains.kotlin.psi.psiUtil.parents
 import org.jetbrains.kotlin.utils.addToStdlib.indexOfOrNull
 import org.jetbrains.kotlin.utils.addToStdlib.lastIndexOfOrNull
 
@@ -28,7 +25,6 @@ fun PsiElement.blockPosition(
     body: PsiElement = this,
     also: PsiElement? = null,
     start: Int? = null,
-    indent: Int? = null, // TODO remove
 ): BlockPosition {
     var range = blockRange()
     if (also != null)
@@ -40,19 +36,13 @@ fun PsiElement.blockPosition(
         range = range,
         outer = outerRange(range),
         inner = body.bodyRange(),
-        indent = findIndent(),
     )
 }
 
 fun PsiElement.blockRange(
     trim: Boolean = false,
 ): IntRange {
-    val range = textIntRange(trim)
-//    val receiver = parents.firstNotNullOfOrNull(::inlineContext)
-//    val indent = findIndent(this)
-    // TODO use receiver / context
-
-    return range
+    return textIntRange(trim)
 }
 
 fun PsiElement.bodyRange(): IntRange {
@@ -200,7 +190,6 @@ private fun KtWhenExpression.asWhenBlock(): Sequence<Block> {
                     ElseBlock(
                         position = child.blockPosition(
                             body = child.children[1],
-                            indent = whenBlock.indent,
                         )
                     )
                 }
@@ -211,7 +200,6 @@ private fun KtWhenExpression.asWhenBlock(): Sequence<Block> {
                     },
                     position = child.blockPosition(
                         body = child.children[1],
-                        indent = whenBlock.indent,
                     )
                 )
             )
@@ -310,22 +298,6 @@ private fun PsiElement.outerRange(range: IntRange): IntRange {
     }
 
     return startOfFirstLine.. endOfLastLine
-}
-
-private fun PsiElement.findIndent(): Int {
-    // we count the number of parent structural elements on separate lines, then multiply by 4
-    var indent = 0
-    for (element in parents) {
-        // TODO Only count indent for elements on different lines
-        when(element.elementType.toString()) {
-            "SCRIPT_INITIALIZER" -> break
-            "BLOCK" -> {
-                indent++
-            }
-        }
-    }
-    // four spaces per level
-    return indent * INDENT
 }
 
 // TODO validation, unchecked casts
