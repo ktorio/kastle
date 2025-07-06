@@ -1,3 +1,8 @@
 
 product: jvm/app
 
+dependencies:
+- $libs.ktor.server.core
+- $libs.ktor.server.cio
+- $libs.ktor.server.content.negotiation
+- $libs.ktor.json

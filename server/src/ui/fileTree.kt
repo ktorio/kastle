@@ -1,9 +1,8 @@
 package org.jetbrains.kastle.server.ui
 
-import io.ktor.htmx.ExperimentalHtmxApi
-import io.ktor.htmx.html.hx
+import io.ktor.htmx.html.*
+import io.ktor.utils.io.*
 import kotlinx.html.*
-import kotlin.collections.iterator
 
 fun HTML.fileTreeHtml(fileNames: List<String>, selectedFile: String? = null) {
     body {
@@ -17,7 +16,7 @@ fun HTML.fileTreeHtml(fileNames: List<String>, selectedFile: String? = null) {
 }
 
 // Recursively builds the tree structure as UL/LI elements.
-@OptIn(ExperimentalHtmxApi::class)
+@OptIn(ExperimentalKtorApi::class)
 private fun UL.buildTree(
     paths: List<List<String>>,
     prefix: List<String> = emptyList(),

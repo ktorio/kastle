@@ -14,7 +14,7 @@ import kotlin.test.Test
 
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
-private const val replaceSnapshot = true
+private const val replaceSnapshot = false
 
 abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots")) {
     private lateinit var repository: PackRepository
@@ -108,6 +108,8 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
                 "org.gradle/gradle",
                 "io.ktor/server-core",
                 "io.ktor/server-cio",
+                "io.ktor/server-content-negotiation",
+                "io.ktor/ktor-kotlinx-serialization-json",
             ),
             properties = mapOf(
                 VariableId.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
@@ -121,13 +123,15 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
     }
 
     @Test
-    fun `ktor server amper`() = runTest {
+    open fun `ktor server amper`() = runTest {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-amper", randomString())
         generateWithPacks(
             outputDir,
             "org.jetbrains/amper",
             "io.ktor/server-core",
             "io.ktor/server-cio",
+            "io.ktor/server-content-negotiation",
+            "io.ktor/ktor-kotlinx-serialization-json",
         )
         assertFilesAreEqualWithSnapshot(
             "$snapshots/ktor-server-amper",

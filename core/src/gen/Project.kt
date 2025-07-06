@@ -8,9 +8,9 @@ data class Project(
     val descriptor: ProjectDescriptor,
     val packs: List<PackDescriptor>,
     val properties: Map<VariableId, Any?>,
-    val slotSources: Map<Url, List<SourceTemplate>>,
+    val slotSources: Map<Url, List<SourceFile>>,
     val moduleSources: ProjectModules,
-    val commonSources: List<SourceTemplate>,
+    val commonSources: List<SourceFile>,
     val versions: Map<String, String>,
     val libraries: Map<String, CatalogArtifact>,
     val gradle: GradleSettings,
@@ -76,7 +76,7 @@ fun Dependency.toVariableMap(modulePath: String) =
             "gradlePath" to gradlePath(modulePath),
             "exported" to exported,
         )
-        // TODO find artifact from catalog
+        // TODO find artifact from catalog?
         is CatalogReference -> mapOf(
             "type" to "catalog",
             "key" to key,

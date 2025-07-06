@@ -48,8 +48,13 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     private fun findBlocks(template: String): Sequence<Block> {
         val stack = ListStack<BlockMatch>()
         val matches = bracesPattern.findAll(template)
+        var position = 0
+        var line = 1
         return sequence {
             for (match in matches) {
+                line = line + template.substring(position, match.range.start).count { it == '\n' }
+                position = match.range.endInclusive + 1
+
                 val helper = match.groups["helper"]?.value
                 val startOfLine = // template.startOfLine(match.range.start) ?: match.range.start
                      if (helper != null) template.startOfLine(match.range.start) ?: match.range.start else match.range.start
@@ -62,20 +67,21 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                             when(parent.helper) {
                                 IF -> {
                                     val ifBlock = parent.toBlock(match)
-                                    yield(ConditionalBlock(ifBlock.position)) // TODO position not right...
+                                    yield(ConditionalBlock(ifBlock.position)) // TODO position not right...?
                                     yield(ifBlock)
-                                    stack += BlockMatch(match, helper = ELSE)
+                                    stack += BlockMatch(line, match, helper = ELSE)
                                 }
                                 null -> {
                                     require(stack.top?.helper == WHEN) { "Bad else placement: missing when parent" }
                                     yield(parent.toBlock(match, inclusive = false))
-                                    stack += BlockMatch(match, helper = ELSE)
+                                    stack += BlockMatch(line, match, helper = ELSE)
                                 }
                             }
                         }
                         else -> yield(InlineValue(
                             expression = VariableRef(text),
                             position = BlockPosition(
+                                line = line,
                                 range = match.range.bumpEnd(),
                             ),
                         ))
@@ -101,13 +107,14 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                         else -> error("Unexpected close term: $text")
                     }
                 } else {
-                    BlockMatch(match, startOfLine).let { blockMatch ->
+                    BlockMatch(line, match, startOfLine).let { blockMatch ->
                         when (blockMatch.helper) {
                             SLOT -> yield(
                                 NamedSlot(
                                     name = blockMatch.expression
                                         ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
                                     position = BlockPosition(
+                                        line = line,
                                         range = match.range.bumpEnd(),
                                     ),
                                 )
@@ -118,6 +125,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                                     name = blockMatch.expression
                                         ?: throw IllegalArgumentException("Missing slot name in block: ${match.value}"),
                                     position = BlockPosition(
+                                        line = line,
                                         range = match.range.bumpEnd(),
                                     ),
                                 )
@@ -154,12 +162,14 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     }
 
     data class BlockMatch(
+        val line: Int,
         val match: MatchResult,
         val outerStart: Int = match.range.start,
         val helper: String? = match.groups["helper"]?.value,
         val expression: String? = match.groups["content"]?.value?.trim()?.takeIf { it.isNotEmpty() }
     ) {
         // TODO parse expression; not always variables
+        //      (actually, handlebars requires variables... not sure how to handle this now...)
         fun toBlock(endMatch: MatchResult, inclusive: Boolean = true): Block = when(helper) {
             IF -> IfBlock(
                 expression = expression?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
@@ -182,7 +192,6 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                 )
             }
             null -> {
-                // TODO parse expression; not always string literal
                 val value = expression?.let {
                     StringLiteral(it.unwrapQuotes())
                 } ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}")
@@ -196,6 +205,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         }
 
         private fun position(endMatch: MatchResult, inclusive: Boolean): BlockPosition = BlockPosition(
+            line = line,
             range = outerStart..if (inclusive) endMatch.range.endInclusive + 1 else endMatch.range.start,
             outer = outerStart..if (inclusive) endMatch.range.endInclusive + 1 else endMatch.range.start,
             inner = match.range.endInclusive + 1..endMatch.range.start,

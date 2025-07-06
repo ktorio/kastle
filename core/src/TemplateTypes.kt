@@ -1,6 +1,15 @@
 package org.jetbrains.kastle
 
+import kotlinx.io.buffered
+import kotlinx.io.bytestring.ByteString
+import kotlinx.io.files.FileSystem
+import kotlinx.io.files.Path
+import kotlinx.io.files.source
+import kotlinx.io.readByteString
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.kastle.io.relativeTo
 import org.jetbrains.kastle.utils.Expression
 
 @Serializable
@@ -12,25 +21,48 @@ data class SourceDefinition(
 )
 
 @Serializable
-sealed interface SourceText {
-    val text: String
+sealed interface SourceFile {
+    val target: Url
+    val condition: Expression?
 }
 
 @Serializable
+@SerialName("static")
+data class StaticSource(
+    @Serializable(with = ByteStringSerializer::class)
+    val contents: ByteString,
+    override val target: Url,
+    override val condition: Expression? = null,
+): SourceFile {
+    companion object {
+        fun FileSystem.sourceFile(
+            file: Path,
+            basePath: Path,
+            condition: Expression? = null,
+        ): StaticSource {
+            val bytes = source(file).buffered().use {
+                it.readByteString()
+            }
+            return StaticSource(
+                contents = bytes,
+                target = "file:${file.relativeTo(basePath)}",
+                condition = condition,
+            )
+        }
+    }
+}
+
+@Serializable
+@SerialName("template")
 data class SourceTemplate(
-    override val text: String,
-    val target: Url,
+    val text: String,
+    override val target: Url,
     val imports: List<String>? = null,
     val blocks: List<Block>? = null,
-    val condition: Expression? = null,
+    override val condition: Expression? = null,
+    // this is here to sort out files after modules are merged
     val packId: PackId? = null,
-): SourceText
-
-@JvmInline
-@Serializable
-value class Snippet(
-    override val text: String
-): SourceText
+): SourceFile
 
 @Serializable
 sealed interface Block {
@@ -40,25 +72,34 @@ sealed interface Block {
 @Serializable
 sealed interface StructuralBlock: Block
 
+/**
+ * Represents the positioning for a block of code within a source file.
+ *
+ * @property line  The line offset in the file.
+ * @property range The primary range of characters pertinent to the block.
+ * @property outer Includes surrounding whitespace of the element.
+ * @property inner The body range of the block (i.e., the contents of an if statement)
+ * @property level The degree of nesting for the block where inlining indentation is concerned.
+ */
 @Serializable(BlockPositionSerializer::class)
 data class BlockPosition(
+    val line: Int,
     val range: IntRange,
     val outer: IntRange = range,
     val inner: IntRange = range,
     val level: Int = 0,
-    val context: SourceContext = SourceContext.TopLevel
 ) {
     companion object {
         fun parse(text: String): BlockPosition {
-            var items = text.split(Regex("\\s*/\\s*"))
-            val (outer, range, inner) = items.take(3).map { item ->
+            val items = text.split(Regex("\\s*/\\s*")).toMutableList()
+            val line = items.removeFirst().toInt()
+            val level = items.removeFirst().toInt()
+            val (outer, range, inner) = items.map { item ->
                 val (first, last) = item.split(',').map { it.toInt() }
                 IntRange(first, last)
             }
-            val level = items[3].toInt()
-            val context = items[4].let(SourceContext::valueOf)
 
-            return BlockPosition(range, outer, inner, level, context)
+            return BlockPosition(line, range, outer, inner, level)
         }
 
         // expanded range to contain both
@@ -74,13 +115,10 @@ data class BlockPosition(
 
         fun IntRange.bumpEnd() =
             IntRange(start, endInclusive + 1)
-
-        fun IntRange.reduceEnd() =
-            IntRange(start, endInclusive - 1)
     }
 
     override fun toString(): String =
-        "${outer.first},${outer.last} / ${range.first},${range.last} / ${inner.first},${inner.last} / $level / ${context.name}"
+        "$line / $level / ${outer.first},${outer.last} / ${range.first},${range.last} / ${inner.first},${inner.last}"
 }
 
 enum class SourceContext {
@@ -92,6 +130,7 @@ enum class SourceContext {
 sealed interface Slot: Block {
     val name: String
     val requirement: Requirement
+    val context: SourceContext
 }
 
 @Serializable
@@ -109,6 +148,7 @@ data class NamedSlot(
     override val name: String,
     override var position: BlockPosition,
     override val requirement: Requirement = Requirement.OPTIONAL,
+    override val context: SourceContext = SourceContext.TopLevel,
 ): Slot {
     override fun toString(): String = "slots(\"$name\")"
 }
@@ -118,6 +158,7 @@ data class RepeatingSlot(
     override val name: String,
     override var position: BlockPosition,
     override val requirement: Requirement = Requirement.OPTIONAL,
+    override val context: SourceContext = SourceContext.TopLevel,
 ): Slot {
     override fun toString(): String = "slots(\"$name\")"
 }
@@ -186,7 +227,7 @@ data class WhenBlock(
     override fun toString(): String = "when(\"$expression\")"
 }
 
-// TODO different condition types
+// TODO variable declaration
 @Serializable
 data class WhenClauseBlock(
     val value: List<Expression>,

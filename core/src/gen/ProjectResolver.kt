@@ -12,7 +12,7 @@ fun interface ProjectResolver {
                 .map { it.sources.modules }
                 .reduceOrNull(ProjectModules::plus)
                 ?.flatten() ?: ProjectModules.Empty
-            val slotSources: Map<Url, List<SourceTemplate>> = packs.asSequence()
+            val slotSources: Map<Url, List<SourceFile>> = packs.asSequence()
                 .flatMap { it.allSources }
                 .filter { it.isSlot() }
                 .groupBy { it.target }
@@ -30,7 +30,8 @@ fun interface ProjectResolver {
                 }
             }.toMap()
             val repositoryCatalog = repository.versions()
-            val versions = mutableMapOf<String, String>()
+            // TODO hard-coded kotlin version
+            val versions = mutableMapOf("kotlin" to "2.1.21")
             val libraries = mutableMapOf<String, CatalogArtifact>()
             for (dependency in moduleSources.modules.flatMap { it.allDependencies }) {
                 if (dependency !is CatalogReference) continue
@@ -79,7 +80,7 @@ fun interface ProjectResolver {
         }
 
         // Add root sources
-        private operator fun ProjectModules.plus(rootSources: List<SourceTemplate>): ProjectModules =
+        private operator fun ProjectModules.plus(rootSources: List<SourceFile>): ProjectModules =
             when (this) {
                 is ProjectModules.Empty ->
                     ProjectModules.Single(SourceModule(sources = rootSources))

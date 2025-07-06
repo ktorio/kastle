@@ -104,10 +104,10 @@ internal class KotlinCompilerTemplateEngine(
                 val slot = repository.slot(target.slotId)
                     ?: throw IllegalArgumentException("Slot not found: ${target.afterProtocol}")
                 val imports = ktFile.importList?.imports?.map { it.text.substring("import ".length) } ?: emptyList()
-                // TODO
+                // TODO should be able to specify which function
                 val text = ktFile.firstFunctionBody()
                         ?: throw IllegalArgumentException("Expected single function body for targeting slot")
-                when(slot.position.context) {
+                when(slot.context) {
                     SourceContext.TopLevel -> ktFile.endOfImports()?.let { endOfImports ->
                         ktFile.text.substring(endOfImports)
                     } ?: ktFile.text

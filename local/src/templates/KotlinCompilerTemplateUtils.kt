@@ -26,6 +26,8 @@ fun PsiElement.blockPosition(
     also: PsiElement? = null,
     start: Int? = null,
 ): BlockPosition {
+    // TODO bad
+    val line = containingFile.text.subSequence(0, textRange.startOffset).count { it == '\n' } + 1
     var range = blockRange()
     if (also != null)
         range = range include also.blockRange()
@@ -33,6 +35,7 @@ fun PsiElement.blockPosition(
         range = range.copy(start = start)
 
     return BlockPosition(
+        line = line,
         range = range,
         outer = outerRange(range),
         inner = body.bodyRange(),
@@ -172,6 +175,7 @@ private fun KtWhenExpression.asWhenBlock(): Sequence<Block> {
     val valueExpression = subjectExpression?.toTemplateExpression() ?: return emptySequence()
 
     return sequence {
+        // TODO variable declaration
         val whenBlock = WhenBlock(
             expression = valueExpression,
             position = blockPosition()
@@ -179,7 +183,6 @@ private fun KtWhenExpression.asWhenBlock(): Sequence<Block> {
         yield(whenBlock)
         for (child in childrenOfType<KtWhenEntry>()) {
             yield(
-                // TODO
                 if (child.isElse) {
                     ElseBlock(
                         position = child.blockPosition(
@@ -297,18 +300,40 @@ private fun PsiElement.outerRange(range: IntRange): IntRange {
 // TODO validation, unchecked casts
 sealed interface TemplateParentReference {
     companion object {
-        fun classify(reference: KtNameReferenceExpression): TemplateParentReference =
-            when (reference.text) {
-                SLOT, SLOTS -> Slot(reference.parent as KtCallExpression)
-                UNSAFE -> Unsafe(reference.parent as KtCallExpression)
-                PROPERTIES -> PropertyDelegate(reference.parent.parent as KtDeclaration)
-                MODULE, PROJECT -> {
-                    val expression = reference.parent as KtDotQualifiedExpression
-                    // TODO other kinds of module references
-                    PropertyReferenceChain(expression)
+        fun classify(reference: KtNameReferenceExpression): TemplateParentReference {
+            val parent = reference.parent
+            return when (reference.text) {
+                SLOT, SLOTS -> {
+                    require(parent is KtCallExpression) {
+                        "Expected slot to be called but found: ${reference.parent?.text ?: "<null>"}"
+                    }
+                    Slot(parent)
                 }
+
+                UNSAFE -> {
+                    require(parent is KtCallExpression) {
+                        "Expected unsafe to be called but was: ${reference.parent?.text ?: "<null>"}"
+                    }
+                    Unsafe(reference.parent as KtCallExpression)
+                }
+                PROPERTIES -> {
+                    val grandparent = parent.parent
+                    require(grandparent is KtDeclaration) {
+                        "Expected property in declaration but was: ${grandparent?.text ?: "<null>"}"
+                    }
+                    PropertyDelegate(grandparent)
+                }
+                MODULE, PROJECT -> {
+                    require(parent is KtDotQualifiedExpression) {
+                        "Expected property access on project/module but was: ${parent?.text ?: "<null>"}"
+                    }
+                    // TODO other kinds of module references
+                    PropertyReferenceChain(parent)
+                }
+
                 else -> throw IllegalArgumentException("Unrecognized reference: ${reference.text}")
             }
+        }
     }
 
     data class PropertyDelegate(val declaration: KtDeclaration): TemplateParentReference

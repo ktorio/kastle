@@ -19,12 +19,13 @@ There are three main elements of the Kastle system:
 
 The pack repository exposes the means for reading the modules that make up a new project.
 
-The interface allows for ID listing and lookup:
+The interface allows for pack ID listing, lookup, and artifact versions:
 
 ```kotlin
 interface PackRepository {
     fun ids(): Flow<PackId>
     suspend fun get(packId: PackId): PackDescriptor?
+    suspend fun versions(): VersionsCatalog
 }
 ```
 
@@ -39,9 +40,9 @@ We currently have a few implementations depending on your requirements:
 2. [**Remote:**](/client/src/RemoteRepository.kt)
    The client implementation for generating projects from a remote server.
    This assumes a schema consistent with the endpoints defined from the [server](#the-server) implementation.
-3. [**Json:**](/core/src/io/JsonFilePackRepository.kt)
+3. [**Json**](/core/src/io/JsonFilePackRepository.kt) or [**Cbor**](/core/src/io/CborFilePackRepository.kt):
    A pre-compiled local repository implementation.
-   You can generate these files using the `exportToJson()` extension function on any other repository implementation.
+   You can generate these files using the `exportToJson()` or `exportToCbor()` extension functions on any repository implementation.
 
 ## The Project Generator
 
@@ -72,12 +73,28 @@ It also includes functions for generating projects on the server itself, and a c
 
 In this section, we'll describe the different server functions and endpoints in more detail.
 
-### Repository Endpoints
+### REST API
 
+The REST API routes can be found under the [RestAPI.kt](/server/src/RestAPI.kt) source file.
 
+Here, you'll find the following endpoints:
 
-### Generation Endpoints
+1. `/api/packIds`: the list of all pack IDs
+2. `/api/packs`: the list of all packs, omitting file contents 
+3. `/{group}/{id}`: the complete details for a given pack
+4. `/generate/preview`: generate a project with the provided settings and return the file listing as JSON
+5. `/generate/download`: generate a project and download as a ZIP archive
+
+All endpoints use JSON for serialization unless specified otherwise.
+
+### Agent API
+
+This project is intended to be accessible both by humans and AI agents for creating Kotlin projects.
+
+This API is currently unfinished, so details are pending.
 
 ### Web Interface
 
-### Agent API
+With the server running, you can access the web interface at [http://localhost:8080/](http://localhost:8080/).
+
+The web interface provides a simple UI for generating projects and reviewing the available options. It is built using [Ktor](https://ktor.io/) and [HTMX](https://htmx.org/).

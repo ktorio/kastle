@@ -1,21 +1,21 @@
 package org.jetbrains.kastle.server.ui
 
-import io.ktor.htmx.ExperimentalHtmxApi
-import io.ktor.htmx.html.hx
+import io.ktor.htmx.html.*
+import io.ktor.utils.io.*
 import kotlinx.html.*
 import org.jetbrains.kastle.PackDescriptor
 
-@OptIn(ExperimentalHtmxApi::class)
+@OptIn(ExperimentalKtorApi::class)
 fun HTML.indexHtml(packs: List<PackDescriptor>) {
     head {
         title = "Kastle"
-        style { unsafe { +Resources.css } }
+        style { unsafe { +Resources.stylesheet } }
         styleLink("/assets/a11y-light.min.css")
         styleLink("/assets/a11y-dark.min.css")
         link(rel = "stylesheet") { id = "highlight-style" }
         script(src = "/assets/htmx.min.js") {}
         script(src = "/assets/highlight.min.js") {}
-        script { unsafe { +Resources.js } }
+        script { unsafe { +Resources.script } }
     }
     body {
         div {
@@ -144,7 +144,7 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
     }
 }
 
-@OptIn(ExperimentalHtmxApi::class)
+@OptIn(ExperimentalKtorApi::class)
 private fun UL.packListItem(pack: PackDescriptor) {
     li {
         // TODO role is tab?

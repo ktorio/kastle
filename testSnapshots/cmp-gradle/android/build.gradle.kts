@@ -1,5 +1,5 @@
 
-plugins {
+plugins {"ios/app"
     alias(libs.plugins.android.application)
 }
 

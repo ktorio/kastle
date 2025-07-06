@@ -17,6 +17,11 @@ class LocalProjectGeneratorTest: ProjectGeneratorTest() {
     }
 
     @Test
+    override fun `ktor server amper`() {
+        super.`ktor server amper`()
+    }
+
+    @Test
     override fun `compose multiplatform gradle`() {
         super.`compose multiplatform gradle`()
     }

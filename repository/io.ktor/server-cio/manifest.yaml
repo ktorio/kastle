@@ -4,5 +4,12 @@ description: Configures your Ktor server to use the CIO engine
 version: 1.0.0
 modules:
   - path: server
+    sources:
+      - !<template>
+        target: "slot://org.gradle/gradle/gradleConfigurations"
+        text: |-
+          application {
+              mainClass = "io.ktor.server.cio.EngineMain"
+          }
 requires:
   - io.ktor/server-core

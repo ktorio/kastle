@@ -49,8 +49,8 @@ data class PackDescriptor(
     val info: PackMetadata,
     val sources: PackSources,
 ): PackMetadata by info {
-    val commonSources: List<SourceTemplate> get() = sources.common
-    val rootSources: List<SourceTemplate> get() = sources.root
+    val commonSources: List<SourceFile> get() = sources.common
+    val rootSources: List<SourceFile> get() = sources.root
     val sourceModules: List<SourceModule> get() = sources.modules.modules
 }
 
@@ -63,8 +63,8 @@ data class PackDescriptor(
  */
 @Serializable
 data class PackSources(
-    val common: List<SourceTemplate> = emptyList(),
-    val root: List<SourceTemplate> = emptyList(),
+    val common: List<SourceFile> = emptyList(),
+    val root: List<SourceFile> = emptyList(),
     val modules: ProjectModules = ProjectModules.Empty,
 ) {
     companion object {
@@ -72,7 +72,7 @@ data class PackSources(
     }
 }
 
-val PackDescriptor.allSources: Sequence<SourceTemplate> get() =
+val PackDescriptor.allSources: Sequence<SourceFile> get() =
     commonSources.asSequence() +
         rootSources.asSequence() +
         sourceModules.asSequence().flatMap { it.sources }

@@ -1,16 +1,12 @@
 package org.jetbrains.kastle.server
 
 import io.ktor.http.*
-import io.ktor.server.application.ApplicationCallPipeline
-import io.ktor.server.application.PluginInstance
-import io.ktor.server.application.RouteScopedPlugin
-import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.util.AttributeKey
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.*
@@ -27,11 +23,9 @@ fun Routing.backEnd(
         get("/packIds") {
             val repositoryIds = repository.all().map { it.id }
             call.respondBytesWriter(ContentType.Application.Json) {
-                var first = true
                 writeByte('['.code.toByte())
-                repositoryIds.collect { id ->
-                    if (!first) writeByte(','.code.toByte())
-                    else first = false
+                repositoryIds.collectIndexed { i, id ->
+                    if (i != 0) writeByte(','.code.toByte())
                     writeString(json.encodeToString(id))
                 }
                 writeByte(']'.code.toByte())
@@ -41,15 +35,13 @@ fun Routing.backEnd(
             get {
                 val packs = repository.all()
                 call.respondBytesWriter(ContentType.Application.Json) {
-                    var first = true
                     writeByte('['.code.toByte())
                     packs.map { pack ->
                         pack.copy(
                             sources = PackSources.Empty
                         )
-                    }.collect { descriptor ->
-                        if (!first) writeByte(','.code.toByte())
-                        else first = false
+                    }.collectIndexed { i, descriptor ->
+                        if (i != 0) writeByte(','.code.toByte())
                         writeString(json.encodeToString(descriptor))
                     }
                     writeByte(']'.code.toByte())
@@ -70,11 +62,9 @@ fun Routing.backEnd(
                 val settings: ProjectDescriptor = call.receive()
                 val result: Flow<SourceFileEntry> = generator.generate(settings)
                 call.respondBytesWriter(ContentType.Application.Json) {
-                    var first = true
                     writeByte('{'.code.toByte())
-                    result.collect { (path, contents) ->
-                        if (!first) writeByte(','.code.toByte())
-                        else first = false
+                    result.collectIndexed { i, (path, contents) ->
+                        if (i != 0) writeByte(','.code.toByte())
                         writeString("\"$path\":")
                         writeJsonString(contents())
                     }

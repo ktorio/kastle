@@ -3,25 +3,31 @@ package org.jetbrains.kastle
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.yamlMap
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
+import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.readByteString
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.serializersModuleOf
+import kotlinx.serialization.modules.subclass
+import kotlinx.serialization.serializer
+import org.jetbrains.kastle.StaticSource.Companion.sourceFile
 import org.jetbrains.kastle.amper.readDependencies
 import org.jetbrains.kastle.amper.readHeader
 import org.jetbrains.kastle.io.*
 import org.jetbrains.kastle.templates.*
+import org.jetbrains.kastle.utils.extension
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtFile
+import kotlin.use
 
 private const val MANIFEST_YAML = "manifest.yaml"
 private const val GROUP_YAML = "group.yaml"
@@ -31,7 +37,16 @@ class LocalPackRepository(
     private val fs: FileSystem = SystemFileSystem,
     remoteRepository: PackRepository = PackRepository.EMPTY,
 ): PackRepository {
-    private val textFileTemplateEngine = HandlebarsTemplateEngine()
+    private val handlebarsTemplateEngine = HandlebarsTemplateEngine()
+    private val serializersModule = SerializersModule {
+        // TODO this doesn't work for some reason
+        polymorphic(SourceFile::class) {
+            defaultDeserializer { SourceTemplate.serializer() }
+            subclass(StaticSource::class)
+            subclass(SourceTemplate::class)
+        }
+    }
+    private val yaml = Yaml(serializersModule)
 
     constructor(root: String): this(Path(root))
 
@@ -48,6 +63,7 @@ class LocalPackRepository(
 
         override suspend fun slot(slotId: SlotId): SlotDescriptor? =
             this.get(slotId.pack)?.allSources
+                ?.filterIsInstance<SourceTemplate>()
                 ?.firstNotNullOfOrNull { source ->
                     source.blocks
                         ?.filterIsInstance<Slot>()
@@ -85,10 +101,12 @@ class LocalPackRepository(
 
         val projectSources = projectPath.moduleFolders().asFlow().map { modulePath ->
             val relativeModulePath = modulePath.relativeTo(projectPath).toString()
-            val manifestYaml = modulePath.resolve("module-manifest.yaml").readYaml<ModuleManifest>()
-            val amperYaml = modulePath.resolve("module.yaml").readYamlNode()?.yamlMap
+            val manifestYaml = modulePath.resolve("module-manifest.yaml")
+                .readYaml<ModuleManifest>(fs, yaml)
+            val amperYaml = modulePath.resolve("module.yaml")
+                .readYamlNode(fs, yaml)?.yamlMap
             val amperSettings = amperYaml?.get<YamlMap>("settings")?.let { node ->
-                Yaml.default.decodeFromYamlNode<AmperSettings>(node)
+                yaml.decodeFromYamlNode<AmperSettings>(node)
             }
 
             // TODO cache versions
@@ -102,11 +120,18 @@ class LocalPackRepository(
                 amperYaml.readDependencies("$dependencies@$platform", catalog)
             } + (Platform.COMMON to amperYaml.readDependencies(dependencies, catalog)))
 
+            val readModuleSource = { file: Path ->
+                when (file.name.extension.lowercase()) {
+                    "hbs" -> handlebarsTemplateEngine.read(modulePath, file).copy(packId = packId)
+                    else -> fs.sourceFile(file, modulePath)
+                }
+            }
+
             val dependencies = readDependencies("dependencies")
             val testDependencies = readDependencies("testDependencies")
 
-            val sources = mutableListOf<SourceTemplate>()
-            val resources = mutableListOf<SourceTemplate>()
+            val sources = mutableListOf<SourceFile>()
+            val resources = mutableListOf<SourceFile>()
             val sourceFolders = when {
                 platforms.size == 1 -> listOf(modulePath.resolve("src"))
                 else -> buildList { add("src"); platforms.forEach { add("src@$it")} }.map(modulePath::resolve)
@@ -123,27 +148,25 @@ class LocalPackRepository(
                         .copy(packId = packId)
                 }
 
-                // include non-kotlin files as hbs templates
+                // include non-kotlin files
                 sources += fs.list(sourceFolder).filter {
                     !it.name.endsWith(".kt")
-                }.map { file ->
-                    textFileTemplateEngine.read(modulePath, file).copy(packId = packId)
-                }
+                }.map(readModuleSource)
 
+                // assume non-kotlin files in resources
                 val resourcesFolder = modulePath.resolve("resources")
                 if (fs.exists(resourcesFolder)) {
-                    resources += fs.list(resourcesFolder).map { file ->
-                        textFileTemplateEngine.read(modulePath, file).copy(packId = packId)
-                    }
+                    resources += fs.list(resourcesFolder)
+                        .map(readModuleSource)
                 }
             }
 
-            // additional sources defined for module; use only the text file templating engine
+            // additional sources defined for module; also assume no kotlin sources
             for (manifestSource in manifestYaml?.sources.orEmpty()) {
                 sources += when(val text = manifestSource.text) {
-                    null -> textFileTemplateEngine.read(modulePath, modulePath.resolve(manifestSource.path!!))
-                    else -> textFileTemplateEngine.read(manifestSource.target!!, text)
-                }.copy(packId = packId)
+                    null -> readModuleSource(modulePath.resolve(manifestSource.path!!))
+                    else -> handlebarsTemplateEngine.read(manifestSource.target!!, text).copy(packId = packId)
+                }
             }
 
             SourceModule(
@@ -160,7 +183,7 @@ class LocalPackRepository(
 
         val kotlinAnalyzer = KotlinCompilerTemplateEngine(projectPath, repository)
         val expressionParser = KotlinExpressionParser(kotlinAnalyzer.psiFileFactory)
-        val readSource: suspend (SourceDefinition) -> SourceTemplate = { (path, text, target, condition) ->
+        val readSource: suspend (SourceDefinition) -> SourceFile = { (path, text, target, condition) ->
             require(target != null) { "Missing target for project-level source: ${path ?: text}" }
             val file = projectPath.resolve(path ?: "source.kt")
             if (!fs.exists(file))
@@ -169,11 +192,6 @@ class LocalPackRepository(
             val format = path?.extensionFormat
                 ?: target.takeIfSlot()?.getExtensionFromSlot()
                 ?: target.extensionFormat
-            val templateContents: String = when {
-                path != null -> file.readText() ?: ""
-                text != null -> text
-                else -> throw IllegalArgumentException("Missing path or text in source definition")
-            }
             val conditionExpression = condition?.let(expressionParser::parse)
 
             when(format) {
@@ -181,7 +199,7 @@ class LocalPackRepository(
                     val psiFile = kotlinAnalyzer.psiFileFactory.createFileFromText(
                         path ?: "source.kt",
                         KotlinFileType.INSTANCE,
-                        templateContents
+                        file.readText() ?: text ?: throw IllegalArgumentException("Missing path or text in source definition"),
                     )
                     kotlinAnalyzer.read(Path(""), psiFile as KtFile, properties)
                         .copy(
@@ -191,11 +209,17 @@ class LocalPackRepository(
                         )
                 }
                 TemplateFormat.OTHER ->
-                    textFileTemplateEngine.read(target, templateContents)
-                        .copy(
-                            packId = packId,
-                            condition = conditionExpression
+                    when (file.name.extension.lowercase()) {
+                        "hbs" -> handlebarsTemplateEngine.read(
+                            target,
+                            file.readText() ?: text ?: throw IllegalArgumentException("Missing path or text in source definition")
+                        ).copy(packId = packId, condition = conditionExpression)
+                        else -> StaticSource(
+                            contents = fs.source(file).buffered().use { it.readByteString() },
+                            target = target,
+                            condition = conditionExpression,
                         )
+                    }
             }
         }
 

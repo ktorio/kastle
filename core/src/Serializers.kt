@@ -1,5 +1,6 @@
 package org.jetbrains.kastle
 
+import kotlinx.io.bytestring.ByteString
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -10,6 +11,8 @@ import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.buildSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.reflect.KClass
 
 open class CustomParserSerializer<T: Any>(
@@ -83,5 +86,22 @@ class CatalogVersionSerializer: KSerializer<CatalogVersion> {
             // If decoding as class fails, try to decode as a string
             CatalogVersion.Number(decoder.decodeString())
         }
+    }
+}
+
+
+@OptIn(ExperimentalEncodingApi::class)
+class ByteStringSerializer : KSerializer<ByteString> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ByteString", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: ByteString) {
+        val base64 = Base64.encode(value.toByteArray())
+        encoder.encodeString(base64)
+    }
+
+    override fun deserialize(decoder: Decoder): ByteString {
+        val base64 = decoder.decodeString()
+        val bytes = Base64.decode(base64)
+        return ByteString(bytes)
     }
 }

@@ -176,7 +176,7 @@ data class SourceModule(
     val platforms: List<Platform> = emptyList(),
     val dependencies: DependenciesMap = emptyMap(),
     val testDependencies: DependenciesMap = emptyMap(),
-    val sources: List<SourceTemplate> = emptyList(),
+    val sources: List<SourceFile> = emptyList(),
     val gradle: GradleSettings = GradleSettings(),
     val amper: AmperSettings = AmperSettings(),
 ) {
@@ -188,7 +188,7 @@ data class SourceModule(
 
 typealias DependenciesMap = Map<Platform, Set<Dependency>>
 
-operator fun DependenciesMap.plus(other: DependenciesMap): DependenciesMap =
+fun DependenciesMap.merge(other: DependenciesMap): DependenciesMap =
     (keys + other.keys).associateWith { platform ->
         this[platform].orEmpty() + other[platform].orEmpty()
     }
@@ -256,8 +256,8 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
             else -> return null
         },
         platforms = (platforms + other.platforms).distinct(),
-        dependencies = dependencies + other.dependencies,
-        testDependencies = testDependencies + other.testDependencies,
+        dependencies = dependencies.merge(other.dependencies),
+        testDependencies = testDependencies.merge(other.testDependencies),
         sources = (sources + other.sources).also { mergedSources ->
             val uniquePaths = mutableSetOf<Url>()
             mergedSources.forEach {

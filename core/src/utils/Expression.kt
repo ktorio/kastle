@@ -53,7 +53,7 @@ sealed interface Expression {
     @Serializable
     data class BinaryOp(val op: Operator, val left: Expression, val right: Expression) : Expression {
         override fun evaluate(variables: Variables): Any? = op.evaluate(left.evaluate(variables), right.evaluate(variables))
-        override fun toString(): String = "$left ${op.name} $right"
+        override fun toString(): String = "$left $op $right"
     }
 
     @Serializable

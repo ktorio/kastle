@@ -28,6 +28,7 @@ interface PackRepository {
 
     suspend fun slot(slotId: SlotId): SlotDescriptor? =
         get(slotId.pack)?.allSources
+            ?.filterIsInstance<SourceTemplate>()
             ?.firstNotNullOfOrNull { source ->
                 source.slots
                     .find { slot -> slot.name == slotId.name }

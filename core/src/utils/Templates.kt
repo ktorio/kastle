@@ -2,16 +2,23 @@ package org.jetbrains.kastle.utils
 
 import org.jetbrains.kastle.Block
 import org.jetbrains.kastle.Slot
+import org.jetbrains.kastle.SourceFile
 import org.jetbrains.kastle.SourceTemplate
 
 val SourceTemplate.slots: Sequence<Slot> get() =
     blocks?.asSequence()?.filterIsInstance<Slot>().orEmpty()
 
-fun SourceTemplate.isFile(): Boolean =
+fun SourceFile.isFile(): Boolean =
     target.protocol == "file"
 
-fun SourceTemplate.isSlot(): Boolean =
+fun SourceFile.isSlot(): Boolean =
     target.protocol == "slot"
+
+val Block.positionPrefix: String get() =
+    lineNumber.toString().padEnd(5)
+
+val Block.lineNumber: Int get() =
+    position.line
 
 val Block.range: IntRange get() =
     position.range
@@ -25,7 +32,6 @@ val Block.outerStart: Int get() =
 val Block.outerEnd: Int get() =
     position.outer.last
 
-// TODO
 val Block.level: Int get() =
     position.level
 

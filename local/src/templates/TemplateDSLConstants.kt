@@ -1,5 +1,6 @@
 package org.jetbrains.kastle.templates
 
+// template functions
 const val SLOT = "_slot"
 const val SLOTS = "_slots"
 const val PROPERTIES = "_properties"

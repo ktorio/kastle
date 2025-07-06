@@ -3,6 +3,7 @@ package org.jetbrains.kastle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.io.Buffer
+import kotlinx.io.write
 import kotlinx.io.writeCodePointValue
 import kotlinx.io.writeString
 import org.jetbrains.kastle.gen.ProjectResolver
@@ -15,6 +16,7 @@ import org.jetbrains.kastle.logging.LogLevel
 import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.*
 import org.jetbrains.kastle.utils.extension
+import kotlin.math.exp
 
 interface ProjectGenerator {
     companion object {
@@ -53,9 +55,24 @@ class ProjectGeneratorImpl(
             val moduleSources = buildList {
                 addAll((module.sources.filter { it.target.protocol == "file" }))
                 addAll(project.commonSources)
-            }.distinctBy { it.target }
+            }
+            val outputtedPaths = mutableSetOf<String>()
 
             for (source in moduleSources) {
+                val path = module.path.appendPath(source.target.relativeFile)
+                if (source !is SourceTemplate) {
+                    if (source !is StaticSource)
+                        error("Unsupported source type: ${source::class.simpleName}")
+
+                    log.debug { "Include ${source.target}; skip templating" }
+                    emit(SourceFileEntry(path) {
+                        Buffer().apply {
+                            write(source.contents)
+                        }
+                    })
+                    continue
+                }
+
                 val packId = source.packId
                 if (packId == null) {
                     log.warn { "Skipping ${source.target}; missing pack ID" }
@@ -68,12 +85,15 @@ class ProjectGeneratorImpl(
                 if (source.condition != null) {
                     val conditionValue = source.condition.evaluate(variables)
                     if (!conditionValue.isTruthy()) {
-                        log.debug { "Skipping ${source.target}; condition ${source.condition} evaluated to $conditionValue" }
+                        log.debug { "Skipping ${source.target}; ${source.condition} = $conditionValue" }
                         continue
                     }
                 }
 
-                val path = module.path.appendPath(source.target.relativeFile)
+                if (!outputtedPaths.add(path)) {
+                    log.debug { "Skipping ${source.target}; duplicate path $path" }
+                    continue
+                }
 
                 emit(SourceFileEntry(path) {
                     writeSourceFile(source, variables) {
@@ -100,8 +120,7 @@ class ProjectGeneratorImpl(
                             forEachBlock(source.blocks) { block ->
                                 log.trace {
                                     buildString {
-                                        append("  ${(block.range.toString()).padEnd(10)} ")
-                                        append("(${block.level})  ")
+                                        append("  ${block.lineNumber.toString().padEnd(5)} ")
                                         append(((block.level * 2).stringOf(' ') + block::class.simpleName).padEnd(30))
                                         append("\"${block.outerContents.replace("\n", "\\n")}\"".padEnd(100))
                                         append("\"${block.bodyContents?.replace("\n", "\\n")}\"")
@@ -197,7 +216,7 @@ class ProjectGeneratorImpl(
         }
     }
 
-    private fun Map<Url, List<SourceTemplate>>.lookup(packId: PackId, block: Block): List<SourceTemplate> {
+    private fun Map<Url, List<SourceFile>>.lookup(packId: PackId, block: Block): List<SourceTemplate> {
         if (block !is Slot)
             return emptyList()
 
@@ -206,7 +225,7 @@ class ProjectGeneratorImpl(
         if (values.isEmpty()) {
             when (block.requirement) {
                 Requirement.REQUIRED ->
-                    throw IllegalArgumentException("Missing slot slot://$packId/${block.name}")
+                    throw IllegalArgumentException("Missing slot://$packId/${block.name}")
                 Requirement.OMITTED -> return emptyList()
                 Requirement.OPTIONAL -> {}
             }
@@ -214,7 +233,7 @@ class ProjectGeneratorImpl(
         require(block is RepeatingSlot || values.size <= 1) {
             "More than one target for non-repeating slot://$packId/${block.name}"
         }
-        return values
+        return values.filterIsInstance<SourceTemplate>()
     }
 
     private fun writeSourceFile(
@@ -356,7 +375,7 @@ class ProjectGeneratorImpl(
                     }
 
                     is UnsafeBlock -> {
-                        log.trace { "unsafe $block" }
+                        log.trace { "  ${block.positionPrefix} UNSAFE $block" }
                         append(source.text, block.outerStart, block.rangeStart, block.level)
                         append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
                         false
@@ -364,7 +383,9 @@ class ProjectGeneratorImpl(
 
                     is ElseBlock -> {
                         val parent = stack.lastOrNull() ?: error("else without parent: $block")
-                        if (conditions[parent] == false) {
+                        val ifResult = conditions[parent]
+                        log.trace { "  ${block.positionPrefix} ELSE @${parent.lineNumber} -> ${ifResult == false}" }
+                        if (ifResult == false) {
                             append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
                             false
                         } else skipContents()
@@ -382,6 +403,7 @@ class ProjectGeneratorImpl(
 
                         when (block) {
                             is InlineValue -> {
+                                log.trace { "  ${block.positionPrefix} VALUE ${block.expression} -> $value" }
                                 when {
                                     value is String && !block.embedded -> append("\"$value\"")
                                     else -> append(value.toString())
@@ -389,7 +411,8 @@ class ProjectGeneratorImpl(
                                 false
                             }
                             is IfBlock -> {
-                                val parent = stack.lastOrNull() ?: error("if without parent: $block")
+                                log.trace { "  ${block.positionPrefix} IF    ${block.expression} -> $value -> ${value.isTruthy()}" }
+                                val parent = stack.top ?: error("if without parent: $block")
                                 val condition = value.isTruthy().also { conditions[parent] = it }
                                 if (condition) {
                                     append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
@@ -397,7 +420,11 @@ class ProjectGeneratorImpl(
                                 } else skipContents()
                             }
                             is ForEachBlock -> {
-                                val list = loops[block] ?: (value as? Iterable<*> ?: emptyList<Any>()).toMutableList()
+                                log.trace { "  ${block.positionPrefix} EACH  ${block.expression} -> $value" }
+                                require(value is Iterable<*>) {
+                                    "Expected iterable for each argument: ${block.expression}"
+                                }
+                                val list = loops[block] ?: value.toMutableList()
                                 if (list.isNotEmpty()) {
                                     val element = list.removeFirst()
                                     when(val variable = block.variable) {
@@ -413,7 +440,10 @@ class ProjectGeneratorImpl(
                                 } else skipContents()
                             }
                             // details handled by direct children
-                            is WhenBlock -> false
+                            is WhenBlock -> {
+                                log.trace { "  ${block.positionPrefix} WHEN  ${block.expression} -> $value" }
+                                false
+                            }
                         }
                     }
                 }

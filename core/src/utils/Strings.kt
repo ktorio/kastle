@@ -11,6 +11,9 @@ fun String.getIndentAt(startIndex: Int) = lastIndexOf('\n', startIndex).takeIf {
         substring(newLineIndex + 1, nonWhitespaceIndex)
     }?.takeIf(String::isBlank) ?: ""
 
+fun String.capitalizeFirst() =
+    replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+
 fun String.trimAngleBrackets() =
     trimEnclosingCharacters('<', '>')
 
