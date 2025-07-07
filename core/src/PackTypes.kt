@@ -16,6 +16,7 @@ sealed interface PackMetadata {
     val documentation: String?
     val requires: List<PackId>
     val properties: List<Property>
+    val attributes: Map<VariableId, String>
     val repositories: List<Repository>
 }
 
@@ -33,6 +34,7 @@ data class PackManifest(
     override val documentation: String? = null,
     override val requires: List<PackId> = emptyList(),
     override val properties: List<Property> = emptyList(),
+    override val attributes: Map<VariableId, String> = emptyMap(),
     override val repositories: List<Repository> = emptyList(),
     val modules: List<SourceModule>? = null,
     val commonSources: List<SourceDefinition> = emptyList(),

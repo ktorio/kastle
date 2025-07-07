@@ -2,6 +2,10 @@ id: io.ktor/server-core
 name: Ktor Server
 description: Adds a Ktor HTTP server
 version: 1.0.0
+properties:
+  - key: serverModules
+    type: list<string>?
+    hidden: true
 modules:
   - path: server
     gradle:

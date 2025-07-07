@@ -1,6 +1,7 @@
 package org.jetbrains.kastle.utils
 
 import org.jetbrains.kastle.utils.Queue.Companion.toQueue
+import org.jetbrains.kastle.utils.plusAssign
 import kotlin.collections.contains
 import kotlin.collections.get
 
@@ -8,6 +9,17 @@ typealias Variables = Stack<Map<String, Any?>>
 
 operator fun Variables.plusAssign(pair: Pair<String, Any?>) {
     this += mapOf(pair)
+}
+
+@Suppress("UNCHECKED_CAST")
+fun Variables.addVariableOrScope(pair: Pair<String?, Any?>) {
+    this += when(val variable = pair.first) {
+        null -> {
+            val elementFields = pair.second as? Map<String, Any> ?: emptyMap()
+            mapOf("this" to pair.second, *elementFields.toList().toTypedArray())
+        }
+        else -> mapOf(variable to pair.second)
+    }
 }
 
 operator fun Variables.plus(pair: Pair<String, Any?>): Variables = apply {

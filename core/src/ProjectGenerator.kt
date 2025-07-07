@@ -421,23 +421,20 @@ class ProjectGeneratorImpl(
                             }
                             is ForEachBlock -> {
                                 log.trace { "  ${block.positionPrefix} EACH  ${block.expression} -> $value" }
-                                require(value is Iterable<*>) {
-                                    "Expected iterable for each argument: ${block.expression}"
-                                }
-                                val list = loops[block] ?: value.toMutableList()
-                                if (list.isNotEmpty()) {
-                                    val element = list.removeFirst()
-                                    when(val variable = block.variable) {
-                                        null -> {
-                                            val elementFields = element as? Map<String, Any> ?: emptyMap()
-                                            variables += mapOf("this" to element, *elementFields.toList().toTypedArray())
-                                        }
-                                        else -> variables += variable to element
+                                when (value) {
+                                    null -> skipContents()
+                                    is Iterable<*> -> {
+                                        val list = loops[block] ?: value.toMutableList()
+                                        if (list.isNotEmpty()) {
+                                            val element = list.removeFirst()
+                                            variables.addVariableOrScope(block.variable to element)
+                                            loops[block] = list
+                                            append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
+                                            false
+                                        } else skipContents()
                                     }
-                                    loops[block] = list
-                                    append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
-                                    false
-                                } else skipContents()
+                                    else -> error("Expected iterable for each argument: ${block.expression}")
+                                }
                             }
                             // details handled by direct children
                             is WhenBlock -> {

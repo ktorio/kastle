@@ -4,6 +4,10 @@ ktor {
     port = ${?PORT}
   }
   application {
-    modules = [ {{_project.group}}.ApplicationKt.module ]
+    modules = [
+      {{#each serverModules}}
+        {{_project.group}}.{{this}}
+      {{/each}}
+    ]
   }
 }

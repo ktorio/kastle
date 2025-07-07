@@ -8,6 +8,11 @@ annotation class TemplateDsl
  */
 val _properties: TemplateProperties = object : TemplateProperties {}
 
+/**
+ * For reading properties supplied from child modules.
+ */
+val _attributes: TemplateProperties = object : TemplateProperties {}
+
 val _project = object {
     val name: String = ""
     val group: String = ""

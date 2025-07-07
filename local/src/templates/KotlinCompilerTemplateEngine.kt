@@ -140,16 +140,15 @@ internal class KotlinCompilerTemplateEngine(
         // declarations of properties
         val propertyDeclarations = templateReferences
             .filterIsInstance<TemplateParentReference.PropertyDelegate>()
-            .map { it.declaration }
 
         // strip declarations using skip blocks
-        val declarationBlocks = propertyDeclarations.map { declaration ->
-            SkipBlock(position = declaration.blockPosition())
+        val declarationBlocks = propertyDeclarations.map {
+            SkipBlock(position = it.declaration.blockPosition())
         }
 
         // inline blocks with references to properties
-        val propertyBlocks = propertyDeclarations.flatMap { declaration ->
-            declaration.findReferences().flatMap { reference ->
+        val propertyBlocks = propertyDeclarations.flatMap {
+            it.declaration.findReferences().flatMap { reference ->
                 reference.readReferenceBlocks()
             }
         }
@@ -181,10 +180,6 @@ internal class KotlinCompilerTemplateEngine(
             slots,
             unsafeBlocks,
         )
-//        val text = containingFile.text
-//        for (block in allBlocks) {
-//            println("${" ".repeat(maxOf(0, block.indent))}${block}\t${text.substring(block.rangeStart, block.rangeEnd).replace("\n", "\\n")}")
-//        }
 
         return allBlocks
     }

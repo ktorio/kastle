@@ -72,30 +72,33 @@ fun PsiElement.textIntRange(
 fun TextRange.toIntRange(): IntRange =
     startOffset .. endOffset
 
-fun KtDeclaration.asProperty(): Property {
-    val variableName = name
+fun TemplateParentReference.PropertyDelegate.asProperty(): Property {
+    val variableName = declaration.name
     require(variableName != null) {
-        "Missing variable name on template property declaration: $text"
+        "Missing variable name on template property declaration: ${declaration.text}"
     }
 
-    val typeReference = children
+    val typeReference = declaration.children
         .filterIsInstance<KtTypeReference>()
         .firstOrNull()
     require(typeReference != null) {
-        "Missing type on template property declaration: $text"
+        "Missing type on template property declaration: ${declaration.text}"
     }
 
     // TODO only supports single-line comments
     // TODO needs to use other lines for details
     val commentText =
-        descendantsOfType<PsiComment>().firstOrNull()?.text?.trimStart('/')?.trim()
-            ?: containingFile.text.previousLine(textRange.startOffset)?.trimStart()?.takeIf { it.startsWith("//") }?.trimStart('/')?.trim()
+        declaration.descendantsOfType<PsiComment>().firstOrNull()?.text?.trimStart('/')?.trim()
+            ?: declaration.containingFile.text.previousLine(declaration.textRange.startOffset)?.trimStart()?.takeIf { it.startsWith("//") }?.trimStart('/')?.trim()
+
+    val propertyType = PropertyType.parse(typeReference.text)
 
     return Property(
         key = variableName,
-        type = PropertyType.Companion.parse(typeReference.text),
+        type = propertyType,
         default = null, // TODO
         label = commentText,
+        hidden = hidden,
     )
 }
 
@@ -316,12 +319,12 @@ sealed interface TemplateParentReference {
                     }
                     Unsafe(reference.parent as KtCallExpression)
                 }
-                PROPERTIES -> {
+                PROPERTIES, ATTRIBUTES -> {
                     val grandparent = parent.parent
                     require(grandparent is KtDeclaration) {
                         "Expected property in declaration but was: ${grandparent?.text ?: "<null>"}"
                     }
-                    PropertyDelegate(grandparent)
+                    PropertyDelegate(grandparent, reference.text == ATTRIBUTES)
                 }
                 MODULE, PROJECT -> {
                     require(parent is KtDotQualifiedExpression) {
@@ -336,7 +339,7 @@ sealed interface TemplateParentReference {
         }
     }
 
-    data class PropertyDelegate(val declaration: KtDeclaration): TemplateParentReference
+    data class PropertyDelegate(val declaration: KtDeclaration, val hidden: Boolean = false): TemplateParentReference
     data class PropertyReferenceChain(val expression: KtDotQualifiedExpression): TemplateParentReference
     data class Slot(val expression: KtCallExpression): TemplateParentReference
     data class Unsafe(val expression: KtCallExpression): TemplateParentReference

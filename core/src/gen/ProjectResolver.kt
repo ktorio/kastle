@@ -22,10 +22,15 @@ fun interface ProjectResolver {
             val rootSourceFiles = packs
                 .flatMap { it.rootSources }
                 .filter { it.isFile() }
+            val attributes = packs.flatMap { pack ->
+                pack.attributes.entries
+            }.groupBy({ it.key }) {
+                it.value
+            }
             val properties = packs.flatMap { pack ->
                 pack.properties.map { property ->
                     VariableId(pack.id, property.key).let { variableId ->
-                        variableId to readValue(descriptor, variableId, property)
+                        variableId to findPropertyValue(descriptor, attributes, variableId, property)
                     }
                 }
             }.toMap()
@@ -66,14 +71,21 @@ fun interface ProjectResolver {
             )
         }
 
-        private fun readValue(
+        private fun findPropertyValue(
             descriptor: ProjectDescriptor,
+            attributes: Map<VariableId, List<String>>,
             variableId: VariableId,
             property: Property
         ): Any? {
             try {
-                val value = descriptor.properties[variableId] ?: property.default
-                return value?.let(property.type::parse)
+                val stringValue = descriptor.properties[variableId]
+                    ?: attributes[variableId]?.let { attrs -> attrs.singleOrNull() ?: attrs.joinToString(",") }
+                    ?: property.default
+                val value = stringValue?.let(property.type::parse)
+                require(property.type is PropertyType.Nullable || value != null) {
+                    "Missing value for property $variableId"
+                }
+                return value
             } catch (e: Exception) {
                 throw IllegalArgumentException("Failed to read property $variableId: ${e.message}", e)
             }

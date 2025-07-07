@@ -4,6 +4,7 @@ package org.jetbrains.kastle.templates
 const val SLOT = "_slot"
 const val SLOTS = "_slots"
 const val PROPERTIES = "_properties"
+const val ATTRIBUTES = "_attributes"
 const val UNSAFE = "_unsafe"
 
 // module properties

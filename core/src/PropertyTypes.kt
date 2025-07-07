@@ -11,6 +11,7 @@ data class Property(
     val type: PropertyType = PropertyType.String,
     val default: String? = null,
     val label: String? = null,
+    val hidden: Boolean = false,
 ) {
     override fun toString(): String = buildString {
         append("$key: $type")

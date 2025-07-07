@@ -8,11 +8,12 @@ import org.jetbrains.kastle.utils.isTruthy
 
 fun HTML.packPropertiesHtml(pack: PackDescriptor) {
     body {
-        if (pack.properties.isNotEmpty()) {
-            div("properties ${pack.properties.shirtSize}") {
+        val properties = pack.properties.filter { !it.hidden }
+        if (properties.isNotEmpty()) {
+            div("properties ${properties.shirtSize}") {
                 id = "properties/${pack.id}"
                 h3 { +pack.name }
-                for (property in pack.properties)
+                for (property in properties)
                     propertyInputAndLabel(pack, property)
             }
         }
