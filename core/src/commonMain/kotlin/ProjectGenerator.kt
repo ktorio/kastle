@@ -16,7 +16,6 @@ import org.jetbrains.kastle.logging.LogLevel
 import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.*
 import org.jetbrains.kastle.utils.extension
-import kotlin.math.exp
 
 interface ProjectGenerator {
     companion object {

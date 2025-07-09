@@ -202,6 +202,7 @@ sealed interface Expression {
                     receiver.joinToString(separator)
                 }
                 "flatten" -> {
+                    @Suppress("UNCHECKED_CAST")
                     receiver as? Collection<Collection<*>> ?: error("flatten requires a List<Collection<*>> receiver")
                     receiver.flatten()
                 }
@@ -226,13 +227,7 @@ sealed interface Expression {
                         is Function1<*, *> -> {
                             @Suppress("UNCHECKED_CAST")
                             val typedPredicate = predicate as (Any?) -> Boolean
-                            receiver.filter {
-                                val result = typedPredicate(it)
-                                if (result !is Boolean) {
-                                    throw IllegalArgumentException("filter predicate must return a Boolean")
-                                }
-                                result
-                            }
+                            receiver.filter { typedPredicate(it) }
                         }
                         else -> throw IllegalArgumentException("filter requires a lambda function argument, got ${predicate::class.simpleName}")
                     }

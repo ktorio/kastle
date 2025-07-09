@@ -1,19 +1,13 @@
 package org.jetbrains.kastle.client
 
-import io.ktor.client.*
-import io.ktor.server.plugins.di.*
-import io.ktor.server.testing.*
+import io.ktor.server.plugins.di.dependencies
+import io.ktor.server.testing.runTestApplication
 import kotlinx.coroutines.*
 import kotlinx.io.files.Path
-import org.jetbrains.kastle.LocalPackRepository
-import org.jetbrains.kastle.PackRepository
-import org.jetbrains.kastle.ProjectGeneratorTest
-import org.jetbrains.kastle.server.routing
-import org.jetbrains.kastle.server.errorHandling
-import org.jetbrains.kastle.server.monitoring
-import org.jetbrains.kastle.server.serialization
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
+import org.jetbrains.kastle.*
+import org.jetbrains.kastle.client.asRepository
+import org.junit.jupiter.api.*
+import java.net.http.HttpClient
 
 class RemoteProjectGeneratorTest: ProjectGeneratorTest() {
     companion object {

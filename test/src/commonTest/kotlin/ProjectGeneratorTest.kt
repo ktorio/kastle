@@ -112,7 +112,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
                 "io.ktor/ktor-kotlinx-serialization-json",
             ),
             properties = mapOf(
-                VariableId.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
+                VariableId.Companion.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
             )
         )
         assertFilesAreEqualWithSnapshot(
@@ -150,7 +150,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
                 "org.jetbrains/compose-multiplatform",
             ),
             properties = mapOf(
-                VariableId.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
+                VariableId.Companion.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
             )
         )
         assertFilesAreEqualWithSnapshot(
