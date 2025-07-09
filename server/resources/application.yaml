@@ -8,7 +8,7 @@ ktor:
       - org.jetbrains.kastle.server.MonitoringKt.monitoring
       - org.jetbrains.kastle.server.ErrorHandlingKt.errorHandling
   deployment:
-    port: 8080
+    port: 2626
 
 repository:
   dir: export

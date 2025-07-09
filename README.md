@@ -33,7 +33,7 @@ To run the server:
 
 You should see the following in the console:
 ```
- INFO  Application - Responding at http://0.0.0.0:8080
+ INFO  Application - Responding at http://0.0.0.0:2626
 ```
 
 Visit the URL in a browser to start creating your projects!

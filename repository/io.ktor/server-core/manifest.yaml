@@ -6,6 +6,9 @@ properties:
   - key: serverModules
     type: list<string>?
     hidden: true
+  - key: configFormat
+    type: enum { HOCON, YAML, none }
+    default: HOCON
 modules:
   - path: server
     gradle:

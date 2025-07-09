@@ -377,11 +377,22 @@ data class CatalogArtifact(
 
 @Serializable(CatalogVersionSerializer::class)
 sealed interface CatalogVersion {
+    companion object {
+        fun parse(text: String) =
+            when {
+                text.startsWith('$') -> Ref(text.substring(1))
+                else -> Number(text)
+            }
+    }
 
     @Serializable
-    data class Ref(val ref: String): CatalogVersion
+    data class Ref(val ref: String): CatalogVersion {
+        override fun toString(): String = "$$ref"
+    }
 
     @JvmInline
     @Serializable
-    value class Number(val number: String): CatalogVersion
+    value class Number(val number: String): CatalogVersion {
+        override fun toString(): String = number
+    }
 }

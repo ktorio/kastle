@@ -15,10 +15,10 @@ fun String.capitalizeFirst() =
     replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 
 fun String.trimAngleBrackets() =
-    trimEnclosingCharacters('<', '>')
+    trimEnclosingCharacters('<', '>').trim()
 
 fun String.trimBraces() =
-    trimEnclosingCharacters('{', '}')
+    trimEnclosingCharacters('{', '}').trim()
 
 fun String.trimEnclosingCharacters(start: Char, end: Char) =
     if (startsWith(start) && endsWith(end))
