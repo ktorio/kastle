@@ -49,8 +49,44 @@ class SemanticVersionSerializer: CustomParserSerializer<SemanticVersion>(Semanti
 //class SourcePositionSerializer: CustomParserSerializer<SourcePosition>(SourcePosition::class, SourcePosition::parse)
 class BlockPositionSerializer: CustomParserSerializer<BlockPosition>(BlockPosition::class, BlockPosition::parse)
 class PropertyTypeSerializer: CustomParserSerializer<PropertyType>(PropertyType::class, PropertyType::parse)
-class CatalogVersionSerializer: CustomParserSerializer<CatalogVersion>(CatalogVersion::class, CatalogVersion::parse)
 
+
+class CatalogVersionSerializer: KSerializer<CatalogVersion> {
+    @OptIn(InternalSerializationApi::class)
+    override val descriptor: SerialDescriptor = buildSerialDescriptor(
+        "CatalogVersion",
+        SerialKind.CONTEXTUAL
+    )
+    private val refDescriptor: SerialDescriptor = buildClassSerialDescriptor("CatalogVersion.Ref") {
+        element("ref", PrimitiveSerialDescriptor("CatalogVersion.Ref.ref", PrimitiveKind.STRING))
+    }
+    override fun serialize(
+        encoder: Encoder,
+        value: CatalogVersion
+    ) {
+        when (value) {
+            is CatalogVersion.Number -> encoder.encodeString(value.number)
+            is CatalogVersion.Ref -> {
+                val compositeEncoder = encoder.beginStructure(refDescriptor)
+                compositeEncoder.encodeStringElement(refDescriptor, 0, value.ref)
+                compositeEncoder.endStructure(refDescriptor)
+            }
+        }
+    }
+    override fun deserialize(decoder: Decoder): CatalogVersion {
+        return try {
+            // Try decoding structure
+            val compositeDecoder = decoder.beginStructure(refDescriptor)
+            val index = compositeDecoder.decodeElementIndex(refDescriptor)
+            val ref = compositeDecoder.decodeStringElement(refDescriptor, index)
+            compositeDecoder.endStructure(refDescriptor)
+            CatalogVersion.Ref(ref)
+        } catch (e: Exception) {
+            // If decoding as class fails, try to decode as a string
+            CatalogVersion.Number(decoder.decodeString())
+        }
+    }
+}
 
 @OptIn(ExperimentalEncodingApi::class)
 class ByteStringSerializer : KSerializer<ByteString> {

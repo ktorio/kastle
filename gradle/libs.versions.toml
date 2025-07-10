@@ -1,23 +1,25 @@
 [versions]
 ktor = "3.2.1"
-kotlin = "2.1.20"
+kotlin = "2.1.10"
 logback = "1.5.18"
-kotlinx-datetime = "0.7.1"
+kotlinx-datetime = "0.6.2"
 kotlinx-serialization = "1.9.0"
 kotlinx-coroutines = "1.10.2"
 kotlinx-io = "0.8.0"
 android-lifecycle = "2.9.1"
 android-activity-compose = "1.10.1"
 ktoml = "0.7.0"
-kaml = "0.83.0"
+kaml = "0.77.1"
 mcp-sdk = "0.5.0"
 commonmark = "0.25.0"
+kotest = "5.9.1"
 
 [plugins]
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotest-mp = { id = "io.kotest.multiplatform", version.ref = "kotest" }
 
 [libraries]
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
@@ -53,6 +55,9 @@ ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref 
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
+kotest-framework = { module = "io.kotest:kotest-framework-engine", version.ref = "kotest" }
+kotest-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
 kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "kotlin" }
 kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }

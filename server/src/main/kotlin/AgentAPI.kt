@@ -49,86 +49,86 @@ val projectDescriptorSchema by lazy {
     }
 }
 
-fun Application.agentAPI(
-    @Property("mcp.implementation") implementation: Implementation,
-    @Property("mcp.options")        options: ServerOptions,
-) {
-    val repository: PackRepository by dependencies
-    val generator: ProjectGenerator by dependencies
-    val json: Json by dependencies
-    val fs = SystemFileSystem
-    val projectDir = Path(SystemTemporaryDirectory, "project")
-
-    routing {
-        mcp("mcp") {
-            Server(implementation, options).apply {
-                addResource(
-                    name = "list-packs",
-                    description = """
-                    Get a list of available "Project Architecture Components" (PACs).
-                    
-                    Each component provides a unit of functionality for building a project.  When generating a project, 
-                    you can choose which PACs to include by referencing their IDs.  When a PAC is included, you must
-                    include its "properties" as referenced by "{PAC id}/{key}" under the "properties" map in the project
-                    descriptor payload.
-                """.trimIndent(),
-                    uri = "data://packs.json",
-                    mimeType = "application/json",
-                ) { request ->
-                    val packListContent = repository.all().map { pack ->
-                        val json = json.encodeToString(pack.copy(
-                            sources = PackSources.Empty,
-                        ))
-                        TextResourceContents(
-                            json,
-                            "data://packs/${pack.id}.json",
-                            "application/json"
-                        )
-                    }
-
-                    ReadResourceResult(packListContent.toList())
-                }
-                addTool(
-                    name = "generate-project",
-                    description = """
-                    Generate a new project with the supplied options.
-                    
-                    Returns a file listing for all sources, which can be read individually.
-                """.trimIndent(),
-                    inputSchema = Tool.Input(
-                        properties = projectDescriptorSchema
-                    )
-                ) { request ->
-                    // TODO remove deleted resources
-                    fs.deleteRecursively(projectDir)
-                    fs.createDirectories(projectDir)
-
-                    val descriptor: ProjectDescriptor = json.decodeFromJsonElement(request.arguments)
-                    val fileList = generator.generate(descriptor).map { (path, content) ->
-                        val filePath = projectDir.resolve(path)
-                        val uri = "file:$path"
-
-                        // write the new project file
-                        fs.sink(filePath).use { sink -> content().transferTo(sink) }
-
-                        // add the file resource
-                        addResource(uri, "read-${path.replace('/', '-')}", "Read file $path") {
-                            ReadResourceResult(listOf(TextResourceContents(
-                                text = fs.source(filePath).buffered().readText(),
-                                uri = uri,
-                                mimeType = "text/plain" // TODO mimetype
-                            )))
-                        }
-
-                        TextContent(uri)
-                    }.toList()
-
-                    // let the client know resources are changed
-                    sendResourceListChanged()
-
-                    CallToolResult(content = fileList)
-                }
-            }
-        }
-    }
-}
+//fun Application.agentAPI(
+//    @Property("mcp.implementation") implementation: Implementation,
+//    @Property("mcp.options")        options: ServerOptions,
+//) {
+//    val repository: PackRepository by dependencies
+//    val generator: ProjectGenerator by dependencies
+//    val json: Json by dependencies
+//    val fs = SystemFileSystem
+//    val projectDir = Path(SystemTemporaryDirectory, "project")
+//
+//    routing {
+//        mcp("mcp") {
+//            Server(implementation, options).apply {
+//                addResource(
+//                    name = "list-packs",
+//                    description = """
+//                    Get a list of available "Project Architecture Components" (PACs).
+//
+//                    Each component provides a unit of functionality for building a project.  When generating a project,
+//                    you can choose which PACs to include by referencing their IDs.  When a PAC is included, you must
+//                    include its "properties" as referenced by "{PAC id}/{key}" under the "properties" map in the project
+//                    descriptor payload.
+//                """.trimIndent(),
+//                    uri = "data://packs.json",
+//                    mimeType = "application/json",
+//                ) { request ->
+//                    val packListContent = repository.all().map { pack ->
+//                        val json = json.encodeToString(pack.copy(
+//                            sources = PackSources.Empty,
+//                        ))
+//                        TextResourceContents(
+//                            json,
+//                            "data://packs/${pack.id}.json",
+//                            "application/json"
+//                        )
+//                    }
+//
+//                    ReadResourceResult(packListContent.toList())
+//                }
+//                addTool(
+//                    name = "generate-project",
+//                    description = """
+//                    Generate a new project with the supplied options.
+//
+//                    Returns a file listing for all sources, which can be read individually.
+//                """.trimIndent(),
+//                    inputSchema = Tool.Input(
+//                        properties = projectDescriptorSchema
+//                    )
+//                ) { request ->
+//                    // TODO remove deleted resources
+//                    fs.deleteRecursively(projectDir)
+//                    fs.createDirectories(projectDir)
+//
+//                    val descriptor: ProjectDescriptor = json.decodeFromJsonElement(request.arguments)
+//                    val fileList = generator.generate(descriptor).map { (path, content) ->
+//                        val filePath = projectDir.resolve(path)
+//                        val uri = "file:$path"
+//
+//                        // write the new project file
+//                        fs.sink(filePath).use { sink -> content().transferTo(sink) }
+//
+//                        // add the file resource
+//                        addResource(uri, "read-${path.replace('/', '-')}", "Read file $path") {
+//                            ReadResourceResult(listOf(TextResourceContents(
+//                                text = fs.source(filePath).buffered().readText(),
+//                                uri = uri,
+//                                mimeType = "text/plain" // TODO mimetype
+//                            )))
+//                        }
+//
+//                        TextContent(uri)
+//                    }.toList()
+//
+//                    // let the client know resources are changed
+//                    sendResourceListChanged()
+//
+//                    CallToolResult(content = fileList)
+//                }
+//            }
+//        }
+//    }
+//}

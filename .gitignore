@@ -32,5 +32,5 @@ replay_pid*
 build
 
 # application artifacts
-server/export
+/export
 actual-files

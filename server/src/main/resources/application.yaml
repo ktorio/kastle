@@ -11,6 +11,7 @@ ktor:
     port: 2626
 
 repository:
+  source: repository
   dir: export
 
 # TODO not in use

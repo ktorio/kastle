@@ -344,6 +344,7 @@ data class ModuleDependency(
 
 @Serializable
 data class VersionsCatalog(
+    val plugins: Map<String, PluginArtifact> = emptyMap(),
     val versions: Map<String, String> = emptyMap(),
     val libraries: Map<String, CatalogArtifact> = emptyMap(),
 ) {
@@ -357,6 +358,7 @@ data class VersionsCatalog(
         if (this.isEmpty()) other
         else if (other.isEmpty()) this
         else VersionsCatalog(
+            plugins = (plugins + other.plugins).toSortedMap(),
             versions = (versions + other.versions).toSortedMap(),
             libraries = (libraries + other.libraries).toSortedMap(),
         )
@@ -364,6 +366,12 @@ data class VersionsCatalog(
     operator fun get(key: String): CatalogArtifact? =
         libraries[key]
 }
+
+@Serializable
+data class PluginArtifact(
+    val id: String,
+    val version: CatalogVersion,
+)
 
 @Serializable
 data class CatalogArtifact(

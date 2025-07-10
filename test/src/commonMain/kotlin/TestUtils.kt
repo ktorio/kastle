@@ -1,13 +1,13 @@
 package org.jetbrains.kastle
 
+import io.kotest.assertions.fail
+import io.kotest.matchers.shouldBe
 import java.nio.file.FileVisitOption
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.stream.Collectors
 import kotlin.io.path.*
-import kotlin.test.assertEquals
-import kotlin.test.fail
 
 @OptIn(ExperimentalPathApi::class)
 fun assertFilesAreEqualWithSnapshot(
@@ -54,11 +54,9 @@ fun assertFilesAreEqual(
         .collect(Collectors.toSet())
 
     if (!ignoreListing) {
-        assertEquals(
-            expectedFiles.joinToString("\n"),
-            actualFiles.joinToString("\n"),
-            "File listing does not match"
-        )
+        val actualListing = actualFiles.joinToString("\n")
+        val expectedListing = expectedFiles.joinToString("\n")
+        actualListing shouldBe expectedListing
     }
 
     for (relativePath in expectedFiles) {
@@ -68,11 +66,7 @@ fun assertFilesAreEqual(
         val expectedContents = expectedFile.readText().normalize()
         val actualContents = actualFile.readText().normalize()
 
-        assertEquals(
-            expectedContents,
-            actualContents,
-            "File contents do not match for: $relativePath"
-        )
+        actualContents shouldBe expectedContents
     }
 }
 

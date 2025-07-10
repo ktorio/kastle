@@ -15,5 +15,11 @@ dependencies {
     implementation(libs.ktoml)
 
     testImplementation(project(":templates"))
-    testImplementation(project(":test", configuration = "commonTest"))
+    testImplementation(project(":test"))
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotest.junit5)
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
 }

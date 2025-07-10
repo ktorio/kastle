@@ -5,7 +5,8 @@ plugins {
 }
 
 dependencies {
-     implementation(project(":core"))
+    implementation(project(":core"))
+    implementation(project(":local"))
 
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.cio)

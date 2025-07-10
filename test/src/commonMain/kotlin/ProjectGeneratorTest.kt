@@ -1,6 +1,7 @@
 package org.jetbrains.kastle
 
-import kotlinx.coroutines.test.runTest
+import io.kotest.core.spec.style.FunSpec
+import kotlinx.coroutines.*
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemTemporaryDirectory
 import org.jetbrains.kastle.gen.ProjectResolver
@@ -10,34 +11,53 @@ import org.jetbrains.kastle.io.export
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
 import kotlin.random.Random
-import kotlin.test.Test
 
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
 private const val replaceSnapshot = true
 
-abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots")) {
-    private lateinit var repository: PackRepository
-    private suspend fun getRepository(): PackRepository {
-        if (!this::repository.isInitialized)
-            repository = createRepository()
-        return repository
-    }
+private val testScope = CoroutineScope(CoroutineName("generator-test"))
 
-    abstract suspend fun createRepository(): PackRepository
+abstract class ProjectGeneratorTest(
+    createRepository: suspend () -> PackRepository,
+    tearDown: suspend () -> Unit = {},
+) : FunSpec({
+    val snapshots = Path("../testSnapshots")
+    val repository: Deferred<PackRepository> =
+        testScope.async(start = CoroutineStart.LAZY) {
+            createRepository()
+        }
 
-    private fun randomString() =
+    fun randomString() =
         Random(System.currentTimeMillis()).nextLong(111, 999).toString(36)
 
-    @Test
-    fun `empty project`() = runTest {
+    suspend fun generate(
+        outputDir: Path,
+        properties: Map<VariableId, String> = emptyMap(),
+        packs: List<String>
+    ) = ProjectGeneratorImpl(
+        repository = repository.await(),
+        projectResolver = ProjectResolver.Default + GradleTransformation,
+        log = ConsoleLogger(LogLevel.TRACE),
+    ).generate(
+        ProjectDescriptor(
+            name = defaultName,
+            group = defaultGroup,
+            properties = properties,
+            packs = packs.map(PackId.Companion::parse),
+        )
+    ).export(outputDir)
+
+    suspend fun generateWithPacks(outputDir: Path, vararg packs: String) =
+        generate(outputDir, packs = packs.toList())
+
+    test("empty project") {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "empty", randomString())
         generateWithPacks(outputDir, "com.acme/empty")
         assertFilesAreEqualWithSnapshot( "$snapshots/empty", outputDir.toString())
     }
 
-    @Test
-    fun `with slot`() = runTest {
+    test("with slot") {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child", randomString())
         generateWithPacks(
             outputDir,
@@ -47,11 +67,11 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         assertFilesAreEqualWithSnapshot(
             "$snapshots/parent-child",
             outputDir.toString(),
+            replace = replaceSnapshot,
         )
     }
 
-    @Test
-    fun `with slot and two children`() = runTest {
+    test("with slot and two children") {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child2", randomString())
         generateWithPacks(
             outputDir,
@@ -62,11 +82,11 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         assertFilesAreEqualWithSnapshot(
             "$snapshots/parent-child2",
             outputDir.toString(),
+            replace = replaceSnapshot,
         )
     }
 
-    @Test
-    fun `with properties`() = runTest {
+    test("with properties") {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "properties", randomString())
         generate(outputDir, packs = listOf("com.acme/properties"), properties = mapOf(
             "numberProperty" to "1",
@@ -83,8 +103,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
     }
 
-    @Test
-    fun `ktor server gradle`() = runTest {
+    test("ktor server gradle") {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server", randomString())
         generateWithPacks(
             outputDir,
@@ -99,8 +118,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
     }
 
-    @Test
-    open fun `ktor server gradle with catalog`() = runTest {
+    test("ktor server gradle with catalog") {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-catalog", randomString())
         generate(
             outputDir,
@@ -122,8 +140,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
     }
 
-    @Test
-    open fun `ktor server amper`() = runTest {
+    test("ktor server amper") {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-amper", randomString())
         generateWithPacks(
             outputDir,
@@ -140,8 +157,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
     }
 
-    @Test
-    open fun `compose multiplatform gradle`() = runTest {
+    test("compose multiplatform gradle") {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-gradle", randomString())
         generate(
             outputDir,
@@ -160,8 +176,7 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
     }
 
-    @Test
-    open fun `compose multiplatform amper`() = runTest {
+    test("compose multiplatform amper") {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-amper", randomString())
         generateWithPacks(
             outputDir,
@@ -175,24 +190,8 @@ abstract class ProjectGeneratorTest(val snapshots: Path = Path("../testSnapshots
         )
     }
 
-    private suspend fun generateWithPacks(outputDir: Path, vararg packs: String) =
-        generate(outputDir, packs = packs.toList())
+    afterSpec {
+        tearDown()
+    }
 
-    private suspend fun generate(
-        outputDir: Path,
-        properties: Map<VariableId, String> = emptyMap(),
-        packs: List<String>
-    ) = ProjectGeneratorImpl(
-        repository = getRepository(),
-        projectResolver = ProjectResolver.Default + GradleTransformation,
-        log = ConsoleLogger(LogLevel.TRACE),
-    ).generate(
-        ProjectDescriptor(
-            name = defaultName,
-            group = defaultGroup,
-            properties = properties,
-            packs = packs.map(PackId.Companion::parse),
-        )
-    ).export(outputDir)
-
-}
+})
