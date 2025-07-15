@@ -1,9 +1,0 @@
-product:
-  type: lib
-  platforms: [jvm]
-
-dependencies:
-  - ../core: exported
-  - $kotlin.test: exported
-  - $kotlin.test.junit5: exported
-  - $libs.kotlinx.coroutines.test: exported

@@ -27,8 +27,10 @@ replay_pid*
 .kotlin
 .idea
 .editorconfig
+.DS_Store
+.gradle
 build
 
 # application artifacts
-server/export
+/export
 actual-files
