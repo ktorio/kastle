@@ -1,16 +1,14 @@
-if (_module.gradle.plugins.isNotEmpty()) {
-    plugins {
-        when(_module.type) {
-            "jvm/app" -> {
-                alias(libs.plugins.kotlin.jvm)
-            }
-            "android/app", "ios/app", "lib" -> {
-                alias(libs.plugins.kotlin.multiplatform)
-            }
+plugins {
+    when(_module.platform) {
+        "jvm" -> {
+            alias(libs.plugins.kotlin.jvm)
         }
-        for (item in _module.gradle.plugins) {
-            alias(_unsafe("libs.plugins.${item.name}"))
+        else -> {
+            alias(libs.plugins.kotlin.multiplatform)
         }
+    }
+    for (item in _module.gradle.plugins) {
+        alias(_unsafe("libs.plugins.${item}"))
     }
 }
 

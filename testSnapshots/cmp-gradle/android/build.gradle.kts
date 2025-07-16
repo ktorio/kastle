@@ -1,5 +1,6 @@
+plugins {
+    alias(libs.plugins.kotlin.multiplatform)
 
-plugins {"ios/app"
     alias(libs.plugins.android.application)
 }
 

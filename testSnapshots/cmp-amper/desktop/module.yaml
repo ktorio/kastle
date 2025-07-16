@@ -1,9 +1,11 @@
 
-product: jvm/app
+product:
+  type: lib
+  platforms: [jvm]
 
 dependencies:
-- ../shared
-- $compose.desktop.currentOs
+  - ../shared
+  - $compose.desktop.currentOs
 
 settings:
     compose: enabled

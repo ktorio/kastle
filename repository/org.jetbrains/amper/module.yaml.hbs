@@ -12,11 +12,11 @@ dependencies{{#when key}}{{"common"}}{{else}}@{{key}}{{/when}}:
 {{#each value}}
 {{#when type}}
 {{ "maven" }}
-- {{ group }}:{{ artifact }}:{{ version }}{{#if exported}}: exported{{/if}}
+  - {{ group }}:{{ artifact }}:{{ version }}{{#if exported}}: exported{{/if}}
 {{ "project" }}
-- {{ path }}{{#if exported}}: exported{{/if}}
+  - {{ path }}{{#if exported}}: exported{{/if}}
 {{ "catalog" }}
-- ${{ key }}{{#if exported}}: exported{{/if}}
+  - ${{ key }}{{#if exported}}: exported{{/if}}
 {{/when}}
 {{/each}}
 {{/each}}

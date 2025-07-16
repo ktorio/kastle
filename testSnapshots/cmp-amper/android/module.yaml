@@ -1,9 +1,11 @@
 
-product: android/app
+product:
+  type: lib
+  platforms: [android]
 
 dependencies:
-- ../shared
-- $libs.android.activity.compose
+  - ../shared
+  - $libs.android.activity.compose
 
 settings:
     compose: enabled

@@ -1,6 +1,0 @@
-id: com.acme/child
-name: Child Feature
-description: This targets a slot
-version: 1.0.0
-requires:
-  - com.acme/parent

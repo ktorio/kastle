@@ -1,8 +1,4 @@
-id: io.ktor/server-content-negotiation
 name: Content Negotiation
 description: Negotiates content type headers with custom serializers
-version: 1.0.0
-modules:
-  - path: server
 attributes:
   io.ktor/server-core/serverModules: SerializationKt.configureSerialization

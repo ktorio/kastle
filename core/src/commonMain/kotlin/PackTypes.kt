@@ -22,9 +22,9 @@ sealed interface PackMetadata {
 
 @Serializable
 data class PackManifest(
-    override val id: PackId,
+    override val id: PackId = PackId("", ""),
     override val name: String,
-    override val version: SemanticVersion,
+    override val version: SemanticVersion = SemanticVersion(1, 0, 0),
     override val group: Group? = null,
     override val categories: List<String> = emptyList(),
     override val license: String? = null,
@@ -43,7 +43,11 @@ data class PackManifest(
 
 @Serializable
 data class ModuleManifest(
-    val sources: List<SourceDefinition> = emptyList(),
+    val platform: String? = null,
+    val platforms: List<String>? = null,
+    val dependencies: List<String>? = null,
+    val gradle: GradleSettings? = null,
+    val sources: List<SourceDefinition>? = null,
 )
 
 @Serializable

@@ -13,7 +13,7 @@ data class Project(
     val commonSources: List<SourceFile>,
     val versions: Map<String, String>,
     val libraries: Map<String, CatalogArtifact>,
-    val gradle: GradleSettings,
+    val gradle: GradleProjectSettings,
 ) {
     val name: String get() = descriptor.name
     val group: String get() = descriptor.group
@@ -47,10 +47,11 @@ fun Project.getVariables(pack: PackDescriptor): Variables {
 fun SourceModule.toVariableEntry(): Pair<String, Any?> =
     "_module" to toVariableMap()
 
-private fun SourceModule.toVariableMap(): Map<String, Any> = mapOf(
+private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "path" to path,
-    "type" to type.toString(),
-    "platforms" to platforms,
+    "type" to if (amper.application != null && platforms.size == 1) "${platforms.single()}/app" else "lib",
+    "platform" to platforms.singleOrNull()?.code,
+    "platforms" to platforms.map { it.code },
     "dependencies" to dependencies.asSequence().associate { (platform, deps) ->
         platform.code to deps.map { it.toVariableMap(path) }
     },
@@ -91,13 +92,17 @@ private fun ModuleDependency.gradlePath(modulePath: String): String = buildStrin
 }
 
 fun GradleSettings.toVariableMap() = mapOf(
-    "plugins" to plugins.map { it.toVariableMap() },
+    "plugins" to plugins
 )
 
-fun GradlePlugin.toVariableMap() = mapOf(
-    "name" to name,
-    "id" to id,
-    "version" to version.toString(),
+fun GradleProjectSettings.toVariableMap() = mapOf(
+    "plugins" to plugins.map {
+        mapOf(
+            "id" to it.id,
+            "name" to it.name,
+            "version" to it.version.toVariableMap()
+        )
+    },
 )
 
 fun AmperSettings.toVariableMap(): Map<String, String?> = mapOf(
@@ -110,8 +115,10 @@ fun CatalogArtifact.toVariableMap() = mapOf(
     "module" to module,
     "group" to group,
     "artifact" to artifact,
-    "version" to when(version) {
-        is CatalogVersion.Ref -> mapOf("ref" to version.ref)
-        is CatalogVersion.Number -> mapOf("number" to version.number)
-    },
+    "version" to version.toVariableMap(),
 )
+
+fun CatalogVersion.toVariableMap(): Map<String, String?> = when(this) {
+    is CatalogVersion.Ref -> mapOf("ref" to ref)
+    is CatalogVersion.Number -> mapOf("number" to number)
+}

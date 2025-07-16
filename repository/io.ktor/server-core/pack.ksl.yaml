@@ -1,7 +1,5 @@
-id: io.ktor/server-core
 name: Ktor Server
 description: Adds a Ktor HTTP server
-version: 1.0.0
 properties:
   - key: serverModules
     type: list<string>?
@@ -9,10 +7,3 @@ properties:
   - key: configFormat
     type: enum { HOCON, YAML, none }
     default: HOCON
-modules:
-  - path: server
-    gradle:
-      plugins:
-        - id: io.ktor.plugin
-          name: ktor
-          version: 3.0.3

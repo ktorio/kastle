@@ -171,9 +171,8 @@ private fun merge(modules: List<SourceModule>, other: List<SourceModule>): Multi
 
 @Serializable
 data class SourceModule(
-    val type: SourceModuleType = SourceModuleType.LIB,
     val path: String = "",
-    val platforms: List<Platform> = emptyList(),
+    val platforms: Set<Platform> = emptySet(),
     val dependencies: DependenciesMap = emptyMap(),
     val testDependencies: DependenciesMap = emptyMap(),
     val sources: List<SourceFile> = emptyList(),
@@ -183,7 +182,7 @@ data class SourceModule(
     val allDependencies: Set<Dependency> =
         (dependencies.values.flatten() + testDependencies.values.flatten()).toSet()
 
-    val gradlePlugins: List<GradlePlugin> get() = gradle.plugins
+    val gradlePlugins: List<String> get() = gradle.plugins
 }
 
 typealias DependenciesMap = Map<Platform, Set<Dependency>>
@@ -212,18 +211,29 @@ enum class Platform(val code: String) {
 @Serializable
 data class AmperSettings(
     val compose: String? = null,
+    val application: AmperApplicationSettings? = null,
+)
+
+@Serializable
+data class AmperApplicationSettings(
+    val mainClass: String? = null,
 )
 
 @Serializable
 data class GradleSettings(
+    val plugins: List<String> = emptyList(),
+)
+
+@Serializable
+data class GradleProjectSettings(
     val plugins: List<GradlePlugin> = emptyList(),
 )
 
 @Serializable
 data class GradlePlugin(
     val id: String,
-    val name: String? = null,
-    val version: String? = null,
+    val name: String,
+    val version: CatalogVersion,
 )
 
 enum class SourceModuleType(val code: String) {
@@ -245,17 +255,12 @@ enum class SourceModuleType(val code: String) {
 
 fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
     return SourceModule(
-        type = when {
-            other.type == SourceModuleType.DEFAULT || type == other.type -> type
-            type == SourceModuleType.DEFAULT -> other.type
-            else -> return null
-        },
         path = when {
             other.path.isEmpty() || path == other.path -> path
             path.isEmpty() -> other.path
             else -> return null
         },
-        platforms = (platforms + other.platforms).distinct(),
+        platforms = platforms + other.platforms,
         dependencies = dependencies.merge(other.dependencies),
         testDependencies = testDependencies.merge(other.testDependencies),
         sources = (sources + other.sources).also { mergedSources ->
@@ -267,7 +272,7 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
             }
         },
         gradle = GradleSettings((gradle.plugins + other.gradle.plugins).distinct()),
-        amper = AmperSettings(amper.compose ?: other.amper.compose),
+        amper = AmperSettings(amper.compose ?: other.amper.compose, amper.application ?: other.amper.application),
     )
 }
 
@@ -276,8 +281,8 @@ sealed interface Dependency {
     companion object {
         // TODO make gud
         fun parse(input: String): Dependency {
-            val exported = input.endsWith(":exported")
-            val text = if (exported) input.substringBeforeLast(":exported") else input
+            val exported = input.endsWith("!")
+            val text = if (exported) input.dropLast(1) else input
             if (text.startsWith("$"))
                 return CatalogReference(text.substring(1), exported = exported)
             if (!text.contains(":"))
@@ -299,13 +304,17 @@ data class CatalogReference(
     val group: String? = null,
     override val exported: Boolean = false,
 ): Dependency {
+    companion object {
+        fun lookupFormat(key: String) =
+            key.removePrefix("libs.").replace('.', '-')
+    }
     val lookupKey: String get() =
         key.removePrefix("libs.").replace('.', '-')
 
     override fun toString(): String = buildString {
         append('$')
         append(key)
-        if (exported) append(":exported")
+        if (exported) append("!")
     }
 }
 
@@ -327,7 +336,7 @@ data class ArtifactDependency(
 
     override fun toString(): String = buildString {
         append("$group:$artifact:$version")
-        if (exported) append(":exported")
+        if (exported) append(":!")
     }
 }
 
@@ -338,7 +347,7 @@ data class ModuleDependency(
 ): Dependency {
     override fun toString(): String = buildString {
         append(path)
-        if (exported) append(":exported")
+        if (exported) append("!")
     }
 }
 

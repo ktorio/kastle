@@ -29,11 +29,9 @@ val GradleTransformation = ProjectMapping { project ->
                             val mainOrTest = if (sourceRoot in setOf("test", "testResources")) "test" else "main"
                             val kotlinOrResources = if (sourceRoot in setOf("resources", "testResources")) "resources" else "kotlin"
                             when (val target = match.groups[2]?.value) {
-                                null -> when (module.type) {
-                                    SourceModuleType.JVM_APP,
-                                    SourceModuleType.ANDROID_APP,
-                                    SourceModuleType.IOS_APP -> "src/main/$kotlinOrResources/"
-                                    SourceModuleType.LIB -> "src/common${mainOrTest.capitalizeFirst()}/$kotlinOrResources/"
+                                null -> when (module.platforms.singleOrNull()) {
+                                    null -> "src/common${mainOrTest.capitalizeFirst()}/$kotlinOrResources/"
+                                    else -> "src/main/$kotlinOrResources/"
                                 }
                                 else -> "src/${target}${mainOrTest.capitalizeFirst()}/$kotlinOrResources/"
                             }

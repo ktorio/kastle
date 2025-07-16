@@ -1,5 +1,0 @@
-product: jvm/app
-
-dependencies:
-  - ../../../templates
-  - $libs.ktor.server.cio

@@ -14,7 +14,7 @@ import kotlin.random.Random
 
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
-private const val replaceSnapshot = true
+private const val replaceSnapshot = false
 
 private val testScope = CoroutineScope(CoroutineName("generator-test"))
 

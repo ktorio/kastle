@@ -9,30 +9,20 @@ import org.jetbrains.kastle.Platform
 import org.jetbrains.kastle.SourceModuleType
 import org.jetbrains.kastle.VersionsCatalog
 
-// TODO not entirely correct
-fun YamlMap?.readHeader(): Pair<SourceModuleType, List<Platform>> =
-    when(val productNode = this?.get<YamlNode>("product")) {
-        is YamlScalar -> SourceModuleType.parse(productNode.content) to listOf(Platform.JVM)
-        is YamlMap -> {
-            val productType = SourceModuleType.parse(productNode.get<YamlScalar>("type")?.content ?: "lib")
-            val platforms = productNode.get<YamlList>("platforms")?.items?.map { it.yamlScalar.content }.orEmpty()
-            productType to platforms.map(Platform::parse)
-        }
-        else -> SourceModuleType.LIB to listOf(Platform.JVM)
-    }
+fun YamlMap.readPlatforms(): Set<Platform> =
+    (
+        get<YamlScalar>("platform")?.content?.let(::listOf)
+            ?: get<YamlList>("platforms")?.items
+                ?.filterIsInstance<YamlScalar>()
+                ?.map(YamlScalar::content) ?: emptyList()
+    ).map(Platform::parse).toSet()
 
-fun YamlMap?.readDependencies(key: String, versionsLookup: VersionsCatalog): Set<Dependency> =
-    this?.get<YamlList>(key)?.items?.asSequence()
+fun YamlMap.readDependencies(key: String): Set<Dependency> =
+    this.get<YamlList>(key)?.items?.asSequence()
         ?.map(::dependencyString)
         .orEmpty()
         .filter(isNotTemplateDSL)
         .map(Dependency::parse)
-//        .map { dependency ->
-//            when(dependency) {
-//                is ArtifactDependency, is ModuleDependency -> dependency
-//                is CatalogReference -> dependency.resolve(versionsLookup)
-//            }
-//        }
         .toSet()
 
 private fun dependencyString(node: YamlNode): String = when (node) {

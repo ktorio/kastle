@@ -1,0 +1,5 @@
+platform: jvm
+
+## TODO
+dependencies:
+  - ../../parent

@@ -1,5 +1,4 @@
-product: jvm/app
-
+platform: jvm
 dependencies:
   - ../../../templates
   - $libs.ktor.server.content.negotiation

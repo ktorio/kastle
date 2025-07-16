@@ -1,0 +1,13 @@
+platform: jvm
+
+dependencies:
+  - ../shared
+  - $compose.desktop.currentOs
+
+gradle:
+  plugins:
+    - jetbrains.compose
+    - compose.compiler
+
+amper:
+  compose: enabled

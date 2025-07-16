@@ -189,7 +189,7 @@ private fun KtWhenExpression.asWhenBlock(): Sequence<Block> {
                 if (child.isElse) {
                     ElseBlock(
                         position = child.blockPosition(
-                            body = child.children[1],
+                            body = child.children.last(),
                         )
                     )
                 }

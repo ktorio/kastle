@@ -1,8 +1,0 @@
-id: io.ktor/ktor-kotlinx-serialization-json
-name: Kotlinx JSON
-description: Handles JSON serialization
-version: 1.0.0
-requires:
-  - com.acme/parent
-modules:
-  - path: server

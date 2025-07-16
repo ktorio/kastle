@@ -9,4 +9,4 @@ ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-ktor = { id = "io.ktor.plugin", version = "3.0.3" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }

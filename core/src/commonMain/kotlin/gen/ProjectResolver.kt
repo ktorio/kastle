@@ -51,9 +51,13 @@ fun interface ProjectResolver {
                 if (library != null)
                     libraries[dependency.lookupKey] = library
             }
-            val gradleSettings = GradleSettings(
+            val gradleSettings = GradleProjectSettings(
                 moduleSources.modules.flatMap { module ->
                     module.gradlePlugins
+                }.distinct().mapNotNull { key ->
+                    val catalogKey = CatalogReference.lookupFormat(key)
+                    val (id, version) = repositoryCatalog.plugins[catalogKey] ?: return@mapNotNull null
+                    GradlePlugin(id, key, version)
                 }
             )
 

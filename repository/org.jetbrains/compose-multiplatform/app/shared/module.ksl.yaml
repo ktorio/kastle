@@ -1,0 +1,13 @@
+platforms: [jvm, android]
+
+dependencies:
+  - $compose.foundation!
+  - $compose.material3!
+
+gradle:
+  plugins:
+    - kotlin.multiplatform
+    - android.library
+
+amper:
+  compose: enabled

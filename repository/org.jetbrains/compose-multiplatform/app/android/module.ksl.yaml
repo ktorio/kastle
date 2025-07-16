@@ -1,0 +1,12 @@
+platform: android
+
+dependencies:
+  - ../shared
+  - $libs.android.activity.compose
+
+amper:
+  compose: enabled
+
+gradle:
+  plugins:
+    - android.application

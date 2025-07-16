@@ -1,4 +1,5 @@
 [versions]
+android = "8.5.2"
 ktor = "3.2.1"
 kotlin = "2.1.10"
 logback = "1.5.18"
@@ -15,11 +16,15 @@ commonmark = "0.25.0"
 kotest = "5.9.1"
 
 [plugins]
+android-library = { id = "com.android.library", version.ref = "android" }
+android-application = { id = "com.android.application", version.ref = "android" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotest-mp = { id = "io.kotest.multiplatform", version.ref = "kotest" }
+jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 [libraries]
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }

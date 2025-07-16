@@ -8,9 +8,8 @@ android-activity-compose = { module = "androidx.activity:activity-compose", vers
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlin.multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version = "2.1.20" }
-android.library = { id = "com.android.library", version = "8.5.2" }
-kotlin.jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.1.20" }
-jetbrains.compose = { id = "org.jetbrains.compose", version = "2.1.20" }
-compose.compiler = { id = "org.jetbrains.kotlin.plugin.compose", version = "2.1.20" }
-android.application = { id = "com.android.application", version = "8.5.2" }
+jetbrains.compose = { id = "org.jetbrains.compose", version.ref = "kotlin" }
+compose.compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin.multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+android.library = { id = "com.android.library", version.ref = "android" }
+android.application = { id = "com.android.application", version.ref = "android" }

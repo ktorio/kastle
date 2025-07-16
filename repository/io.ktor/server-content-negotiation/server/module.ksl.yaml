@@ -1,4 +1,4 @@
-product: jvm/app
+platform: jvm
 
 dependencies:
   - ../../../templates

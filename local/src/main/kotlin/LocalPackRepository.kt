@@ -1,6 +1,7 @@
 package org.jetbrains.kastle
 
 import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.yamlMap
 import kotlinx.coroutines.flow.*
@@ -13,13 +14,12 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.serializersModuleOf
 import kotlinx.serialization.modules.subclass
-import kotlinx.serialization.serializer
 import org.jetbrains.kastle.StaticSource.Companion.sourceFile
 import org.jetbrains.kastle.amper.readDependencies
-import org.jetbrains.kastle.amper.readHeader
+import org.jetbrains.kastle.amper.readPlatforms
 import org.jetbrains.kastle.io.*
+import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.templates.*
 import org.jetbrains.kastle.utils.extension
 import org.jetbrains.kastle.utils.protocol
@@ -27,10 +27,10 @@ import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtFile
-import kotlin.use
 
-private const val MANIFEST_YAML = "manifest.yaml"
-private const val GROUP_YAML = "group.yaml"
+private const val PACK_YAML = "pack.ksl.yaml"
+private const val GROUP_YAML = "group.ksl.yaml"
+private const val MODULE_YAML = "module.ksl.yaml"
 
 class LocalPackRepository(
     private val root: Path,
@@ -94,31 +94,33 @@ class LocalPackRepository(
 
     override suspend fun get(packId: PackId): PackDescriptor? {
         val projectPath = root.resolve(packId.toString())
-        val manifest: PackManifest = projectPath.resolve(MANIFEST_YAML).readYaml() ?: return null
+        val manifest: PackManifest = projectPath.resolve(PACK_YAML).readYaml() ?: return null
         val group = manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml()
         val properties = manifest.properties.toMutableList()
         val documentation = projectPath.resolve("README.md").readText()
 
-        val projectSources = projectPath.moduleFolders().asFlow().map { modulePath ->
+        val projectSources = projectPath.moduleFolders().asFlow().mapNotNull { modulePath ->
             val relativeModulePath = modulePath.relativeTo(projectPath).toString()
-            val manifestYaml = modulePath.resolve("module-manifest.yaml")
-                .readYaml<ModuleManifest>(fs, yaml)
-            val amperYaml = modulePath.resolve("module.yaml")
+            val moduleYaml = modulePath.resolve(MODULE_YAML)
                 .readYamlNode(fs, yaml)?.yamlMap
-            val amperSettings = amperYaml?.get<YamlMap>("settings")?.let { node ->
+                ?: return@mapNotNull null
+
+            val platforms = moduleYaml.readPlatforms()
+
+            val amperSettings = moduleYaml.get<YamlMap>("amper")?.let { node ->
                 yaml.decodeFromYamlNode<AmperSettings>(node)
             }
-
-            // TODO cache versions
-            val catalog = versions()
-            val (moduleType, platforms) = amperYaml.readHeader()
+            val gradleSettings = moduleYaml.get<YamlMap>("gradle")?.let { node ->
+                yaml.decodeFromYamlNode<GradleSettings>(node)
+            }
 
             // TODO verify this is correct
-            fun readDependencies(dependencies: String): DependenciesMap = platforms.singleOrNull()?.let {
-                mapOf(it to amperYaml.readDependencies(dependencies, catalog))
-            } ?: (platforms.associateWith { platform ->
-                amperYaml.readDependencies("$dependencies@$platform", catalog)
-            } + (Platform.COMMON to amperYaml.readDependencies(dependencies, catalog)))
+            fun readDependencies(dependencies: String): DependenciesMap =
+                platforms.singleOrNull()?.let {
+                    mapOf(it to moduleYaml.readDependencies(dependencies))
+                } ?: (platforms.associateWith { platform ->
+                    moduleYaml.readDependencies("$dependencies@$platform")
+                } + (Platform.COMMON to moduleYaml.readDependencies(dependencies)))
 
             val readModuleSource = { file: Path ->
                 when (file.name.extension.lowercase()) {
@@ -162,22 +164,22 @@ class LocalPackRepository(
             }
 
             // additional sources defined for module; also assume no kotlin sources
-            for (manifestSource in manifestYaml?.sources.orEmpty()) {
-                sources += when(val text = manifestSource.text) {
-                    null -> readModuleSource(modulePath.resolve(manifestSource.path!!))
-                    else -> handlebarsTemplateEngine.read(manifestSource.target!!, text).copy(packId = packId)
+            for (manifestSource in moduleYaml.get<YamlList>("sources")?.items.orEmpty()) {
+                val source = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
+                sources += when(val text = source.text) {
+                    null -> readModuleSource(modulePath.resolve(source.path!!))
+                    else -> handlebarsTemplateEngine.read(source.target!!, text).copy(packId = packId)
                 }
             }
 
             SourceModule(
-                type = moduleType,
                 path = relativeModulePath,
                 platforms = platforms,
                 dependencies = dependencies,
                 testDependencies = testDependencies,
                 sources = sources + resources,
                 amper = amperSettings ?: AmperSettings(),
-                // TODO gradle settings
+                gradle = gradleSettings ?: GradleSettings(),
             )
         }.toList().let(ProjectModules::fromList)
 
@@ -225,6 +227,7 @@ class LocalPackRepository(
 
         return PackDescriptor(
             info = manifest.copy(
+                id = packId,
                 group = group,
                 properties = properties.distinctBy { it.key },
                 documentation = documentation,
@@ -282,15 +285,10 @@ class LocalPackRepository(
     private fun Path.moduleFolders(): Sequence<Path> =
         if (fs.metadataOrNull(this)?.isDirectory != true)
             emptySequence()
-        else if (isModuleFolder())
+        else if (fs.exists(resolve(MODULE_YAML)))
             sequenceOf(this)
         else fs.list(this).asSequence()
             .flatMap { it.moduleFolders() }
-
-    private fun Path.isModuleFolder(): Boolean =
-        fs.exists(resolve("src")) ||
-            fs.exists(resolve("module.yaml")) ||
-            fs.exists(resolve("module-manifest.yaml"))
 
 
     @Serializable
