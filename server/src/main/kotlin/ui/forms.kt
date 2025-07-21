@@ -71,8 +71,8 @@ private fun DIV.propertyInput(
             id = inputId
             for (value in type.values) {
                 option {
-                    +value
                     selected = value == default
+                    +value
                 }
             }
         }

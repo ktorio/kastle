@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
+    `maven-publish`
 }
 
 dependencies {
@@ -20,6 +21,15 @@ dependencies {
     testImplementation(libs.kotest.junit5)
 }
 
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
+tasks {
+    test {
+        useJUnitPlatform()
+    }
+
+    register<Test>("updateSnapshots") {
+        group = "verification"
+        useJUnitPlatform()
+        environment("UPDATE_SNAPSHOTS", "true")
+        include("**/*ProjectGeneratorTest.class")
+    }
 }

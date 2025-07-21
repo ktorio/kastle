@@ -18,11 +18,12 @@ class RemoteProjectGeneratorTest: ProjectGeneratorTest({
 
 class TestServer {
     val deferredClient = CompletableDeferred<HttpClient>()
-    var serverJob: Job? = CoroutineScope(Dispatchers.IO).launch {
+    var serverJob: Result<Job> = runCatching {
+        CoroutineScope(Dispatchers.IO).launch {
             runTestApplication(Dispatchers.IO) {
                 application {
                     dependencies.provide<PackRepository> {
-                        LocalPackRepository(Path("../repository"))
+                        LocalPackRepository(Path("../repository/packs"))
                     }
                     routing()
                     serialization()
@@ -33,8 +34,9 @@ class TestServer {
                 awaitCancellation()
             }
         }
+    }
 
     suspend fun stop() {
-        serverJob?.cancelAndJoin()
+        serverJob.getOrThrow().cancelAndJoin()
     }
 }

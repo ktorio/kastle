@@ -9,7 +9,7 @@ class KotlinCompilerTemplateEngineTest {
 
     @Test
     fun testGradleBuild() = runTest {
-        val file = Path("../repository/org.gradle/gradle")
+        val file = Path("../repository/packs/org.gradle/gradle")
         val engine = KotlinCompilerTemplateEngine(file.parent!!)
         val ktFile = engine.ktFiles.single { it.name == "build.gradle.kts" }
         val template = engine.read(

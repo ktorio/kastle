@@ -15,7 +15,6 @@ dependencyResolutionManagement {
     }
 }
 
-// Include all modules from project.yaml
 include(
     "core",
     "test",
@@ -23,5 +22,5 @@ include(
     "server",
     "local",
     "templates",
-    // "tasks:bundle"
+    "gradle-plugin",
 )

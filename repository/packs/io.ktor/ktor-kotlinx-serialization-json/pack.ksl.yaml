@@ -1,0 +1,4 @@
+name: Kotlinx JSON
+description: Handles JSON serialization
+requires:
+  - io.ktor/server-content-negotiation

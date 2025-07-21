@@ -1,9 +1,0 @@
-product: jvm/app
-
-dependencies:
-  - ../../local
-  - com.github.ajalt.clikt:clikt:5.0.3
-
-settings:
-  kotlin:
-    serialization: json

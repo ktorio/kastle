@@ -14,7 +14,7 @@ fun assertFilesAreEqualWithSnapshot(
     expectedPath: String,
     actualPath: String,
     ignorePaths: Collection<String> = emptySet(),
-    replace: Boolean = false,
+    replace: Boolean = REPLACE_SNAPSHOTS,
 ) = try {
     assertFilesAreEqual(Paths.get(expectedPath), Paths.get(actualPath), ignorePaths)
 } catch (cause: Throwable) {

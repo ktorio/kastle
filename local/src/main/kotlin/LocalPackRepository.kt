@@ -35,6 +35,7 @@ private const val MODULE_YAML = "module.ksl.yaml"
 class LocalPackRepository(
     private val root: Path,
     private val fs: FileSystem = SystemFileSystem,
+    private val versionsCatalogFile: String = "../../gradle/libs.versions.toml",
     remoteRepository: PackRepository = PackRepository.EMPTY,
 ): PackRepository {
     private val handlebarsTemplateEngine = HandlebarsTemplateEngine()
@@ -84,7 +85,7 @@ class LocalPackRepository(
                 return@flatMap emptyList()
             fs.list(groupPath)
         }.asFlow().mapNotNull { path ->
-            if (path.isDir())
+            if (path.isDir() && fs.exists(path.resolve(PACK_YAML)))
                 PackId.parse("${path.parent!!.name}/${path.name}")
             else null
         }
@@ -98,6 +99,9 @@ class LocalPackRepository(
         val group = manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml()
         val properties = manifest.properties.toMutableList()
         val documentation = projectPath.resolve("README.md").readText()
+
+        val kotlinAnalyzer = KotlinCompilerTemplateEngine(projectPath, repository)
+        val expressionParser = KotlinExpressionParser(kotlinAnalyzer.psiFileFactory)
 
         val projectSources = projectPath.moduleFolders().asFlow().mapNotNull { modulePath ->
             val relativeModulePath = modulePath.relativeTo(projectPath).toString()
@@ -122,12 +126,20 @@ class LocalPackRepository(
                     moduleYaml.readDependencies("$dependencies@$platform")
                 } + (Platform.COMMON to moduleYaml.readDependencies(dependencies)))
 
-            val readModuleSource = { file: Path ->
+            fun readModuleSource(file: Path, target: String? = null) =
                 when (file.name.extension.lowercase()) {
-                    "hbs" -> handlebarsTemplateEngine.read(modulePath, file).copy(packId = packId)
-                    else -> fs.sourceFile(file, modulePath)
+                    "hbs" -> handlebarsTemplateEngine.read(modulePath, file).let { template ->
+                        template.copy(
+                            target = target ?: template.target,
+                            packId = packId,
+                        )
+                    }
+                    else -> fs.sourceFile(file, modulePath).let { source ->
+                        source.copy(
+                            target = target ?: source.target,
+                        )
+                    }
                 }
-            }
 
             val dependencies = readDependencies("dependencies")
             val testDependencies = readDependencies("testDependencies")
@@ -153,23 +165,25 @@ class LocalPackRepository(
                 // include non-kotlin files
                 sources += fs.list(sourceFolder).filter {
                     !it.name.endsWith(".kt")
-                }.map(readModuleSource)
+                }.map(::readModuleSource)
 
                 // assume non-kotlin files in resources
                 val resourcesFolder = modulePath.resolve("resources")
                 if (fs.exists(resourcesFolder)) {
                     resources += fs.list(resourcesFolder)
-                        .map(readModuleSource)
+                        .map(::readModuleSource)
                 }
             }
 
             // additional sources defined for module; also assume no kotlin sources
+            // TODO remove duplicates from files in source folders
             for (manifestSource in moduleYaml.get<YamlList>("sources")?.items.orEmpty()) {
-                val source = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
-                sources += when(val text = source.text) {
-                    null -> readModuleSource(modulePath.resolve(source.path!!))
-                    else -> handlebarsTemplateEngine.read(source.target!!, text).copy(packId = packId)
-                }
+                val (path, text, target, condition) = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
+                val conditionExpression = condition?.let(expressionParser::parse)
+                sources += when(text) {
+                    null -> readModuleSource(modulePath.resolve(path!!), target = target)
+                    else -> handlebarsTemplateEngine.read(target!!, text).copy(packId = packId)
+                }.withCondition(conditionExpression)
             }
 
             SourceModule(
@@ -183,8 +197,6 @@ class LocalPackRepository(
             )
         }.toList().let(ProjectModules::fromList)
 
-        val kotlinAnalyzer = KotlinCompilerTemplateEngine(projectPath, repository)
-        val expressionParser = KotlinExpressionParser(kotlinAnalyzer.psiFileFactory)
         val readSource: suspend (SourceDefinition) -> SourceFile = { (path, text, target, condition) ->
             require(target != null) { "Missing target for project-level source: ${path ?: text}" }
             val file = projectPath.resolve(path ?: "source.kt")
@@ -262,7 +274,7 @@ class LocalPackRepository(
             }
         )
 
-        val gradleCatalog = root.resolve("../gradle/libs.versions.toml")
+        val gradleCatalog = root.resolve(versionsCatalogFile)
             .readToml<VersionsCatalog>(fs) ?: return builtInCatalog
 
         return builtInCatalog + gradleCatalog

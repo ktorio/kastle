@@ -12,9 +12,9 @@ import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
 import kotlin.random.Random
 
-private const val defaultName = "sample"
-private const val defaultGroup = "com.acme"
-private const val replaceSnapshot = false
+private const val DEFAULT_NAME = "sample"
+private const val DEFAULT_GROUP = "com.acme"
+internal val REPLACE_SNAPSHOTS = System.getenv("UPDATE_GENERATOR_SNAPSHOTS") != null
 
 private val testScope = CoroutineScope(CoroutineName("generator-test"))
 
@@ -41,8 +41,8 @@ abstract class ProjectGeneratorTest(
         log = ConsoleLogger(LogLevel.TRACE),
     ).generate(
         ProjectDescriptor(
-            name = defaultName,
-            group = defaultGroup,
+            name = DEFAULT_NAME,
+            group = DEFAULT_GROUP,
             properties = properties,
             packs = packs.map(PackId.Companion::parse),
         )
@@ -67,7 +67,6 @@ abstract class ProjectGeneratorTest(
         assertFilesAreEqualWithSnapshot(
             "$snapshots/parent-child",
             outputDir.toString(),
-            replace = replaceSnapshot,
         )
     }
 
@@ -82,7 +81,6 @@ abstract class ProjectGeneratorTest(
         assertFilesAreEqualWithSnapshot(
             "$snapshots/parent-child2",
             outputDir.toString(),
-            replace = replaceSnapshot,
         )
     }
 
@@ -99,7 +97,6 @@ abstract class ProjectGeneratorTest(
         assertFilesAreEqualWithSnapshot(
             "$snapshots/properties",
             outputDir.toString(),
-            replace = replaceSnapshot,
         )
     }
 
@@ -114,7 +111,6 @@ abstract class ProjectGeneratorTest(
         assertFilesAreEqualWithSnapshot(
             "$snapshots/ktor-server",
             outputDir.toString(),
-            replace = replaceSnapshot,
         )
     }
 
@@ -136,7 +132,6 @@ abstract class ProjectGeneratorTest(
         assertFilesAreEqualWithSnapshot(
             "$snapshots/ktor-server-catalog",
             outputDir.toString(),
-            replace = replaceSnapshot,
         )
     }
 
@@ -153,7 +148,6 @@ abstract class ProjectGeneratorTest(
         assertFilesAreEqualWithSnapshot(
             "$snapshots/ktor-server-amper",
             outputDir.toString(),
-            replace = replaceSnapshot,
         )
     }
 
@@ -172,7 +166,6 @@ abstract class ProjectGeneratorTest(
         assertFilesAreEqualWithSnapshot(
             "$snapshots/cmp-gradle",
             outputDir.toString(),
-            replace = replaceSnapshot,
         )
     }
 
@@ -186,7 +179,6 @@ abstract class ProjectGeneratorTest(
         assertFilesAreEqualWithSnapshot(
             "$snapshots/cmp-amper",
             outputDir.toString(),
-            replace = replaceSnapshot,
         )
     }
 

@@ -12,7 +12,14 @@ fun String.getIndentAt(startIndex: Int) = lastIndexOf('\n', startIndex).takeIf {
     }?.takeIf(String::isBlank) ?: ""
 
 fun String.capitalizeFirst() =
-    replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+    replaceFirstChar { it.titlecase() }
+
+/**
+ * Removes all non-word characters and converts the result to camel case.  The first character is always capitalized.
+ */
+fun String.camelCase() =
+    splitToSequence(Regex("\\W+"))
+        .joinToString("") { it.capitalizeFirst() }
 
 fun String.trimAngleBrackets() =
     trimEnclosingCharacters('<', '>').trim()

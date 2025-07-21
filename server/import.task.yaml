@@ -1,7 +1,0 @@
-type: jvm/external-task
-
-module: ../tasks/bundle
-
-programArguments:
-  - --input-dir=../repository
-  - --output-dir=./export

@@ -11,8 +11,8 @@ ktor:
     port: 2626
 
 repository:
-  source: repository
-  dir: export
+  source: ../repository/packs
+  dir: ../export
 
 # TODO not in use
 mcp:

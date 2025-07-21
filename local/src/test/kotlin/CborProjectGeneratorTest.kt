@@ -10,10 +10,11 @@ import kotlin.io.path.ExperimentalPathApi
 
 @OptIn(ExperimentalPathApi::class, ExperimentalSerializationApi::class)
 class CborProjectGeneratorTest: ProjectGeneratorTest({
-    val local = LocalPackRepository(Path("../repository"))
+    val local = LocalPackRepository(Path("../repository/packs"))
     val exportDir = Path(SystemTemporaryDirectory, "cbor_export")
     SystemFileSystem.deleteRecursively(exportDir)
     SystemFileSystem.createDirectories(exportDir)
+    local.export(exportDir, fileFormat = FileFormat.CBOR)
     local.export(exportDir, fileFormat = FileFormat.CBOR)
     val byteSize = SystemFileSystem.calculateDirectorySize(exportDir).formatToByteSize()
     println("Exported $byteSize to $exportDir")

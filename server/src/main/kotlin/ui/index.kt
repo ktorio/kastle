@@ -8,7 +8,7 @@ import org.jetbrains.kastle.PackDescriptor
 @OptIn(ExperimentalKtorApi::class)
 fun HTML.indexHtml(packs: List<PackDescriptor>) {
     head {
-        title = "Kastle"
+        title { +"K A S T L E" }
         style { unsafe { +Resources.stylesheet } }
         styleLink("/assets/a11y-light.min.css")
         styleLink("/assets/a11y-dark.min.css")

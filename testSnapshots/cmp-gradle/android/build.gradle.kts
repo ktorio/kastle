@@ -8,5 +8,4 @@ plugins {
 dependencies {
     implementation(project(":shared"))
     implementation(libs.android.activity.compose)
-
 }

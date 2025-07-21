@@ -1,9 +1,11 @@
 package org.jetbrains.kastle
 
+import kotlinx.io.files.Path
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.ProjectModules.Multi
 import org.jetbrains.kastle.ProjectModules.Single
 import org.jetbrains.kastle.ProjectModules.Empty
+import org.jetbrains.kastle.io.relativeTo
 import org.jetbrains.kastle.utils.protocol
 import kotlin.collections.plus
 
@@ -183,6 +185,8 @@ data class SourceModule(
         (dependencies.values.flatten() + testDependencies.values.flatten()).toSet()
 
     val gradlePlugins: List<String> get() = gradle.plugins
+
+    fun fullPath(packId: PackId) = if (path.isEmpty()) packId.toString() else "$packId/$path"
 }
 
 typealias DependenciesMap = Map<Platform, Set<Dependency>>
@@ -197,7 +201,8 @@ enum class Platform(val code: String) {
     JVM("jvm"),
     ANDROID("android"),
     IOS("ios"),
-    WASM("wasmJs");
+    WASM("wasmJs"),
+    NATIVE("native");
 
     companion object {
         fun parse(text: String): Platform =
@@ -206,6 +211,18 @@ enum class Platform(val code: String) {
     }
 
     override fun toString(): String = code
+}
+
+// Amper convention
+val Platform.srcDir get() = when(this) {
+    Platform.COMMON -> "src"
+    else -> "src@$code"
+}
+
+// Amper convention
+val Platform.resourcesDir get() = when(this) {
+    Platform.COMMON -> "resources"
+    else -> "resources@$code"
 }
 
 @Serializable
@@ -308,8 +325,6 @@ data class CatalogReference(
         fun lookupFormat(key: String) =
             key.removePrefix("libs.").replace('.', '-')
     }
-    val lookupKey: String get() =
-        key.removePrefix("libs.").replace('.', '-')
 
     override fun toString(): String = buildString {
         append('$')
@@ -317,6 +332,18 @@ data class CatalogReference(
         if (exported) append("!")
     }
 }
+val CatalogReference.lookupKey: String get() =
+    key.removePrefix("$").removePrefix("libs.").replace('.', '-')
+
+fun CatalogReference.gradleFormat(versionsCatalog: VersionsCatalog): String? {
+    val artifact = versionsCatalog.libraries[lookupKey] ?: return null
+    val versionNumber = when(artifact.version) {
+        is CatalogVersion.Ref -> versionsCatalog.versions[artifact.version.ref] ?: return null
+        is CatalogVersion.Number -> artifact.version.number
+    }
+    return "${artifact.group}:${artifact.artifact}:$versionNumber"
+}
+
 
 @Serializable(ArtifactDependencySerializer::class)
 data class ArtifactDependency(

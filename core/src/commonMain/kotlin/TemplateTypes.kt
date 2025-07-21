@@ -26,6 +26,12 @@ sealed interface SourceFile {
     val condition: Expression?
 }
 
+fun SourceFile.withCondition(condition: Expression?) =
+    if (condition == null || this.condition == condition) this else when (this) {
+        is StaticSource -> this.copy(condition = condition)
+        is SourceTemplate -> this.copy(condition = condition)
+    }
+
 @Serializable
 @SerialName("static")
 data class StaticSource(

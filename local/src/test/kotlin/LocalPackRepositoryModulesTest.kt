@@ -11,7 +11,7 @@ private const val defaultGroup = "com.acme"
 
 class LocalPackRepositoryModulesTest {
 
-    private val root = "../repository"
+    private val root = "../repository/packs"
     private val repository = LocalPackRepository(root)
 
     @Test
