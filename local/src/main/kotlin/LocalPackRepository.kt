@@ -96,7 +96,9 @@ class LocalPackRepository(
     override suspend fun get(packId: PackId): PackDescriptor? {
         val projectPath = root.resolve(packId.toString())
         val manifest: PackManifest = projectPath.resolve(PACK_YAML).readYaml() ?: return null
-        val group = manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml()
+        val group = manifest.group
+            ?: projectPath.resolve("../$GROUP_YAML").readYaml()
+            ?: Group(packId.group)
         val properties = manifest.properties.toMutableList()
         val documentation = projectPath.resolve("README.md").readText()
 

@@ -19,8 +19,7 @@ class ClientServerTest {
         assertNotNull(pack, "Missing pack\nActual list:\n  - ${repository.ids().toList().joinToString("\n  - ")}")
         assertEquals("Empty Feature", pack.name)
         assertEquals("1.0.0", pack.version.toString())
-        assertEquals("acme", pack.group?.id)
-        assertEquals("ACME", pack.group?.name)
+        assertEquals("com.acme", pack.group?.id)
     }
 
 }

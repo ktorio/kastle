@@ -10,7 +10,11 @@ import org.jetbrains.kastle.server.*
 
 val testServer by lazy { TestServer() }
 
-class RemoteProjectGeneratorTest: ProjectGeneratorTest({
+@OptIn(DelicateCoroutinesApi::class)
+class ClientProjectGeneratorTest: ProjectGeneratorTest({
+    if (testServer.isRunning()) {
+        testServer.start(GlobalScope)
+    }
     testServer.deferredClient.await().asRepository()
 }, {
     testServer.stop()
@@ -18,9 +22,15 @@ class RemoteProjectGeneratorTest: ProjectGeneratorTest({
 
 class TestServer {
     val deferredClient = CompletableDeferred<HttpClient>()
-    var serverJob: Result<Job> = runCatching {
-        CoroutineScope(Dispatchers.IO).launch {
-            runTestApplication(Dispatchers.IO) {
+
+    var serverJob: Job? = null
+
+    fun isRunning() = serverJob != null
+
+    fun start(coroutineScope: CoroutineScope) {
+        if (isRunning()) return
+        serverJob = coroutineScope.launch {
+            runTestApplication {
                 application {
                     dependencies.provide<PackRepository> {
                         LocalPackRepository(Path("../repository/packs"))
@@ -37,6 +47,6 @@ class TestServer {
     }
 
     suspend fun stop() {
-        serverJob.getOrThrow().cancelAndJoin()
+        serverJob?.cancelAndJoin()
     }
 }

@@ -86,7 +86,7 @@ val PackDescriptor.allSources: Sequence<SourceFile> get() =
 @Serializable
 data class Group(
     val id: String,
-    val name: String,
+    val name: String? = null,
     val icon: String? = null,
 )
 
