@@ -29,7 +29,7 @@ tasks {
     register<Test>("updateSnapshots") {
         group = "verification"
         useJUnitPlatform()
-        environment("UPDATE_SNAPSHOTS", "true")
+        environment("UPDATE_GENERATOR_SNAPSHOTS", "true")
         include("**/*ProjectGeneratorTest.class")
     }
 }

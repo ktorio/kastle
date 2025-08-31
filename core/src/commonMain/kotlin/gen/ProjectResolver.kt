@@ -1,5 +1,7 @@
 package org.jetbrains.kastle.gen
 
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.utils.isFile
 import org.jetbrains.kastle.utils.isSlot
@@ -7,7 +9,9 @@ import org.jetbrains.kastle.utils.isSlot
 fun interface ProjectResolver {
     companion object {
         val Default = ProjectResolver { descriptor, repository ->
-            val packs = descriptor.packs.map { repository.get(it) ?: throw MissingPackException(it) }
+            val packs = repository.getAllWithRequirements(descriptor.packs)
+                .toList()
+                .distinctBy { it.id }
             val moduleSources = packs.asSequence()
                 .map { it.sources.modules }
                 .reduceOrNull(ProjectModules::plus)
@@ -85,11 +89,13 @@ fun interface ProjectResolver {
                 val stringValue = descriptor.properties[variableId]
                     ?: attributes[variableId]?.let { attrs -> attrs.singleOrNull() ?: attrs.joinToString(",") }
                     ?: property.default
-                val value = stringValue?.let(property.type::parse)
-                require(property.type is PropertyType.Nullable || value != null) {
-                    "Missing value for property $variableId"
+                if (stringValue == null) {
+                    require(property.type is PropertyType.Nullable) {
+                        "Missing value for property $variableId"
+                    }
+                    return null
                 }
-                return value
+                return property.type.parse(stringValue)
             } catch (e: Exception) {
                 throw IllegalArgumentException("Failed to read property $variableId: ${e.message}", e)
             }

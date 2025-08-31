@@ -94,7 +94,7 @@ function buildProjectGenerationUrl(requestPath) {
     const url = new URL(requestPath, window.location.origin);
     const form = document.getElementById('form-panel-contents');
     for (let input of form.getElementsByTagName('input')) {
-        const key = removeUpToFirstSlash(input.name || input.id)
+        const key = removeUpToFirstSlash(input.name)
         switch (input.type) {
             case 'text':
             case 'number':
@@ -105,8 +105,7 @@ function buildProjectGenerationUrl(requestPath) {
                 url.searchParams.append(key, input.value);
                 break;
             case 'checkbox':
-                if (input.checked)
-                    url.searchParams.append(key, 'true');
+                url.searchParams.append(key, input.checked.toString());
                 break;
             case 'radio':
                 if (input.checked)
@@ -115,7 +114,10 @@ function buildProjectGenerationUrl(requestPath) {
 
         }
     }
-    // TODO select, etc.
+    for (let input of form.getElementsByTagName('select')) {
+        const key = removeUpToFirstSlash(input.name)
+        url.searchParams.append(key, input.value);
+    }
 
     for (const el of document.getElementsByClassName('include-pack-toggle')) {
         if (el.checked) {
@@ -140,4 +142,8 @@ function removeUpToFirstSlash(str) {
         return str.substring(indexOfSlash + 1); // Remove up to the first '/'
     }
     return str; // Return the original string if no '/' is found
+}
+
+function addElement(e) {
+    e.target.parentElement.insertAdjacentHTML('beforeend', '<div>New Element</div>');
 }

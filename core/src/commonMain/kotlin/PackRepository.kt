@@ -1,8 +1,13 @@
 package org.jetbrains.kastle
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import org.jetbrains.kastle.utils.slots
 
@@ -24,7 +29,19 @@ interface PackRepository {
     suspend fun get(packId: PackId): PackDescriptor?
 
     suspend fun getAll(packIds: Collection<PackId>): Flow<PackDescriptor> =
-        packIds.asFlow().mapNotNull(::get)
+        packIds.asFlow().map {
+            get(it) ?: throw MissingPackException(it)
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun getAllWithRequirements(packIds: Collection<PackId>): Flow<PackDescriptor> =
+        packIds.asFlow().flatMapConcat { packId ->
+            flow {
+                val pack = get(packId) ?: throw MissingPackException(packId)
+                emit(pack)
+                emitAll(getAllWithRequirements(pack.requires.filter { it !in packIds }))
+            }
+        }
 
     suspend fun slot(slotId: SlotId): SlotDescriptor? =
         get(slotId.pack)?.allSources

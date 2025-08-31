@@ -126,7 +126,7 @@ data class VariableId(val packId: PackId, val name: String) {
     companion object {
         fun parse(text: String): VariableId {
             val segments = text.split('/', limit = 3)
-            if (segments.size != 3) throw IllegalArgumentException("Invalid variable id: $text")
+            if (segments.size < 3) throw IllegalArgumentException("Invalid variable id: $text")
             val (group, pack, variable) = segments
             return VariableId(PackId(group, pack), variable)
         }

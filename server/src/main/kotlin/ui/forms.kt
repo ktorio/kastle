@@ -1,6 +1,8 @@
 package org.jetbrains.kastle.server.ui
 
 import kotlinx.html.*
+import kotlinx.html.consumers.delayed
+import kotlinx.html.stream.HTMLStreamBuilder
 import org.jetbrains.kastle.PackDescriptor
 import org.jetbrains.kastle.Property
 import org.jetbrains.kastle.PropertyType
@@ -53,22 +55,22 @@ private fun DIV.propertyInput(
         PropertyType.Int,
         PropertyType.Float,
         PropertyType.Double -> input(InputType.number) {
-            id = inputId
+            name = inputId
             default?.let { value = it.toString() }
         }
 
         PropertyType.String -> input(InputType.text) {
-            id = inputId
+            name = inputId
             default?.let { value = it.toString() }
         }
 
         PropertyType.Boolean -> input(InputType.checkBox) {
-            id = inputId
+            name = inputId
             checked = default.isTruthy()
         }
 
         is PropertyType.Enum -> select {
-            id = inputId
+            name = inputId
             for (value in type.values) {
                 option {
                     selected = value == default
@@ -82,15 +84,34 @@ private fun DIV.propertyInput(
         }
 
         is PropertyType.List -> {
-            div {
-                +"TODO"
+            addRemove {
+                propertyInput(type.elementType, null, inputId)
             }
         }
 
         is PropertyType.Object -> {
+            for ((key, elementType) in type.properties)
+                propertyInput(elementType, null, "$inputId/$key")
+        }
+    }
+}
+
+fun FlowContent.addRemove(content: DIV.() -> Unit) {
+    val elementHtml = buildString {
+        HTMLStreamBuilder(this, prettyPrint = false, xhtmlCompatible = false).delayed().apply {
             div {
-                +"TODO"
+                content()
+                button {
+                    onClick = "event.target.parentElement.remove();"
+                    +"Remove"
+                }
             }
+        }
+    }
+    div("add-remove") {
+        button {
+            attributes["onclick"] = "event.preventDefault(); event.target.parentElement.insertAdjacentHTML('beforeend', '$elementHtml')"
+            +"Add"
         }
     }
 }

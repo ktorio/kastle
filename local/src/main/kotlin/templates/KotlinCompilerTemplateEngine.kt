@@ -58,7 +58,7 @@ internal class KotlinCompilerTemplateEngine(
 
             addKotlinSourceRoot(path.toString())
         }
-        environment = KotlinCoreEnvironment.Companion.createForProduction(
+        environment = KotlinCoreEnvironment.createForProduction(
             Disposer.newDisposable(),
             configuration,
             EnvironmentConfigFiles.JVM_CONFIG_FILES

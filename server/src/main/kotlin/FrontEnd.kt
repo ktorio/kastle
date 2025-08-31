@@ -90,8 +90,46 @@ private fun RoutingCall.readProjectDescriptor() =
         properties = request.queryParameters.entries()
             .asSequence()
             .filter { runCatching { VariableId.parse(it.key) }.isSuccess }
-            .associate { (key, value) ->
-                VariableId.parse(key) to value.first()
-            },
+            .toVariableEntries()
+            .toMap(),
         packs = request.queryParameters.getAll("pack").orEmpty().map(PackId::parse),
     )
+
+/**
+ * Handles merging object properties.
+ */
+private fun Sequence<Map.Entry<String, List<String>>>.toVariableEntries(): Sequence<Pair<VariableId, String>> {
+    val iter = iterator()
+    if (!iter.hasNext()) return emptySequence()
+    var map: ObjectVariableBuilder? = null
+    return sequence {
+        while(iter.hasNext()) {
+            val (parameter, parameterValue) = iter.next()
+            val variableId = VariableId.parse(parameter)
+            val nameAndKey = if (variableId.name.contains('/'))
+                variableId.name.split('/', limit = 2)
+            else null
+            val parentVariableId = nameAndKey?.firstOrNull()?.let {
+                VariableId(variableId.packId, it)
+            }
+            val obj = map
+            if (obj != null) {
+                if (obj.variableId == parentVariableId) {
+                    obj[nameAndKey.last()] = parameterValue
+                } else {
+                    yield(obj.variableId to obj.entries.joinToString(", ", "{", "}") { (key, value) -> "$key: $value" })
+                    map = null
+                }
+            } else if (nameAndKey != null && parentVariableId != null) {
+                map = ObjectVariableBuilder(parentVariableId, mutableMapOf(nameAndKey[1] to parameterValue))
+            } else {
+                yield(variableId to parameterValue.joinToString())
+            }
+        }
+    }
+}
+
+data class ObjectVariableBuilder(
+    val variableId: VariableId,
+    val properties: MutableMap<String, List<String>>
+): MutableMap<String, List<String>> by properties
