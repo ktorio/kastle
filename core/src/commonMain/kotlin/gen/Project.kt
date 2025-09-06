@@ -24,7 +24,7 @@ fun Project.toVariableEntry(): Pair<String, Any?> =
     "_project" to mapOf(
         "name" to name,
         "group" to group,
-        "modules" to moduleSources.modules.map { it.toVariableMap() },
+        "modules" to moduleSources.modules.sortedBy { it.path }.map { it.toVariableMap() },
         "versions" to versions,
         "libraries" to libraries.mapValues { (_, value) -> value.toVariableMap() },
         "gradle" to gradle.toVariableMap(),
