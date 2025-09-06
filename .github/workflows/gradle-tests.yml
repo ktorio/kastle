@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: read
+  checks: write
+  pull-requests: write
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -34,3 +36,32 @@ jobs:
 
       - name: Run tests
         run: ./gradlew --no-daemon test --stacktrace
+
+      - name: Publish Unit Test Results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: |
+            **/build/test-results/test/*.xml
+          check_name: Unit Test Results
+          report_individual_runs: true
+
+      - name: Upload HTML Test Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-html
+          path: |
+            **/build/reports/tests/test
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload JUnit XML Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-xml
+          path: |
+            **/build/test-results/test
+          if-no-files-found: ignore
+          retention-days: 7
