@@ -9,11 +9,16 @@ import java.nio.file.Paths
 import java.util.stream.Collectors
 import kotlin.io.path.*
 
+private val DEFAULT_IGNORE_FILES = setOf(
+    ".gitkeep",
+    "gradle-wrapper.jar"
+)
+
 @OptIn(ExperimentalPathApi::class)
 fun assertFilesAreEqualWithSnapshot(
     expectedPath: String,
     actualPath: String,
-    ignorePaths: Collection<String> = emptySet(),
+    ignorePaths: Collection<String> = DEFAULT_IGNORE_FILES,
     replace: Boolean = REPLACE_SNAPSHOTS,
 ) = try {
     assertFilesAreEqual(Paths.get(expectedPath), Paths.get(actualPath), ignorePaths)
@@ -44,13 +49,13 @@ fun assertFilesAreEqual(
     }
 
     val expectedFiles = Files.walk(expected, FileVisitOption.FOLLOW_LINKS)
-        .filter { Files.isRegularFile(it) && !ignorePaths.contains(it.toString()) }
+        .filter { Files.isRegularFile(it) && !ignorePaths.contains(it.name) }
         .map { expected.relativize(it).toString() }
         .sorted()
         .collect(Collectors.toList())
 
     val actualFiles = Files.walk(actual, FileVisitOption.FOLLOW_LINKS)
-        .filter { Files.isRegularFile(it) && !ignorePaths.contains(it.toString()) }
+        .filter { Files.isRegularFile(it) && !ignorePaths.contains(it.name) }
         .map { actual.relativize(it).toString() }
         .sorted()
         .collect(Collectors.toList())
