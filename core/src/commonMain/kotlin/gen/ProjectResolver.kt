@@ -1,6 +1,5 @@
 package org.jetbrains.kastle.gen
 
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.utils.isFile
@@ -62,7 +61,7 @@ fun interface ProjectResolver {
                     val catalogKey = CatalogReference.lookupFormat(key)
                     val (id, version) = repositoryCatalog.plugins[catalogKey] ?: return@mapNotNull null
                     GradlePlugin(id, key, version)
-                }
+                }.sortedBy { it.name }
             )
 
             // TODO validate structure, check for collisions, etc.

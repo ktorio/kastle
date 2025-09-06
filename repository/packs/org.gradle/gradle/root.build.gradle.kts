@@ -1,4 +1,3 @@
-// Use version catalog
 val versionCatalogEnabled: Boolean by _properties
 
 plugins {
