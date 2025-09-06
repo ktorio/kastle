@@ -46,12 +46,14 @@ fun assertFilesAreEqual(
     val expectedFiles = Files.walk(expected, FileVisitOption.FOLLOW_LINKS)
         .filter { Files.isRegularFile(it) && !ignorePaths.contains(it.toString()) }
         .map { expected.relativize(it).toString() }
-        .collect(Collectors.toSet())
+        .sorted()
+        .collect(Collectors.toList())
 
     val actualFiles = Files.walk(actual, FileVisitOption.FOLLOW_LINKS)
         .filter { Files.isRegularFile(it) && !ignorePaths.contains(it.toString()) }
         .map { actual.relativize(it).toString() }
-        .collect(Collectors.toSet())
+        .sorted()
+        .collect(Collectors.toList())
 
     if (!ignoreListing) {
         val actualListing = actualFiles.joinToString("\n")
