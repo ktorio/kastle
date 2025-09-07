@@ -1,5 +1,6 @@
 package org.jetbrains.kastle.server.ui
 
+import io.ktor.utils.io.ExperimentalKtorApi
 import kotlinx.html.*
 import kotlinx.html.consumers.delayed
 import kotlinx.html.stream.HTMLStreamBuilder
@@ -8,12 +9,14 @@ import org.jetbrains.kastle.Property
 import org.jetbrains.kastle.PropertyType
 import org.jetbrains.kastle.utils.isTruthy
 
+@OptIn(ExperimentalKtorApi::class)
 fun HTML.packPropertiesHtml(pack: PackDescriptor) {
     body {
         val properties = pack.properties.filter { !it.hidden }
         if (properties.isNotEmpty()) {
             div("properties ${properties.shirtSize}") {
                 id = "properties/${pack.id}"
+
                 h3 { +pack.name }
                 for (property in properties)
                     propertyInputAndLabel(pack, property)

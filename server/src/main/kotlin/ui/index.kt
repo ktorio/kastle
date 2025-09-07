@@ -25,7 +25,7 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
                 +"♜"
             }
             span("secondary small-caps spaced") {
-                +"Kotlin All-purpose Sourcecode Templating and Layout Engine"
+                +"Kotlin Application Sourcecode Templating and Layout Engine"
             }
             // header navigation
         }
@@ -34,13 +34,23 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
 
             form {
                 id = "pack-search"
+                onSubmit = "event.preventDefault();"
+
                 input(type = InputType.text) {
                     id = "pack-search-input"
                     placeholder = "Search"
+
+                    attributes.hx {
+                        get = "/packs"
+                        trigger = "changed, keyup[key=='Enter']"
+                        target = "#packs-list"
+                        vals = "js:{search: event.target.value}"
+                    }
                 }
             }
 
             ul {
+                id = "packs-list"
                 for (pack in packs)
                     packListItem(pack)
             }
@@ -58,10 +68,12 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
             }
 
             tabList("main-tabs") {
-                tab(id = "form-panel", title = "Settings", checked = true) {
+                tab(id = "form-panel", icon = "&#9881;", title = "Settings", checked = true) {
                     id = "form-panel-contents"
 
                     form {
+                        id = "project-form"
+
                         div("properties") {
                             h3 {
                                 +"Project"
@@ -99,39 +111,26 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
                         }
                     }
                 }
-                tab(id = "pack-details", title = "About") {
+                tab(id = "pack-details", icon = "&#8505;", title = "About") {
                     id = "pack-details-docs"
 
                     attributes["data-tab"] = "pack-details-tab"
                     attributes.hx {
-                        get = "/pack/docs"
+                        get = "/packs/docs"
                         trigger = "load"
                     }
 
                     +"No details available."
                 }
-                tab(id = "preview-panel", title = "Preview") {
+                tab(id = "preview-panel", icon = "&#9778;", title = "Preview") {
                     div {
                         id = "preview-panel-container"
-
-                        div {
-                            id = "preview-panel-controls"
-
-                            button {
-                                attributes.hx {
-                                    get = "/project/listing"
-                                    target = "#preview-panel-tree"
-                                    trigger = "click"
-                                }
-                                +"Refresh"
-                            }
-                        }
                         div {
                             id = "preview-panel-tree"
 
                             attributes.hx {
                                 get = "/project/listing"
-                                trigger = "load"
+                                trigger = "refreshPreview, load, change from:#project-form input"
                             }
                         }
                         div {
@@ -145,13 +144,13 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
 }
 
 @OptIn(ExperimentalKtorApi::class)
-private fun UL.packListItem(pack: PackDescriptor) {
+fun UL.packListItem(pack: PackDescriptor) {
     li {
         // TODO role is tab?
         val inputId = "toggle/${pack.id}"
         input(type = InputType.radio, name = "selected-pack") {
             attributes.hx {
-                get = "/pack/${pack.id}/docs"
+                get = "/packs/${pack.id}/docs"
                 target = "#pack-details-docs"
                 trigger = "change"
             }
@@ -172,7 +171,7 @@ private fun UL.packListItem(pack: PackDescriptor) {
             attributes["data-pack-id"] = pack.id.toString()
             attributes["data-swap-id"] = "properties/${pack.id}"
             attributes.hx {
-                get = "/pack/${pack.id}/properties"
+                get = "/packs/${pack.id}/properties"
                 target = "#dynamic-properties"
                 trigger = "change, load"
                 swap = "afterend"

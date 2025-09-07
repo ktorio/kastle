@@ -11,7 +11,11 @@ fun Application.errorHandling() {
     install(StatusPages) {
         exception<Exception> { call, cause ->
             call.application.environment.log.error("Error in endpoint", cause)
-            call.respondText(ContentType.Text.Html, HttpStatusCode.InternalServerError) {
+            val status = when (cause) {
+                is IllegalArgumentException -> HttpStatusCode.BadRequest
+                else -> HttpStatusCode.InternalServerError
+            }
+            call.respondText(ContentType.Text.Html, status) {
                 "<h1>${cause::class.simpleName}</h1><p>${cause.localizedMessage}</p>"
             }
         }

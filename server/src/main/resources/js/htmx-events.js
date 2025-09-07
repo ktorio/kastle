@@ -11,6 +11,8 @@ document.addEventListener('htmx:beforeRequest', (event) => {
             // trigger is turned off, remove the element
             existingElement?.remove()
             event.preventDefault();
+            // update the preview
+            htmx.trigger('#preview-panel-tree', 'refreshPreview');
         } else if (existingElement) {
             // element already exists, prevent request
             event.preventDefault();
@@ -30,10 +32,10 @@ document.addEventListener('htmx:configRequest', (event) => {
         event.detail.path = url.pathname + url.search;
     }
     // Include current selected pack for docs request on load
-    else if (requestPath === '/pack/docs') {
+    else if (requestPath === '/packs/docs') {
         const packId = document.querySelector('input[name="selected-pack"]:checked')?.value;
         if (packId) {
-            event.detail.path = `/pack/${packId}/docs`
+            event.detail.path = `/packs/${packId}/docs`
         } else {
             // if nothing selected, abort request
             event.preventDefault();
@@ -64,4 +66,17 @@ document.addEventListener('htmx:afterSwap', (event) => {
     event.target.querySelectorAll('pre code').forEach((block) => {
         hljs.highlightElement(block); // Apply syntax highlighting
     });
+});
+
+/**
+ * Update preview on new form elements.
+ */
+document.addEventListener('htmx:afterSettle', (event) => {
+    try {
+        if (event.target.id === 'dynamic-properties' && event.detail.requestConfig?.triggeringEvent?.type === 'change') {
+            htmx.trigger('#preview-panel-tree', 'refreshPreview');
+        }
+    } catch (e) {
+        console.error('Failed to refresh preview panel tree')
+    }
 });

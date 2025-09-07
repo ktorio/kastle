@@ -1,6 +1,6 @@
 # ♖ KASTLE ♖
 
-_**K**otlin **A**ll-Purpose **S**ourcecode **T**emplating and **L**ayout **E**ngine_
+_**K**otlin **A**pplication **S**ourcecode **T**emplating and **L**ayout **E**ngine_
 
 ## Project structure
 

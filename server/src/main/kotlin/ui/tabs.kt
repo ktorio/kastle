@@ -19,8 +19,10 @@ fun FlowContent.tabList(
         div("tabs-header") {
             for (tab in tabsContent) {
                 horizontalNavLabel("${tab.id}-tab", "main-tabs") {
-                    div { +tab.title }
-                    // TODO div("icon") {}
+                    div {
+                        unsafe { +"${tab.icon}&nbsp;" }
+                        +tab.title
+                    }
                 }
             }
         }
@@ -39,8 +41,8 @@ fun FlowContent.tabList(
 class TabsContent(private val flowContent: FlowContent): FlowContent by flowContent, Iterable<TabsContent.Tab> {
     private val tabs = mutableListOf<Tab>()
 
-    fun tab(id: String, title: String, checked: Boolean = false, contents: DIV.() -> Unit) {
-        tabs += Tab(id, title, checked, contents)
+    fun tab(id: String, icon: String, title: String, checked: Boolean = false, contents: DIV.() -> Unit) {
+        tabs += Tab(id, icon, title, checked, contents)
     }
 
     override fun iterator(): Iterator<Tab> =
@@ -48,6 +50,7 @@ class TabsContent(private val flowContent: FlowContent): FlowContent by flowCont
 
     class Tab(
         val id: String,
+        val icon: String,
         val title: String,
         val checked: Boolean = false,
         val contents: DIV.() -> Unit

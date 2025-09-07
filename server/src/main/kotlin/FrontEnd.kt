@@ -6,6 +6,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
+import kotlinx.html.body
+import kotlinx.html.ul
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.server.ui.*
 
@@ -23,8 +25,32 @@ fun Routing.frontEnd(
             indexHtml(packs)
         }
     }
-    // pack details
-    route("/pack/{group}/{id}") {
+    get("/packs") {
+        val search = call.request.queryParameters["search"]
+        val packs = repository.all()
+            .filter {
+                search == null || listOfNotNull(
+                    it.id.toString(),
+                    it.name,
+                    it.group?.name,
+                    it.description,
+                ).any { part ->
+                    part.contains(search, ignoreCase = true)
+                }
+            }
+            .toList()
+            .sortedBy { it.name }
+
+        call.respondHtml {
+            body {
+                ul {
+                    for (pack in packs)
+                        packListItem(pack)
+                }
+            }
+        }
+    }
+    route("/packs/{group}/{id}") {
         suspend fun RoutingCall.readPack(): PackDescriptor? =
             repository.get(
                 PackId(
