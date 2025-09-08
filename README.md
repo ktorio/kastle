@@ -11,7 +11,7 @@ _**K**otlin **A**pplication **S**ourcecode **T**emplating and **L**ayout **E**ng
 | [local](local)           | Human-readable repository, designed for export                 |
 | [server](server)         | The HTTP server for building projects from various clients     |
 | [client](client)         | For making calls to the server from IDE's, websites, etc.      |
-| [repository](repository) | Contains all PACKs for creating new projects.                  |
+| [repository](repository) | Contains all sample PACKs for creating new projects.           |
 
 ## Documentation
 
@@ -19,17 +19,15 @@ _**K**otlin **A**pplication **S**ourcecode **T**emplating and **L**ayout **E**ng
 - [Publishing guide](docs/publishing.md)
 - [Template DSL Reference](docs/dsl.md)
 
-## Building
+## Building & Running
 
-This project uses [Amper](https://github.com/JetBrains/amper) for building and as part of its inner workings.
+This project uses Gradle as a build system.
 
-## Running
+You can start the server using:
 
-This project is both a library and a standalone server.
-
-To run the server:
- - Run `./amper task :server:import` to compile the current repository.
- - Run `./amper run --module server` to start the server
+```
+./gradlew :server:run
+```
 
 You should see the following in the console:
 ```
