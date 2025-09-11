@@ -4,6 +4,20 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+jib {
+    extraDirectories {
+        paths {
+            path {
+                setFrom(layout.projectDirectory.dir("../export"))
+                into = "/repository"
+            }
+        }
+        container {
+            environment = mapOf("REPOSITORY_PATH" to "/repository")
+        }
+    }
+}
+
 dependencies {
     implementation(project(":core"))
     implementation(project(":local"))
@@ -11,7 +25,6 @@ dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.cio)
     implementation(libs.ktor.server.call.logging)
-    implementation(libs.ktor.server.config.yaml)
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.server.sse)
