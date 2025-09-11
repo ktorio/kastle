@@ -12,7 +12,7 @@ class ClientServerTest {
 
     @Test
     fun `get pack descriptor`() = testApplication {
-        configure("application.yaml")
+        configure("application.conf")
 
         val repository = client.asRepository()
         val pack = repository.get("com.acme/empty")
