@@ -33,7 +33,7 @@ fun Application.provideGenerator(
 }
 
 typealias JavaPath = java.nio.file.Path
-fun JavaPath(str: String) = kotlin.io.path.Path(str)
+fun JavaPath(str: String) = JavaPath.of(str)
 
 @OptIn(ExperimentalSerializationApi::class)
 private suspend fun getCompiledRepository(
@@ -61,7 +61,7 @@ private suspend fun getCompiledRepository(
         .export(Path(compiledDir), fileFormat = FileFormat.CBOR)
 }
 
-fun lastModifiedFile(directory: JavaPath): FileTime {
+private fun lastModifiedFile(directory: JavaPath): FileTime {
     var latestTime = directory.getLastModifiedTime()
 
     Files.walk(directory).use { paths ->

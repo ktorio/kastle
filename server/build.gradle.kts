@@ -4,7 +4,18 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+tasks.jib {
+    // this will generate the exported repository automatically
+    dependsOn("test")
+}
+
 jib {
+    from {
+        image = "amazoncorretto:21"
+    }
+    to {
+        image = "registry.jetbrains.team/p/kastle/containers/kastle:latest"
+    }
     extraDirectories {
         paths {
             path {
@@ -12,9 +23,10 @@ jib {
                 into = "/repository"
             }
         }
-        container {
-            environment = mapOf("REPOSITORY_PATH" to "/repository")
-        }
+    }
+    container {
+        ports = listOf("2626")
+        environment = mapOf("REPOSITORY_PATH" to "/repository")
     }
 }
 
