@@ -162,7 +162,7 @@ class ProjectGeneratorImpl(
                                 val initial = start
                                 var next = source.text[start]
                                 if (next.isWhitespace()) {
-                                    while (next.isWhitespace() && start < source.text.length) {
+                                    while (next.isWhitespace() && start + 1 < source.text.length) {
                                         next = source.text[++start]
                                     }
                                     while (next != '\n' && start > initial) {

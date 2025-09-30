@@ -53,7 +53,29 @@ class HandlebarsTemplateEngineTest {
         assertEquals("someSlot", slot.name)
     }
 
-    fun String.substringEx(intRange: IntRange) =
-        substring(intRange.first, intRange.endInclusive)
+
+    @Test
+    fun escapedBraces() {
+        val template = engine.read(path, """
+            This is a normal template: {{ someProperty }}
+            These are escaped: \{{notAProperty}}\{{notAProperty}} \{{notAProperty}}
+            This has both: {{ realProperty }} and \{{notAProperty}}
+        """.trimIndent())
+
+        assertEquals(2, template.blocks?.size)
+        val expected = listOf("someProperty", "realProperty")
+        for ((i, ref) in template.blocks!!.withIndex()) {
+            assertIs<InlineValue>(ref)
+            val expression = ref.expression
+            assertIs<VariableRef>(expression)
+            assertEquals(expected[i], expression.name)
+            assertEquals("{{ ${expected[i]} }}", template.text.substring(ref.position.range).trim())
+        }
+
+        // Check that the backslash is removed in the processed text
+        val processedText = template.text
+        assertEquals(true, processedText.contains("{{notAProperty}}"))
+        assertEquals(false, processedText.contains("\\{{notAProperty}}"))
+    }
 
 }

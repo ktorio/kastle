@@ -4,6 +4,12 @@ plugins {
     `maven-publish`
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
+}
+
 dependencies {
     api(project(":core"))
     api(libs.kotlinx.coroutines)

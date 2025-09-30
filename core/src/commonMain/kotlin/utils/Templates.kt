@@ -50,7 +50,7 @@ val Block.bodyEnd: Int get() =
 fun Int.stringOf(char: Char) =
     if (this <= 0) "" else CharArray(this) { char }.concatToString()
 
-fun String.indent(indent: String) =
+fun CharSequence.indent(indent: String) =
     lines().joinToString("\n$indent")
 
 operator fun Block.contains(block: Block?) =
