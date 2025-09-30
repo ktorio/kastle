@@ -43,7 +43,7 @@ fun String.appendPath(vararg paths: String): String =
         .map { it.trim('/') }
         .joinToString("/")
 
-fun String.startOfLine(index: Int, ignoreNonWhitespace: Boolean = false): Int? {
+fun CharSequence.startOfLine(index: Int, ignoreNonWhitespace: Boolean = false): Int? {
     for (i in index - 1 downTo 0) {
         val ch = get(i)
         if (ch == '\n')
@@ -65,7 +65,7 @@ fun String.endOfLine(index: Int, ignoreNonWhitespace: Boolean = false): Int? {
     return null
 }
 
-fun String.indentAt(index: Int): Int? {
+fun CharSequence.indentAt(index: Int): Int? {
     var lastNonWhitespace = index
     for (i in index - 1 downTo 0) {
         val ch = get(i)

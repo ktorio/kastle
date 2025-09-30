@@ -110,17 +110,14 @@ data class BlockPosition(
 
         // expanded range to contain both
         infix fun IntRange.include(range: IntRange): IntRange =
-            if (start < range.start) {
-                IntRange(start, range.endInclusive)
+            if (start < range.first) {
+                IntRange(start, range.last)
             } else {
-                IntRange(range.start, endInclusive)
+                IntRange(range.first, endInclusive)
             }
 
-        fun IntRange.copy(start: Int = this.start, end: Int = endInclusive) =
+        fun IntRange.copy(start: Int = this.first, end: Int = last) =
             IntRange(start, end)
-
-        fun IntRange.bumpEnd() =
-            IntRange(start, endInclusive + 1)
     }
 
     override fun toString(): String =
