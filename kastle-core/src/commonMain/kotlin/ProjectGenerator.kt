@@ -104,6 +104,7 @@ class ProjectGeneratorImpl(
                             "kt" -> writeKotlinSourcePreamble(
                                 projectDescriptor,
                                 source.target,
+                                source,
                                 slots,
                             )
                         }
@@ -192,6 +193,7 @@ class ProjectGeneratorImpl(
     private fun Appendable.writeKotlinSourcePreamble(
         project: ProjectDescriptor,
         target: Url,
+        source: SourceTemplate,
         blocks: List<SourceTemplate>,
     ) {
         // TODO replace existing package in template if present
@@ -203,15 +205,14 @@ class ProjectGeneratorImpl(
 
         append("package $pkg\n\n")
 
-        val imports: List<String> = blocks.asSequence()
-            .flatMap { it.imports.orEmpty() }
-            .distinct()
-            .toList()
+        val sourceImports = source.imports?.asSequence().orEmpty()
+        val slotImports = blocks.asSequence().flatMap { it.imports.orEmpty() }
+        val imports: List<String> = (sourceImports + slotImports).distinct().toList()
 
         if (imports.isNotEmpty()) {
-            for (import in imports)
-                append("import $import\n")
-            append("\n")
+            append(imports.joinToString("\n") {
+                "import $it"
+            })
         }
     }
 
@@ -292,7 +293,7 @@ class ProjectGeneratorImpl(
         inner class SourceFileBlockIterationContext(
             val blocks: List<Block>,
             val variables: Variables,
-            var start: Int = 0,
+            var start: Int = source.imports?.position?.range?.last ?: 0,
             var i: Int = 0,
             var stack: Stack<Block> = Stack.of()
         ): Appendable by this {

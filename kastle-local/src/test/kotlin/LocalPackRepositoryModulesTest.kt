@@ -1,5 +1,6 @@
 package org.jetbrains.kastle
 
+import io.kotest.core.spec.style.StringSpec
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.kastle.gen.Project
 import org.jetbrains.kastle.gen.ProjectResolver
@@ -9,26 +10,12 @@ import kotlin.test.assertEquals
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
 
-class LocalPackRepositoryModulesTest {
+class LocalPackRepositoryModulesTest : StringSpec({
 
-    private val root = "../repository"
-    private val repository = LocalPackRepository(root)
+    val root = "../repository"
+    val repository = LocalPackRepository(root)
 
-    @Test
-    fun `compose multiplatform`() = runTest {
-        val project = loadProjectDetails(packs = listOf(
-            "org.jetbrains/amper",
-            "org.jetbrains/compose-multiplatform",
-        ))
-        assertEquals(
-            listOf("android", "desktop", "shared"),
-            project.moduleSources.modules.mapNotNull {
-                it.path.takeIf(String::isNotEmpty)
-            }.sorted()
-        )
-    }
-
-    private suspend fun loadProjectDetails(
+    suspend fun loadProjectDetails(
         properties: Map<VariableId, String> = emptyMap(),
         packs: List<String>,
     ): Project {
@@ -41,4 +28,16 @@ class LocalPackRepositoryModulesTest {
         return ProjectResolver.Default.resolve(descriptor, repository)
     }
 
-}
+    "compose multiplatform" {
+        val project = loadProjectDetails(packs = listOf(
+            "org.jetbrains/amper",
+            "org.jetbrains/compose-multiplatform",
+        ))
+        assertEquals(
+            listOf("android", "desktop", "shared"),
+            project.moduleSources.modules.mapNotNull {
+                it.path.takeIf(String::isNotEmpty)
+            }.sorted()
+        )
+    }
+})

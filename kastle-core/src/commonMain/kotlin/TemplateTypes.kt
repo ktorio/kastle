@@ -63,12 +63,18 @@ data class StaticSource(
 data class SourceTemplate(
     val text: String,
     override val target: Url,
-    val imports: List<String>? = null,
+    val imports: SourceImports? = null,
     val blocks: List<Block>? = null,
     override val condition: Expression? = null,
     // this is here to sort out files after modules are merged
     val packId: PackId? = null,
 ): SourceFile
+
+@Serializable
+data class SourceImports(
+    val position: BlockPosition,
+    val imports: List<String>,
+): List<String> by imports
 
 @Serializable
 sealed interface Block {
