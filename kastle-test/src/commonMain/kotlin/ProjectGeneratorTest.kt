@@ -1,6 +1,6 @@
 package org.jetbrains.kastle
 
-import io.kotest.core.spec.style.FunSpec
+import io.kotest.core.spec.style.StringSpec
 import kotlinx.coroutines.*
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemTemporaryDirectory
@@ -18,10 +18,10 @@ internal val REPLACE_SNAPSHOTS = System.getenv("UPDATE_GENERATOR_SNAPSHOTS") != 
 
 private val testScope = CoroutineScope(CoroutineName("generator-test"))
 
-abstract class ProjectGeneratorTest(
-    createRepository: suspend () -> PackRepository,
+fun ProjectGeneratorTest(
     tearDown: suspend () -> Unit = {},
-) : FunSpec({
+    createRepository: suspend () -> PackRepository,
+) : StringSpec.() -> Unit = {
     val snapshots = Path("../testSnapshots")
     val repository: Deferred<PackRepository> =
         testScope.async(start = CoroutineStart.LAZY) {
@@ -51,13 +51,13 @@ abstract class ProjectGeneratorTest(
     suspend fun generateWithPacks(outputDir: Path, vararg packs: String) =
         generate(outputDir, packs = packs.toList())
 
-    test("empty project") {
+    "empty project" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "empty", randomString())
         generateWithPacks(outputDir, "com.acme/empty")
         assertFilesAreEqualWithSnapshot( "$snapshots/empty", outputDir.toString())
     }
 
-    test("with slot") {
+    "with slot" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child", randomString())
         generateWithPacks(
             outputDir,
@@ -70,7 +70,7 @@ abstract class ProjectGeneratorTest(
         )
     }
 
-    test("with slot and two children") {
+    "with slot and two children" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child2", randomString())
         generateWithPacks(
             outputDir,
@@ -84,7 +84,7 @@ abstract class ProjectGeneratorTest(
         )
     }
 
-    test("with properties") {
+    "with properties" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "properties", randomString())
         generate(outputDir, packs = listOf("com.acme/properties"), properties = mapOf(
             "numberProperty" to "1",
@@ -100,7 +100,7 @@ abstract class ProjectGeneratorTest(
         )
     }
 
-    test("ktor server gradle") {
+    "ktor server gradle" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server", randomString())
         generateWithPacks(
             outputDir,
@@ -114,7 +114,7 @@ abstract class ProjectGeneratorTest(
         )
     }
 
-    test("ktor server gradle with catalog") {
+    "ktor server gradle with catalog" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-catalog", randomString())
         generate(
             outputDir,
@@ -135,7 +135,7 @@ abstract class ProjectGeneratorTest(
         )
     }
 
-    test("ktor server amper") {
+    "ktor server amper" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-amper", randomString())
         generateWithPacks(
             outputDir,
@@ -151,7 +151,7 @@ abstract class ProjectGeneratorTest(
         )
     }
 
-    test("compose multiplatform gradle") {
+    "compose multiplatform gradle" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-gradle", randomString())
         generate(
             outputDir,
@@ -160,7 +160,7 @@ abstract class ProjectGeneratorTest(
                 "org.jetbrains/compose-multiplatform",
             ),
             properties = mapOf(
-                VariableId.Companion.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
+                VariableId.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
             )
         )
         assertFilesAreEqualWithSnapshot(
@@ -169,7 +169,7 @@ abstract class ProjectGeneratorTest(
         )
     }
 
-    test("compose multiplatform amper") {
+    "compose multiplatform amper" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-amper", randomString())
         generateWithPacks(
             outputDir,
@@ -185,5 +185,4 @@ abstract class ProjectGeneratorTest(
     afterSpec {
         tearDown()
     }
-
-})
+}

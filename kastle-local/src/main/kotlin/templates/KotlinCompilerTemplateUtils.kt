@@ -300,6 +300,16 @@ private fun PsiElement.outerRange(range: IntRange): IntRange {
     return startOfFirstLine.. endOfLastLine
 }
 
+internal fun KtFile.readImports(): SourceImports? =
+    importList?.let { importList ->
+        SourceImports(
+            position = importList.blockPosition(),
+            imports = importList.imports.map {
+                it.text.substring("import".length).trim()
+            }
+        )
+    }
+
 // TODO validation, unchecked casts
 sealed interface TemplateParentReference {
     companion object {

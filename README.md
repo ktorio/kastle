@@ -11,7 +11,7 @@ _**K**otlin **A**pplication **S**ourcecode **T**emplating and **L**ayout **E**ng
 | [local](kastle-local)           | Human-readable repository, designed for export                 |
 | [server](kastle-server)         | The HTTP server for building projects from various clients     |
 | [client](kastle-client)         | For making calls to the server from IDE's, websites, etc.      |
-| [repository](kastle-repository) | Contains all sample PACKs for creating new projects.           |
+| [repository](repository)        | Contains all sample PACKs for creating new projects.           |
 
 ## Documentation
 
