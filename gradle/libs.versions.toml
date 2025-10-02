@@ -1,7 +1,10 @@
 [versions]
-android = "8.13.0"
-android-lifecycle = "2.9.3"
-android-activity-compose = "1.10.1"
+android = "8.11.2"
+android-lifecycle = "2.9.4"
+android-activity-compose = "1.11.0"
+android-compileSdk = "36"
+android-minSdk = "24"
+android-targetSdk = "36"
 commonmark = "0.25.1"
 kaml = "0.79.0"
 ktor = "3.3.0"
@@ -13,8 +16,9 @@ kotlinx-io = "0.8.0"
 ktoml = "0.7.1"
 logback = "1.5.18"
 mcp-sdk = "0.6.0"
-kotest = "5.9.1"
+kotest = "6.0.3"
 pluginPublish = "1.3.1"
+composeMultiplatform = "1.9.0"
 kastle = "1.0.0-SNAPSHOT"
 
 [libraries]
@@ -60,16 +64,18 @@ mcp-sdk = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp-sd
 ktoml = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
 android-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "android-activity-compose" }
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+gradlePlugin-androidLibrary = { module = "com.android.library:com.android.library.gradle.plugin", version.ref = "android" }
+gradlePlugin-composeCompiler = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "composeMultiplatform" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "android" }
 android-application = { id = "com.android.application", version.ref = "android" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+kotest = { id = "io.kotest", version.ref = "kotest" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-kotest-mp = { id = "io.kotest.multiplatform", version.ref = "kotest" }
-jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "pluginPublish" }
-kastle = { id = "org.jetbrains.kastle", version.ref = "kastle" } # The published plugin
+kastle = { id = "org.jetbrains.kastle", version.ref = "kastle" }

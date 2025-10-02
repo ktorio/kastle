@@ -16,11 +16,11 @@ dependencyResolutionManagement {
 }
 
 include(
-    "core",
-    "test",
-    "client",
-    "server",
-    "local",
-    "templates",
-    "gradle-plugin",
+    "kastle-core",
+    "kastle-test",
+    "kastle-client",
+    "kastle-server",
+    "kastle-local",
+    "kastle-templates",
+    "kastle-gradle-plugin",
 )

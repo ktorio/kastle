@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.1.21"
-android-activity-compose = "1.10.1"
+android-activity-compose = "1.11.0"
 
 [libraries]
 android-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "android-activity-compose" }
@@ -11,5 +11,5 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 android.application = { id = "com.android.application", version.ref = "android" }
 android.library = { id = "com.android.library", version.ref = "android" }
 compose.compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-jetbrains.compose = { id = "org.jetbrains.compose", version.ref = "kotlin" }
+compose.multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 kotlin.multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

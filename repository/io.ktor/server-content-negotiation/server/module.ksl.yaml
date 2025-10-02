@@ -1,0 +1,5 @@
+platform: jvm
+
+dependencies:
+  - $libs.ktor.server.core
+  - $libs.ktor.server.content.negotiation
