@@ -7,12 +7,17 @@ subprojects {
     group = "com.jetbrains.kastle"
     version = "1.0.0-SNAPSHOT"
 
+    tasks.withType<Test> {
+        // kotest problems
+        failOnNoDiscoveredTests = false
+    }
+
     plugins.withId("maven-publish") {
         afterEvaluate {
             configure<PublishingExtension> {
                 publications.withType<MavenPublication> {
                     pom {
-                        artifactId = "kastle-${project.name}"
+                        artifactId = project.name
                         group = "org.jetbrains.kastle"
                         version = "1.0.0-SNAPSHOT"
                         url = "https://github.com/ktorio/kastle"

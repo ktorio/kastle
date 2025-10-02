@@ -1,0 +1,15 @@
+platform: jvm
+
+dependencies:
+  - $libs.ktor.server.cio
+
+amper:
+  application:
+    mainClass: io.ktor.server.cio.EngineMain
+
+sources:
+  - target: slot://org.gradle/gradle/gradleConfigurations
+    text: |-
+      application {
+          mainClass = "io.ktor.server.cio.EngineMain"
+      }

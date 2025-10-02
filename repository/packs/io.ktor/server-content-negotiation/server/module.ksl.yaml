@@ -1,6 +1,0 @@
-platform: jvm
-
-dependencies:
-  - ../../../templates
-  - $libs.ktor.server.core
-  - $libs.ktor.server.content.negotiation
