@@ -1,3 +1,5 @@
+package kastle
+
 import kotlin.reflect.KProperty
 
 @DslMarker

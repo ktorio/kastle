@@ -1,3 +1,5 @@
+package kastle
+
 val whenProperty: String by _properties
 
 fun main() {

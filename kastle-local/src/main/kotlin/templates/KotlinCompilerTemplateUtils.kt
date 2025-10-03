@@ -305,7 +305,13 @@ internal fun KtFile.readImports(): SourceImports? =
         SourceImports(
             position = importList.blockPosition(),
             imports = importList.imports.map {
-                it.text.substring("import".length).trim()
+                // TODO bad assumption for module vs normal imports
+                it.text.substring("import".length).trim().let { pkg ->
+                    when (pkg.substringBefore('.')) {
+                        "kastle" -> SourceImport.Module(pkg.removePrefix("kastle."))
+                        else -> SourceImport.Default(pkg)
+                    }
+                }
             }
         )
     }

@@ -161,19 +161,22 @@ class LocalPackRepository(
                 // properties are supplied both from the manifest and from declarations in the source files
                 val kotlinAnalyzer = KotlinCompilerTemplateEngine(sourceFolder, repository)
                 sources += kotlinAnalyzer.ktFiles.map { sourceFile ->
-                    kotlinAnalyzer.read(sourceFolder.relativeTo(modulePath), sourceFile, properties)
-                        .copy(packId = packId)
+                    kotlinAnalyzer.read(
+                        sourceFolder.relativeTo(modulePath).resolvePackageDir(sourceFile),
+                        sourceFile,
+                        properties
+                    ).copy(packId = packId)
                 }
 
                 // include non-kotlin files
-                sources += fs.list(sourceFolder).filter {
-                    !it.name.endsWith(".kt")
+                sources += fs.walkFiles(sourceFolder).filter { file ->
+                    !file.name.endsWith(".kt")
                 }.map(::readModuleSource)
 
                 // assume non-kotlin files in resources
                 val resourcesFolder = modulePath.resolve("resources")
                 if (fs.exists(resourcesFolder)) {
-                    resources += fs.list(resourcesFolder)
+                    resources += fs.walkFiles(resourcesFolder)
                         .map(::readModuleSource)
                 }
             }
@@ -304,6 +307,12 @@ class LocalPackRepository(
             sequenceOf(this)
         else fs.list(this).asSequence()
             .flatMap { it.moduleFolders() }
+
+    private fun Path.resolvePackageDir(ktFile: KtFile): Path {
+        val packageDir = ktFile.packageFqName.asString().replace(Regex("^kastle\\.?"), "").replace('.', '/')
+        if (packageDir.isEmpty()) return this
+        return resolve(packageDir)
+    }
 
 
     @Serializable

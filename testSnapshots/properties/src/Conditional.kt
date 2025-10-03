@@ -1,6 +1,5 @@
 package com.acme
 
-
 fun main() {
     println("numberProperty is positive")
 
