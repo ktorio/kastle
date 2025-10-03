@@ -11,6 +11,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.io.relativeTo
 import org.jetbrains.kastle.utils.Expression
+import java.io.Serial
 
 @Serializable
 data class SourceDefinition(
@@ -73,8 +74,34 @@ data class SourceTemplate(
 @Serializable
 data class SourceImports(
     val position: BlockPosition,
-    val imports: List<String>,
-): List<String> by imports
+    val imports: List<SourceImport>,
+): List<SourceImport> by imports
+
+/**
+ * Represents an import in a source file.
+ */
+@Serializable
+sealed interface SourceImport {
+    /**
+     * A reference to another package from the KASTLE repository.
+     */
+    @Serializable
+    @JvmInline
+    value class Module(val value: String): SourceImport
+
+    /**
+     * A reference to some other package.
+     */
+    @Serializable
+    @JvmInline
+    value class Default(val value: String): SourceImport
+}
+
+fun SourceImport.toString(basePackage: String): String =
+    when (this) {
+        is SourceImport.Default -> "import $value"
+        is SourceImport.Module -> "import $basePackage.$value"
+    }
 
 @Serializable
 sealed interface Block {

@@ -1,3 +1,5 @@
+package kastle
+
 /**
  * @target slot://com.acme/parent/install
  */

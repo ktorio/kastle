@@ -203,16 +203,17 @@ class ProjectGeneratorImpl(
             .replace('/', '.')
         val pkg = if (dir.isEmpty()) project.group else "${project.group}.$dir"
 
-        append("package $pkg\n\n")
+        append("package $pkg")
 
         val sourceImports = source.imports?.asSequence().orEmpty()
         val slotImports = blocks.asSequence().flatMap { it.imports.orEmpty() }
-        val imports: List<String> = (sourceImports + slotImports).distinct().toList()
+        val imports: List<String> = (sourceImports + slotImports).map {
+            it.toString(project.group)
+        }.distinct().toList()
 
         if (imports.isNotEmpty()) {
-            append(imports.joinToString("\n") {
-                "import $it"
-            })
+            append("\n\n")
+            append(imports.joinToString("\n"))
         }
     }
 

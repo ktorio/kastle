@@ -152,3 +152,15 @@ fun Long.formatToByteSize(): String {
         units[digitGroups]
     ).trimEnd('0').trimEnd('.')  // Remove trailing zeros and decimal point if whole number
 }
+
+fun FileSystem.walkFiles(root: Path): Sequence<Path> = sequence {
+    val metadata = metadataOrNull(root) ?: return@sequence
+
+    if (metadata.isRegularFile) {
+        yield(root)
+    } else if (metadata.isDirectory) {
+        list(root).forEach { path ->
+            yieldAll(walkFiles(path))
+        }
+    }
+}

@@ -1,3 +1,5 @@
+package kastle
+
 // String example
 val literal: String by _properties
 // Missing string example

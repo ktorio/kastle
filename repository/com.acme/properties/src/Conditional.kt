@@ -1,3 +1,5 @@
+package kastle
+
 // Number example
 val numberProperty: Int by _properties
 // Boolean example

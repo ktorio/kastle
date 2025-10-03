@@ -1,3 +1,5 @@
+package kastle
+
 // Collection example
 val collection: List<String> by _properties
 
