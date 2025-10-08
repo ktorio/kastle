@@ -52,7 +52,7 @@ private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "type" to if (amper.application != null && platforms.size == 1) "${platforms.single()}/app" else "lib",
     "platform" to platforms.singleOrNull()?.code,
     "platforms" to platforms.map { it.code },
-    "dependencies" to dependencies.asSequence().associate { (platform, deps) ->
+    "dependencies" to dependencies.asSequence().filter { it.value.isNotEmpty() }.associate { (platform, deps) ->
         platform.code to deps.map { it.toVariableMap(path) }
     },
     "testDependencies" to testDependencies.asSequence().associate { (platform, deps) ->
