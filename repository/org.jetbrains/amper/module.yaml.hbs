@@ -1,3 +1,4 @@
+{{!-- Product type --}}
 {{#when _module.type }}
 {{ "lib" }}
 product:
@@ -6,7 +7,7 @@ product:
 {{ else }}
 product: {{ _module.type }}
 {{/when}}
-
+{{!-- Dependencies --}}
 {{#each _module.dependencies.entries }}
 dependencies{{#when key}}{{"common"}}{{else}}@{{key}}{{/when}}:
 {{#each value}}
@@ -20,7 +21,7 @@ dependencies{{#when key}}{{"common"}}{{else}}@{{key}}{{/when}}:
 {{/when}}
 {{/each}}
 {{/each}}
-
+{{!-- Settings --}}
 {{#if _module.amper}}
 settings:
   {{#each _module.amper.entries}}

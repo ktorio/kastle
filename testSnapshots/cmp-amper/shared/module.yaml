@@ -4,8 +4,6 @@ product:
   platforms: [jvm, android]
 
 dependencies:
-dependencies:
-dependencies:
   - $compose.foundation: exported
   - $compose.material3: exported
 

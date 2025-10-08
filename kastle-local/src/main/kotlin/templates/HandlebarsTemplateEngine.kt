@@ -78,7 +78,15 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
 
                 val text = match.groups["content"]?.value.orEmpty().trim()
 
-                if (helper == null && variablePattern.matches(text)) {
+                if (text.startsWith("!")) {
+                    yield(SkipBlock(
+                        position = BlockPosition(
+                            line = line,
+                            range = match.rangeAdjusted,
+                        ),
+                    ))
+                }
+                else if (helper == null && variablePattern.matches(text)) {
                     when(text) {
                         ELSE -> {
                             val parent = stack.pop() ?: error("Bad else placement: missing parent")

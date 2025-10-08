@@ -17,7 +17,6 @@ class CborProjectGeneratorTest: StringSpec(
         SystemFileSystem.deleteRecursively(exportDir)
         SystemFileSystem.createDirectories(exportDir)
         local.export(exportDir, fileFormat = FileFormat.CBOR)
-        local.export(exportDir, fileFormat = FileFormat.CBOR)
         val byteSize = SystemFileSystem.calculateDirectorySize(exportDir).formatToByteSize()
         println("Exported $byteSize to $exportDir")
         CborFilePackRepository(exportDir)
