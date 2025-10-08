@@ -13,6 +13,7 @@ kotlin {
             implementation(libs.ktor.client.cio)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.json)
+            implementation(libs.ktoml)
         }
         commonTest.dependencies {
             implementation(project(":kastle-test"))
@@ -21,6 +22,9 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.ktor.server.test.host)
             implementation(libs.ktor.server.di)
+        }
+        jvmTest.dependencies {
+            implementation(libs.kotest.junit5)
         }
     }
 }

@@ -1,11 +1,11 @@
 package org.jetbrains.kastle.utils
 
-import kotlin.test.*
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 
-class SourceFileWriterTest {
+class SourceFileWriterTest : StringSpec({
 
-    @Test
-    fun testIndentation() {
+    "append with level" {
         val testString = """
             
             }
@@ -15,10 +15,9 @@ class SourceFileWriterTest {
             id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
         """.trimIndent()
 
-        val actual = StringBuilder()
+        testString shouldBe StringBuilder()
             .append(testString, 0, testString.length, level = 0)
             .toString()
-        assertEquals(testString, actual)
     }
 
-}
+})

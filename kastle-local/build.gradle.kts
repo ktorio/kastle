@@ -24,8 +24,6 @@ dependencies {
 
     testImplementation(project(":kastle-templates"))
     testImplementation(project(":kastle-test"))
-    testImplementation(libs.kotlin.test)
-    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotest.junit5)
 }
 

@@ -1,11 +1,9 @@
 package org.jetbrains.kastle
 
 import io.kotest.core.spec.style.StringSpec
-import kotlinx.coroutines.test.runTest
+import io.kotest.matchers.shouldBe
 import org.jetbrains.kastle.gen.Project
 import org.jetbrains.kastle.gen.ProjectResolver
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 private const val defaultName = "sample"
 private const val defaultGroup = "com.acme"
@@ -33,11 +31,9 @@ class LocalPackRepositoryModulesTest : StringSpec({
             "org.jetbrains/amper",
             "org.jetbrains/compose-multiplatform",
         ))
-        assertEquals(
-            listOf("android", "desktop", "shared"),
-            project.moduleSources.modules.mapNotNull {
-                it.path.takeIf(String::isNotEmpty)
-            }.sorted()
-        )
+        val actualModules = project.moduleSources.modules
+            .mapNotNull { it.path.takeIf(String::isNotEmpty) }
+            .sorted()
+        actualModules shouldBe listOf("android", "desktop", "shared")
     }
 })

@@ -35,33 +35,13 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run tests
-        run: ./gradlew --no-daemon test --stacktrace
+        run: ./gradlew --no-daemon kotest --stacktrace
 
       - name: Publish Unit Test Results
         if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           files: |
-            **/build/test-results/test/*.xml
+            **/build/test-results/jvmKotest/*.xml
           check_name: Unit Test Results
           report_individual_runs: true
-
-      - name: Upload HTML Test Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-report-html
-          path: |
-            **/build/reports/tests/test
-          if-no-files-found: ignore
-          retention-days: 7
-
-      - name: Upload JUnit XML Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-xml
-          path: |
-            **/build/test-results/test
-          if-no-files-found: ignore
-          retention-days: 7
