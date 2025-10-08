@@ -38,7 +38,7 @@ fun ProjectGeneratorTest(
     ) = ProjectGeneratorImpl(
         repository = repository.await(),
         projectResolver = ProjectResolver.Default + GradleTransformation,
-        log = ConsoleLogger(LogLevel.TRACE),
+        log = ConsoleLogger(LogLevel.INFO),
     ).generate(
         ProjectDescriptor(
             name = DEFAULT_NAME,
@@ -182,7 +182,7 @@ fun ProjectGeneratorTest(
         )
     }
 
-    afterSpec {
+    afterContainer {
         tearDown()
     }
 }

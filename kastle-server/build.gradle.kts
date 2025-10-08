@@ -7,7 +7,7 @@ plugins {
 
 tasks.jib {
     // this will generate the exported repository automatically
-    dependsOn("test")
+    dependsOn("kotest")
 }
 
 jib {
@@ -49,10 +49,10 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.commonmark)
     implementation(libs.mcp.sdk)
+    implementation(libs.ktoml)
     testImplementation(project(":kastle-client"))
-
+    testImplementation(project(":kastle-test"))
     testImplementation(libs.ktor.server.test.host)
-    testImplementation(kotlin("test"))
 }
 
 application {

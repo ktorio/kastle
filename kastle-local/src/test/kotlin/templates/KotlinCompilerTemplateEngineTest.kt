@@ -1,22 +1,20 @@
 package org.jetbrains.kastle.templates
 
-import kotlinx.coroutines.test.runTest
+import io.kotest.core.spec.style.StringSpec
 import kotlinx.io.files.Path
 import org.jetbrains.kastle.io.resolve
-import kotlin.test.Test
 
-class KotlinCompilerTemplateEngineTest {
+class KotlinCompilerTemplateEngineTest : StringSpec({
 
-    @Test
-    fun testGradleBuild() = runTest {
+    "gradle build does not fail" {
         val file = Path("../repository/org.gradle/gradle")
         val engine = KotlinCompilerTemplateEngine(file.parent!!)
         val ktFile = engine.ktFiles.single { it.name == "build.gradle.kts" }
-        val template = engine.read(
+        engine.read(
             file.resolve("build.gradle.kts"),
             ktFile,
             mutableListOf()
         )
     }
 
-}
+})
