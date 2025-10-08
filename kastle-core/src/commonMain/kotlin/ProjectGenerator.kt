@@ -97,27 +97,29 @@ class ProjectGeneratorImpl(
                 emit(SourceFileEntry(path) {
                     writeSourceFile(source, variables) {
                         log.trace { path }
+
                         val slots = source.blocks?.asSequence().orEmpty()
                             .flatMap { project.slotSources.lookup(pack.id, it) }
                             .toList()
-                        when (source.target.extension) {
+                        val startPosition = when (source.target.extension) {
                             "kt" -> writeKotlinSourcePreamble(
                                 projectDescriptor,
                                 source.target,
                                 source,
                                 slots,
                             )
+                            else -> 0
                         }
 
                         if (source.blocks.isNullOrEmpty()) {
                             log.trace { "  Not templated; returning verbatim" }
-                            append(source.text)
+                            append(source.text, startPosition, source.text.length)
                             return@writeSourceFile
                         }
 
                         // print debug info to logs
                         if (log.level == LogLevel.TRACE) {
-                            forEachBlock(source.blocks) { block ->
+                            forEachBlock(source.blocks, startPosition) { block ->
                                 log.trace {
                                     buildString {
                                         append("  ${block.lineNumber.toString().padEnd(5)} ")
@@ -130,7 +132,7 @@ class ProjectGeneratorImpl(
                             log.trace { "" } // log empty line
                         }
 
-                        forEachBlock(source.blocks) { block ->
+                        forEachBlock(source.blocks, startPosition) { block ->
                             // exited blocks
                             val parent = stack.popUntil({ block in it }) { parent ->
                                 parent.close()
@@ -195,7 +197,7 @@ class ProjectGeneratorImpl(
         target: Url,
         source: SourceTemplate,
         blocks: List<SourceTemplate>,
-    ) {
+    ): Int {
         // TODO replace existing package in template if present
         //      include sub-packages when present in the target file
         val dir = target.parentPath
@@ -205,7 +207,8 @@ class ProjectGeneratorImpl(
 
         append("package $pkg")
 
-        val sourceImports = source.imports?.asSequence().orEmpty()
+        val importsDeclaration = source.imports ?: return 0
+        val sourceImports = importsDeclaration.asSequence()
         val slotImports = blocks.asSequence().flatMap { it.imports.orEmpty() }
         val imports: List<String> = (sourceImports + slotImports).map {
             it.toString(project.group)
@@ -215,6 +218,8 @@ class ProjectGeneratorImpl(
             append("\n\n")
             append(imports.joinToString("\n"))
         }
+
+        return importsDeclaration.position.range.last
     }
 
     private fun Map<Url, List<SourceFile>>.lookup(packId: PackId, block: Block): List<SourceTemplate> {
@@ -277,10 +282,11 @@ class ProjectGeneratorImpl(
             return this
         }
 
-        fun forEachBlock(blocks: List<Block>?, op: SourceFileBlockIterationContext.(Block) -> Unit): SourceFileBlockIterationContext =
+        fun forEachBlock(blocks: List<Block>?, startPosition: Int, op: SourceFileBlockIterationContext.(Block) -> Unit): SourceFileBlockIterationContext =
             SourceFileBlockIterationContext(
                 blocks = blocks.orEmpty().sortedBy { it.rangeStart },
                 variables = variables.copy(),
+                start = startPosition,
             ).also { context ->
                 while (context.i < context.blocks.size) {
                     context.op(context.current)
@@ -294,7 +300,7 @@ class ProjectGeneratorImpl(
         inner class SourceFileBlockIterationContext(
             val blocks: List<Block>,
             val variables: Variables,
-            var start: Int = source.imports?.position?.range?.last ?: 0,
+            var start: Int,
             var i: Int = 0,
             var stack: Stack<Block> = Stack.of()
         ): Appendable by this {

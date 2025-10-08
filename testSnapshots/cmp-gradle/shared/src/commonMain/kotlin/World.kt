@@ -1,3 +1,3 @@
-package com.acmepackage kastle
+package com.acme
 
 expect fun getWorld() :String
