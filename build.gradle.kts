@@ -17,9 +17,7 @@ subprojects {
             configure<PublishingExtension> {
                 repositories {
                     maven {
-                        repositories {
-                            maven("https://packages.jetbrains.team/maven/p/kastle/maven")
-                        }
+                        url = uri("https://packages.jetbrains.team/maven/p/kastle/maven")
                         credentials {
                             username = System.getenv("SPACE_USERNAME")
                             password = System.getenv("SPACE_PASSWORD")
