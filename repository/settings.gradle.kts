@@ -2,7 +2,6 @@
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 pluginManagement {
-    includeBuild("../kastle-gradle-plugin")
     repositories {
         google {
             mavenContent {
@@ -13,6 +12,9 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+        repositories {
+            maven("https://packages.jetbrains.team/maven/p/kastle/maven")
+        }
         mavenLocal()
     }
 }

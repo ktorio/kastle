@@ -14,7 +14,7 @@ import org.jetbrains.kotlin.gradle.plugin.*
 internal const val REPOSITORY_PROPERTY = "kastle.repository"
 internal const val PACK_PROPERTY = "kastle.pack"
 internal const val SOURCE_MODULE_PROPERTY = "kastle.sourceModule"
-private const val TEMPLATES_ARTIFACT = "org.jetbrains.kastle:kastle-templates:1.0.0-SNAPSHOT"
+private const val TEMPLATES_ARTIFACT = "org.jetbrains:kastle-templates:1.0.0-SNAPSHOT"
 
 abstract class KastlePackPlugin : Plugin<Project> {
     override fun apply(project: Project) {
