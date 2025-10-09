@@ -15,10 +15,20 @@ subprojects {
     plugins.withId("maven-publish") {
         afterEvaluate {
             configure<PublishingExtension> {
+                repositories {
+                    maven {
+                        uri("https://packages.jetbrains.team/maven/p/kastle/maven")
+                        credentials {
+                            username = System.getenv("SPACE_USERNAME")
+                            password = System.getenv("SPACE_PASSWORD")
+                        }
+                    }
+
+                }
                 publications.withType<MavenPublication> {
                     pom {
                         artifactId = project.name
-                        group = "org.jetbrains.kastle"
+                        group = "org.jetbrains"
                         version = "1.0.0-SNAPSHOT"
                         url = "https://github.com/ktorio/kastle"
 

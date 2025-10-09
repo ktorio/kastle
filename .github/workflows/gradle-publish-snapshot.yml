@@ -1,0 +1,33 @@
+name: Publish Snapshot
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish Snapshot to Maven
+    runs-on: ubuntu-latest
+    environment: Publishing
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Publish to Maven
+        run: ./gradlew publish --no-daemon
+        env:
+          SPACE_USERNAME: ${{ vars.SPACE_USERNAME }}
+          SPACE_PASSWORD: ${{ secrets.SPACE_PASSWORD }}

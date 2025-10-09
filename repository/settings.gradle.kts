@@ -2,6 +2,7 @@
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 pluginManagement {
+    includeBuild("../kastle-gradle-plugin")
     repositories {
         google {
             mavenContent {
@@ -39,5 +40,3 @@ dependencyResolutionManagement {
         }
     }
 }
-
-includeBuild("..")
