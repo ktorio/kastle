@@ -1,3 +1,8 @@
+import java.nio.file.Paths
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.relativeTo
+import kotlin.io.path.walk
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
@@ -5,22 +10,18 @@ plugins {
     alias(libs.plugins.kotest)
 }
 
-tasks.jib {
+tasks.jibDockerBuild {
     // this will generate the exported repository automatically
     dependsOn("kotest")
 }
 
 jib {
-    from {
-        image = "amazoncorretto:21"
-    }
-    to {
-        image = "registry.jetbrains.team/p/kastle/containers/kastle:latest"
-    }
+    from { image = "amazoncorretto:21" }
+    to { image = "registry.jetbrains.team/p/kastle/containers/kastle:latest" }
     extraDirectories {
         paths {
             path {
-                setFrom(layout.projectDirectory.dir("../export"))
+                setFrom("../export")
                 into = "/repository"
             }
         }
@@ -28,6 +29,7 @@ jib {
     container {
         ports = listOf("2626")
         environment = mapOf("REPOSITORY_PATH" to "/repository")
+        creationTime = "USE_CURRENT_TIMESTAMP"
     }
 }
 
