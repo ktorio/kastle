@@ -1,8 +1,3 @@
-import java.nio.file.Paths
-import kotlin.io.path.isRegularFile
-import kotlin.io.path.relativeTo
-import kotlin.io.path.walk
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
@@ -10,7 +5,7 @@ plugins {
     alias(libs.plugins.kotest)
 }
 
-tasks.jibDockerBuild {
+tasks.jib {
     // this will generate the exported repository automatically
     dependsOn("kotest")
 }
