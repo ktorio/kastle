@@ -41,9 +41,14 @@ private suspend fun getCompiledRepository(
     compiledDir: String,
     log: Logger,
 ): PackRepository {
+    val isLocal = JavaPath("build.gradle.kts").exists()
     val sourcePath = JavaPath(sourceDir)
     val compiledPath = JavaPath(compiledDir)
     val compiledKotlinxPath = Path(compiledDir)
+
+    if (!isLocal) {
+        return CborFilePackRepository(compiledKotlinxPath)
+    }
 
     if (!sourcePath.exists()) {
         log.warn("Source directory $sourceDir does not exist; continuing with compiled dir $compiledDir")
