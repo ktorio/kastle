@@ -1,6 +1,5 @@
 package org.jetbrains.kastle.server
 
-import com.akuleshov7.ktoml.Toml
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -9,7 +8,6 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.*
 
@@ -35,7 +33,7 @@ fun Routing.backEnd(
         }
         get("/versions") {
             call.respondText(
-                Toml.encodeToString(repository.versions()),
+                json.encodeToString(repository.versions()),
                 ContentType("text", "toml")
             )
         }

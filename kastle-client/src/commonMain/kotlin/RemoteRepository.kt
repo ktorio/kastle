@@ -35,10 +35,6 @@ fun HttpClient.asRepository(url: String? = null): RemoteRepository =
     })
 
 class RemoteRepository(private val client: HttpClient): PackRepository {
-    companion object {
-        val TomlContentType = ContentType("text", "toml")
-    }
-
     constructor(url: Url) : this(HttpClient {
         install(DefaultRequest) {
             url(url)
@@ -54,26 +50,16 @@ class RemoteRepository(private val client: HttpClient): PackRepository {
 
     override suspend fun get(packId: PackId): PackDescriptor? {
         val response = client.get("/api/packs/$packId")
-        return when(response.status.value) {
-            200 -> response.body<PackDescriptor>()
-            else -> null
-        }
+        if (!response.status.isSuccess())
+            return null
+        return response.body()
     }
 
     override suspend fun versions(): VersionsCatalog {
-        val response = client.prepareGet {
-            url("/api/versions")
-            accept(TomlContentType)
-        }.execute()
-
+        val response = client.get("/api/versions")
         if (!response.status.isSuccess())
             throw RuntimeException("${response.status}: ${response.bodyAsText()}")
-        val responseText = response.bodyAsText()
-        try {
-            return Toml.decodeFromString(responseText)
-        } catch (e: Throwable) {
-            throw RuntimeException("Failed to parse versions catalog: $responseText", e)
-        }
+        return response.body()
     }
 
 }
