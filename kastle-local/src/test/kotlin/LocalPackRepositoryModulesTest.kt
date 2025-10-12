@@ -34,6 +34,12 @@ class LocalPackRepositoryModulesTest : StringSpec({
         val actualModules = project.moduleSources.modules
             .mapNotNull { it.path.takeIf(String::isNotEmpty) }
             .sorted()
-        actualModules shouldBe listOf("android", "desktop", "shared")
+        actualModules shouldBe listOf(
+            "android",
+            "desktop",
+            "shared",
+            "ios",
+            "web",
+        )
     }
 })

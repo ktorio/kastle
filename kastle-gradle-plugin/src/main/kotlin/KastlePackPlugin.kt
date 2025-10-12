@@ -51,9 +51,7 @@ abstract class KastlePackPlugin : Plugin<Project> {
                     kotlinExt.configurePlatform(platform)
 
                     kotlinExt.sourceSets.apply {
-                        val platformSourceSet = findByName(platform.kotlinSourceSetName)
-                            ?: error { "Missing source set ${platform.kotlinSourceSetName}" }
-                        platformSourceSet.apply {
+                        findByName(platform.kotlinSourceSetName)?.apply {
                             if (isSinglePlatform || platform == Platform.COMMON) {
                                 kotlin.srcDir("src")
                                 resources.srcDir("resources")
@@ -61,9 +59,8 @@ abstract class KastlePackPlugin : Plugin<Project> {
                                 kotlin.srcDir(platform.srcDir)
                                 resources.srcDir(platform.resourcesDir)
                             }
-
                             project.configureDependencies(repository, this, pack, module, platform, versionsCatalog)
-                        }
+                        } ?: project.logger.error("Missing source set ${platform.kotlinSourceSetName}")
                     }
 
                 }
@@ -78,8 +75,17 @@ abstract class KastlePackPlugin : Plugin<Project> {
             Platform.JVM -> jvm()
             Platform.ANDROID -> androidTarget()
             Platform.WASM -> wasmJs()
+            Platform.JS -> js()
+            Platform.WEB -> {
+                wasmJs()
+                js()
+            }
             Platform.NATIVE -> linuxX64()
-            Platform.IOS -> iosArm64()
+            Platform.IOS -> {
+                iosArm64()
+                iosSimulatorArm64()
+            }
+
         }
     }
 
@@ -90,7 +96,9 @@ abstract class KastlePackPlugin : Plugin<Project> {
             Platform.ANDROID -> "androidMain"
             Platform.WASM -> "wasmJsMain"
             Platform.NATIVE -> "nativeMain"
-            Platform.IOS -> "iosMain"
+            Platform.IOS -> "iosArm64Main"
+            Platform.JS -> "jsMain"
+            Platform.WEB -> "wasmJsMain"
         }
 
     private fun Project.configureDependencies(
@@ -110,13 +118,14 @@ abstract class KastlePackPlugin : Plugin<Project> {
         // inter-pack dependencies
         for (packId in pack.requires) {
             try {
-                runBlocking {
-                    // TODO support direct module references for multi-module packs
-                    val module = repository.get(packId)?.sourceModules?.singleOrNull() ?:
-                        error("Pack $packId could not be imported; it must be present and only have ONE module")
-                    val projectRef = packId.toProjectRef(module.path)
-                    dependencies.add(sourceSet.apiConfigurationName, project(projectRef))
+                // TODO support direct module references for multi-module packs
+                val module = runBlocking { repository.get(packId) }?.sourceModules?.singleOrNull()
+                if (module == null) {
+                    logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
+                    continue
                 }
+                val projectRef = packId.toProjectRef(module.path)
+                dependencies.add(sourceSet.apiConfigurationName, project(projectRef))
             } catch (e: Exception) {
                 logger.error("Cannot resolve {}", packId, e)
             }

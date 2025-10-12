@@ -1,0 +1,7 @@
+platform: wasmJs
+
+dependencies:
+  - ../shared
+
+amper:
+  compose: enabled

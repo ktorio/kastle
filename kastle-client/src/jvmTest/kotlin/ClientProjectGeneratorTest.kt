@@ -11,7 +11,6 @@ import org.jetbrains.kastle.server.*
 
 val testServer by lazy { TestServer() }
 
-// TODO this is broken :(
 @OptIn(DelicateCoroutinesApi::class)
 class ClientProjectGeneratorTest : StringSpec(
     ProjectGeneratorTest(

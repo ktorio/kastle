@@ -1,0 +1,10 @@
+
+product:
+  type: lib
+  platforms: [wasmJs]
+
+dependencies:
+  - ../shared
+
+settings:
+    compose: enabled

@@ -197,6 +197,8 @@ enum class Platform(val code: String) {
     ANDROID("android"),
     IOS("ios"),
     WASM("wasmJs"),
+    JS("js"),
+    WEB("web"),
     NATIVE("native");
 
     companion object {

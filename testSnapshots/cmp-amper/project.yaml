@@ -1,4 +1,6 @@
 modules:
   - android
   - desktop
+  - ios
   - shared
+  - web

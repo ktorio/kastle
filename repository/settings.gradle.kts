@@ -12,10 +12,10 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+        // mavenLocal()
         repositories {
             maven("https://packages.jetbrains.team/maven/p/kastle/maven")
         }
-        mavenLocal()
     }
 }
 
@@ -33,6 +33,9 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        repositories {
+            maven("https://packages.jetbrains.team/maven/p/kastle/maven")
+        }
         mavenLocal()
     }
 

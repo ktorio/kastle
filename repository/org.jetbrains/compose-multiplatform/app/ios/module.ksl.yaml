@@ -1,0 +1,7 @@
+platform: ios
+
+dependencies:
+  - ../shared
+
+amper:
+  compose: enabled

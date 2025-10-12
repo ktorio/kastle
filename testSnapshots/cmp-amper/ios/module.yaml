@@ -1,0 +1,10 @@
+
+product:
+  type: lib
+  platforms: [ios]
+
+dependencies:
+  - ../shared
+
+settings:
+    compose: enabled

@@ -19,4 +19,6 @@ plugins {
 
 include(":android")
 include(":desktop")
+include(":ios")
 include(":shared")
+include(":web")
