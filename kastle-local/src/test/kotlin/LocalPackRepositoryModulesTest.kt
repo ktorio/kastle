@@ -1,6 +1,8 @@
 package org.jetbrains.kastle
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.shouldBe
 import org.jetbrains.kastle.gen.Project
 import org.jetbrains.kastle.gen.ProjectResolver
@@ -34,12 +36,12 @@ class LocalPackRepositoryModulesTest : StringSpec({
         val actualModules = project.moduleSources.modules
             .mapNotNull { it.path.takeIf(String::isNotEmpty) }
             .sorted()
-        actualModules shouldBe listOf(
-            "android",
-            "desktop",
+        actualModules shouldContainOnly listOf(
+            "androidApp",
+            "desktopApp",
+            "iosApp",
+            "webApp",
             "shared",
-            "ios",
-            "web",
         )
     }
 })

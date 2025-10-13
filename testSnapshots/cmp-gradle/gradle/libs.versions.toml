@@ -12,4 +12,3 @@ android.application = { id = "com.android.application", version.ref = "android" 
 android.library = { id = "com.android.library", version.ref = "android" }
 compose.compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose.multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
-kotlin.multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

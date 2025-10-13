@@ -1,7 +1,7 @@
 
 product:
   type: lib
-  platforms: [jvm, android]
+  platforms: [jvm, android, ios, js, wasmJs]
 
 dependencies:
   - $compose.foundation: exported
