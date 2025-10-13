@@ -208,8 +208,8 @@ class ProjectGeneratorImpl(
         append("package $pkg")
 
         val importsDeclaration = source.imports ?: return 0
-        val sourceImports = importsDeclaration.asSequence()
-        val slotImports = blocks.asSequence().flatMap { it.imports.orEmpty() }
+        val sourceImports = importsDeclaration.imports.asSequence()
+        val slotImports = blocks.asSequence().flatMap { it.imports?.imports.orEmpty() }
         val imports: List<String> = (sourceImports + slotImports).map {
             it.toString(project.group)
         }.distinct().toList()

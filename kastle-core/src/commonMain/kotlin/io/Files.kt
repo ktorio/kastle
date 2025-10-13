@@ -10,6 +10,7 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
 import kotlinx.io.readString
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.decodeFromString
@@ -17,8 +18,14 @@ import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.io.decodeFromSource
 import kotlinx.serialization.json.io.encodeToSink
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.serializersModuleOf
+import org.jetbrains.kastle.CatalogVersion
+import org.jetbrains.kastle.CatalogVersionSerializer
 import kotlin.math.log10
 import kotlin.math.pow
+
+val tomlModule = serializersModuleOf<CatalogVersion>(CatalogVersionSerializer())
 
 fun Path.resolve(subPath: String) = Path(this, subPath)
 
@@ -104,7 +111,7 @@ fun Path.readYamlNode(
 @OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T: Any> Path.readToml(
     fs: FileSystem = SystemFileSystem,
-    toml: Toml = Toml,
+    toml: Toml = Toml(serializersModule = tomlModule),
 ): T? {
     if (!fs.exists(this)) return null
     return fs.source(this).buffered().readString().let { text ->

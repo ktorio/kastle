@@ -1,11 +1,19 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotest)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
     jvm()
+    js()
+    wasmJs()
+
     sourceSets {
         commonMain.dependencies {
             implementation(project(":kastle-core"))

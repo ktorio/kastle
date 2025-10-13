@@ -73,31 +73,42 @@ data class SourceTemplate(
 data class SourceImports(
     val position: BlockPosition,
     val imports: List<SourceImport>,
-): List<SourceImport> by imports
+)
 
 /**
  * Represents an import in a source file.
  */
-@Serializable
+@Serializable(SourceImportSerializer::class)
 sealed interface SourceImport {
+    companion object {
+        fun parse(input: String): SourceImport =
+            if (input.startsWith("module:"))
+                Module(input.removePrefix("module:").trim())
+            else External(input)
+    }
+
     /**
      * A reference to another package from the KASTLE repository.
      */
     @Serializable
     @JvmInline
-    value class Module(val value: String): SourceImport
+    value class Module(val value: String): SourceImport {
+        override fun toString(): String = "module: $value"
+    }
 
     /**
      * A reference to some other package.
      */
     @Serializable
     @JvmInline
-    value class Default(val value: String): SourceImport
+    value class External(val value: String): SourceImport {
+        override fun toString(): String = value
+    }
 }
 
 fun SourceImport.toString(basePackage: String): String =
     when (this) {
-        is SourceImport.Default -> "import $value"
+        is SourceImport.External -> "import $value"
         is SourceImport.Module -> "import $basePackage.$value"
     }
 

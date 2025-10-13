@@ -34,7 +34,7 @@ fun Routing.backEnd(
         get("/versions") {
             call.respondText(
                 json.encodeToString(repository.versions()),
-                ContentType("text", "toml")
+                ContentType.Application.Json
             )
         }
         route("/packs") {

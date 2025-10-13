@@ -49,6 +49,7 @@ class SemanticVersionSerializer: CustomParserSerializer<SemanticVersion>(Semanti
 //class SourcePositionSerializer: CustomParserSerializer<SourcePosition>(SourcePosition::class, SourcePosition::parse)
 class BlockPositionSerializer: CustomParserSerializer<BlockPosition>(BlockPosition::class, BlockPosition::parse)
 class PropertyTypeSerializer: CustomParserSerializer<PropertyType>(PropertyType::class, PropertyType::parse)
+class SourceImportSerializer: CustomParserSerializer<SourceImport>(SourceImport::class, SourceImport::parse)
 
 
 class CatalogVersionSerializer: KSerializer<CatalogVersion> {
