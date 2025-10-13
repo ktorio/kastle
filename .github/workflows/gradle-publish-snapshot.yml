@@ -27,7 +27,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Publish to Maven
-        run: ./gradlew publish --no-daemon
+        run: ./gradlew publish --no-daemon --stacktrace
         env:
           SPACE_USERNAME: ${{ vars.SPACE_USERNAME }}
           SPACE_PASSWORD: ${{ secrets.SPACE_PASSWORD }}
