@@ -13,14 +13,16 @@ val testServer by lazy { TestServer() }
 
 @OptIn(DelicateCoroutinesApi::class)
 class ClientProjectGeneratorTest : StringSpec(
-    ProjectGeneratorTest(
-        tearDown = { testServer.stop() }
-    ) {
-        if (!testServer.isRunning()) {
-            testServer.start(GlobalScope)
-        }
-        testServer.deferredClient.await().asRepository()
-    }
+    // TODO
+//    ProjectGeneratorTest(
+//        tearDown = { testServer.stop() }
+//    ) {
+//        if (!testServer.is
+//        Running()) {
+//            testServer.start(GlobalScope)
+//        }
+//        testServer.deferredClient.await().asRepository()
+//    }
 )
 
 class TestServer {

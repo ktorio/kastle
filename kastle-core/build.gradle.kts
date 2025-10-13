@@ -15,7 +15,6 @@ kotlin {
 // TODO kotest problem
 //    iosArm64()
 //    iosSimulatorArm64()
-    jvm()
     js()
     wasmJs()
 

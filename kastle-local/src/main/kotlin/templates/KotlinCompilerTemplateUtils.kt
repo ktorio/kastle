@@ -309,7 +309,7 @@ internal fun KtFile.readImports(): SourceImports? =
                 it.text.substring("import".length).trim().let { pkg ->
                     when (pkg.substringBefore('.')) {
                         "kastle" -> SourceImport.Module(pkg.removePrefix("kastle."))
-                        else -> SourceImport.Default(pkg)
+                        else -> SourceImport.External(pkg)
                     }
                 }
             }
