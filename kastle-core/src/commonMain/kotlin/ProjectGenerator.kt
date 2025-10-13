@@ -262,13 +262,13 @@ class ProjectGeneratorImpl(
         val Block.bodyContents: String? get() =
             source.text.substring(bodyStart, bodyEnd)
 
-        override fun append(csq: CharSequence?): java.lang.Appendable {
+        override fun append(csq: CharSequence?): Appendable {
             if (csq == null) return this
             buffer.writeString(csq)
             return this
         }
 
-        override fun append(csq: CharSequence?, start: Int, end: Int): java.lang.Appendable {
+        override fun append(csq: CharSequence?, start: Int, end: Int): Appendable {
             if (csq == null) return this
             require(start <= end) {
                 "Overlap $start > $end: ${csq.substring(end, start)}"
@@ -277,7 +277,7 @@ class ProjectGeneratorImpl(
             return this
         }
 
-        override fun append(c: Char): java.lang.Appendable {
+        override fun append(c: Char): Appendable {
             buffer.writeCodePointValue(c.code)
             return this
         }

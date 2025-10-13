@@ -9,6 +9,7 @@ commonmark = "0.25.1"
 kaml = "0.79.0"
 ktor = "3.3.1"
 kotlin = "2.2.20"
+ksp-version = "2.2.20-2.0.2"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-serialization = "1.9.0"
 kotlinx-coroutines = "1.10.2"
@@ -75,6 +76,7 @@ kotest = { id = "io.kotest", version.ref = "kotest" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id="com.google.devtools.ksp", version.ref = "ksp-version" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "pluginPublish" }

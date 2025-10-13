@@ -15,7 +15,8 @@ fun Sink.writeJsonString(buffer: Buffer) {
             '\r' -> writeString("\\r") // Escape carriage returns
             '\t' -> writeString("\\t") // Escape tabs
             in '\u0000'..'\u001F', '\u007F' -> { // Escape control characters
-                writeString(String.format("\\u%04X", char.code))
+                val hex = char.code.toString(16).uppercase().padStart(4, '0')
+                writeString("\\u$hex")
             }
             else -> writeCodePointValue(codePoint) // Append valid characters as is
         }

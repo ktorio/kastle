@@ -137,22 +137,6 @@ fun FileSystem.calculateDirectorySize(path: Path): Long =
         }
     }
 
-fun Long.formatToByteSize(): String {
-    val units = arrayOf("B", "KB", "MB", "GB", "TB", "PB", "EB")
-
-    if (this <= 0) return "0 B"
-
-    // Calculate the power of 1024 that fits our bytes
-    val digitGroups = (log10(toDouble()) / log10(1024.0)).toInt()
-
-    // Format the number with up to 2 decimal places and the appropriate suffix
-    return String.format(
-        "%.2f %s",
-        this / 1024.0.pow(digitGroups.toDouble()),
-        units[digitGroups]
-    ).trimEnd('0').trimEnd('.')  // Remove trailing zeros and decimal point if whole number
-}
-
 fun FileSystem.walkFiles(root: Path): Sequence<Path> = sequence {
     val metadata = metadataOrNull(root) ?: return@sequence
 

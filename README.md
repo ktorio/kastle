@@ -16,7 +16,6 @@ _**K**otlin **A**pplication **S**ourcecode **T**emplating and **L**ayout **E**ng
 ## Documentation
 
 - [How it works](docs/overview.md)
-- [Publishing guide](docs/publishing.md)
 - [Template DSL Reference](docs/dsl.md)
 
 ## Building & Running

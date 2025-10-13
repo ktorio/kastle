@@ -24,8 +24,40 @@ if (_project.modules.size == 1) {
 
 _slots("gradleConfigurations")
 
-if (_module.platforms.size() > 1) {
+if (_module.platform != "jvm") {
     kotlin {
+        for (platform in _module.platforms) {
+            when(platform) {
+                "jvm" -> {
+                    jvm()
+                }
+                "android" -> {
+                    androidTarget {
+                        compilerOptions {
+                            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+                        }
+                    }
+                }
+                "ios" -> {
+                    iosArm64()
+                    iosSimulatorArm64()
+                }
+                "js" -> {
+                    js {
+                        browser()
+                        binaries.executable()
+                    }
+                }
+                "wasmJs" -> {
+                    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+                    wasmJs {
+                        browser()
+                        binaries.executable()
+                    }
+                }
+            }
+        }
+
         sourceSets {
             for (e in _module.dependencies.entries) {
                 if (e.value.isNotEmpty()) {

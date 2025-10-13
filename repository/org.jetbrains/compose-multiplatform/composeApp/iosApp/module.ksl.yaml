@@ -1,0 +1,13 @@
+platform: ios
+
+dependencies:
+  - ../shared
+  - $compose.ui
+
+gradle:
+  plugins:
+    - compose.multiplatform
+    - compose.compiler
+
+amper:
+  compose: enabled

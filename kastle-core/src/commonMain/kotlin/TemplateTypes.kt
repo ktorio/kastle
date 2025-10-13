@@ -4,14 +4,12 @@ import kotlinx.io.buffered
 import kotlinx.io.bytestring.ByteString
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
-import kotlinx.io.files.source
 import kotlinx.io.readByteString
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.io.relativeTo
 import org.jetbrains.kastle.utils.Expression
-import java.io.Serial
+import kotlin.jvm.JvmInline
 
 @Serializable
 data class SourceDefinition(

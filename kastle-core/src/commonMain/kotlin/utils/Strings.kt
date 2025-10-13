@@ -122,7 +122,7 @@ fun Appendable.append(
     start: Int,
     end: Int,
     level: Int,
-): java.lang.Appendable {
+): Appendable {
     if (level <= 0) return append(csq, start, end)
     if (start == end) return this
     val skipIndent = level * 4

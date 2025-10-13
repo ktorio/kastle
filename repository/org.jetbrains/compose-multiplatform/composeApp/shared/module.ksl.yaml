@@ -1,4 +1,4 @@
-platforms: [jvm, android]
+platforms: [jvm, android, ios, js, wasmJs]
 
 dependencies:
   - $compose.foundation!
@@ -8,7 +8,6 @@ dependencies:
 
 gradle:
   plugins:
-    - kotlin.multiplatform
     - compose.multiplatform
     - compose.compiler
     - android.library

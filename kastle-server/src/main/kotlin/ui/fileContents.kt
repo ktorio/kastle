@@ -13,9 +13,9 @@ fun HTML.fileContentsHtml(name: String, contents: String) {
 }
 
 private fun languageString(fileName: String): String? =
-    when (fileName.substringAfterLast('.')) {
+    when (val extension = fileName.substringAfterLast('.')) {
         "kt", "kts" -> "kotlin"
-        "java" -> "java"
-        "yaml" -> "yaml"
-        else -> null
+        else -> extension
+    }.takeIf {
+        it !in setOf("jar", "tar", "exe", "")
     }?.let { "language-$it" }

@@ -2,7 +2,9 @@ package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.ProjectModules.*
+import org.jetbrains.kastle.utils.TreeMap.Companion.toTreeMap
 import org.jetbrains.kastle.utils.protocol
+import kotlin.jvm.JvmInline
 
 
 @Serializable(RevisionSerializer::class)
@@ -391,9 +393,9 @@ data class VersionsCatalog(
         if (this.isEmpty()) other
         else if (other.isEmpty()) this
         else VersionsCatalog(
-            plugins = (plugins + other.plugins).toSortedMap(),
-            versions = (versions + other.versions).toSortedMap(),
-            libraries = (libraries + other.libraries).toSortedMap(),
+            plugins = (plugins + other.plugins).toTreeMap(),
+            versions = (versions + other.versions).toTreeMap(),
+            libraries = (libraries + other.libraries).toTreeMap(),
         )
 
     operator fun get(key: String): CatalogArtifact? =

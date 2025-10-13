@@ -13,7 +13,7 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
                     else -> left.toInt() + right.toInt()
                 }
             }
-            else -> throw IllegalArgumentException("Cannot apply + to ${left?.javaClass} and ${right?.javaClass}")
+            else -> throw OperationTypeError("+", left, right)
         }
     }),
 
@@ -26,7 +26,7 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
                 else -> left.toInt() - right.toInt()
             }
         } else {
-            throw IllegalArgumentException("Cannot apply - to ${left?.javaClass} and ${right?.javaClass}")
+            throw OperationTypeError("-", left, right)
         }
     }),
 
@@ -39,7 +39,7 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
                 else -> left.toInt() * right.toInt()
             }
         } else {
-            throw IllegalArgumentException("Cannot apply * to ${left?.javaClass} and ${right?.javaClass}")
+            throw OperationTypeError("*", left, right)
         }
     }),
 
@@ -56,7 +56,7 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
                 else -> left.toInt() / right.toInt()
             }
         } else {
-            throw IllegalArgumentException("Cannot apply / to ${left?.javaClass} and ${right?.javaClass}")
+            throw OperationTypeError("/", left, right)
         }
     }),
 
@@ -73,7 +73,7 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
                 else -> left.toInt() % right.toInt()
             }
         } else {
-            throw IllegalArgumentException("Cannot apply % to ${left?.javaClass} and ${right?.javaClass}")
+            throw OperationTypeError("%", left, right)
         }
     }),
 
@@ -97,7 +97,7 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
                 }
             }
             left is String && right is String -> left > right
-            else -> throw IllegalArgumentException("Cannot apply > to ${left?.javaClass} and ${right?.javaClass}")
+            else -> throw OperationTypeError(">", left, right)
         }
     }),
 
@@ -112,7 +112,7 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
                 }
             }
             left is String && right is String -> left < right
-            else -> throw IllegalArgumentException("Cannot apply < to ${left?.javaClass} and ${right?.javaClass}")
+            else -> throw OperationTypeError("<", left, right)
         }
     }),
 
@@ -127,7 +127,7 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
                 }
             }
             left is String && right is String -> left >= right
-            else -> throw IllegalArgumentException("Cannot apply >= to ${left?.javaClass} and ${right?.javaClass}")
+            else -> throw OperationTypeError(">=", left, right)
         }
     }),
 
@@ -142,7 +142,7 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
                 }
             }
             left is String && right is String -> left <= right
-            else -> throw IllegalArgumentException("Cannot apply <= to ${left?.javaClass} and ${right?.javaClass}")
+            else -> throw OperationTypeError("<=", left, right)
         }
     }),
 
@@ -151,7 +151,7 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
         if (left is Boolean && right is Boolean) {
             left && right
         } else {
-            throw IllegalArgumentException("Cannot apply && to ${left?.javaClass} and ${right?.javaClass}")
+            throw OperationTypeError("&&", left, right)
         }
     }),
 
@@ -159,7 +159,7 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
         if (left is Boolean && right is Boolean) {
             left || right
         } else {
-            throw IllegalArgumentException("Cannot apply || to ${left?.javaClass} and ${right?.javaClass}")
+            throw OperationTypeError("||", left, right)
         }
     }),
 
@@ -170,3 +170,9 @@ enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
 
     override fun toString(): String = string
 }
+
+class OperationTypeError(
+    operator: String,
+    left: Any?,
+    right: Any?
+): IllegalArgumentException("Cannot apply $operator to ${left?.let { it::class }} and ${right?.let { it::class }}")

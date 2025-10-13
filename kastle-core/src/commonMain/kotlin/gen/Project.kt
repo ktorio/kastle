@@ -1,8 +1,10 @@
 package org.jetbrains.kastle.gen
 
+import kotlinx.io.files.Path
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.utils.Variables
-import kotlin.io.path.Path
+import org.jetbrains.kastle.utils.normalize
 
 data class Project(
     val descriptor: ProjectDescriptor,
