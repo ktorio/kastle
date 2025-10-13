@@ -12,8 +12,9 @@ plugins {
 
 kotlin {
     jvm()
-    iosArm64()
-    iosSimulatorArm64()
+// TODO kotest problem
+//    iosArm64()
+//    iosSimulatorArm64()
     jvm()
     js()
     wasmJs()
