@@ -262,28 +262,28 @@ class LocalPackRepository(
 
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun versions(): VersionsCatalog {
-        val builtInArtifacts =
-            fs.list(root).filter {
-                it.name.endsWith(".versions.toml")
-            }.mapNotNull { file ->
-                file.readToml<BuiltInToml>(fs)?.libraries
-            }.reduceOrNull { left, right -> left + right } ?: return VersionsCatalog.Empty
+// TODO support for other catalogs
+//        val builtInArtifacts =
+//            fs.list(root).filter {
+//                it.name.endsWith(".versions.toml")
+//            }.mapNotNull { file ->
+//                file.readToml<BuiltInToml>(fs)?.libraries
+//            }.reduceOrNull { left, right -> left + right } ?: return VersionsCatalog.Empty
+//
+//        val builtInCatalog = VersionsCatalog(
+//            libraries = builtInArtifacts.mapValues { (_, artifact) ->
+//                val (group, artifact, version) = artifact
+//                CatalogArtifact(
+//                    "$group:$artifact",
+//                    CatalogVersion.Number(version),
+//                    builtIn = true
+//                )
+//            }
+//        )
 
-        val builtInCatalog = VersionsCatalog(
-            libraries = builtInArtifacts.mapValues { (_, artifact) ->
-                val (group, artifact, version) = artifact
-                CatalogArtifact(
-                    "$group:$artifact",
-                    CatalogVersion.Number(version),
-                    builtIn = true
-                )
-            }
-        )
-
-        val gradleCatalog = root.resolve(versionsCatalogFile)
-            .readToml<VersionsCatalog>(fs) ?: return builtInCatalog
-
-        return builtInCatalog + gradleCatalog
+        return root.resolve(versionsCatalogFile).readToml<VersionsCatalog>(fs) ?: error {
+            "Failed to read versions catalog from $versionsCatalogFile"
+        }
     }
 
     private suspend fun Url.getExtensionFromSlot(): TemplateFormat {

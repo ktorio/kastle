@@ -1,5 +1,5 @@
 [versions]
-android = "8.11.2"
+agp = "8.11.2"
 android-lifecycle = "2.9.4"
 android-activity-compose = "1.11.0"
 android-compileSdk = "36"
@@ -67,20 +67,20 @@ mcp-sdk = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp-sd
 ktoml = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
 android-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "android-activity-compose" }
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-gradlePlugin-androidLibrary = { module = "com.android.library:com.android.library.gradle.plugin", version.ref = "android" }
+gradlePlugin-androidLibrary = { module = "com.android.library:com.android.library.gradle.plugin", version.ref = "agp" }
 gradlePlugin-composeCompiler = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "composeMultiplatform" }
 
 [plugins]
-android-library = { id = "com.android.library", version.ref = "android" }
-android-application = { id = "com.android.application", version.ref = "android" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+android-application = { id = "com.android.application", version.ref = "agp" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotest = { id = "io.kotest", version.ref = "kotest" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ksp = { id="com.google.devtools.ksp", version.ref = "ksp-version" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp-version" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-compose-hotReload = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeMultiplatform" }
+compose-hotReload = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeHotReload" }
 pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "pluginPublish" }
 kastle = { id = "org.jetbrains.kastle", version.ref = "kastle" }

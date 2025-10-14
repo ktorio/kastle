@@ -40,8 +40,11 @@ dependencyResolutionManagement {
     }
 
     versionCatalogs {
-        maybeCreate("libs").apply {
+        create("libs").apply {
             from(files("../gradle/libs.versions.toml"))
+        }
+        create("ktor").apply {
+            from("io.ktor:ktor-version-catalog:3.3.1")
         }
     }
 }
