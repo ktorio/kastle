@@ -1,8 +1,11 @@
 [versions]
 kotlin = "2.1.21"
+android-lifecycle = "2.9.4"
 android-activity-compose = "1.11.0"
 
 [libraries]
+androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "android-lifecycle" }
+androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "android-lifecycle" }
 android-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "android-activity-compose" }
 
 [plugins]
@@ -11,4 +14,5 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 android.application = { id = "com.android.application", version.ref = "android" }
 android.library = { id = "com.android.library", version.ref = "android" }
 compose.compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose.hotReload = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose.multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }

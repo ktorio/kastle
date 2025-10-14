@@ -7,10 +7,10 @@ subprojects {
     group = "com.jetbrains.kastle"
     version = "1.0.0-SNAPSHOT"
 
-    tasks.withType<Test> {
-        // kotest problems
-        failOnNoDiscoveredTests = false
-    }
+//    tasks.withType<Test> {
+//        // kotest problems
+//        failOnNoDiscoveredTests = false
+//    }
 
     plugins.withId("maven-publish") {
         afterEvaluate {
