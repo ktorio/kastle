@@ -2,6 +2,7 @@ package org.jetbrains.kastle.gen
 
 import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.utils.TreeMap
 import org.jetbrains.kastle.utils.isFile
 import org.jetbrains.kastle.utils.isSlot
 
@@ -40,29 +41,35 @@ fun interface ProjectResolver {
             val repositoryCatalog = repository.versions()
             // TODO hard-coded kotlin version
             val versions = mutableMapOf("kotlin" to "2.1.21")
-            val libraries = mutableMapOf<String, CatalogArtifact>()
-            for (dependency in moduleSources.modules.flatMap { it.allDependencies }) {
-                if (dependency !is CatalogReference) continue
-                val artifact = repositoryCatalog.libraries[dependency.lookupKey] ?: missingDependency(dependency)
-                val version = artifact.version
-                // TODO allow non-refs?
-                val versionRef = (version as? CatalogVersion.Ref)?.ref ?: continue
-                val versionValue = repositoryCatalog.versions[versionRef]
-                if (versionValue != null)
-                    versions[versionRef] = versionValue
-                val library = repositoryCatalog.libraries[dependency.lookupKey]
-                if (library != null)
-                    libraries[dependency.lookupKey] = library
+            val libraries = TreeMap<String, CatalogArtifact>()
+            val gradlePlugins = TreeMap<String, GradlePlugin>()
+            for (module in moduleSources.modules) {
+                for (pluginKey in module.gradlePlugins) {
+                    val catalogKey = CatalogReference.lookupFormat(pluginKey)
+                    val (id, version) = repositoryCatalog.plugins[catalogKey] ?: continue
+                    gradlePlugins[pluginKey] = GradlePlugin(id, pluginKey, version)
+                }
+
+                for (dependency in module.allDependencies) {
+                    if (dependency !is CatalogReference) continue
+                    val artifact = repositoryCatalog.libraries[dependency.lookupKey]
+                    if (artifact == null) {
+                        // skip libraries supplied from other catalogs
+                        if (!dependency.lookupKey.startsWith("lib"))
+                            continue
+                        missingDependency(dependency)
+                    }
+                    val version = artifact.version
+                    // TODO allow non-refs?
+                    val versionRef = (version as? CatalogVersion.Ref)?.ref ?: continue
+                    val versionValue = repositoryCatalog.versions[versionRef]
+                    if (versionValue != null)
+                        versions[versionRef] = versionValue
+                    val library = repositoryCatalog.libraries[dependency.lookupKey]
+                    if (library != null)
+                        libraries[dependency.lookupKey] = library
+                }
             }
-            val gradleSettings = GradleProjectSettings(
-                moduleSources.modules.flatMap { module ->
-                    module.gradlePlugins
-                }.distinct().mapNotNull { key ->
-                    val catalogKey = CatalogReference.lookupFormat(key)
-                    val (id, version) = repositoryCatalog.plugins[catalogKey] ?: return@mapNotNull null
-                    GradlePlugin(id, key, version)
-                }.sortedBy { it.name }
-            )
 
             // TODO validate structure, check for collisions, etc.
             Project(
@@ -74,7 +81,7 @@ fun interface ProjectResolver {
                 commonSources = commonSourceFiles,
                 versions = versions,
                 libraries = libraries,
-                gradle = gradleSettings,
+                gradle = GradleProjectSettings(gradlePlugins.values.toList()),
             )
         }
 
