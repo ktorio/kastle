@@ -47,6 +47,8 @@ fun interface ProjectResolver {
                 for (pluginKey in module.gradlePlugins) {
                     val catalogKey = CatalogReference.lookupFormat(pluginKey)
                     val (id, version) = repositoryCatalog.plugins[catalogKey] ?: continue
+                    if (version is CatalogVersion.Ref)
+                        versions[version.ref] = repositoryCatalog.versions[version.ref] ?: missingVersion(version.ref)
                     gradlePlugins[pluginKey] = GradlePlugin(id, pluginKey, version)
                 }
 
@@ -63,8 +65,7 @@ fun interface ProjectResolver {
                     // TODO allow non-refs?
                     val versionRef = (version as? CatalogVersion.Ref)?.ref ?: continue
                     val versionValue = repositoryCatalog.versions[versionRef]
-                    if (versionValue != null)
-                        versions[versionRef] = versionValue
+                    versions[versionRef] = versionValue ?: missingVersion(versionRef)
                     val library = repositoryCatalog.libraries[dependency.lookupKey]
                     if (library != null)
                         libraries[dependency.lookupKey] = library
@@ -121,6 +122,9 @@ fun interface ProjectResolver {
 
         private fun missingDependency(dependency: Dependency): Nothing =
             throw IllegalArgumentException("Missing dependency $dependency")
+
+        private fun missingVersion(versionRef: String): Nothing =
+            throw IllegalArgumentException("Missing version $versionRef")
     }
 
     suspend fun resolve(

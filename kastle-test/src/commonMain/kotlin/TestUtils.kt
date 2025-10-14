@@ -19,18 +19,26 @@ fun assertFilesAreEqualWithSnapshot(
     actualPath: String,
     ignorePaths: Collection<String> = DEFAULT_IGNORE_FILES,
     replace: Boolean = REPLACE_SNAPSHOTS,
-) = try {
-    assertFilesAreEqual(Paths.get(expectedPath), Paths.get(actualPath), ignorePaths)
-} catch (cause: Throwable) {
-    // Save a copy of the failed project
-    val destination = if (replace) Paths.get(expectedPath)
-                      else Files.createTempDirectory("actual-files-${System.currentTimeMillis()}")
-    println("Files changed, see ${destination.absolute()} for new snapshot")
-    if (!destination.exists())
-        destination.createDirectories()
-    destination.deleteRecursively()
-    Paths.get(actualPath).copyToRecursively(destination, followLinks = false, overwrite = true)
-    throw cause
+) {
+    try {
+        assertFilesAreEqual(
+            Paths.get(expectedPath),
+            Paths.get(actualPath),
+            ignorePaths,
+        )
+    } catch (cause: Throwable) {
+        // Save a copy of the failed project
+        val destination = if (replace) Paths.get(expectedPath)
+        else Files.createTempDirectory("actual-files-${System.currentTimeMillis()}")
+        println("Files changed, see ${destination.absolute()} for new snapshot")
+        if (!destination.exists())
+            destination.createDirectories()
+        destination.deleteRecursively()
+        Paths.get(actualPath).copyToRecursively(destination, followLinks = false, overwrite = true)
+
+        if (!replace)
+            throw cause
+    }
 }
 
 fun assertFilesAreEqual(
