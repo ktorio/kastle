@@ -5,6 +5,10 @@ plugins {
     alias(libs.plugins.kotest)
 }
 
+tasks.named("buildOpenApi") {
+    enabled = false
+}
+
 tasks.jib {
     // this will generate the exported repository automatically
     dependsOn("kotest")

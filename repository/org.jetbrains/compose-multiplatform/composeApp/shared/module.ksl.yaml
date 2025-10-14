@@ -1,15 +1,20 @@
 platforms: [jvm, android, ios, js, wasmJs]
 
 dependencies:
+  - $compose.runtime!
   - $compose.foundation!
   - $compose.material3!
+  - $compose.ui!
   - $compose.preview!
   - $compose.components.resources!
+  - $libs.androidx.lifecycle.viewmodelCompose!
+  - $libs.androidx.lifecycle.runtimeCompose!
 
 gradle:
   plugins:
     - compose.multiplatform
     - compose.compiler
+    - compose.hotReload
     - android.library
 
 amper:

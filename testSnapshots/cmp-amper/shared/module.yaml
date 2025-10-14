@@ -4,10 +4,14 @@ product:
   platforms: [jvm, android, ios, js, wasmJs]
 
 dependencies:
+  - $compose.runtime: exported
   - $compose.foundation: exported
   - $compose.material3: exported
+  - $compose.ui: exported
   - $compose.preview: exported
   - $compose.components.resources: exported
+  - $libs.androidx.lifecycle.viewmodelCompose: exported
+  - $libs.androidx.lifecycle.runtimeCompose: exported
 
 settings:
     compose: enabled

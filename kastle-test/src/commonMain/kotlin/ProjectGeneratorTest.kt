@@ -14,7 +14,7 @@ import kotlin.random.Random
 
 private const val DEFAULT_NAME = "sample"
 private const val DEFAULT_GROUP = "com.acme"
-internal val REPLACE_SNAPSHOTS = true // System.getenv("UPDATE_GENERATOR_SNAPSHOTS") != null
+internal val REPLACE_SNAPSHOTS = System.getenv("UPDATE_GENERATOR_SNAPSHOTS") != null
 
 private val testScope = CoroutineScope(CoroutineName("generator-test"))
 
