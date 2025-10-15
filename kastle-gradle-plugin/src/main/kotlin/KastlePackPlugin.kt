@@ -115,15 +115,9 @@ abstract class KastlePackPlugin : Plugin<Project> {
             Platform.ANDROID -> androidTarget()
             Platform.WASM -> wasmJs()
             Platform.JS -> js()
-            Platform.WEB -> {
-                wasmJs()
-                js()
-            }
+            Platform.WEB -> wasmJs()
             Platform.NATIVE -> linuxX64()
-            Platform.IOS -> {
-                iosArm64()
-                iosSimulatorArm64()
-            }
+            Platform.IOS -> iosArm64()
 
         }
     }
