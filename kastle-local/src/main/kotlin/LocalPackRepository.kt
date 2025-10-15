@@ -281,9 +281,11 @@ class LocalPackRepository(
             }
         )
 
-        return root.resolve(versionsCatalogFile).readToml<VersionsCatalog>(fs) ?: error {
+        val libraryCatalog = root.resolve(versionsCatalogFile).readToml<VersionsCatalog>(fs) ?: error {
             "Failed to read versions catalog from $versionsCatalogFile"
         }
+
+        return libraryCatalog + builtInCatalog
     }
 
     private suspend fun Url.getExtensionFromSlot(): TemplateFormat {
