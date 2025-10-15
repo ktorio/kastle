@@ -6,7 +6,7 @@ plugins {
 
 
 subprojects {
-    group = "com.jetbrains"
+    group = "org.jetbrains"
     version = "1.0.0-SNAPSHOT"
 
     // kotest problems
