@@ -1,16 +1,18 @@
+
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
 }
 
+
 subprojects {
     group = "com.jetbrains.kastle"
     version = "1.0.0-SNAPSHOT"
 
-//    tasks.withType<Test> {
-//        // kotest problems
-//        failOnNoDiscoveredTests = false
-//    }
+    // kotest problems
+    tasks.withType<Test> {
+        failOnNoDiscoveredTests = false
+    }
 
     plugins.withId("maven-publish") {
         afterEvaluate {

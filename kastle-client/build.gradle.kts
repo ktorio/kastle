@@ -11,8 +11,17 @@ plugins {
 
 kotlin {
     jvm()
-    js()
-    wasmJs()
+    iosArm64()
+    iosSimulatorArm64()
+//    js {
+//        browser()
+//        nodejs()
+//    }
+//    wasmJs {
+//        browser()
+//        nodejs()
+//    }
+
 
     sourceSets {
         commonMain.dependencies {
@@ -26,12 +35,12 @@ kotlin {
         commonTest.dependencies {
             implementation(project(":kastle-test"))
             implementation(project(":kastle-server"))
-            implementation(project(":kastle-local"))
             implementation(libs.kotlin.test)
             implementation(libs.ktor.server.test.host)
             implementation(libs.ktor.server.di)
         }
         jvmTest.dependencies {
+            implementation(project(":kastle-local"))
             implementation(libs.kotest.junit5)
         }
     }

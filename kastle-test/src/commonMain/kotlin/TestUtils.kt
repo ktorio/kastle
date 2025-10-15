@@ -1,40 +1,46 @@
 package org.jetbrains.kastle
 
 import io.kotest.matchers.shouldBe
-import java.nio.file.FileVisitOption
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.util.stream.Collectors
-import kotlin.io.path.*
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.buffered
+import kotlinx.io.files.FileSystem
+import kotlinx.io.files.SystemTemporaryDirectory
+import kotlinx.io.readString
+import org.jetbrains.kastle.io.resolve
 
 private val DEFAULT_IGNORE_FILES = setOf(
     ".gitkeep",
     "gradle-wrapper.jar"
 )
 
-@OptIn(ExperimentalPathApi::class)
 fun assertFilesAreEqualWithSnapshot(
     expectedPath: String,
     actualPath: String,
     ignorePaths: Collection<String> = DEFAULT_IGNORE_FILES,
     replace: Boolean = REPLACE_SNAPSHOTS,
 ) {
+    val fs = SystemFileSystem
     try {
         assertFilesAreEqual(
-            Paths.get(expectedPath),
-            Paths.get(actualPath),
+            Path(expectedPath),
+            Path(actualPath),
             ignorePaths,
         )
     } catch (cause: Throwable) {
         // Save a copy of the failed project
-        val destination = if (replace) Paths.get(expectedPath)
-        else Files.createTempDirectory("actual-files-${System.currentTimeMillis()}")
-        println("Files changed, see ${destination.absolute()} for new snapshot")
-        if (!destination.exists())
-            destination.createDirectories()
-        destination.deleteRecursively()
-        Paths.get(actualPath).copyToRecursively(destination, followLinks = false, overwrite = true)
+        val destination = if (replace) Path(expectedPath)
+        else Path(fs.metadataOrNull(SystemTemporaryDirectory)?.toString() ?: ".")
+            .resolve("actual-files-${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}")
+
+        println("Files changed, see $destination for new snapshot")
+
+        if (!fs.exists(destination)) {
+            fs.createDirectories(destination)
+        }
+
+        deleteRecursively(destination, fs)
+        copyRecursively(Path(actualPath), destination, fs)
 
         if (!replace)
             throw cause
@@ -47,25 +53,25 @@ fun assertFilesAreEqual(
     ignorePaths: Collection<String> = emptySet(),
     ignoreListing: Boolean = false,
 ) {
-    if (!Files.exists(expected) || !Files.isDirectory(expected)) {
-        error { "Expected path is not a directory or does not exist: $expected" }
+    val fs = SystemFileSystem
+
+    if (!fs.exists(expected) || fs.metadataOrNull(expected)!!.isRegularFile) {
+        error("Expected path is not a directory or does not exist: $expected")
     }
 
-    if (!Files.exists(actual) || !Files.isDirectory(actual)) {
-        error { "Actual path is not a directory or does not exist: $actual" }
+    if (!fs.exists(actual) || fs.metadataOrNull(actual)!!.isRegularFile) {
+        error("Actual path is not a directory or does not exist: $actual")
     }
 
-    val expectedFiles = Files.walk(expected, FileVisitOption.FOLLOW_LINKS)
-        .filter { Files.isRegularFile(it) && !ignorePaths.contains(it.name) }
-        .map { expected.relativize(it).toString() }
+    val expectedFiles = walkFiles(expected, fs)
+        .filter { !ignorePaths.contains(it.name) }
+        .map { relativePath(expected, it) }
         .sorted()
-        .collect(Collectors.toList())
 
-    val actualFiles = Files.walk(actual, FileVisitOption.FOLLOW_LINKS)
-        .filter { Files.isRegularFile(it) && !ignorePaths.contains(it.name) }
-        .map { actual.relativize(it).toString() }
+    val actualFiles = walkFiles(actual, fs)
+        .filter { !ignorePaths.contains(it.name) }
+        .map { relativePath(actual, it) }
         .sorted()
-        .collect(Collectors.toList())
 
     if (!ignoreListing) {
         val actualListing = actualFiles.joinToString("\n")
@@ -77,11 +83,74 @@ fun assertFilesAreEqual(
         val expectedFile = expected.resolve(relativePath)
         val actualFile = actual.resolve(relativePath)
 
-        val expectedContents = expectedFile.readText().normalize()
-        val actualContents = actualFile.readText().normalize()
+        val expectedContents = readText(expectedFile, fs).normalize()
+        val actualContents = readText(actualFile, fs).normalize()
 
         actualContents shouldBe expectedContents
     }
+}
+
+private fun walkFiles(path: Path, fs: FileSystem = SystemFileSystem): List<Path> {
+    val result = mutableListOf<Path>()
+
+    fun walk(current: Path) {
+        val metadata = fs.metadataOrNull(current) ?: return
+
+        if (metadata.isRegularFile) {
+            result.add(current)
+        } else if (metadata.isDirectory) {
+            fs.list(current).forEach { walk(it) }
+        }
+    }
+
+    walk(path)
+    return result
+}
+
+private fun relativePath(base: Path, target: Path): String {
+    val baseParts = base.toString().split('/')
+    val targetParts = target.toString().split('/')
+
+    val commonPrefix = baseParts.zip(targetParts)
+        .takeWhile { (a, b) -> a == b }
+        .count()
+
+    return targetParts.drop(commonPrefix).joinToString("/")
+}
+
+private fun readText(path: Path, fs: FileSystem = SystemFileSystem): String =
+    fs.source(path).buffered().use { it.readString() }
+
+private fun copyRecursively(source: Path, destination: Path, fs: FileSystem = SystemFileSystem) {
+    val metadata = fs.metadataOrNull(source) ?: return
+
+    if (metadata.isRegularFile) {
+        fs.source(source).buffered().use { input ->
+            fs.sink(destination).buffered().use { output ->
+                input.transferTo(output)
+            }
+        }
+    } else if (metadata.isDirectory) {
+        if (!fs.exists(destination)) {
+            fs.createDirectories(destination)
+        }
+        fs.list(source).forEach { child ->
+            val childName = child.name
+            copyRecursively(child, destination.resolve(childName), fs)
+        }
+    }
+}
+
+private fun deleteRecursively(path: Path, fs: FileSystem = SystemFileSystem) {
+    if (!fs.exists(path)) return
+
+    val metadata = fs.metadataOrNull(path) ?: return
+
+    if (metadata.isDirectory) {
+        fs.list(path).forEach { deleteRecursively(it, fs) }
+    }
+
+    fs.delete(path)
 }
 
 fun String.normalize(): String {

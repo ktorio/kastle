@@ -12,9 +12,14 @@ kotlin {
     jvm()
     iosArm64()
     iosSimulatorArm64()
-    jvm()
-    js()
-    wasmJs()
+//    js {
+//        browser()
+//        nodejs()
+//    }
+//    wasmJs {
+//        browser()
+//        nodejs()
+//    }
 
     sourceSets {
         commonMain.dependencies {

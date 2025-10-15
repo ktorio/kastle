@@ -1,12 +1,13 @@
 package org.jetbrains.kastle
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.comparables.shouldBeGreaterThan
 
 fun PackRepositoryTest(repository: PackRepository): StringSpec.() -> Unit = {
     "get versions" {
         val catalog = repository.versions()
 
-        assert(catalog.versions.size > 10)
-        assert(catalog.libraries.size > 10)
+        catalog.versions.size shouldBeGreaterThan 10
+        catalog.libraries.size shouldBeGreaterThan 10
     }
 }

@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotest)
+    alias(libs.plugins.ksp)
 }
 
 tasks.named("buildOpenApi") {

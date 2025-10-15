@@ -11,6 +11,8 @@ import org.jetbrains.kastle.io.export
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
 import kotlin.random.Random
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 private const val DEFAULT_NAME = "sample"
 private const val DEFAULT_GROUP = "com.acme"
@@ -28,8 +30,9 @@ fun ProjectGeneratorTest(
             createRepository()
         }
 
+    @OptIn(ExperimentalTime::class)
     fun randomString() =
-        Random(System.currentTimeMillis()).nextLong(111, 999).toString(36)
+        Random(Clock.System.now().toEpochMilliseconds()).nextLong(111, 999).toString(36)
 
     suspend fun generate(
         outputDir: Path,

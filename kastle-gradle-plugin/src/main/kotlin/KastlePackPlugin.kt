@@ -48,6 +48,11 @@ abstract class KastlePackPlugin : Plugin<Project> {
                     else listOf(Platform.COMMON) + module.platforms
 
                 for (platform in platforms) {
+                    // we do not publish templates for these platforms currently
+                    // because of problems with KMP build tooling
+                    if (platform in setOf(Platform.JS, Platform.WASM, Platform.WEB))
+                        continue
+
                     kotlinExt.configurePlatform(platform)
 
                     kotlinExt.sourceSets.apply {
