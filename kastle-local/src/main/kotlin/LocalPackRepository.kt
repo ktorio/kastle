@@ -263,23 +263,23 @@ class LocalPackRepository(
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun versions(): VersionsCatalog {
 // TODO support for other catalogs
-//        val builtInArtifacts =
-//            fs.list(root).filter {
-//                it.name.endsWith(".versions.toml")
-//            }.mapNotNull { file ->
-//                file.readToml<BuiltInToml>(fs)?.libraries
-//            }.reduceOrNull { left, right -> left + right } ?: return VersionsCatalog.Empty
-//
-//        val builtInCatalog = VersionsCatalog(
-//            libraries = builtInArtifacts.mapValues { (_, artifact) ->
-//                val (group, artifact, version) = artifact
-//                CatalogArtifact(
-//                    "$group:$artifact",
-//                    CatalogVersion.Number(version),
-//                    builtIn = true
-//                )
-//            }
-//        )
+        val builtInArtifacts =
+            fs.list(root).filter {
+                it.name.endsWith(".versions.toml")
+            }.mapNotNull { file ->
+                file.readToml<BuiltInToml>(fs)?.libraries
+            }.reduceOrNull { left, right -> left + right } ?: return VersionsCatalog.Empty
+
+        val builtInCatalog = VersionsCatalog(
+            libraries = builtInArtifacts.mapValues { (_, artifact) ->
+                val (group, artifact, version) = artifact
+                CatalogArtifact(
+                    "$group:$artifact",
+                    CatalogVersion.Number(version),
+                    builtIn = true
+                )
+            }
+        )
 
         return root.resolve(versionsCatalogFile).readToml<VersionsCatalog>(fs) ?: error {
             "Failed to read versions catalog from $versionsCatalogFile"

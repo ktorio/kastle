@@ -5,6 +5,7 @@ dependencies:
   - $compose.foundation!
   - $compose.material3!
   - $compose.ui!
+  - $compose.animation!
   - $compose.preview!
   - $compose.components.resources!
   - $libs.androidx.lifecycle.viewmodelCompose!
@@ -14,7 +15,6 @@ gradle:
   plugins:
     - compose.multiplatform
     - compose.compiler
-    - compose.hotReload
     - android.library
 
 amper:

@@ -8,6 +8,7 @@ gradle:
   plugins:
     - compose.multiplatform
     - compose.compiler
+    - compose.hotReload
 
 amper:
   compose: enabled

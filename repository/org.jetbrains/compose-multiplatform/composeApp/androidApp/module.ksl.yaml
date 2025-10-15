@@ -9,4 +9,7 @@ amper:
 
 gradle:
   plugins:
+    - compose.multiplatform
+    - compose.compiler
+    - compose.hotReload
     - android.application

@@ -8,6 +8,7 @@ dependencies:
   - $compose.foundation: exported
   - $compose.material3: exported
   - $compose.ui: exported
+  - $compose.animation: exported
   - $compose.preview: exported
   - $compose.components.resources: exported
   - $libs.androidx.lifecycle.viewmodelCompose: exported

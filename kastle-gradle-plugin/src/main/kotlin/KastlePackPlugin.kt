@@ -25,7 +25,11 @@ abstract class KastlePackPlugin : Plugin<Project> {
 
         project.logger.lifecycle("Pack: ${pack.name}")
 
+        /**
+         * Manually apply plugins based on metadata
+         */
         project.plugins.apply(KotlinMultiplatformPluginWrapper::class.java)
+
         if (Platform.ANDROID in module.platforms) {
             project.plugins.apply(LibraryPlugin::class.java)
             project.extensions.configure(LibraryExtension::class.java) { android ->
@@ -40,6 +44,9 @@ abstract class KastlePackPlugin : Plugin<Project> {
         if (module.amper.compose == "enabled")
             project.plugins.apply(ComposeCompilerGradleSubplugin::class.java)
 
+        /**
+         * Include all source sets and dependencies.
+         */
         project.afterEvaluate {
             project.extensions.configure(KotlinMultiplatformExtension::class.java) { kotlinExt ->
                 val isSinglePlatform = module.platforms.size == 1
@@ -48,15 +55,11 @@ abstract class KastlePackPlugin : Plugin<Project> {
                     else listOf(Platform.COMMON) + module.platforms
 
                 for (platform in platforms) {
-                    // we do not publish templates for these platforms currently
-                    // because of problems with KMP build tooling
-                    if (platform in setOf(Platform.JS, Platform.WASM, Platform.WEB))
-                        continue
-
                     kotlinExt.configurePlatform(platform)
 
                     kotlinExt.sourceSets.apply {
                         findByName(platform.kotlinSourceSetName)?.apply {
+                            // Configure source directories
                             if (isSinglePlatform || platform == Platform.COMMON) {
                                 kotlin.srcDir("src")
                                 resources.srcDir("resources")
@@ -64,7 +67,38 @@ abstract class KastlePackPlugin : Plugin<Project> {
                                 kotlin.srcDir(platform.srcDir)
                                 resources.srcDir(platform.resourcesDir)
                             }
-                            project.configureDependencies(repository, this, pack, module, platform, versionsCatalog)
+
+                            // Always include templates
+                            project.dependencies.add(implementationConfigurationName, TEMPLATES_ARTIFACT)
+
+                            val requiredDependencies = module.dependencies[platform] ?: emptyList()
+                            val fullModulePath = module.fullPath(pack.id)
+                            project.logger.lifecycle("Add {} dependencies to {}", requiredDependencies.size, this)
+
+                            // Inter-pack dependencies
+                            for (packId in pack.requires) {
+                                try {
+                                    // TODO support direct module references for multi-module packs
+                                    val module = runBlocking { repository.get(packId) }?.sourceModules?.singleOrNull()
+                                    if (module == null) {
+                                        project.logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
+                                        continue
+                                    }
+                                    val projectRef = packId.toProjectRef(module.path)
+                                    project.dependencies.add(apiConfigurationName, project.project(projectRef))
+                                } catch (e: Exception) {
+                                    project.logger.error("Cannot resolve {}", packId, e)
+                                }
+                            }
+
+                            // Module dependencies
+                            for (dependency in requiredDependencies) {
+                                try {
+                                    project.dependency(this, dependency, versionsCatalog, fullModulePath)
+                                } catch (e: Exception) {
+                                    project.logger.error("Cannot resolve {}", dependency, e)
+                                }
+                            }
                         } ?: project.logger.error("Missing source set ${platform.kotlinSourceSetName}")
                     }
 
@@ -105,45 +139,6 @@ abstract class KastlePackPlugin : Plugin<Project> {
             Platform.JS -> "jsMain"
             Platform.WEB -> "wasmJsMain"
         }
-
-    private fun Project.configureDependencies(
-        repository: PackRepository,
-        sourceSet: KotlinSourceSet,
-        pack: PackDescriptor,
-        module: SourceModule,
-        platform: Platform,
-        versionsCatalog: VersionsCatalog
-    ) {
-        // Always include templates
-        dependencies.add(sourceSet.implementationConfigurationName, TEMPLATES_ARTIFACT)
-
-        val requiredDependencies = module.dependencies[platform] ?: emptyList()
-        val fullModulePath = module.fullPath(pack.id)
-        logger.lifecycle("Add {} dependencies to {}", requiredDependencies.size, sourceSet)
-        // inter-pack dependencies
-        for (packId in pack.requires) {
-            try {
-                // TODO support direct module references for multi-module packs
-                val module = runBlocking { repository.get(packId) }?.sourceModules?.singleOrNull()
-                if (module == null) {
-                    logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
-                    continue
-                }
-                val projectRef = packId.toProjectRef(module.path)
-                dependencies.add(sourceSet.apiConfigurationName, project(projectRef))
-            } catch (e: Exception) {
-                logger.error("Cannot resolve {}", packId, e)
-            }
-        }
-        // module dependencies
-        for (dependency in requiredDependencies) {
-            try {
-                dependency(sourceSet, dependency, versionsCatalog,  fullModulePath)
-            } catch (e: Exception) {
-                logger.error("Cannot resolve {}", dependency, e)
-            }
-        }
-    }
 
     private fun Project.dependency(
         sourceSet: KotlinSourceSet,
