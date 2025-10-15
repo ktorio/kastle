@@ -33,9 +33,3 @@ gradlePlugin {
         }
     }
 }
-
-publishing {
-    repositories {
-        mavenLocal()
-    }
-}

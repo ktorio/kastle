@@ -6,7 +6,7 @@ plugins {
 
 
 subprojects {
-    group = "com.jetbrains.kastle"
+    group = "com.jetbrains"
     version = "1.0.0-SNAPSHOT"
 
     // kotest problems
@@ -29,9 +29,6 @@ subprojects {
                 }
                 publications.withType<MavenPublication> {
                     pom {
-                        artifactId = project.name
-                        group = "org.jetbrains"
-                        version = "1.0.0-SNAPSHOT"
                         url = "https://github.com/ktorio/kastle"
 
                         licenses {
