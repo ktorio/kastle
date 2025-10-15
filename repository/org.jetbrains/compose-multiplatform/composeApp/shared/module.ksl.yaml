@@ -6,7 +6,6 @@ dependencies:
   - $compose.material3!
   - $compose.ui!
   - $compose.animation!
-  - $compose.preview!
   - $compose.components.resources!
   - $libs.androidx.lifecycle.viewmodelCompose!
   - $libs.androidx.lifecycle.runtimeCompose!
