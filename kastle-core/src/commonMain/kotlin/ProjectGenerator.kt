@@ -21,8 +21,9 @@ interface ProjectGenerator {
     companion object {
         fun fromRepository(
             repository: PackRepository,
-            projectResolver: ProjectResolver = ProjectResolver.Default + GradleTransformation
-        ): ProjectGenerator = ProjectGeneratorImpl(repository, projectResolver)
+            projectResolver: ProjectResolver = ProjectResolver.Default + GradleTransformation,
+            log: Logger = ConsoleLogger(),
+        ): ProjectGenerator = ProjectGeneratorImpl(repository, projectResolver, log)
     }
 
     fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry>
@@ -31,7 +32,7 @@ interface ProjectGenerator {
 class ProjectGeneratorImpl(
     private val repository: PackRepository,
     private val projectResolver: ProjectResolver,
-    private val log: Logger = ConsoleLogger(),
+    private val log: Logger,
 ) : ProjectGenerator {
 
     override fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
@@ -389,9 +390,9 @@ class ProjectGeneratorImpl(
                     }
 
                     is ElseBlock -> {
-                        val parent = stack.lastOrNull() ?: error("else without parent: $block")
+                        val parent = stack.top ?: error("else without parent: $block")
                         val ifResult = conditions[parent]
-                        log.trace { "  ${block.positionPrefix} ELSE @${parent.lineNumber} -> ${ifResult == false}" }
+                        log.trace { "  ${block.positionPrefix} ELSE  ^${parent.lineNumber} -> !$ifResult -> ${ifResult == false}" }
                         if (ifResult == false) {
                             append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
                             false
@@ -418,9 +419,11 @@ class ProjectGeneratorImpl(
                                 false
                             }
                             is IfBlock -> {
-                                log.trace { "  ${block.positionPrefix} IF    ${block.expression} -> $value -> ${value.isTruthy()}" }
                                 val parent = stack.top ?: error("if without parent: $block")
-                                val condition = value.isTruthy().also { conditions[parent] = it }
+                                log.trace { "  ${block.positionPrefix} IF    ^${parent.lineNumber} ${block.expression} -> !!$value -> ${value.isTruthy()}" }
+                                val condition = value.isTruthy().also {
+                                    conditions[parent] = it
+                                }
                                 if (condition) {
                                     append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
                                     false
@@ -440,7 +443,7 @@ class ProjectGeneratorImpl(
                                             false
                                         } else skipContents()
                                     }
-                                    else -> error("Expected iterable for each argument: ${block.expression}")
+                                    else -> error("Expected '${block.expression}' to be Iterable, but was $value")
                                 }
                             }
                             // details handled by direct children

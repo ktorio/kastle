@@ -15,34 +15,36 @@ val _properties: TemplateProperties = object : TemplateProperties {}
  */
 val _attributes: TemplateProperties = object : TemplateProperties {}
 
-val _project = object {
+@Suppress("Unused", "ClassName")
+object _project {
     val name: String = ""
     val group: String = ""
+    val modules: List<TemplateSourceModule> = emptyList()
+    val gradle = TemplateGradleProjectSettings()
 }
 
 /**
  * References the current module in the templated project.
  */
-val _module: SourceModule = object: SourceModule {
+val _module: TemplateSourceModule = object: TemplateSourceModule {
     override val path: String = ""
     override val type: String = "lib"
-    override val defaultTarget: Target? = null
-    override val targets: List<Target> = emptyList()
-
-    override val dependencies: Collection<BuildDependency> = emptyList()
-    override val testDependencies: Collection<BuildDependency> = emptyList()
-    override val gradlePlugins: Collection<String> = emptyList()
+    override val platform: String? = null
+    override val platforms: List<String> = emptyList()
+    override val dependencies: Map<String, List<TemplateBuildDependency>> = emptyMap()
+    override val testDependencies: Map<String, List<TemplateBuildDependency>> = emptyMap()
+    override val gradle = TemplateGradleModuleSettings()
 }
 
 /**
  * Injects the slot with the given name.
  */
-val _slot: (String) -> Slot? = { null }
+val _slot: (String) -> TemplateSlot? = { null }
 
 /**
  * Injects all slots targeting the given slot name.
  */
-fun _slots(key: String): Sequence<Slot> = emptySequence()
+fun _slots(key: String): Sequence<TemplateSlot> = emptySequence()
 
 /**
  * Returns true when the project config includes a source targeting this slot.
@@ -61,53 +63,47 @@ interface TemplateProperties {
     operator fun <T> get(key: String): T = TODO()
 }
 
-interface DependencyHolder {
-    val dependencies: Collection<BuildDependency>
-    val testDependencies: Collection<BuildDependency>
-}
-
-interface SourceModule: DependencyHolder {
+interface TemplateSourceModule {
     val path: String
     val type: String
-    val defaultTarget: Target?
-    val targets: List<Target>
-    val gradlePlugins: Collection<String>
+    val platform: String?
+    val platforms: List<String>
+    val gradle: TemplateGradleModuleSettings
+    val dependencies: Map<String, List<TemplateBuildDependency>>
+    val testDependencies: Map<String, List<TemplateBuildDependency>>
 }
 
+data class TemplateGradleProjectSettings(
+    val repositories: List<TemplateMavenRepository> = emptyList(),
+    val plugins: List<TemplateGradlePlugin> = emptyList(),
+)
+
+data class TemplateGradleModuleSettings(
+    val plugins: List<String> = emptyList(),
+)
+
+data class TemplateMavenRepository(
+    val name: String,
+    val url: String,
+    val gradleFunction: String?
+)
+
 @TemplateDsl
-interface Slot {
+interface TemplateSlot {
     fun <T> get(): T
 }
 
-interface Target: DependencyHolder {
-    val name: String
-}
+data class TemplateBuildDependency(
+    val type: String, // maven, project, catalog
+    val group: String? = null,
+    val artifact: String? = null,
+    val version: String? = null,
+    val path: String? = null,
+    val key: String? = null,
+    val exported: Boolean = false,
+)
 
-data class BuildDependency(
-    val group: String,
-    val artifact: String,
-    val version: String
-) {
-    companion object {
-        private val tlds = setOf("org", "io", "com")
-    }
-
-    val catalogReference: String get() {
-        var prev: String? = null
-        return sequenceOf(group, artifact).flatMap {
-            it.split(Regex("\\W"))
-        }.filterIndexed { i, token ->
-            try {
-                token.isNotBlank() && !(i == 0 && token in tlds) && prev != token
-            } finally {
-                prev = token
-            }
-        }.joinToString(".")
-    }
-
-}
-
-data class GradlePlugin(
+data class TemplateGradlePlugin(
     val id: String,
     val name: String,
     val version: String

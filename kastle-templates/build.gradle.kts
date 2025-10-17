@@ -20,10 +20,4 @@ kotlin {
         browser()
         nodejs()
     }
-
-    sourceSets {
-        commonMain.dependencies {
-            implementation(project(":kastle-core"))
-        }
-    }
 }

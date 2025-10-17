@@ -3,7 +3,8 @@ package org.jetbrains.kastle.templates
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.*
 import org.jetbrains.kastle.utils.Expression
-import org.jetbrains.kastle.utils.Operator
+import org.jetbrains.kastle.utils.BinaryOperator
+import org.jetbrains.kastle.utils.PostfixOperator
 import org.jetbrains.kotlin.lexer.KtTokens
 
 fun KtExpression?.toTemplateExpression(): Expression {
@@ -63,32 +64,31 @@ fun KtExpression?.toTemplateExpression(): Expression {
             Expression.VariableRef(getReferencedName())
         }
 
-        // Handle binary operations
         is KtBinaryExpression -> {
             val left = left?.toTemplateExpression()
                 ?: throw IllegalArgumentException("Missing left operand in binary expression")
             val right = right?.toTemplateExpression()
                 ?: throw IllegalArgumentException("Missing right operand in binary expression")
 
-            val operator = when (operationToken) {
-                KtTokens.PLUS -> Operator.PLUS
-                KtTokens.MINUS -> Operator.MINUS
-                KtTokens.MUL -> Operator.MULTIPLY
-                KtTokens.DIV -> Operator.DIVIDE
-                KtTokens.PERC -> Operator.MODULO
-                KtTokens.EQEQ -> Operator.EQUALS
-                KtTokens.EXCLEQ -> Operator.NOT_EQUALS
-                KtTokens.GT -> Operator.GREATER_THAN
-                KtTokens.LT -> Operator.LESS_THAN
-                KtTokens.GTEQ -> Operator.GREATER_THAN_OR_EQUAL
-                KtTokens.LTEQ -> Operator.LESS_THAN_OR_EQUAL
-                KtTokens.ANDAND -> Operator.AND
-                KtTokens.OROR -> Operator.OR
-                KtTokens.ELVIS -> Operator.ELVIS
+            val binaryOperator = when (operationToken) {
+                KtTokens.PLUS -> BinaryOperator.PLUS
+                KtTokens.MINUS -> BinaryOperator.MINUS
+                KtTokens.MUL -> BinaryOperator.MULTIPLY
+                KtTokens.DIV -> BinaryOperator.DIVIDE
+                KtTokens.PERC -> BinaryOperator.MODULO
+                KtTokens.EQEQ -> BinaryOperator.EQUALS
+                KtTokens.EXCLEQ -> BinaryOperator.NOT_EQUALS
+                KtTokens.GT -> BinaryOperator.GREATER_THAN
+                KtTokens.LT -> BinaryOperator.LESS_THAN
+                KtTokens.GTEQ -> BinaryOperator.GREATER_THAN_OR_EQUAL
+                KtTokens.LTEQ -> BinaryOperator.LESS_THAN_OR_EQUAL
+                KtTokens.ANDAND -> BinaryOperator.AND
+                KtTokens.OROR -> BinaryOperator.OR
+                KtTokens.ELVIS -> BinaryOperator.ELVIS
                 else -> throw IllegalArgumentException("Unsupported binary operator: $operationToken")
             }
 
-            Expression.BinaryOp(operator, left, right)
+            Expression.BinaryOp(binaryOperator, left, right)
         }
 
         // Handle method calls and property access
@@ -128,7 +128,6 @@ fun KtExpression?.toTemplateExpression(): Expression {
             }
         }
 
-        // Handle lambda expressions
         is KtLambdaExpression -> {
             val parameters = functionLiteral.valueParameters.map { it.name ?: "_" }
             val body = functionLiteral.bodyExpression?.statements?.singleOrNull()
@@ -137,14 +136,21 @@ fun KtExpression?.toTemplateExpression(): Expression {
             Expression.Lambda(parameters, body.toTemplateExpression())
         }
 
-        // Handle parenthesized expressions
         is KtParenthesizedExpression -> {
             expression?.toTemplateExpression()
                 ?: throw IllegalArgumentException("Empty parenthesized expression")
         }
 
-        // For if expressions and other complex constructs, you might want to add more cases
+        is KtPostfixExpression -> {
+            val operator = when(operationReference.text) {
+                "!!" -> PostfixOperator.NOT_NULL
+                else -> throw IllegalArgumentException("Unsupported postfix operator: ${operationReference.text}")
+            }
+            Expression.PostfixOp(operator, baseExpression?.toTemplateExpression()
+                ?: throw IllegalArgumentException("Missing base expression"))
+        }
 
+        // For if expressions and other complex constructs, you might want to add more cases
         else -> throw IllegalArgumentException("Unsupported expression type: ${this::class.simpleName}")
     }
 }

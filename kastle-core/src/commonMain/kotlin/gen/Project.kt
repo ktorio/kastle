@@ -5,6 +5,7 @@ import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.normalize
+import kotlin.collections.map
 
 data class Project(
     val descriptor: ProjectDescriptor,
@@ -54,12 +55,15 @@ private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "type" to if (amper.application != null && platforms.size == 1) "${platforms.single()}/app" else "lib",
     "platform" to platforms.singleOrNull()?.code,
     "platforms" to platforms.map { it.code },
-    "dependencies" to dependencies.asSequence().filter { it.value.isNotEmpty() }.associate { (platform, deps) ->
-        platform.code to deps.map { it.toVariableMap(path) }
-    },
-    "testDependencies" to testDependencies.asSequence().associate { (platform, deps) ->
-        platform.code to deps.map { it.toVariableMap(path) }
-    },
+    "dependencies" to dependencies.asSequence()
+        .filter { it.value.isNotEmpty() }
+        .associate { (platform, deps) ->
+            platform.code to deps.map { it.toVariableMap(path) }
+        },
+    "testDependencies" to testDependencies.asSequence()
+        .associate { (platform, deps) ->
+            platform.code to deps.map { it.toVariableMap(path) }
+        },
     "gradle" to gradle.toVariableMap(),
     "amper" to amper.toVariableMap(),
 )
@@ -98,6 +102,9 @@ fun GradleSettings.toVariableMap() = mapOf(
 )
 
 fun GradleProjectSettings.toVariableMap() = mapOf(
+    "repositories" to repositories.map {
+        it.toVariableMap()
+    },
     "plugins" to plugins.map {
         mapOf(
             "id" to it.id,
@@ -105,6 +112,12 @@ fun GradleProjectSettings.toVariableMap() = mapOf(
             "version" to it.version.toVariableMap()
         )
     },
+)
+
+fun MavenRepository.toVariableMap() = mapOf(
+    "id" to id,
+    "url" to url,
+    "gradleFunction" to gradleFunction,
 )
 
 fun AmperSettings.toVariableMap(): Map<String, String?> = mapOf(

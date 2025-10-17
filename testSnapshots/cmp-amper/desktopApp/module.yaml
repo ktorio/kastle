@@ -3,7 +3,7 @@ product:
   type: lib
   platforms: [jvm]
 
-dependencies:
+dependencies@jvm:
   - ../shared
   - $compose.desktop.currentOs
 

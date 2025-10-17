@@ -3,7 +3,7 @@ product:
   type: lib
   platforms: [ios]
 
-dependencies:
+dependencies@ios:
   - ../shared
   - $compose.ui
 

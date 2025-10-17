@@ -4,14 +4,18 @@ pluginManagement {
     repositories {
         mavenCentral()
         gradlePluginPortal()
-        _slots("gradlePluginRepositories")
+        for (repository in _project.gradle.repositories) {
+            _unsafe("${repository.gradleFunction}()")
+        }
     }
 }
 
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
-        _slots("gradleRepositories")
+        for (repository in _project.gradle.repositories) {
+            _unsafe("${repository.gradleFunction}()")
+        }
     }
 }
 

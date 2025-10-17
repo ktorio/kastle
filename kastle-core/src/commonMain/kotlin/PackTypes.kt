@@ -17,7 +17,7 @@ sealed interface PackMetadata {
     val requires: List<PackId>
     val properties: List<Property>
     val attributes: Map<VariableId, String>
-    val repositories: List<Repository>
+    val repositories: List<MavenRepository>
 }
 
 @Serializable
@@ -35,7 +35,7 @@ data class PackManifest(
     override val requires: List<PackId> = emptyList(),
     override val properties: List<Property> = emptyList(),
     override val attributes: Map<VariableId, String> = emptyMap(),
-    override val repositories: List<Repository> = emptyList(),
+    override val repositories: List<MavenRepository> = emptyList(),
     val modules: List<SourceModule>? = null,
     val commonSources: List<SourceDefinition> = emptyList(),
     val rootSources: List<SourceDefinition> = emptyList(),

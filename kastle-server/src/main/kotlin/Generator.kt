@@ -28,7 +28,12 @@ fun Application.provideGenerator(
     val log = environment.log
     dependencies {
         provide<PackRepository> { getCompiledRepository(sourceDir, compiledDir, log) }
-        provide<ProjectGenerator> { ProjectGenerator.fromRepository(resolve()) }
+        provide<ProjectGenerator> {
+            ProjectGenerator.fromRepository(
+                repository = resolve(),
+                log = resolve()
+            )
+        }
     }
 }
 

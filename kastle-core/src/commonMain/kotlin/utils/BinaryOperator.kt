@@ -1,6 +1,6 @@
 package org.jetbrains.kastle.utils
 
-enum class Operator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
+enum class BinaryOperator(val string: String, val evaluate: (Any?, Any?) -> Any?) {
     // Arithmetic operators
     PLUS("+", { left, right ->
         when {

@@ -146,12 +146,21 @@ fun KtExpression.readReferenceBlocks(): Sequence<Block> {
     // handles deep references (i.e., foo.bar)
     var variableReference: KtExpression = this
     var ancestor: PsiElement? = parent
-    while (ancestor is KtExpression || ancestor is KtContainerNode || ancestor is KtStringTemplateEntry) {
-        val blocks = ancestor.tryReadBlocks()
-        if (blocks != null)
-            return blocks
-        variableReference = ancestor as? KtQualifiedExpression ?: variableReference
-        ancestor = ancestor.parent
+    while (true) {
+        when(ancestor) {
+            is KtContainerNodeForControlStructureBody -> {
+                // avoid infinite loop on (amusingly) for loops
+                break
+            }
+            is KtExpression, is KtContainerNode, is KtStringTemplateEntry -> {
+                val blocks = ancestor.tryReadBlocks()
+                if (blocks != null)
+                    return blocks
+                variableReference = ancestor as? KtQualifiedExpression ?: variableReference
+                ancestor = ancestor.parent
+            }
+            else -> break
+        }
     }
     return variableReference.asLiteralReference()
 }

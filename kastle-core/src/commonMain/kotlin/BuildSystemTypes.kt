@@ -90,9 +90,10 @@ data class BuildSystemDependency(
 )
 
 @Serializable
-data class Repository(
+data class MavenRepository(
     val id: String,
-    val url: Url
+    val url: Url,
+    val gradleFunction: String? = null,
 )
 
 @Serializable
@@ -242,6 +243,7 @@ data class GradleSettings(
 
 @Serializable
 data class GradleProjectSettings(
+    val repositories: List<MavenRepository> = emptyList(),
     val plugins: List<GradlePlugin> = emptyList(),
 )
 
@@ -321,7 +323,7 @@ data class CatalogReference(
     override val exported: Boolean = false,
 ): Dependency {
     companion object {
-        fun lookupFormat(key: String) =
+        fun lookupFormat(key: String): String =
             key.removePrefix("libs.").replace('.', '-')
     }
 

@@ -3,7 +3,7 @@ product:
   type: lib
   platforms: [android]
 
-dependencies:
+dependencies@android:
   - ../shared
   - $libs.android.activity.compose
 

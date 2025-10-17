@@ -38,7 +38,6 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.animation)
-            implementation(compose.preview)
             implementation(compose.components.resources)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)

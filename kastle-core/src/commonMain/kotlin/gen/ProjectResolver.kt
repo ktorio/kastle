@@ -39,8 +39,8 @@ fun interface ProjectResolver {
                 }
             }.toMap()
             val repositoryCatalog = repository.versions()
-            // TODO hard-coded kotlin version
-            val versions = mutableMapOf("kotlin" to "2.1.21")
+            val kotlinVersion = repositoryCatalog.versions["kotlin"] ?: missingVersion("kotlin")
+            val versions = mutableMapOf("kotlin" to kotlinVersion)
             val libraries = TreeMap<String, CatalogArtifact>()
             val gradlePlugins = TreeMap<String, GradlePlugin>()
             for (module in moduleSources.modules) {
@@ -49,7 +49,7 @@ fun interface ProjectResolver {
                     val (id, version) = repositoryCatalog.plugins[catalogKey] ?: continue
                     if (version is CatalogVersion.Ref)
                         versions[version.ref] = repositoryCatalog.versions[version.ref] ?: missingVersion(version.ref)
-                    gradlePlugins[pluginKey] = GradlePlugin(id, pluginKey, version)
+                    gradlePlugins[catalogKey] = GradlePlugin(id, pluginKey, version)
                 }
 
                 for (dependency in module.allDependencies) {
@@ -71,6 +71,10 @@ fun interface ProjectResolver {
                         libraries[dependency.lookupKey] = library
                 }
             }
+            val gradleSettings = GradleProjectSettings(
+                repositories = packs.flatMap { it.repositories }.distinct(),
+                plugins = gradlePlugins.values.toList(),
+            )
 
             // TODO validate structure, check for collisions, etc.
             Project(
@@ -82,7 +86,7 @@ fun interface ProjectResolver {
                 commonSources = commonSourceFiles,
                 versions = versions,
                 libraries = libraries,
-                gradle = GradleProjectSettings(gradlePlugins.values.toList()),
+                gradle = gradleSettings,
             )
         }
 
