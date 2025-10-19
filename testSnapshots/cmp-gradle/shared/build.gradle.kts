@@ -7,6 +7,10 @@ plugins {
 }
 
 
+dependencies {
+    debugImplementation(compose.uiTooling)
+}
+
 kotlin {
     jvm()
 
@@ -16,9 +20,15 @@ kotlin {
         }
     }
 
-    iosArm64()
-    iosSimulatorArm64()
-
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+        }
+    }
     js {
         browser()
         binaries.executable()

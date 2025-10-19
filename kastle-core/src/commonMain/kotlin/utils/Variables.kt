@@ -22,6 +22,10 @@ fun Variables.addVariableOrScope(pair: Pair<String?, Any?>) {
     }
 }
 
+operator fun Variables.plus(pair: Map<String, Any?>): Variables = apply {
+    this += pair
+}
+
 operator fun Variables.plus(pair: Pair<String, Any?>): Variables = apply {
     this += mapOf(pair)
 }

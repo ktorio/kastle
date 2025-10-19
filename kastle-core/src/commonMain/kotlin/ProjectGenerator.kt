@@ -9,6 +9,7 @@ import kotlinx.io.writeString
 import org.jetbrains.kastle.gen.ProjectResolver
 import org.jetbrains.kastle.gen.getVariables
 import org.jetbrains.kastle.gen.plus
+import org.jetbrains.kastle.gen.toVariableEntries
 import org.jetbrains.kastle.gen.toVariableEntry
 import org.jetbrains.kastle.gradle.GradleTransformation
 import org.jetbrains.kastle.logging.ConsoleLogger
@@ -80,7 +81,7 @@ class ProjectGeneratorImpl(
                 }
                 val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
                 val variables = project.getVariables(pack) +
-                        project.toVariableEntry() +
+                        project.toVariableEntries() +
                         module.toVariableEntry()
                 if (source.condition != null) {
                     val conditionValue = source.condition.evaluate(variables)
@@ -358,8 +359,8 @@ class ProjectGeneratorImpl(
                     is SkipBlock -> skipContents()
 
                     is Slot -> {
-                        // TODO verify
-                        val indentString = (source.text.indentAt(block.rangeStart) ?: 0).stringOf(' ')
+                        val indentSize = (source.text.indentAt(block.rangeStart) ?: 0) - block.level * 4
+                        val indentString = indentSize.stringOf(' ')
                         if (slots.isNotEmpty()) {
                             append(source.text, block.outerStart, block.rangeStart, block.level)
                             append(slots.joinToString("\n\n$indentString") {

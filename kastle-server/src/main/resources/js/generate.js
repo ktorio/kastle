@@ -119,22 +119,38 @@ function buildProjectGenerationUrl(requestPath) {
         url.searchParams.append(key, input.value);
     }
 
+    const packIds = new Set()
     for (const el of document.getElementsByClassName('include-pack-toggle')) {
         if (el.checked) {
-            url.searchParams.append('pack', el.dataset.packId);
+            packIds.add(el.dataset.packId)
         }
     }
+    packIds.forEach(id => url.searchParams.append('pack', id))
 
-    if (requestPath.endsWith('/listing')) {
-        const selectedFileElement = document.querySelector(`input[name="preview-file"]:checked`);
-        if (selectedFileElement) {
-            const selectedFile = removeUpToFirstSlash(selectedFileElement.id);
-            url.searchParams.append('selected', selectedFile);
-        }
-    }
+    includeViewState(url);
+
     return url;
 }
 
+function includeViewState(url) {
+    const selectedTabElement = document.querySelector(`input[name="main-tabs"]:checked`);
+    if (selectedTabElement) {
+        const selectedTab = selectedTabElement.dataset.tabTitle;
+        url.searchParams.append('tab', selectedTab);
+    }
+
+    const selectedPackElement = document.querySelector(`input[name="selected-pack"]:checked`);
+    if (selectedPackElement) {
+        const selectedPack = selectedPackElement.value;
+        url.searchParams.append('selectedPack', selectedPack);
+    }
+
+    const selectedFileElement = document.querySelector(`input[name="preview-file"]:checked`);
+    if (selectedFileElement) {
+        const selectedFile = selectedFileElement.dataset.filePath;
+        url.searchParams.append('selectedFile', selectedFile);
+    }
+}
 
 function removeUpToFirstSlash(str) {
     const indexOfSlash = str.indexOf('/');
@@ -142,8 +158,4 @@ function removeUpToFirstSlash(str) {
         return str.substring(indexOfSlash + 1); // Remove up to the first '/'
     }
     return str; // Return the original string if no '/' is found
-}
-
-function addElement(e) {
-    e.target.parentElement.insertAdjacentHTML('beforeend', '<div>New Element</div>');
 }

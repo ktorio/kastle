@@ -38,6 +38,7 @@ private fun UL.buildTree(
                     input(type = InputType.radio, name = "preview-file") {
                         id = inputId
                         checked = selected
+                        attributes["data-file-path"] = fullPath
                         attributes.hx {
                             get = "/project/file/$fullPath"
                             target = "#preview-panel-contents"

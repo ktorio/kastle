@@ -14,5 +14,5 @@ amper:
   compose: enabled
 
 sources:
-  - target: slot://org.gradle/gradle/gradleConfigurations
-    path: config.gradle.kts
+  - path: config.gradle.kts
+    target: slot://org.gradle/gradle/buildRoot

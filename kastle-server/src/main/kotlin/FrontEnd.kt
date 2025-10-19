@@ -2,14 +2,21 @@ package org.jetbrains.kastle.server
 
 import io.ktor.http.*
 import io.ktor.server.html.*
+import io.ktor.server.request.path
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
+import kotlinx.html.FlowContent
 import kotlinx.html.body
 import kotlinx.html.ul
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.server.ui.*
+
+val DEFAULT_PROJECT = ProjectDescriptor(
+    name = "project",
+    group = "com.example",
+)
 
 fun Routing.frontEnd(
     repository: PackRepository,
@@ -17,12 +24,17 @@ fun Routing.frontEnd(
 ) {
     // main page
     get {
+        val project = call.tryReadProjectDescriptor()
+        val view = call.readViewState()
         val packs = repository.all()
             .toList()
             .sortedBy { it.name }
+        val previewContents: FlowContent.() -> Unit = view.selectedFile?.let { filePath ->
+            generator.generate(project ?: DEFAULT_PROJECT).filter { it.path == filePath }.singleOrNull()
+        }?.htmlContent ?: {}
 
         call.respondHtml {
-            indexHtml(packs)
+            indexHtml(view, packs, project, previewContents)
         }
     }
     get("/packs") {
@@ -78,7 +90,7 @@ fun Routing.frontEnd(
     route("/project") {
         get("listing") {
             val descriptor = call.readProjectDescriptor()
-            val selectedFile = call.request.queryParameters["selected"]
+            val selectedFile = call.readViewState().selectedFile
             val files = generator.generate(descriptor)
                 .map { it.path }
                 .toList()
@@ -108,11 +120,18 @@ fun Routing.frontEnd(
     }
 }
 
+private fun RoutingCall.readProjectDescriptor(): ProjectDescriptor {
+    val descriptor = tryReadProjectDescriptor()
+    requireNotNull(descriptor) { "Project parameters 'name' and 'group' are required" }
+    return descriptor
+}
 
-private fun RoutingCall.readProjectDescriptor() =
-    ProjectDescriptor(
-        name = request.queryParameters["name"]!!,
-        group = request.queryParameters["group"]!!,
+private fun RoutingCall.tryReadProjectDescriptor(): ProjectDescriptor? {
+    val name = request.queryParameters["name"] ?: return null
+    val group = request.queryParameters["group"] ?: return null
+    return ProjectDescriptor(
+        name = name,
+        group = group,
         properties = request.queryParameters.entries()
             .asSequence()
             .filter { runCatching { VariableId.parse(it.key) }.isSuccess }
@@ -120,6 +139,18 @@ private fun RoutingCall.readProjectDescriptor() =
             .toMap(),
         packs = request.queryParameters.getAll("pack").orEmpty().map(PackId::parse),
     )
+}
+
+private fun RoutingCall.readViewState(): View {
+    val tab = request.queryParameters["tab"]?.let { tabName ->
+        ViewTab.entries.firstOrNull {
+            it.name.equals(tabName, ignoreCase = true)
+        }
+    } ?: return View()
+    val pack = request.queryParameters["selectedPack"]?.let(PackId::parse)
+    val file = request.queryParameters["selectedFile"]
+    return View(tab, pack, file)
+}
 
 /**
  * Handles merging object properties.

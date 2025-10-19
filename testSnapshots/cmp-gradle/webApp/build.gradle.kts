@@ -4,6 +4,10 @@ plugins {
 }
 
 
+dependencies {
+    debugImplementation(compose.uiTooling)
+}
+
 kotlin {
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {

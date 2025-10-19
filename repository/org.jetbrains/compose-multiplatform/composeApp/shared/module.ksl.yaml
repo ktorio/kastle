@@ -18,3 +18,10 @@ gradle:
 
 amper:
   compose: enabled
+
+sources:
+  - target: slot://org.gradle/gradle/buildRoot
+    text: |-
+      dependencies {
+          debugImplementation(compose.uiTooling)
+      }

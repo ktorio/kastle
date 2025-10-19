@@ -22,7 +22,7 @@ if (_project.modules.size == 1) {
     }
 }
 
-_slots("gradleConfigurations")
+_slots("buildRoot")
 
 if (_module.platform != "jvm") {
     kotlin {
@@ -39,8 +39,12 @@ if (_module.platform != "jvm") {
                     }
                 }
                 "ios" -> {
-                    iosArm64()
-                    iosSimulatorArm64()
+                    if (_slots.contains("iosOverride")) {
+                        _slot("iosOverride")
+                    } else {
+                        iosArm64()
+                        iosSimulatorArm64()
+                    }
                 }
                 "js" -> {
                     js {

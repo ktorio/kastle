@@ -11,7 +11,7 @@ sealed interface PackMetadata {
     val description: String?
     val license: String?
     val group: Group?
-    val categories: List<String>
+    val tags: List<String>
     val links: PackLinks?
     val documentation: String?
     val requires: List<PackId>
@@ -26,7 +26,7 @@ data class PackManifest(
     override val name: String,
     override val version: SemanticVersion = SemanticVersion(1, 0, 0),
     override val group: Group? = null,
-    override val categories: List<String> = emptyList(),
+    override val tags: List<String> = emptyList(),
     override val license: String? = null,
     override val icon: String? = null,
     override val description: String? = null,

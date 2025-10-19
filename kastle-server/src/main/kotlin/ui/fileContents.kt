@@ -1,13 +1,23 @@
 package org.jetbrains.kastle.server.ui
 
+import io.ktor.utils.io.readText
 import kotlinx.html.*
+import org.jetbrains.kastle.SourceFileEntry
 
 fun HTML.fileContentsHtml(name: String, contents: String) {
     body {
-        pre {
-            code(languageString(name)) {
-                +contents
-            }
+        fileBodyContentsHtml(name, contents)
+    }
+}
+
+val SourceFileEntry.htmlContent: FlowContent.() -> Unit get() = {
+    fileBodyContentsHtml(path, content().readText())
+}
+
+fun FlowContent.fileBodyContentsHtml(name: String, contents: String) {
+    pre {
+        code(languageString(name)) {
+            +contents
         }
     }
 }

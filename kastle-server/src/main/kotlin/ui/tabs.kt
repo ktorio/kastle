@@ -11,8 +11,9 @@ fun FlowContent.tabList(
 
         for (tab in tabsContent) {
             input(type = InputType.radio, name = name) {
-                this.id = "${tab.id}-tab"
-                this.checked = tab.checked
+                id = "${tab.id}-tab"
+                checked = tab.checked
+                attributes["data-tab-title"] = tab.title
             }
         }
 

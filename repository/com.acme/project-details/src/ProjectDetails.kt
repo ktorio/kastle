@@ -1,7 +1,5 @@
 package kastle
 
-import kastle.unaryPlus
-
 fun main() {
     +"Project ${_project.group}:${_project.name}"
     for (module in _project.modules) {

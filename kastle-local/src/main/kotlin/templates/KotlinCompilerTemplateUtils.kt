@@ -332,10 +332,11 @@ sealed interface TemplateParentReference {
             val parent = reference.parent
             return when (reference.text) {
                 SLOT, SLOTS -> {
-                    require(parent is KtCallExpression) {
-                        "Expected slot to be called but found: ${reference.parent?.text ?: "<null>"}"
+                    when(parent) {
+                        is KtCallExpression -> Slot(parent)
+                        is KtExpression -> PropertyReference(parent)
+                        else -> throw IllegalArgumentException("Expected slot on call or property reference but was: ${parent?.text ?: "<null>"}")
                     }
-                    Slot(parent)
                 }
 
                 UNSAFE -> {
@@ -352,11 +353,11 @@ sealed interface TemplateParentReference {
                     PropertyDelegate(grandparent, reference.text == ATTRIBUTES)
                 }
                 MODULE, PROJECT -> {
-                    require(parent is KtDotQualifiedExpression) {
+                    require(parent is KtExpression) {
                         "Expected property access on project/module but was: ${parent?.text ?: "<null>"}"
                     }
-                    // TODO other kinds of module references
-                    PropertyReferenceChain(parent)
+                    // TODO other kinds of references
+                    PropertyReference(parent)
                 }
 
                 else -> throw IllegalArgumentException("Unrecognized reference: ${reference.text}")
@@ -365,7 +366,7 @@ sealed interface TemplateParentReference {
     }
 
     data class PropertyDelegate(val declaration: KtDeclaration, val hidden: Boolean = false): TemplateParentReference
-    data class PropertyReferenceChain(val expression: KtDotQualifiedExpression): TemplateParentReference
+    data class PropertyReference(val expression: KtExpression): TemplateParentReference
     data class Slot(val expression: KtCallExpression): TemplateParentReference
     data class Unsafe(val expression: KtCallExpression): TemplateParentReference
 }

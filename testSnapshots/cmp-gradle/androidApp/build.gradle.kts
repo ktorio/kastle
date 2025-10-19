@@ -8,6 +8,10 @@ plugins {
 }
 
 
+dependencies {
+    debugImplementation(compose.uiTooling)
+}
+
 kotlin {
     androidTarget {
         compilerOptions {

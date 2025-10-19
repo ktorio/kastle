@@ -8,6 +8,10 @@ plugins {
 
 
 dependencies {
+    debugImplementation(compose.uiTooling)
+}
+
+dependencies {
     implementation(project(":shared"))
     implementation(compose.desktop.currentOs)
 }

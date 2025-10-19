@@ -108,3 +108,8 @@ data class TemplateGradlePlugin(
     val name: String,
     val version: String
 )
+
+interface TemplateSlots {
+    fun contains(name: String): Boolean
+    fun invoke(name: String): Sequence<TemplateSlot>?
+}

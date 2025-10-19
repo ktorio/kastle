@@ -13,3 +13,7 @@ gradle:
     - compose.compiler
     - compose.hotReload
     - android.application
+
+sources:
+  - path: android.gradle.kts
+    target: slot://org.gradle/gradle/buildRoot

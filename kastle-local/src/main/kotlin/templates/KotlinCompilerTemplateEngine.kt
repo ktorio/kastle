@@ -133,9 +133,14 @@ internal class KotlinCompilerTemplateEngine(
 
     private fun KtFile.findBlocks(properties: MutableList<Property>): List<Block> {
         // references to project or module
-        val templateReferences = findReferencesTo(PROPERTIES, SLOT, SLOTS, MODULE, PROJECT, UNSAFE)
-            .map(TemplateParentReference.Companion::classify)
-            .toList()
+        val templateReferences = findReferencesTo(
+            PROPERTIES,
+            SLOT,
+            SLOTS,
+            MODULE,
+            PROJECT,
+            UNSAFE
+        ).map(TemplateParentReference.Companion::classify).toList()
 
         // declarations of properties
         val propertyDeclarations = templateReferences
@@ -155,7 +160,7 @@ internal class KotlinCompilerTemplateEngine(
 
         // inline reference chains
         val chainedReferences = templateReferences
-            .filterIsInstance<TemplateParentReference.PropertyReferenceChain>()
+            .filterIsInstance<TemplateParentReference.PropertyReference>()
             .flatMap { it.expression.readReferenceBlocks() }
 
         // slot references

@@ -2,11 +2,20 @@ package org.jetbrains.kastle.server.ui
 
 import io.ktor.htmx.html.*
 import io.ktor.utils.io.*
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.html.*
 import org.jetbrains.kastle.PackDescriptor
+import org.jetbrains.kastle.ProjectDescriptor
+import org.jetbrains.kastle.ProjectGenerator
 
 @OptIn(ExperimentalKtorApi::class)
-fun HTML.indexHtml(packs: List<PackDescriptor>) {
+fun HTML.indexHtml(
+    view: View = View(),
+    packs: List<PackDescriptor> = emptyList(),
+    project: ProjectDescriptor? = null,
+    previewContents: FlowContent.() -> Unit = {},
+) {
     head {
         title { +"K A S T L E" }
         style { unsafe { +Resources.stylesheet } }
@@ -68,7 +77,12 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
             }
 
             tabList("main-tabs") {
-                tab(id = "form-panel", icon = "&#9881;", title = "Settings", checked = true) {
+                tab(
+                    id = "form-panel",
+                    icon = "&#9881;",
+                    title = "Settings",
+                    checked = view.tab == ViewTab.SETTINGS
+                ) {
                     id = "form-panel-contents"
 
                     form {
@@ -111,7 +125,12 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
                         }
                     }
                 }
-                tab(id = "pack-details", icon = "&#8505;", title = "About") {
+                tab(
+                    id = "pack-details",
+                    icon = "&#8505;",
+                    title = "About",
+                    checked = view.tab == ViewTab.ABOUT,
+                ) {
                     id = "pack-details-docs"
 
                     attributes["data-tab"] = "pack-details-tab"
@@ -122,12 +141,16 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
 
                     +"No details available."
                 }
-                tab(id = "preview-panel", icon = "&#9778;", title = "Preview") {
+                tab(
+                    id = "preview-panel",
+                    icon = "&#9778;",
+                    title = "Preview",
+                    checked = view.tab == ViewTab.PREVIEW,
+                ) {
                     div {
                         id = "preview-panel-container"
                         div {
                             id = "preview-panel-tree"
-
                             attributes.hx {
                                 get = "/project/listing"
                                 trigger = "refreshPreview, load, change from:#project-form input"
@@ -135,6 +158,7 @@ fun HTML.indexHtml(packs: List<PackDescriptor>) {
                         }
                         div {
                             id = "preview-panel-contents"
+                            previewContents()
                         }
                     }
                 }

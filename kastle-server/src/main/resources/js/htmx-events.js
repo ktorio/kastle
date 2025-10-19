@@ -68,6 +68,17 @@ document.addEventListener('htmx:afterSwap', (event) => {
     });
 });
 
+// After the request succeeds, update the browser URL
+document.addEventListener('htmx:afterOnLoad', (event) => {
+    // Only update URL for requests that should push state
+    const requestPath = event.detail.pathInfo.requestPath
+    if (requestPath.startsWith('/project')) {
+        const url = buildProjectGenerationUrl(window.location.pathname);
+        const newUrl = window.location.pathname + url.search;
+        history.replaceState(null, '', newUrl);
+    }
+});
+
 /**
  * Update preview on new form elements.
  */
