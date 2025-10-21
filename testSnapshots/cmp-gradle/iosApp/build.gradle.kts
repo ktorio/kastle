@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
 
@@ -7,20 +8,10 @@ plugins {
 }
 
 
-dependencies {
-    debugImplementation(compose.uiTooling)
-}
-
 kotlin {
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "ComposeApp"
-            isStatic = true
-        }
-    }
+    iosArm64()
+    iosSimulatorArm64()
+
 
     sourceSets {
         iosMain.dependencies {

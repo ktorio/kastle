@@ -1,7 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 /**
- * @target slot://com.acme/parent/install
+ * @target slot://org.gradle/gradle/buildRoot
  */
 fun gradleConfig() {
     compose.desktop {

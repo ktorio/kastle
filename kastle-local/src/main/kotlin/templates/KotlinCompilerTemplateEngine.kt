@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.kotlin.psi.KtScript
 import java.io.File
 
 /**
@@ -33,7 +34,7 @@ import java.io.File
  * @property repository An optional pack repository for additional data or functionality.
  */
 internal class KotlinCompilerTemplateEngine(
-    private val path: Path,
+    private val path: Path?,
     private val repository: PackRepository = PackRepository.EMPTY,
     private val log: Logger = ConsoleLogger()
 
@@ -52,11 +53,11 @@ internal class KotlinCompilerTemplateEngine(
         val stderrMessages = PrintingMessageCollector(System.err, MessageRenderer.PLAIN_RELATIVE_PATHS, verbose)
         val configuration = CompilerConfiguration().apply {
             put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, stderrMessages)
-            put(CommonConfigurationKeys.MODULE_NAME, path.parent!!.name)
+            path?.parent?.name?.let { put(CommonConfigurationKeys.MODULE_NAME, it) }
             put(CommonConfigurationKeys.ALLOW_ANY_SCRIPTS_IN_SOURCE_ROOTS, true)
             put(JVMConfigurationKeys.JDK_HOME, File(System.getenv("JAVA_HOME")))
 
-            addKotlinSourceRoot(path.toString())
+            path?.let { addKotlinSourceRoot(path.toString()) }
         }
         environment = KotlinCoreEnvironment.createForProduction(
             Disposer.newDisposable(),
@@ -106,14 +107,14 @@ internal class KotlinCompilerTemplateEngine(
                 require(slot != null) { "Slot ${target.slotId} not found" }
                 // TODO should be able to specify which function
                 val text = ktFile.firstFunctionBody()
-                        ?: throw IllegalArgumentException("Expected single function body for targeting slot")
+                        ?: throw IllegalArgumentException("${ktFile.name}: Expected single function body for slot")
                 when(slot.context) {
                     SourceContext.TopLevel -> ktFile.endOfImports()?.let { endOfImports ->
                         ktFile.text.substring(endOfImports)
                     } ?: ktFile.text
                     // TODO other positions, annotations, etc.
                     SourceContext.Inline -> ktFile.firstFunctionBody()
-                        ?: throw IllegalArgumentException("Expected single function body for targeting slot")
+                        ?: throw IllegalArgumentException("${ktFile.name}: Expected single function body for slot")
                 }
                 SourceTemplate(
                     text = text,
@@ -126,10 +127,22 @@ internal class KotlinCompilerTemplateEngine(
         }
     }
 
-    private fun KtFile.firstFunctionBody() =
-        declarations.filterIsInstance<KtNamedFunction>()
-            .singleOrNull()
-            ?.bodyExpression?.text?.trimBraces()?.trimIndent()?.trim()
+    private fun KtFile.firstFunctionBody(): String? {
+        val fileBody = if (name.extension == "kts") {
+            declarations
+                .filterIsInstance<KtScript>()
+                .singleOrNull() ?: return null
+        } else this
+
+        val namedFunction = fileBody.declarations
+            .filterIsInstance<KtNamedFunction>()
+            .singleOrNull() ?: return null
+
+        val functionBody = namedFunction.bodyExpression?.text
+            ?: return null
+
+        return functionBody.trimBraces().trim('\n').trimIndent().trim()
+    }
 
     private fun KtFile.findBlocks(properties: MutableList<Property>): List<Block> {
         // references to project or module

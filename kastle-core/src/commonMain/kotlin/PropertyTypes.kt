@@ -48,8 +48,8 @@ sealed interface PropertyType {
                 LONG -> Long
                 FLOAT -> Float
                 DOUBLE -> Double
-                ENUM -> Enum(details.trimBraces().split(Regex(",\\s*")))
-                LIST -> List(parse(details.trimAngleBrackets()))
+                ENUM -> Enum(details.trimBraces().trim().split(Regex(",\\s*")))
+                LIST -> List(parse(details.trimAngleBrackets().trim()))
                 OBJECT -> Object(Json.decodeFromString(details.trimBraces()))
                 else -> throw IllegalArgumentException("Invalid property type: $text")
             }

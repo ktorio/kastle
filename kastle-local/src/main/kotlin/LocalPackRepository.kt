@@ -63,16 +63,6 @@ class LocalPackRepository(
                 cache[packId] = it
             }
 
-        override suspend fun slot(slotId: SlotId): SlotDescriptor? =
-            this.get(slotId.pack)?.allSources
-                ?.filterIsInstance<SourceTemplate>()
-                ?.firstNotNullOfOrNull { source ->
-                    source.blocks
-                        ?.filterIsInstance<Slot>()
-                        ?.find { slot -> slot.name == slotId.name }
-                        ?.let { SlotDescriptor(it, source.target) }
-                }
-
         private suspend fun fromLocalOrRemote(id: PackId): PackDescriptor? =
             this@LocalPackRepository.get(id) ?: remoteRepository.get(id)
 
@@ -120,6 +110,9 @@ class LocalPackRepository(
             val gradleSettings = moduleYaml.get<YamlMap>("gradle")?.let { node ->
                 yaml.decodeFromYamlNode<GradleSettings>(node)
             }
+            val propertyValues = moduleYaml.get<YamlMap>("propertyValues")?.let { node ->
+                yaml.decodeFromYamlNode<Map<VariableId, String>>(node)
+            }
 
             // TODO verify this is correct
             fun readDependencies(dependencies: String): DependenciesMap =
@@ -129,13 +122,27 @@ class LocalPackRepository(
                     moduleYaml.readDependencies("$dependencies@$platform")
                 } + (Platform.COMMON to moduleYaml.readDependencies(dependencies)))
 
-            fun readModuleSource(file: Path, target: String? = null) =
+            suspend fun readModuleSource(file: Path, target: String? = null) =
                 when (file.name.extension.lowercase()) {
                     "hbs" -> handlebarsTemplateEngine.read(modulePath, file).let { template ->
                         template.copy(
                             target = target ?: template.target,
                             packId = packId,
                         )
+                    }
+                    "kt", "kts" -> {
+                        val kotlinAnalyzer = KotlinCompilerTemplateEngine(file.parent, repository)
+                        val psiFile = kotlinAnalyzer.psiFileFactory.createFileFromText(
+                            file.toString(),
+                            KotlinFileType.INSTANCE,
+                            file.readText() ?: throw IllegalArgumentException("Missing path or text in source definition"),
+                        )
+                        kotlinAnalyzer.read(file, psiFile as KtFile, properties).let { template ->
+                            template.copy(
+                                target = target ?: template.target,
+                                packId = packId,
+                            )
+                        }
                     }
                     else -> fs.sourceFile(file, modulePath).let { source ->
                         source.copy(
@@ -171,19 +178,20 @@ class LocalPackRepository(
                 // include non-kotlin files
                 sources += fs.walkFiles(sourceFolder).filter { file ->
                     !file.name.endsWith(".kt")
-                }.map(::readModuleSource)
+                }.asFlow().map(::readModuleSource).toList()
 
                 // assume non-kotlin files in resources
                 val resourcesFolder = modulePath.resolve("resources")
                 if (fs.exists(resourcesFolder)) {
                     resources += fs.walkFiles(resourcesFolder)
-                        .map(::readModuleSource)
+                        .asFlow().map(::readModuleSource).toList()
                 }
             }
 
             // additional sources defined for module; also assume no kotlin sources
             // TODO remove duplicates from files in source folders
-            for (manifestSource in moduleYaml.get<YamlList>("sources")?.items.orEmpty()) {
+            val sourcesFromManifest = moduleYaml.get<YamlList>("sources")?.items.orEmpty()
+            for (manifestSource in sourcesFromManifest) {
                 val (path, text, target, condition) = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
                 val conditionExpression = condition?.let(expressionParser::parse)
                 sources += when(text) {
@@ -200,6 +208,7 @@ class LocalPackRepository(
                 sources = sources + resources,
                 amper = amperSettings ?: AmperSettings(),
                 gradle = gradleSettings ?: GradleSettings(),
+                propertyValues = propertyValues ?: emptyMap(),
             )
         }.toList().let(ProjectModules::fromList)
 

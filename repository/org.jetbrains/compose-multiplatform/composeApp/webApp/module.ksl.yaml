@@ -5,3 +5,6 @@ dependencies:
 
 amper:
   compose: enabled
+
+propertyValues:
+  org.gradle/gradle/isExecutable: true

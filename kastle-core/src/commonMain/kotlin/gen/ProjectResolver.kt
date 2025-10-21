@@ -17,7 +17,7 @@ fun interface ProjectResolver {
                 .reduceOrNull(ProjectModules::plus)
                 ?.flatten() ?: ProjectModules.Empty
             val slotSources: Map<Url, List<SourceFile>> = packs.asSequence()
-                .flatMap { it.allSources }
+                .flatMap { it.commonAndRootSources }
                 .filter { it.isSlot() }
                 .groupBy { it.target }
             val commonSourceFiles = packs
@@ -26,18 +26,19 @@ fun interface ProjectResolver {
             val rootSourceFiles = packs
                 .flatMap { it.rootSources }
                 .filter { it.isFile() }
-            val attributes = packs.flatMap { pack ->
-                pack.attributes.entries
+            val propertyValues = packs.flatMap { pack ->
+                pack.propertyValues.entries
             }.groupBy({ it.key }) {
                 it.value
             }
-            val properties = packs.flatMap { pack ->
+            val propertyDescriptors = packs.flatMap { pack ->
                 pack.properties.map { property ->
-                    VariableId(pack.id, property.key).let { variableId ->
-                        variableId to findPropertyValue(descriptor, attributes, variableId, property)
-                    }
+                    VariableId(pack.id, property.key) to property
                 }
             }.toMap()
+            val properties = propertyDescriptors.mapValues { (variableId, property) ->
+                findPropertyValue(descriptor, propertyValues, variableId, property)
+            }
             val repositoryCatalog = repository.versions()
             val kotlinVersion = repositoryCatalog.versions["kotlin"] ?: missingVersion("kotlin")
             val versions = mutableMapOf("kotlin" to kotlinVersion)
@@ -80,6 +81,7 @@ fun interface ProjectResolver {
             Project(
                 descriptor = descriptor,
                 packs = packs,
+                propertyDescriptors = propertyDescriptors,
                 properties = properties,
                 slotSources = slotSources,
                 moduleSources = moduleSources + rootSourceFiles,
@@ -92,13 +94,13 @@ fun interface ProjectResolver {
 
         private fun findPropertyValue(
             descriptor: ProjectDescriptor,
-            attributes: Map<VariableId, List<String>>,
+            propertyValues: Map<VariableId, List<String>>,
             variableId: VariableId,
             property: Property
         ): Any? {
             try {
                 val stringValue = descriptor.properties[variableId]
-                    ?: attributes[variableId]?.let { attrs -> attrs.singleOrNull() ?: attrs.joinToString(",") }
+                    ?: propertyValues[variableId]?.let { attrs -> attrs.singleOrNull() ?: attrs.joinToString(",") }
                     ?: property.default
                 if (stringValue == null) {
                     require(property.type is PropertyType.Nullable) {

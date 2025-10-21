@@ -1,3 +1,5 @@
+val isExecutable: Boolean by _properties
+
 plugins {
     when(_module.platform) {
         "jvm" -> {
@@ -49,14 +51,18 @@ if (_module.platform != "jvm") {
                 "js" -> {
                     js {
                         browser()
-                        binaries.executable()
+                        if (isExecutable) {
+                            binaries.executable()
+                        }
                     }
                 }
                 "wasmJs" -> {
                     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
                     wasmJs {
                         browser()
-                        binaries.executable()
+                        if (isExecutable) {
+                            binaries.executable()
+                        }
                     }
                 }
             }

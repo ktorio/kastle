@@ -36,6 +36,7 @@ fun ProjectGeneratorTest(
 
     suspend fun generate(
         outputDir: Path,
+        name: String,
         properties: Map<VariableId, String> = emptyMap(),
         packs: List<String>
     ) = ProjectGeneratorImpl(
@@ -44,19 +45,19 @@ fun ProjectGeneratorTest(
         log = ConsoleLogger(LogLevel.INFO),
     ).generate(
         ProjectDescriptor(
-            name = DEFAULT_NAME,
+            name = name,
             group = DEFAULT_GROUP,
             properties = properties,
             packs = packs.map(PackId.Companion::parse),
         )
     ).export(outputDir)
 
-    suspend fun generateWithPacks(outputDir: Path, vararg packs: String) =
-        generate(outputDir, packs = packs.toList())
+    suspend fun generateWithPacks(outputDir: Path, name: String, vararg packs: String) =
+        generate(outputDir, name, packs = packs.toList())
 
     "empty project" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "empty", randomString())
-        generateWithPacks(outputDir, "com.acme/empty")
+        generateWithPacks(outputDir, "empty", "com.acme/empty")
         assertFilesAreEqualWithSnapshot( "$snapshots/empty", outputDir.toString())
     }
 
@@ -64,6 +65,7 @@ fun ProjectGeneratorTest(
         val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child", randomString())
         generateWithPacks(
             outputDir,
+            "parent-child",
             "com.acme/parent",
             "com.acme/child",
         )
@@ -77,6 +79,7 @@ fun ProjectGeneratorTest(
         val outputDir = Path(SystemTemporaryDirectory, "generated", "parent-child2", randomString())
         generateWithPacks(
             outputDir,
+            "parent-child2",
             "com.acme/parent",
             "com.acme/child",
             "com.acme/child2",
@@ -89,7 +92,7 @@ fun ProjectGeneratorTest(
 
     "with properties" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "properties", randomString())
-        generate(outputDir, packs = listOf("com.acme/properties"), properties = mapOf(
+        generate(outputDir, "properties", packs = listOf("com.acme/properties"), properties = mapOf(
             "numberProperty" to "1",
             "booleanProperty" to "true",
             "nullProperty" to "null",
@@ -107,6 +110,7 @@ fun ProjectGeneratorTest(
         val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server", randomString())
         generateWithPacks(
             outputDir,
+            "ktor-server",
             "org.gradle/gradle",
             "io.ktor/server-core",
             "io.ktor/server-cio",
@@ -121,6 +125,7 @@ fun ProjectGeneratorTest(
         val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-catalog", randomString())
         generate(
             outputDir,
+            "ktor-server-catalog",
             packs = listOf(
                 "org.gradle/gradle",
                 "io.ktor/server-core",
@@ -142,6 +147,7 @@ fun ProjectGeneratorTest(
         val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-amper", randomString())
         generateWithPacks(
             outputDir,
+            "ktor-server-amper",
             "org.jetbrains/amper",
             "io.ktor/server-core",
             "io.ktor/server-cio",
@@ -158,6 +164,7 @@ fun ProjectGeneratorTest(
         val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-gradle", randomString())
         generate(
             outputDir,
+            "cmp-gradle",
             packs = listOf(
                 "org.gradle/gradle",
                 "org.jetbrains/compose-multiplatform",
@@ -176,6 +183,7 @@ fun ProjectGeneratorTest(
         val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-amper", randomString())
         generateWithPacks(
             outputDir,
+            "cmp-amper",
             "org.jetbrains/amper",
             "org.jetbrains/compose-multiplatform",
         )

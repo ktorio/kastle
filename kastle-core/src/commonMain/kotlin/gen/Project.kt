@@ -11,6 +11,7 @@ import kotlin.collections.map
 data class Project(
     val descriptor: ProjectDescriptor,
     val packs: List<PackDescriptor>,
+    val propertyDescriptors: Map<VariableId, Property>,
     val properties: Map<VariableId, Any?>,
     val slotSources: Map<Url, List<SourceFile>>,
     val moduleSources: ProjectModules,

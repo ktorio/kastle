@@ -37,9 +37,13 @@ interface PackRepository {
     suspend fun getAllWithRequirements(packIds: Collection<PackId>): Flow<PackDescriptor> =
         packIds.asFlow().flatMapConcat { packId ->
             flow {
-                val pack = get(packId) ?: throw MissingPackException(packId)
-                emit(pack)
-                emitAll(getAllWithRequirements(pack.requires.filter { it !in packIds }))
+                try {
+                    val pack = get(packId) ?: throw MissingPackException(packId)
+                    emit(pack)
+                    emitAll(getAllWithRequirements(pack.requires.filter { it !in packIds }))
+                } catch (cause: Throwable) {
+                    throw FailedToReadPackException(packId, cause)
+                }
             }
         }
 

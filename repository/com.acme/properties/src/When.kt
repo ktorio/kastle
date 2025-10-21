@@ -10,5 +10,8 @@ fun main() {
         "no" -> {
             println("property is no")
         }
+        else -> {
+            println("property is something else")
+        }
     }
 }

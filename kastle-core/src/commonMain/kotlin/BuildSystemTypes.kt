@@ -178,6 +178,7 @@ data class SourceModule(
     val sources: List<SourceFile> = emptyList(),
     val gradle: GradleSettings = GradleSettings(),
     val amper: AmperSettings = AmperSettings(),
+    val propertyValues: Map<VariableId, String> = emptyMap(),
 ) {
     val allDependencies: Set<Dependency> =
         (dependencies.values.flatten() + testDependencies.values.flatten()).toSet()
@@ -291,6 +292,7 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
         },
         gradle = GradleSettings((gradle.plugins + other.gradle.plugins).distinct()),
         amper = AmperSettings(amper.compose ?: other.amper.compose, amper.application ?: other.amper.application),
+        propertyValues = propertyValues + other.propertyValues
     )
 }
 

@@ -19,3 +19,8 @@ rootSources:
     target: file:gradle/libs.versions.toml
 commonSources:
   - path: build.gradle.kts
+properties:
+  - key: isExecutable
+    type: boolean
+    default: false
+    hidden: true

@@ -22,10 +22,10 @@ fun String.camelCase() =
         .joinToString("") { it.capitalizeFirst() }
 
 fun String.trimAngleBrackets() =
-    trimEnclosingCharacters('<', '>').trim()
+    trimEnclosingCharacters('<', '>')
 
 fun String.trimBraces() =
-    trimEnclosingCharacters('{', '}').trim()
+    trimEnclosingCharacters('{', '}')
 
 fun String.trimEnclosingCharacters(start: Char, end: Char) =
     if (startsWith(start) && endsWith(end))

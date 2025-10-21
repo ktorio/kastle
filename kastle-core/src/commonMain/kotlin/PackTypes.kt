@@ -16,7 +16,7 @@ sealed interface PackMetadata {
     val documentation: String?
     val requires: List<PackId>
     val properties: List<Property>
-    val attributes: Map<VariableId, String>
+    val propertyValues: Map<VariableId, String>
     val repositories: List<MavenRepository>
 }
 
@@ -34,7 +34,7 @@ data class PackManifest(
     override val documentation: String? = null,
     override val requires: List<PackId> = emptyList(),
     override val properties: List<Property> = emptyList(),
-    override val attributes: Map<VariableId, String> = emptyMap(),
+    override val propertyValues: Map<VariableId, String> = emptyMap(),
     override val repositories: List<MavenRepository> = emptyList(),
     val modules: List<SourceModule>? = null,
     val commonSources: List<SourceDefinition> = emptyList(),
@@ -78,10 +78,11 @@ data class PackSources(
     }
 }
 
+val PackDescriptor.commonAndRootSources: Sequence<SourceFile> get() =
+    commonSources.asSequence() + rootSources.asSequence()
+
 val PackDescriptor.allSources: Sequence<SourceFile> get() =
-    commonSources.asSequence() +
-        rootSources.asSequence() +
-        sourceModules.asSequence().flatMap { it.sources }
+    commonSources.asSequence() + rootSources.asSequence() + sourceModules.asSequence().flatMap { it.sources }
 
 @Serializable
 data class Group(

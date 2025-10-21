@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
 
@@ -20,26 +21,16 @@ kotlin {
         }
     }
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "ComposeApp"
-            isStatic = true
-        }
-    }
+    iosArm64()
+    iosSimulatorArm64()
+
     js {
         browser()
-        binaries.executable()
     }
-
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
         browser()
-        binaries.executable()
     }
-
 
     sourceSets {
         commonMain.dependencies {

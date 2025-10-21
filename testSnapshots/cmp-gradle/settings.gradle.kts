@@ -1,4 +1,4 @@
-rootProject.name = "sample"
+rootProject.name = "cmp-gradle"
 
 pluginManagement {
     repositories {

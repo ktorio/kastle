@@ -3,9 +3,11 @@ package org.jetbrains.kastle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.io.Buffer
+import kotlinx.io.bytestring.decodeToString
 import kotlinx.io.write
 import kotlinx.io.writeCodePointValue
 import kotlinx.io.writeString
+import org.jetbrains.kastle.gen.Project
 import org.jetbrains.kastle.gen.ProjectResolver
 import org.jetbrains.kastle.gen.getVariables
 import org.jetbrains.kastle.gen.plus
@@ -58,6 +60,7 @@ class ProjectGeneratorImpl(
                 addAll(project.commonSources)
             }
             val outputtedPaths = mutableSetOf<String>()
+            val slotSources = project.slotSources + module.slotSources
 
             for (source in moduleSources) {
                 val path = module.path.appendPath(source.target.relativeFile)
@@ -82,7 +85,8 @@ class ProjectGeneratorImpl(
                 val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
                 val variables = project.getVariables(pack) +
                         project.toVariableEntries() +
-                        module.toVariableEntry()
+                        module.toVariableEntry() +
+                        module.loadPropertyValues(project)
                 if (source.condition != null) {
                     val conditionValue = source.condition.evaluate(variables)
                     if (!conditionValue.isTruthy()) {
@@ -101,14 +105,14 @@ class ProjectGeneratorImpl(
                         log.trace { path }
 
                         val slots = source.blocks?.asSequence().orEmpty()
-                            .flatMap { project.slotSources.lookup(pack.id, it) }
+                            .flatMap { slotSources.lookup(pack.id, it) }
                             .toList()
                         val startPosition = when (source.target.extension) {
                             "kt" -> writeKotlinSourcePreamble(
                                 projectDescriptor,
                                 source.target,
                                 source,
-                                slots,
+                                slots.filterIsInstance<SourceTemplate>(),
                             )
                             else -> 0
                         }
@@ -149,7 +153,7 @@ class ProjectGeneratorImpl(
                             val skipped = appendBlockContents(
                                 block = block,
                                 source = source,
-                                slots = project.slotSources.lookup(pack.id, block)
+                                slots = slotSources.lookup(pack.id, block)
                             )
 
                             // where to go next
@@ -224,7 +228,19 @@ class ProjectGeneratorImpl(
         return importsDeclaration.position.range.last
     }
 
-    private fun Map<Url, List<SourceFile>>.lookup(packId: PackId, block: Block): List<SourceTemplate> {
+    private val SourceModule.slotSources: Map<Url, List<SourceFile>> get() =
+        sources
+            .filter { it.isSlot() }
+            .groupBy { it.target }
+
+    private fun SourceModule.loadPropertyValues(project: Project): Map<String, Any?> =
+        propertyValues.mapNotNull {
+            project.propertyDescriptors[it.key]?.let { property ->
+                property.key to property.type.parse(it.value)
+            }
+        }.toMap()
+
+    private fun Map<Url, List<SourceFile>>.lookup(packId: PackId, block: Block): List<SourceFile> {
         if (block !is Slot)
             return emptyList()
 
@@ -241,7 +257,7 @@ class ProjectGeneratorImpl(
         require(block is RepeatingSlot || values.size <= 1) {
             "More than one target for non-repeating slot://$packId/${block.name}"
         }
-        return values.filterIsInstance<SourceTemplate>()
+        return values
     }
 
     private fun writeSourceFile(
@@ -353,18 +369,21 @@ class ProjectGeneratorImpl(
             fun appendBlockContents(
                 block: Block,
                 source: SourceTemplate,
-                slots: List<SourceTemplate> = emptyList()
+                slots: List<SourceFile> = emptyList()
             ): Boolean =
                 when (block) {
                     is SkipBlock -> skipContents()
 
                     is Slot -> {
-                        val indentSize = (source.text.indentAt(block.rangeStart) ?: 0) - block.level * 4
+                        val indentSize = ((source.text.indentAt(block.rangeStart) ?: 0) - block.level * 4).coerceAtLeast(0)
                         val indentString = indentSize.stringOf(' ')
                         if (slots.isNotEmpty()) {
                             append(source.text, block.outerStart, block.rangeStart, block.level)
-                            append(slots.joinToString("\n\n$indentString") {
-                                it.text.indent(indentString)
+                            append(slots.joinToString("\n\n$indentString") { slotSourceFile ->
+                                when(slotSourceFile) {
+                                    is SourceTemplate -> slotSourceFile.text.indent(indentString)
+                                    is StaticSource -> slotSourceFile.contents.decodeToString()
+                                }
                             })
                         }
                         slots.isEmpty()
@@ -460,3 +479,4 @@ class ProjectGeneratorImpl(
 }
 
 class MissingPackException(pack: PackId) : Exception("Missing pack: $pack")
+class FailedToReadPackException(pack: PackId, cause: Throwable) : Exception("Failed to read pack: $pack", cause)
