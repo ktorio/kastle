@@ -14,4 +14,4 @@ dependencies:
   - $libs.androidx.lifecycle.runtimeCompose: exported
 
 settings:
-    compose: enabled
+  compose: enabled

@@ -8,4 +8,4 @@ dependencies@ios:
   - $compose.ui
 
 settings:
-    compose: enabled
+  compose: enabled

@@ -8,4 +8,4 @@ dependencies@jvm:
   - $compose.desktop.currentOs
 
 settings:
-    compose: enabled
+  compose: enabled

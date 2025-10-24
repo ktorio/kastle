@@ -7,4 +7,4 @@ dependencies@wasmJs:
   - ../shared
 
 settings:
-    compose: enabled
+  compose: enabled

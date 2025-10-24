@@ -8,4 +8,4 @@ dependencies@android:
   - $libs.android.activity.compose
 
 settings:
-    compose: enabled
+  compose: enabled

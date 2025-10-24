@@ -248,7 +248,7 @@ sealed interface Expression {
                 "size" -> receiver.size
                 "isEmpty" -> receiver.isEmpty()
                 "isNotEmpty" -> receiver.isNotEmpty()
-                "containsKey" -> {
+                "contains", "containsKey" -> {
                     val key = args.firstOrNull() ?: throw IllegalArgumentException("containsKey requires a key argument")
                     receiver.containsKey(key)
                 }

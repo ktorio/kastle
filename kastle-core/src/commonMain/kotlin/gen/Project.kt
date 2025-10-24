@@ -4,7 +4,11 @@ import kotlinx.io.files.Path
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.utils.Variables
+import org.jetbrains.kastle.utils.afterProtocol
+import org.jetbrains.kastle.utils.isSlot
 import org.jetbrains.kastle.utils.normalize
+import org.jetbrains.kastle.utils.protocol
+import org.jetbrains.kastle.utils.relativeFile
 import org.jetbrains.kastle.utils.slotId
 import kotlin.collections.map
 
@@ -25,19 +29,14 @@ data class Project(
 }
 
 // TODO make smarter, maybe use serialization
-fun Project.toVariableEntries(): Map<String, Any?> =
-    mapOf(
-        "_project" to mapOf(
-            "name" to name,
-            "group" to group,
-            "modules" to moduleSources.modules.sortedBy { it.path }.map { it.toVariableMap() },
-            "versions" to versions,
-            "libraries" to libraries.mapValues { (_, value) -> value.toVariableMap() },
-            "gradle" to gradle.toVariableMap(),
-        ),
-        "_slots" to slotSources.map {
-            it.key.slotId.name
-        }
+fun Project.toVariableEntry(): Pair<String, Any?> =
+    "_project" to mapOf(
+        "name" to name,
+        "group" to group,
+        "modules" to moduleSources.modules.sortedBy { it.path }.map { it.toVariableMap() },
+        "versions" to versions,
+        "libraries" to libraries.mapValues { (_, value) -> value.toVariableMap() },
+        "gradle" to gradle.toVariableMap(),
     )
 
 /**
@@ -56,6 +55,16 @@ fun Project.getVariables(pack: PackDescriptor): Variables {
 
 fun SourceModule.toVariableEntry(): Pair<String, Any?> =
     "_module" to toVariableMap()
+
+fun SourceModule.slotsVariableEntry(project: Project, packId: PackId): Pair<String, Any?> =
+    "_slots" to (project.slotSources + this.slotSources).mapKeys { (url, _) ->
+        url.relativeFile.removePrefix(packId.toString()).trimStart('/')
+    }
+
+val SourceModule.slotSources: Map<Url, List<SourceFile>> get() =
+    sources
+        .filter { it.isSlot() }
+        .groupBy { it.target }
 
 private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "path" to path,

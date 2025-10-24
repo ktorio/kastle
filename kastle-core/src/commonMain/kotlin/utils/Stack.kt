@@ -14,6 +14,7 @@ interface Stack<E>: Iterable<E> {
     fun isEmpty(): Boolean = top == null
     fun pop(): E?
     operator fun plusAssign(element: E)
+    operator fun plusAssign(elements: Iterable<E>)
     operator fun dec(): Stack<E> = apply { pop() }
     fun copy(): Stack<E>
 }
@@ -26,6 +27,9 @@ class ListStack<E>(private val list: MutableList<E> = mutableListOf()) : Stack<E
 
     override fun plusAssign(element: E) {
         list.add(element)
+    }
+    override fun plusAssign(elements: Iterable<E>) {
+        list.addAll(elements)
     }
     override fun iterator(): Iterator<E> =
         list.asReversed().iterator()

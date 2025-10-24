@@ -7,18 +7,12 @@ import kotlinx.io.bytestring.decodeToString
 import kotlinx.io.write
 import kotlinx.io.writeCodePointValue
 import kotlinx.io.writeString
-import org.jetbrains.kastle.gen.Project
-import org.jetbrains.kastle.gen.ProjectResolver
-import org.jetbrains.kastle.gen.getVariables
-import org.jetbrains.kastle.gen.plus
-import org.jetbrains.kastle.gen.toVariableEntries
-import org.jetbrains.kastle.gen.toVariableEntry
+import org.jetbrains.kastle.gen.*
 import org.jetbrains.kastle.gradle.GradleTransformation
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
 import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.*
-import org.jetbrains.kastle.utils.extension
 
 interface ProjectGenerator {
     companion object {
@@ -84,8 +78,9 @@ class ProjectGeneratorImpl(
                 }
                 val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
                 val variables = project.getVariables(pack) +
-                        project.toVariableEntries() +
+                        project.toVariableEntry() +
                         module.toVariableEntry() +
+                        module.slotsVariableEntry(project, packId) +
                         module.loadPropertyValues(project)
                 if (source.condition != null) {
                     val conditionValue = source.condition.evaluate(variables)
@@ -227,11 +222,6 @@ class ProjectGeneratorImpl(
 
         return importsDeclaration.position.range.last
     }
-
-    private val SourceModule.slotSources: Map<Url, List<SourceFile>> get() =
-        sources
-            .filter { it.isSlot() }
-            .groupBy { it.target }
 
     private fun SourceModule.loadPropertyValues(project: Project): Map<String, Any?> =
         propertyValues.mapNotNull {

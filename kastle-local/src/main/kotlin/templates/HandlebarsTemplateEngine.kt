@@ -10,8 +10,7 @@ import org.jetbrains.kastle.io.relativeTo
 import org.jetbrains.kastle.utils.Expression.StringLiteral
 import org.jetbrains.kastle.utils.Expression.VariableRef
 import org.jetbrains.kastle.utils.ListStack
-import org.jetbrains.kastle.utils.startOfLine
-import org.jetbrains.kastle.utils.unwrapQuotes
+import org.jetbrains.kastle.utils.*
 
 class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     companion object {
@@ -21,6 +20,8 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         private const val WHEN = "when"
         private const val ELSE = "else"
         private const val EACH = "each"
+        // virtual helper for conditional blocks
+        private const val COND = "!cond"
 
         // Regex for normal (non-escaped) template blocks
         private val bracesPattern = Regex("(?<!\\\\)\\{\\{(?:#?(?<helper>[\\w_]+)\\s+)?(?<content>.*?)}}")
@@ -47,7 +48,11 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
             SourceTemplate(
                 text = template,
                 target = target,
-                blocks = findBlocks(text).toList(),
+                blocks = findBlocks(text).toList().sortedWith(Comparator { a, b ->
+                    val startComparison = a.rangeStart.compareTo(b.rangeStart)
+                    if (startComparison != 0) startComparison
+                    else b.rangeEnd.compareTo(a.rangeEnd) // reversed for descending
+                }),
             )
         }
 
@@ -93,7 +98,6 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                             when(parent.helper) {
                                 IF -> {
                                     val ifBlock = parent.toBlock(match)
-                                    yield(ConditionalBlock(ifBlock.position))
                                     yield(ifBlock)
                                     stack += BlockMatch(line, match, helper = ELSE)
                                 }
@@ -117,9 +121,10 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                     val block = parent.toBlock(match, parent.helper !in setOf(null, WHEN))
                     when(text.drop(1)) {
                         IF -> {
-                            // conditional wrapper
                             require(parent.helper in setOf(IF, ELSE)) { "Unexpected close term: $text" }
-                            yield(ConditionalBlock(block.position))
+                            val conditionalBlock = stack.pop()?.toBlock(match) as? ConditionalBlock
+                                ?: error("Expected conditional wrapper")
+                            yield(conditionalBlock)
                             yield(block)
                         }
                         WHEN -> {
@@ -157,7 +162,10 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                                 )
                             )
 
-                            IF, EACH, WHEN -> stack += blockMatch
+                            // add conditional wrapper and if at the same time
+                            IF -> stack += listOf(blockMatch.copy(helper = COND), blockMatch)
+
+                            EACH, WHEN -> stack += blockMatch
 
                             else -> {
                                 // Value expression can only be used for when clauses
@@ -190,39 +198,43 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         // TODO parse expression; not always variables
         //      (actually, handlebars requires variables... not sure how to handle this now...)
         context(_: ParseContext)
-        fun toBlock(endMatch: MatchResult, inclusive: Boolean = true): Block = when(helper) {
-            IF -> IfBlock(
-                expression = expression?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
-                position = position(endMatch, inclusive),
-            )
-            ELSE -> ElseBlock(
-                position = position(endMatch, inclusive),
-            )
-            WHEN -> {
-                WhenBlock(
+        fun toBlock(endMatch: MatchResult, inclusive: Boolean = true): Block =
+            when(helper) {
+                COND -> ConditionalBlock(
+                    position = position(endMatch, inclusive),
+                )
+                IF -> IfBlock(
                     expression = expression?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
                     position = position(endMatch, inclusive),
                 )
-            }
-            EACH -> {
-                ForEachBlock(
-                    expression = expression?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
+                ELSE -> ElseBlock(
                     position = position(endMatch, inclusive),
-                    variable = null,
                 )
-            }
-            null -> {
-                val value = expression?.let {
-                    StringLiteral(it.unwrapQuotes())
-                } ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}")
+                WHEN -> {
+                    WhenBlock(
+                        expression = expression?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
+                        position = position(endMatch, inclusive),
+                    )
+                }
+                EACH -> {
+                    ForEachBlock(
+                        expression = expression?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
+                        position = position(endMatch, inclusive),
+                        variable = null,
+                    )
+                }
+                null -> {
+                    val value = expression?.let {
+                        StringLiteral(it.unwrapQuotes())
+                    } ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}")
 
-                WhenClauseBlock(
-                    value = listOf(value),
-                    position = position(endMatch, inclusive),
-                )
+                    WhenClauseBlock(
+                        value = listOf(value),
+                        position = position(endMatch, inclusive),
+                    )
+                }
+                else -> error("Unexpected keyword: $helper")
             }
-            else -> error("Unexpected keyword: $helper")
-        }
 
         context(_: ParseContext)
         private fun position(endMatch: MatchResult, inclusive: Boolean): BlockPosition {

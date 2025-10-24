@@ -11,3 +11,5 @@ sources:
   - path: application.yaml.hbs
     target: file:resources/application.yaml
     if: configFormat == "YAML"
+  - target: slot://org.jetbrains/amper/settings
+    text: "ktor: enabled"

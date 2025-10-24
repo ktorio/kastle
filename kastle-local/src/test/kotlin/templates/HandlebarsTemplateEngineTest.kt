@@ -7,10 +7,9 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
-import org.jetbrains.kastle.InlineValue
-import org.jetbrains.kastle.NamedSlot
-import org.jetbrains.kastle.RepeatingSlot
+import org.jetbrains.kastle.*
 import org.jetbrains.kastle.utils.Expression.VariableRef
+import org.jetbrains.kastle.utils.*
 
 class HandlebarsTemplateEngineTest : StringSpec({
 
@@ -29,6 +28,24 @@ class HandlebarsTemplateEngineTest : StringSpec({
         val expression = literal.expression
         expression.shouldBeInstanceOf<VariableRef>()
         expression.name shouldBe "someProperty"
+    }
+
+    "if and else" {
+        val template = engine.read(path, """
+            {{if someProperty}}
+            Hello!
+            {{else}}
+            Goodbye!
+            {{/if}}
+        """.trimIndent())
+
+        template.blocks.shouldNotBeNull()
+        template.blocks!! shouldHaveSize 3
+        val (cond, ifBlock, elseBlock) = template.blocks!!
+        cond.shouldBeInstanceOf<ConditionalBlock>()
+        ifBlock.shouldBeInstanceOf<IfBlock>()
+        elseBlock.shouldBeInstanceOf<ElseBlock>()
+        cond.position.range shouldBe ifBlock.rangeStart..elseBlock.rangeEnd
     }
 
     "slot" {

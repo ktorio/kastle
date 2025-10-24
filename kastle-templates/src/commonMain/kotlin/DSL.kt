@@ -44,14 +44,7 @@ val _slot: (String) -> TemplateSlot? = { null }
 /**
  * Injects all slots targeting the given slot name.
  */
-fun _slots(key: String): Sequence<TemplateSlot> = emptySequence()
-
-/**
- * Returns true when the project config includes a source targeting this slot.
- *
- * Useful for when there is some wrapping content around some slots.
- */
-fun _hasSlot(key: String): Boolean = false
+val _slots: TemplateSlots = object: TemplateSlots {}
 
 /**
  * Inlines the string as raw code.
@@ -89,6 +82,20 @@ data class TemplateMavenRepository(
 )
 
 @TemplateDsl
+interface TemplateSlots: Map<String, List<TemplateSlot>> {
+    operator fun contains(name: String): Boolean = false
+    operator fun invoke(name: String): Sequence<TemplateSlot>? = null
+    override fun containsKey(key: String): Boolean = false
+    override fun containsValue(value: List<TemplateSlot>): Boolean = false
+    override fun get(key: String): List<TemplateSlot>? = null
+    override fun isEmpty(): Boolean = true
+    override val entries: Set<Map.Entry<String, List<TemplateSlot>>> get() = emptySet()
+    override val keys: Set<String> get() = emptySet()
+    override val size: Int get() = 0
+    override val values: Collection<List<TemplateSlot>> get() = emptyList()
+}
+
+@TemplateDsl
 interface TemplateSlot {
     fun <T> get(): T
 }
@@ -108,8 +115,3 @@ data class TemplateGradlePlugin(
     val name: String,
     val version: String
 )
-
-interface TemplateSlots {
-    fun contains(name: String): Boolean
-    fun invoke(name: String): Sequence<TemplateSlot>?
-}
