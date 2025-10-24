@@ -116,6 +116,22 @@ fun HTML.indexHtml(
                                     value = "generated"
                                 }
                             }
+                            div("field") {
+                                label {
+                                    htmlFor = "packaging"
+                                    +"Packaging"
+                                }
+                                select {
+                                    name = "packaging"
+                                    option {
+                                        +"Flat"
+                                    }
+                                    option {
+                                        selected = true
+                                        +"Nested"
+                                    }
+                                }
+                            }
                         }
                         div {
                             id = "dynamic-properties"

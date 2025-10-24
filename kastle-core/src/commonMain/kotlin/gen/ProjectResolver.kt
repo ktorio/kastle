@@ -89,6 +89,7 @@ fun interface ProjectResolver {
                 versions = versions,
                 libraries = libraries,
                 gradle = gradleSettings,
+                packaging = descriptor.packaging,
             )
         }
 

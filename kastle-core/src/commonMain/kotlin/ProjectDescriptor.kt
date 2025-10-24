@@ -6,6 +6,12 @@ import kotlinx.serialization.Serializable
 data class ProjectDescriptor(
     val name: String,
     val group: String,
+    val packaging: PackagingStyle = PackagingStyle.FLAT,
     val properties: Map<VariableId, String> = emptyMap(),
     val packs: List<PackId> = emptyList(),
 )
+
+public enum class PackagingStyle {
+    FLAT,
+    NESTED,
+}

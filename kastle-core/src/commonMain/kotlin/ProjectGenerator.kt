@@ -8,17 +8,19 @@ import kotlinx.io.write
 import kotlinx.io.writeCodePointValue
 import kotlinx.io.writeString
 import org.jetbrains.kastle.gen.*
-import org.jetbrains.kastle.gradle.GradleTransformation
+import org.jetbrains.kastle.structure.GradleSourceMapping
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
 import org.jetbrains.kastle.logging.Logger
+import org.jetbrains.kastle.structure.NestedPackagingMapping
 import org.jetbrains.kastle.utils.*
 
 interface ProjectGenerator {
     companion object {
         fun fromRepository(
             repository: PackRepository,
-            projectResolver: ProjectResolver = ProjectResolver.Default + GradleTransformation,
+            projectResolver: ProjectResolver =
+                ProjectResolver.Default + NestedPackagingMapping + GradleSourceMapping,
             log: Logger = ConsoleLogger(),
         ): ProjectGenerator = ProjectGeneratorImpl(repository, projectResolver, log)
     }
@@ -199,11 +201,11 @@ class ProjectGeneratorImpl(
         source: SourceTemplate,
         blocks: List<SourceTemplate>,
     ): Int {
-        // TODO replace existing package in template if present
-        //      include sub-packages when present in the target file
         val dir = target.parentPath
             .replace(Regex("^/?/?(?:src(?:@\\w+)?)?(?:/\\w*(?:main|test)/\\w+)?/?", RegexOption.IGNORE_CASE), "")
             .replace('/', '.')
+            .removePrefix(project.group) // when using nested structure
+
         val pkg = if (dir.isEmpty()) project.group else "${project.group}.$dir"
 
         append("package $pkg")

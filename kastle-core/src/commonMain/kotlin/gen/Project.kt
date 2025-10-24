@@ -23,6 +23,7 @@ data class Project(
     val versions: Map<String, String>,
     val libraries: Map<String, CatalogArtifact>,
     val gradle: GradleProjectSettings,
+    val packaging: PackagingStyle,
 ) {
     val name: String get() = descriptor.name
     val group: String get() = descriptor.group

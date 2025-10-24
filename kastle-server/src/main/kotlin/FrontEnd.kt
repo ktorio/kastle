@@ -129,6 +129,10 @@ private fun RoutingCall.readProjectDescriptor(): ProjectDescriptor {
 private fun RoutingCall.tryReadProjectDescriptor(): ProjectDescriptor? {
     val name = request.queryParameters["name"] ?: return null
     val group = request.queryParameters["group"] ?: return null
+    val packaging = request.queryParameters["packaging"]?.let { packaging ->
+        PackagingStyle.entries.firstOrNull { it.name.equals(packaging, ignoreCase = true) }
+    } ?: PackagingStyle.NESTED
+
     return ProjectDescriptor(
         name = name,
         group = group,
@@ -138,6 +142,7 @@ private fun RoutingCall.tryReadProjectDescriptor(): ProjectDescriptor? {
             .toVariableEntries()
             .toMap(),
         packs = request.queryParameters.getAll("pack").orEmpty().map(PackId::parse),
+        packaging = packaging
     )
 }
 

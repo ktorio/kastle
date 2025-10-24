@@ -6,10 +6,10 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemTemporaryDirectory
 import org.jetbrains.kastle.gen.ProjectResolver
 import org.jetbrains.kastle.gen.plus
-import org.jetbrains.kastle.gradle.GradleTransformation
 import org.jetbrains.kastle.io.export
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
+import org.jetbrains.kastle.structure.GradleSourceMapping
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -41,7 +41,7 @@ fun ProjectGeneratorTest(
         packs: List<String>
     ) = ProjectGeneratorImpl(
         repository = repository.await(),
-        projectResolver = ProjectResolver.Default + GradleTransformation,
+        projectResolver = ProjectResolver.Default + GradleSourceMapping,
         log = ConsoleLogger(LogLevel.INFO),
     ).generate(
         ProjectDescriptor(

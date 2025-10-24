@@ -1,7 +1,6 @@
-package org.jetbrains.kastle.gradle
+package org.jetbrains.kastle.structure
 
 import org.jetbrains.kastle.PackId
-import org.jetbrains.kastle.SourceModuleType
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.StaticSource
 import org.jetbrains.kastle.gen.ProjectMapping
@@ -9,13 +8,13 @@ import org.jetbrains.kastle.map
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.capitalizeFirst
 
-private val GRADLE_PACK_ID = PackId("org.gradle", "gradle")
-private val regex = Regex("(src|test|resources|testResources)(?:@(\\w+))?/")
+internal val GRADLE_PACK_ID = PackId("org.gradle", "gradle")
+internal val SOURCE_FOLDER_REGEX = Regex("(src|test|resources|testResources)(?:@(\\w+))?/")
 
 /**
  * Transforms Amper source structure with Gradle.
  */
-val GradleTransformation = ProjectMapping { project ->
+val GradleSourceMapping = ProjectMapping { project ->
     if (project.packs.none { it.id == GRADLE_PACK_ID })
         return@ProjectMapping project
 
@@ -23,8 +22,8 @@ val GradleTransformation = ProjectMapping { project ->
         moduleSources = project.moduleSources.map { module ->
             module.copy(
                 sources = module.sources.map { source ->
-                    if (source.target.protocol == "file" && source.target.contains(regex)) {
-                        val newTarget = source.target.replace(regex) { match ->
+                    if (source.target.protocol == "file" && source.target.contains(SOURCE_FOLDER_REGEX)) {
+                        val newTarget = source.target.replace(SOURCE_FOLDER_REGEX) { match ->
                             val sourceRoot = match.groups[1]!!.value
                             val mainOrTest = if (sourceRoot in setOf("test", "testResources")) "test" else "main"
                             val kotlinOrResources = if (sourceRoot in setOf("resources", "testResources")) "resources" else "kotlin"
