@@ -1,11 +1,13 @@
 package org.jetbrains.kastle.utils
 
 import org.jetbrains.kastle.utils.Queue.Companion.toQueue
-import org.jetbrains.kastle.utils.plusAssign
 import kotlin.collections.contains
 import kotlin.collections.get
 
 typealias Variables = Stack<Map<String, Any?>>
+
+fun Variables(vararg pairs: Pair<String, Any?>): Variables =
+    ListStack(mutableListOf(mapOf(*pairs)))
 
 operator fun Variables.plusAssign(pair: Pair<String, Any?>) {
     this += mapOf(pair)

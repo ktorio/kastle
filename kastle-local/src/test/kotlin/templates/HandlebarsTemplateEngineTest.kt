@@ -2,100 +2,113 @@ package org.jetbrains.kastle.templates
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.string.shouldContain
-import io.kotest.matchers.string.shouldNotContain
-import org.jetbrains.kastle.*
-import org.jetbrains.kastle.utils.Expression.VariableRef
-import org.jetbrains.kastle.utils.*
+import org.jetbrains.kastle.SourceTemplate
+import org.jetbrains.kastle.TemplateEvaluator.Companion.toString
+import org.jetbrains.kastle.utils.Variables
 
 class HandlebarsTemplateEngineTest : StringSpec({
 
     val engine = HandlebarsTemplateEngine()
     val path = "templates/test.txt"
 
-    "literals" {
-        val template = engine.read(path, """
-            Hello, {{ someProperty }}!
-        """.trimIndent())
+    fun template(text: String): SourceTemplate =
+        engine.read(path, text)
 
-        template.blocks.shouldNotBeNull()
-        template.blocks!! shouldHaveSize 1
-        val literal = template.blocks!!.first()
-        literal.shouldBeInstanceOf<InlineValue>()
-        val expression = literal.expression
-        expression.shouldBeInstanceOf<VariableRef>()
-        expression.name shouldBe "someProperty"
+    "literals" {
+        val actual = template("Hello, {{ someProperty }}!").toString(
+            variables = Variables("someProperty" to "World")
+        )
+        actual shouldBe "Hello, World!"
     }
 
     "if and else" {
-        val template = engine.read(path, """
-            {{if someProperty}}
-            Hello!
-            {{else}}
-            Goodbye!
-            {{/if}}
-        """.trimIndent())
+        val template = template("{{if someProperty}}Hello!{{else}}Goodbye!{{/if}}")
 
-        template.blocks.shouldNotBeNull()
-        template.blocks!! shouldHaveSize 3
-        val (cond, ifBlock, elseBlock) = template.blocks!!
-        cond.shouldBeInstanceOf<ConditionalBlock>()
-        ifBlock.shouldBeInstanceOf<IfBlock>()
-        elseBlock.shouldBeInstanceOf<ElseBlock>()
-        cond.position.range shouldBe ifBlock.rangeStart..elseBlock.rangeEnd
+        template.toString(
+            variables = Variables("someProperty" to true)
+        ) shouldBe "Hello!"
+
+        template.toString(
+            variables = Variables("someProperty" to false)
+        ) shouldBe "Goodbye!"
+    }
+
+    "when" {
+        val template = template("{{when name}}{{\"Bob\"}}Hi{{\"Joe\"}}Hello{{else}}Up yours{{/when}}, {{name}}!")
+
+        template.toString(
+            variables = Variables("name" to "Bob")
+        ) shouldBe "Hi, Bob!"
+
+        template.toString(
+            variables = Variables("name" to "Joe")
+        ) shouldBe "Hello, Joe!"
+
+        template.toString(
+            variables = Variables("name" to "Steve")
+        ) shouldBe "Up yours, Steve!"
+    }
+
+    // TODO extra newline?
+    "each" {
+        template("""
+            {{#each names}}
+            - {{this}}
+            {{/each}}
+        """.trimIndent()).toString(
+            variables = Variables("names" to listOf("Bob", "Alice", "Joe"))
+        ) shouldBe """
+            
+            - Bob
+            - Alice
+            - Joe
+        """.trimIndent()
     }
 
     "slot" {
-        val template = engine.read(path, """
-            Hello, {{#slot someSlot}}!
-        """.trimIndent())
-
-        template.blocks.shouldNotBeNull()
-        template.blocks!! shouldHaveSize 1
-
-        val slot = template.blocks!!.first()
-        slot.shouldBeInstanceOf<NamedSlot>()
-        slot.name shouldBe "someSlot"
+        template("Hello, {{slot someSlot}}!").toString(
+            slots = mapOf(
+                "slot:someSlot" to listOf(template("you slot"))
+            )
+        ) shouldBe "Hello, you slot!"
     }
 
     "repeatingSlot" {
-        val template = engine.read(path, """
-            Hello, {{#slots someSlot}}!
-        """.trimIndent())
-
-        template.blocks.shouldNotBeNull()
-        template.blocks!! shouldHaveSize 1
-
-        val slot = template.blocks!!.first()
-        slot.shouldBeInstanceOf<RepeatingSlot>()
-        slot.name shouldBe "someSlot"
+        template("""
+            Hello, these slots:
+            {{slots someSlot}}
+        """.trimIndent()).toString(
+            slots = mapOf(
+                "slot:someSlot" to listOf(
+                    template("first"),
+                    template("second"),
+                    template("third")
+                )
+            )
+        ) shouldBe """
+            Hello, these slots:
+            first
+            second
+            third
+        """.trimIndent()
     }
 
     "escapedBraces" {
-        val template = engine.read(path, """
+        template("""
             This is a normal template: {{ someProperty }}
             These are escaped: \{{notAProperty}}\{{notAProperty}} \{{notAProperty}}
             This has both: {{ realProperty }} and \{{notAProperty}}
-        """.trimIndent())
-
-        template.blocks.shouldNotBeNull()
-        template.blocks!! shouldHaveSize 2
-        val expected = listOf("someProperty", "realProperty")
-        for ((i, ref) in template.blocks!!.withIndex()) {
-            ref.shouldBeInstanceOf<InlineValue>()
-            val expression = ref.expression
-            expression.shouldBeInstanceOf<VariableRef>()
-            expression.name shouldBe expected[i]
-            template.text.substring(ref.position.range).trim() shouldBe "{{ ${expected[i]} }}"
-        }
-
-        // Check that the backslash is removed in the processed text
-        val processedText = template.text
-        processedText shouldContain "{{notAProperty}}"
-        processedText shouldNotContain "\\{{notAProperty}}"
+        """.trimIndent()).toString(
+            variables = Variables(
+                "someProperty" to "some value",
+                "notAProperty" to "shouldn't appear",
+                "realProperty" to "another value",
+            )
+        ) shouldBe """
+            This is a normal template: some value
+            These are escaped: {{notAProperty}}{{notAProperty}} {{notAProperty}}
+            This has both: another value and {{notAProperty}}
+        """.trimIndent()
     }
 
 })

@@ -97,9 +97,9 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                             val parent = stack.pop() ?: error("Bad else placement: missing parent")
                             when(parent.helper) {
                                 IF -> {
-                                    val ifBlock = parent.toBlock(match)
+                                    val ifBlock = parent.toBlock(match, inclusive = false)
                                     yield(ifBlock)
-                                    stack += BlockMatch(line, match, helper = ELSE)
+                                    stack += BlockMatch(line, match, startOfLine, helper = ELSE)
                                 }
                                 null -> {
                                     require(stack.top?.helper == WHEN) { "Bad else placement: missing when parent" }
@@ -163,7 +163,10 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                             )
 
                             // add conditional wrapper and if at the same time
-                            IF -> stack += listOf(blockMatch.copy(helper = COND), blockMatch)
+                            IF -> stack += listOf(
+                                blockMatch.copy(helper = COND),
+                                blockMatch,
+                            )
 
                             EACH, WHEN -> stack += blockMatch
 

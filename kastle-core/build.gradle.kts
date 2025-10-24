@@ -40,5 +40,8 @@ kotlin {
             implementation(libs.kotest.framework)
             implementation(libs.kotest.assertions)
         }
+        all {
+            languageSettings.enableLanguageFeature("ContextParameters")
+        }
     }
 }

@@ -75,6 +75,8 @@ data class SourceImports(
     val imports: List<SourceImport>,
 )
 
+typealias SourcesByUrl = Map<Url, List<SourceFile>>
+
 /**
  * Represents an import in a source file.
  */

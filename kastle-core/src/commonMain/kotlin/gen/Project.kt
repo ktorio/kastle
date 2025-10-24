@@ -17,7 +17,7 @@ data class Project(
     val packs: List<PackDescriptor>,
     val propertyDescriptors: Map<VariableId, Property>,
     val properties: Map<VariableId, Any?>,
-    val slotSources: Map<Url, List<SourceFile>>,
+    val slotSources: SourcesByUrl,
     val moduleSources: ProjectModules,
     val commonSources: List<SourceFile>,
     val versions: Map<String, String>,
@@ -62,7 +62,7 @@ fun SourceModule.slotsVariableEntry(project: Project, packId: PackId): Pair<Stri
         url.relativeFile.removePrefix(packId.toString()).trimStart('/')
     }
 
-val SourceModule.slotSources: Map<Url, List<SourceFile>> get() =
+val SourceModule.slotSources: SourcesByUrl get() =
     sources
         .filter { it.isSlot() }
         .groupBy { it.target }

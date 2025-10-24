@@ -3,14 +3,10 @@ package org.jetbrains.kastle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.io.Buffer
-import kotlinx.io.bytestring.decodeToString
 import kotlinx.io.write
-import kotlinx.io.writeCodePointValue
-import kotlinx.io.writeString
 import org.jetbrains.kastle.gen.*
 import org.jetbrains.kastle.structure.GradleSourceMapping
 import org.jetbrains.kastle.logging.ConsoleLogger
-import org.jetbrains.kastle.logging.LogLevel
 import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.structure.NestedPackagingMapping
 import org.jetbrains.kastle.utils.*
@@ -33,6 +29,7 @@ class ProjectGeneratorImpl(
     private val projectResolver: ProjectResolver,
     private val log: Logger,
 ) : ProjectGenerator {
+    val templateEvaluator = TemplateEvaluator(log)
 
     override fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
         val project = projectResolver.resolve(projectDescriptor, repository)
@@ -84,6 +81,7 @@ class ProjectGeneratorImpl(
                         module.toVariableEntry() +
                         module.slotsVariableEntry(project, packId) +
                         module.loadPropertyValues(project)
+
                 if (source.condition != null) {
                     val conditionValue = source.condition.evaluate(variables)
                     if (!conditionValue.isTruthy()) {
@@ -98,131 +96,16 @@ class ProjectGeneratorImpl(
                 }
 
                 emit(SourceFileEntry(path) {
-                    writeSourceFile(source, variables) {
-                        log.trace { path }
-
-                        val slots = source.blocks?.asSequence().orEmpty()
-                            .flatMap { slotSources.lookup(pack.id, it) }
-                            .toList()
-                        val startPosition = when (source.target.extension) {
-                            "kt" -> writeKotlinSourcePreamble(
-                                projectDescriptor,
-                                source.target,
-                                source,
-                                slots.filterIsInstance<SourceTemplate>(),
-                            )
-                            else -> 0
-                        }
-
-                        if (source.blocks.isNullOrEmpty()) {
-                            log.trace { "  Not templated; returning verbatim" }
-                            append(source.text, startPosition, source.text.length)
-                            return@writeSourceFile
-                        }
-
-                        // print debug info to logs
-                        if (log.level == LogLevel.TRACE) {
-                            forEachBlock(source.blocks, startPosition) { block ->
-                                log.trace {
-                                    buildString {
-                                        append("  ${block.lineNumber.toString().padEnd(5)} ")
-                                        append(((block.level * 2).stringOf(' ') + block::class.simpleName).padEnd(30))
-                                        append("\"${block.outerContents.replace("\n", "\\n")}\"".padEnd(100))
-                                        append("\"${block.bodyContents?.replace("\n", "\\n")}\"")
-                                    }
-                                }
-                            }
-                            log.trace { "" } // log empty line
-                        }
-
-                        forEachBlock(source.blocks, startPosition) { block ->
-                            // exited blocks
-                            val parent = stack.popUntil({ block in it }) { parent ->
-                                parent.close()
-                                if (parent.tryLoopBack())
-                                    return@forEachBlock
-                            }
-
-                            // interstitial
-                            append(source.text, start, block.outerStart, parent?.level ?: 0)
-
-                            // current block
-                            val skipped = appendBlockContents(
-                                block = block,
-                                source = source,
-                                slots = slotSources.lookup(pack.id, block)
-                            )
-
-                            // where to go next
-                            start = when {
-                                child != null -> {
-                                    stack += block
-                                    child!!.outerStart
-                                }
-
-                                else -> block.rangeEnd
-                            }
-
-                            // Remove empty lines after skipped blocks
-                            if (skipped && start < source.text.length) {
-                                val initial = start
-                                var next = source.text[start]
-                                if (next.isWhitespace()) {
-                                    while (next.isWhitespace() && start + 1 < source.text.length) {
-                                        next = source.text[++start]
-                                    }
-                                    while (next != '\n' && start > initial) {
-                                        next = source.text[--start]
-                                    }
-                                }
-                            }
-
-                            if (isLast()) {
-                                // trailing ancestors
-                                stack.popSequence().forEach { parent ->
-                                    parent.close()
-                                    if (parent.tryLoopBack())
-                                        return@forEachBlock
-                                }
-
-                                // trailing content
-                                append(source.text, start, source.text.length)
-                            }
-                        }
-                    }
+                    templateEvaluator.evaluateToBuffer(
+                        template = source,
+                        groupId = project.group,
+                        packId = pack.id,
+                        variables = variables,
+                        slots = slotSources,
+                    )
                 })
             }
         }
-    }
-
-    private fun Appendable.writeKotlinSourcePreamble(
-        project: ProjectDescriptor,
-        target: Url,
-        source: SourceTemplate,
-        blocks: List<SourceTemplate>,
-    ): Int {
-        val dir = target.parentPath
-            .replace(Regex("^/?/?(?:src(?:@\\w+)?)?(?:/\\w*(?:main|test)/\\w+)?/?", RegexOption.IGNORE_CASE), "")
-            .replace('/', '.')
-            .removePrefix(project.group) // when using nested structure
-
-        val pkg = if (dir.isEmpty()) project.group else "${project.group}.$dir"
-
-        append("package $pkg")
-
-        val importsDeclaration = source.imports ?: return 0
-        val sourceImports = importsDeclaration.imports.asSequence()
-        val slotImports = blocks.asSequence().flatMap { it.imports?.imports.orEmpty() }
-        val imports: List<String> = (sourceImports + slotImports).map {
-            it.toString(project.group)
-        }.distinct().toList()
-
-        if (imports.isNotEmpty()) {
-            append("\n\n")
-            append(imports.joinToString("\n"))
-        }
-
-        return importsDeclaration.position.range.last
     }
 
     private fun SourceModule.loadPropertyValues(project: Project): Map<String, Any?> =
@@ -232,242 +115,6 @@ class ProjectGeneratorImpl(
             }
         }.toMap()
 
-    private fun Map<Url, List<SourceFile>>.lookup(packId: PackId, block: Block): List<SourceFile> {
-        if (block !is Slot)
-            return emptyList()
-
-        val key = "slot://$packId/${block.name}"
-        val values = this[key] ?: emptyList()
-        if (values.isEmpty()) {
-            when (block.requirement) {
-                Requirement.REQUIRED ->
-                    throw IllegalArgumentException("Missing slot://$packId/${block.name}")
-                Requirement.OMITTED -> return emptyList()
-                Requirement.OPTIONAL -> {}
-            }
-        }
-        require(block is RepeatingSlot || values.size <= 1) {
-            "More than one target for non-repeating slot://$packId/${block.name}"
-        }
-        return values
-    }
-
-    private fun writeSourceFile(
-        source: SourceTemplate,
-        variables: Variables,
-        action: SourceFileWriteContext.() -> Unit
-    ): Buffer = SourceFileWriteContext(source, variables).apply(action).buffer
-
-    /**
-     * Writer context for building a source file.
-     */
-    private inner class SourceFileWriteContext(
-        val source: SourceTemplate,
-        val variables: Variables,
-        val buffer: Buffer = Buffer(),
-    ): Appendable {
-
-        val Block.outerContents: String get() =
-            source.text.substring(outerStart, outerEnd)
-        val Block.bodyContents: String? get() =
-            source.text.substring(bodyStart, bodyEnd)
-
-        override fun append(csq: CharSequence?): Appendable {
-            if (csq == null) return this
-            buffer.writeString(csq)
-            return this
-        }
-
-        override fun append(csq: CharSequence?, start: Int, end: Int): Appendable {
-            if (csq == null) return this
-            require(start <= end) {
-                "Overlap $start > $end: ${csq.substring(end, start)}"
-            }
-            buffer.writeString(csq, start, end)
-            return this
-        }
-
-        override fun append(c: Char): Appendable {
-            buffer.writeCodePointValue(c.code)
-            return this
-        }
-
-        fun forEachBlock(blocks: List<Block>?, startPosition: Int, op: SourceFileBlockIterationContext.(Block) -> Unit): SourceFileBlockIterationContext =
-            SourceFileBlockIterationContext(
-                blocks = blocks.orEmpty().sortedBy { it.rangeStart },
-                variables = variables.copy(),
-                start = startPosition,
-            ).also { context ->
-                while (context.i < context.blocks.size) {
-                    context.op(context.current)
-                    context.i++
-                }
-            }
-
-        /**
-         * Context for iterating over the given blocks.  Allows extra navigation controls.
-         */
-        inner class SourceFileBlockIterationContext(
-            val blocks: List<Block>,
-            val variables: Variables,
-            var start: Int,
-            var i: Int = 0,
-            var stack: Stack<Block> = Stack.of()
-        ): Appendable by this {
-            val current: Block get() = blocks[i]
-            val child: Block? get() = next?.takeIf { it in blocks[i] }
-            val next: Block? get() = blocks.getOrNull(i + 1)
-            val loops: MutableMap<DeclaringBlock, MutableList<*>> = mutableMapOf()
-            val conditions: MutableMap<Block, Boolean> = mutableMapOf()
-
-            fun skipContents(): Boolean {
-                val current = blocks[i]
-                while (next in current)
-                    i++
-                return true
-            }
-
-            fun isLast() =
-                i == blocks.lastIndex
-
-            /**
-             * Return to the start of the loop for the next element.
-             */
-            fun Block.tryLoopBack(): Boolean {
-                if (this !is DeclaringBlock) return false
-                val items = loops[this] ?: return false
-                if (items.isEmpty()) {
-                    loops -= this
-                    return false
-                }
-                i = blocks.indexOf(this) - 1
-                start = outerStart
-                return true
-            }
-
-            fun Block.close() {
-                if (start < bodyEnd) {
-                    // trim the contents of structural blocks when inlined, else extra whitespace will appear
-                    val trimmedEnd = source.text.lastNonWhitespace(bodyEnd, start)
-                    append(source.text, start, trimmedEnd, level)
-                }
-                start = rangeEnd
-
-                if (this is DeclaringBlock)
-                    variables.pop()
-            }
-
-            @Suppress("UNCHECKED_CAST")
-            fun appendBlockContents(
-                block: Block,
-                source: SourceTemplate,
-                slots: List<SourceFile> = emptyList()
-            ): Boolean =
-                when (block) {
-                    is SkipBlock -> skipContents()
-
-                    is Slot -> {
-                        val indentSize = ((source.text.indentAt(block.rangeStart) ?: 0) - block.level * 4).coerceAtLeast(0)
-                        val indentString = indentSize.stringOf(' ')
-                        if (slots.isNotEmpty()) {
-                            append(source.text, block.outerStart, block.rangeStart, block.level)
-                            append(slots.joinToString("\n\n$indentString") { slotSourceFile ->
-                                when(slotSourceFile) {
-                                    is SourceTemplate -> slotSourceFile.text.indent(indentString)
-                                    is StaticSource -> slotSourceFile.contents.decodeToString()
-                                }
-                            })
-                        }
-                        slots.isEmpty()
-                    }
-
-                    is WhenClauseBlock -> {
-                        val parent = stack.top as? WhenBlock
-                            ?: error("when clause with no parent: $block")
-                        val value = parent.expression.evaluate(variables)
-                        val matched = value in block.value.map { it.evaluate(variables) } // TODO types?
-                        conditions[parent] = matched || conditions[parent] ?: false
-
-                        if (matched) {
-                            append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
-                            false
-                        } else skipContents()
-                    }
-
-                    is UnsafeBlock -> {
-                        log.trace { "  ${block.positionPrefix} UNSAFE $block" }
-                        append(source.text, block.outerStart, block.rangeStart, block.level)
-                        append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
-                        false
-                    }
-
-                    is ElseBlock -> {
-                        val parent = stack.top ?: error("else without parent: $block")
-                        val ifResult = conditions[parent]
-                        log.trace { "  ${block.positionPrefix} ELSE  ^${parent.lineNumber} -> !$ifResult -> ${ifResult == false}" }
-                        if (ifResult == false) {
-                            append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
-                            false
-                        } else skipContents()
-                    }
-
-                    // details handled by children
-                    is ConditionalBlock -> false
-
-                    is ExpressionBlock -> {
-                        val value = try {
-                            block.expression.evaluate(variables)
-                        } catch (e: Exception) {
-                            throw IllegalArgumentException("Failed to evaluate expression `${block.expression}` in ${source.target}", e)
-                        }
-
-                        when (block) {
-                            is InlineValue -> {
-                                log.trace { "  ${block.positionPrefix} VALUE ${block.expression} -> $value" }
-                                when {
-                                    value is String && !block.embedded -> append("\"$value\"")
-                                    else -> append(value.toString())
-                                }
-                                false
-                            }
-                            is IfBlock -> {
-                                val parent = stack.top ?: error("if without parent: $block")
-                                log.trace { "  ${block.positionPrefix} IF    ^${parent.lineNumber} ${block.expression} -> !!$value -> ${value.isTruthy()}" }
-                                val condition = value.isTruthy().also {
-                                    conditions[parent] = it
-                                }
-                                if (condition) {
-                                    append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
-                                    false
-                                } else skipContents()
-                            }
-                            is ForEachBlock -> {
-                                log.trace { "  ${block.positionPrefix} EACH  ${block.expression} -> $value" }
-                                when (value) {
-                                    null -> skipContents()
-                                    is Iterable<*> -> {
-                                        val list = loops[block] ?: value.toMutableList()
-                                        if (list.isNotEmpty()) {
-                                            val element = list.removeFirst()
-                                            variables.addVariableOrScope(block.variable to element)
-                                            loops[block] = list
-                                            append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
-                                            false
-                                        } else skipContents()
-                                    }
-                                    else -> error("Expected '${block.expression}' to be Iterable, but was $value")
-                                }
-                            }
-                            // details handled by direct children
-                            is WhenBlock -> {
-                                log.trace { "  ${block.positionPrefix} WHEN  ${block.expression} -> $value" }
-                                false
-                            }
-                        }
-                    }
-                }
-        }
-    }
 }
 
 class MissingPackException(pack: PackId) : Exception("Missing pack: $pack")

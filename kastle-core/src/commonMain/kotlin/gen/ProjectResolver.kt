@@ -16,7 +16,7 @@ fun interface ProjectResolver {
                 .map { it.sources.modules }
                 .reduceOrNull(ProjectModules::plus)
                 ?.flatten() ?: ProjectModules.Empty
-            val slotSources: Map<Url, List<SourceFile>> = packs.asSequence()
+            val slotSources: SourcesByUrl = packs.asSequence()
                 .flatMap { it.commonAndRootSources }
                 .filter { it.isSlot() }
                 .groupBy { it.target }
