@@ -131,13 +131,12 @@ class LocalPackRepository(
                         )
                     }
                     "kt", "kts" -> {
-                        val kotlinAnalyzer = KotlinCompilerTemplateEngine(file.parent, repository)
-                        val psiFile = kotlinAnalyzer.psiFileFactory.createFileFromText(
-                            file.toString(),
-                            KotlinFileType.INSTANCE,
-                            file.readText() ?: throw IllegalArgumentException("Missing path or text in source definition"),
+                        val kotlinAnalyzer = KotlinCompilerTemplateEngine(
+                            path = file.parent,
+                            repository = repository,
+                            onProperty = properties::add,
                         )
-                        kotlinAnalyzer.read(file, psiFile as KtFile, properties).let { template ->
+                        kotlinAnalyzer.read(file, file.readText()).let { template ->
                             template.copy(
                                 target = target ?: template.target,
                                 packId = packId,
@@ -166,12 +165,15 @@ class LocalPackRepository(
                     continue
 
                 // properties are supplied both from the manifest and from declarations in the source files
-                val kotlinAnalyzer = KotlinCompilerTemplateEngine(sourceFolder, repository)
+                val kotlinAnalyzer = KotlinCompilerTemplateEngine(
+                    path = sourceFolder,
+                    repository = repository,
+                    onProperty = properties::add,
+                )
                 sources += kotlinAnalyzer.ktFiles.map { sourceFile ->
                     kotlinAnalyzer.read(
                         sourceFolder.relativeTo(modulePath).resolvePackageDir(sourceFile),
                         sourceFile,
-                        properties
                     ).copy(packId = packId)
                 }
 
@@ -225,24 +227,24 @@ class LocalPackRepository(
 
             when(format) {
                 TemplateFormat.KOTLIN -> {
-                    val psiFile = kotlinAnalyzer.psiFileFactory.createFileFromText(
-                        path ?: "source.kt",
-                        KotlinFileType.INSTANCE,
-                        file.readText() ?: text ?: throw IllegalArgumentException("Missing path or text in source definition"),
+                    kotlinAnalyzer.read(
+                        path = path?.let(::Path),
+                        text = file.readText() ?: text
+                    ).copy(
+                        packId = packId,
+                        target = target,
+                        condition = conditionExpression
                     )
-                    kotlinAnalyzer.read(Path(""), psiFile as KtFile, properties)
-                        .copy(
-                            packId = packId,
-                            target = target,
-                            condition = conditionExpression
-                        )
                 }
                 TemplateFormat.OTHER ->
                     when (file.name.extension.lowercase()) {
                         "hbs" -> handlebarsTemplateEngine.read(
                             target,
                             file.readText() ?: text ?: throw IllegalArgumentException("Missing path or text in source definition")
-                        ).copy(packId = packId, condition = conditionExpression)
+                        ).copy(
+                            packId = packId,
+                            condition = conditionExpression
+                        )
                         else -> StaticSource(
                             contents = fs.source(file).buffered().use { it.readByteString() },
                             target = target,

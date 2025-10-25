@@ -6,6 +6,7 @@ import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.util.descendantsOfType
 import kotlinx.io.files.Path
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.io.readText
 import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.Logger
@@ -18,6 +19,7 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
+import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtScript
@@ -34,10 +36,10 @@ import java.io.File
  * @property repository An optional pack repository for additional data or functionality.
  */
 internal class KotlinCompilerTemplateEngine(
-    private val path: Path?,
+    private val path: Path? = null,
     private val repository: PackRepository = PackRepository.EMPTY,
-    private val log: Logger = ConsoleLogger()
-
+    private val log: Logger = ConsoleLogger(),
+    private val onProperty: (Property) -> Unit = {},
 ) {
     companion object {
         private val targetRegex = Regex("""@target\s+(\S+)""", RegexOption.IGNORE_CASE)
@@ -71,6 +73,18 @@ internal class KotlinCompilerTemplateEngine(
         environment.getSourceFiles()
     }
 
+    suspend fun read(
+        path: Path? = null,
+        text: String? = null,
+    ): SourceTemplate {
+        val psiFile = psiFileFactory.createFileFromText(
+            path.toString(),
+            KotlinFileType.INSTANCE,
+            text ?: path?.readText() ?: throw IllegalArgumentException("Missing path or text in source definition"),
+        )
+        return read(path ?: Path("source.kt"), psiFile as KtFile)
+    }
+
     /**
      * Parses a source template reference and retrieves the corresponding source template.
      *
@@ -82,7 +96,6 @@ internal class KotlinCompilerTemplateEngine(
     suspend fun read(
         sourcePath: Path,
         ktFile: KtFile,
-        properties: MutableList<Property>
     ): SourceTemplate {
         // TODO drop header
         // TODO full file path
@@ -100,7 +113,7 @@ internal class KotlinCompilerTemplateEngine(
                 text = ktFile.text,
                 target = target,
                 imports = ktFile.readImports(),
-                blocks = ktFile.findBlocks(properties),
+                blocks = ktFile.findBlocks(),
             )
             "slot" -> {
                 val slot = repository.slot(target.slotId)
@@ -120,7 +133,7 @@ internal class KotlinCompilerTemplateEngine(
                     text = text,
                     target = target,
                     imports = ktFile.readImports(),
-                    blocks = ktFile.findBlocks(properties),
+                    blocks = ktFile.findBlocks(),
                 )
             }
             else -> throw IllegalArgumentException("Unsupported target protocol: ${target.protocol}")
@@ -144,7 +157,7 @@ internal class KotlinCompilerTemplateEngine(
         return functionBody.trimBraces().trim('\n').trimIndent().trim()
     }
 
-    private fun KtFile.findBlocks(properties: MutableList<Property>): List<Block> {
+    private fun KtFile.findBlocks(): List<Block> {
         // references to project or module
         val templateReferences = findReferencesTo(
             PROPERTIES,
@@ -187,8 +200,9 @@ internal class KotlinCompilerTemplateEngine(
             .map { it.expression.readUnsafeBlock() }
 
         // include discovered properties in the list of properties
-        // TODO bad abstraction
-        properties.addAll(propertyDeclarations.map { it.asProperty() })
+        for (property in propertyDeclarations.map { it.asProperty() }) {
+            onProperty(property)
+        }
 
         // sort, indent logic
         val allBlocks = collect(

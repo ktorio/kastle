@@ -1,20 +1,114 @@
 package org.jetbrains.kastle.templates
 
 import io.kotest.core.spec.style.StringSpec
-import kotlinx.io.files.Path
-import org.jetbrains.kastle.io.resolve
+import io.kotest.matchers.shouldBe
+import org.jetbrains.kastle.SourceTemplate
+import org.jetbrains.kastle.TemplateEvaluator.Companion.toString
+import org.jetbrains.kastle.utils.Variables
 
 class KotlinCompilerTemplateEngineTest : StringSpec({
 
-    "gradle build does not fail" {
-        val file = Path("../repository/org.gradle/gradle")
-        val engine = KotlinCompilerTemplateEngine(file.parent!!)
-        val ktFile = engine.ktFiles.single { it.name == "build.gradle.kts" }
-        engine.read(
-            file.resolve("build.gradle.kts"),
-            ktFile,
-            mutableListOf()
-        )
+    val engine = KotlinCompilerTemplateEngine()
+
+    suspend fun template(text: String): SourceTemplate =
+        engine.read(text = text)
+
+    "literals" {
+        val template = template("""
+            val title: String by _properties
+            val html = html {
+                h1 {
+                    +title
+                }
+            }
+        """.trimIndent())
+
+        template.toString(
+            variables = Variables("title" to "Hello, World!")
+        ) shouldBe "\nval html = html {\n    h1 {\n        +\"Hello, World!\"\n    }\n}"
+    }
+
+    "string interpolation" {
+        val template = template($$"""
+            val someProperty: String by _properties
+            fun main() {
+                println("Hello, $someProperty!")
+            }
+        """.trimIndent())
+
+        template.toString(
+            variables = Variables("someProperty" to "World")
+        ) shouldBe "\nfun main() {\n    println(\"Hello, World!\")\n}"
+    }
+
+    "if and else" {
+        val template = template("""
+            val condition: Boolean by _properties
+            val result = if (condition) "on" else "off"
+        """.trimIndent())
+
+        template.toString(
+            variables = Variables("condition" to true)
+        ) shouldBe "\nval result = \"on\""
+
+        template.toString(
+            variables = Variables("condition" to false)
+        ) shouldBe "\nval result = \"off\""
+    }
+
+    "for each" {
+        val template = template("""
+            val names: List<String> by _properties
+            fun readNames(callback: (String) -> Unit) {
+                for (name in names) {
+                    callback(name)
+                }
+            }
+        """.trimIndent())
+
+        template.toString(
+            variables = Variables("names" to listOf("John", "Jane", "Jill"))
+        ) shouldBe """
+            
+            fun readNames(callback: (String) -> Unit) {
+                callback("John")
+                callback("Jane")
+                callback("Jill")
+            }
+        """.trimIndent()
+    }
+
+    "operator expressions" {
+        val template = template("""
+            val number: Int by _properties
+            fun main() {
+                if (number + 42 > 100) {
+                    bigNumber()
+                } else {
+                    smallNumber()
+                }
+            }
+        """.trimIndent())
+
+        template.toString(
+            variables = Variables("number" to 60)
+        ) shouldBe """
+            
+            fun main() {
+                bigNumber()
+            
+            }
+        """.trimIndent()
+
+        template.toString(
+            variables = Variables("number" to 37)
+        ) shouldBe """
+            
+            fun main() {
+                smallNumber()
+            
+            }
+        """.trimIndent()
     }
 
 })

@@ -179,7 +179,7 @@ private fun PsiElement.tryReadBlocks(): Sequence<Block>? =
         is KtWhenExpression -> asWhenBlock()
         is KtIfExpression -> asIfBlock()
         is KtForExpression -> asEachBlock()
-        is KtBlockStringTemplateEntry -> asStringTemplateLiteral()
+        is KtStringTemplateEntry -> asStringTemplateLiteral()
         else -> null
     }
 
@@ -259,7 +259,7 @@ private fun KtForExpression.asEachBlock(): Sequence<Block> = sequence {
     }
 }
 
-private fun KtBlockStringTemplateEntry.asStringTemplateLiteral(): Sequence<Block> = sequence {
+private fun KtStringTemplateEntry.asStringTemplateLiteral(): Sequence<Block> = sequence {
     // Check for unsafe call on string template
     val grandParent = parent.parent
     if (grandParent is KtDotQualifiedExpression && grandParent.selectorExpression is KtCallExpression) {
