@@ -156,10 +156,7 @@ class LocalPackRepository(
 
             val sources = mutableListOf<SourceFile>()
             val resources = mutableListOf<SourceFile>()
-            val sourceFolders = when {
-                platforms.size == 1 -> listOf(modulePath.resolve("src"))
-                else -> buildList { add("src"); platforms.forEach { add("src@$it")} }.map(modulePath::resolve)
-            }
+            val (sourceFolders, resourceFolders) = getStandardSourceFolders(platforms, modulePath)
 
             for (sourceFolder in sourceFolders) {
                 if (!fs.exists(sourceFolder))
@@ -182,12 +179,15 @@ class LocalPackRepository(
                 sources += fs.walkFiles(sourceFolder).filter { file ->
                     !file.name.endsWith(".kt")
                 }.asFlow().map(::readModuleSource).toList()
+            }
 
-                // assume non-kotlin files in resources
-                val resourcesFolder = modulePath.resolve("resources")
-                if (fs.exists(resourcesFolder)) {
-                    resources += fs.walkFiles(resourcesFolder)
-                        .asFlow().map(::readModuleSource).toList()
+            // resource files included; can be templated
+            for (resourceFolder in resourceFolders) {
+                if (fs.exists(resourceFolder)) {
+                    resources += fs.walkFiles(resourceFolder)
+                        .asFlow()
+                        .map(::readModuleSource)
+                        .toList()
                 }
             }
 
@@ -270,6 +270,30 @@ class LocalPackRepository(
                 } ?: projectSources,
             )
         )
+    }
+
+    private fun getStandardSourceFolders(
+        platforms: Set<Platform>,
+        modulePath: Path,
+    ): Pair<List<Path>, List<Path>> {
+        val (sources, resources) = when {
+            platforms.size == 1 -> listOf(listOf("src"), listOf("resources"))
+            else -> {
+                listOf("src", "resources").map { folder ->
+                    buildList {
+                        add(folder)
+                        platforms.forEach { platform ->
+                            add("$folder@$platform")
+                        }
+                    }
+                }
+            }
+        }
+        return sources.map(modulePath::resolve) to resources.let {
+            if (Platform.ANDROID in platforms)
+                it + "res"
+            else it
+        }.map(modulePath::resolve)
     }
 
     @OptIn(ExperimentalSerializationApi::class)
