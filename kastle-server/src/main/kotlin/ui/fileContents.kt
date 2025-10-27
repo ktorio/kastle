@@ -3,6 +3,8 @@ package org.jetbrains.kastle.server.ui
 import io.ktor.utils.io.readText
 import kotlinx.html.*
 import org.jetbrains.kastle.SourceFileEntry
+import org.jetbrains.kastle.kotlin.KT_EXTENSION
+import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
 
 fun HTML.fileContentsHtml(name: String, contents: String) {
     body {
@@ -24,7 +26,7 @@ fun FlowContent.fileBodyContentsHtml(name: String, contents: String) {
 
 private fun languageString(fileName: String): String? =
     when (val extension = fileName.substringAfterLast('.')) {
-        "kt", "kts" -> "kotlin"
+        KT_EXTENSION, KT_SCRIPT_EXTENSION -> "kotlin"
         else -> extension
     }.takeIf {
         it !in setOf("jar", "tar", "exe", "")

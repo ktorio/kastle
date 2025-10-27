@@ -8,7 +8,7 @@ import org.jetbrains.kastle.utils.isSlot
 
 fun interface ProjectResolver {
     companion object {
-        val Default = ProjectResolver { descriptor, repository ->
+        val BaseImpl = ProjectResolver { descriptor, repository ->
             val packs = repository.getAllWithRequirements(descriptor.packs)
                 .toList()
                 .distinctBy { it.id }
@@ -50,7 +50,7 @@ fun interface ProjectResolver {
                     val (id, version) = repositoryCatalog.plugins[catalogKey] ?: continue
                     if (version is CatalogVersion.Ref)
                         versions[version.ref] = repositoryCatalog.versions[version.ref] ?: missingVersion(version.ref)
-                    gradlePlugins[catalogKey] = GradlePlugin(id, pluginKey, version)
+                    gradlePlugins[catalogKey] = GradlePlugin(id, pluginKey, catalogKey, version)
                 }
 
                 for (dependency in module.allDependencies) {

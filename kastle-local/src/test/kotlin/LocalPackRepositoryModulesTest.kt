@@ -1,9 +1,7 @@
 package org.jetbrains.kastle
 
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainOnly
-import io.kotest.matchers.shouldBe
 import org.jetbrains.kastle.gen.Project
 import org.jetbrains.kastle.gen.ProjectResolver
 
@@ -25,7 +23,7 @@ class LocalPackRepositoryModulesTest : StringSpec({
             properties = properties,
             packs = packs.map(PackId::parse),
         )
-        return ProjectResolver.Default.resolve(descriptor, repository)
+        return ProjectResolver.BaseImpl.resolve(descriptor, repository)
     }
 
     "compose multiplatform" {

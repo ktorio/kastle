@@ -11,27 +11,20 @@ import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.structure.NestedPackagingMapping
 import org.jetbrains.kastle.utils.*
 
-interface ProjectGenerator {
+class ProjectGenerator(
+    private val repository: PackRepository,
+    private val projectResolver: ProjectResolver = DefaultResolver,
+    private val log: Logger = ConsoleLogger(),
+) {
     companion object {
-        fun fromRepository(
-            repository: PackRepository,
-            projectResolver: ProjectResolver =
-                ProjectResolver.Default + NestedPackagingMapping + GradleSourceMapping,
-            log: Logger = ConsoleLogger(),
-        ): ProjectGenerator = ProjectGeneratorImpl(repository, projectResolver, log)
+        val DefaultResolver = ProjectResolver.BaseImpl +
+                NestedPackagingMapping +
+                GradleSourceMapping
     }
 
-    fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry>
-}
-
-class ProjectGeneratorImpl(
-    private val repository: PackRepository,
-    private val projectResolver: ProjectResolver,
-    private val log: Logger,
-) : ProjectGenerator {
     val templateEvaluator = TemplateEvaluator(log)
 
-    override fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
+    fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
         val project = projectResolver.resolve(projectDescriptor, repository)
         log.trace { project.name }
         log.trace {

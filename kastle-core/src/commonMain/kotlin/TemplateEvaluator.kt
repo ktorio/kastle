@@ -6,6 +6,7 @@ import kotlinx.io.readString
 import kotlinx.io.writeCodePointValue
 import kotlinx.io.writeString
 import org.jetbrains.kastle.kotlin.KT_EXTENSION
+import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
 import org.jetbrains.kastle.kotlin.writeKotlinSourcePreamble
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
@@ -84,12 +85,14 @@ class TemplateEvaluator(
             .flatMap { it.imports?.imports.orEmpty() }
             .toList()
         val startPosition = when (template.target.extension) {
-            KT_EXTENSION, KT_EXTENSION -> writeKotlinSourcePreamble(
-                groupId = groupId,
-                target = template.target,
-                source = template,
-                includeImports = slotImports,
-            )
+            KT_EXTENSION, KT_SCRIPT_EXTENSION ->
+                writeKotlinSourcePreamble(
+                    groupId = groupId,
+                    target = template.target,
+                    source = template,
+                    extraImports = slotImports,
+                    skipPackage = template.target.extension == KT_SCRIPT_EXTENSION,
+                )
             else -> 0
         }
 
@@ -129,7 +132,16 @@ class TemplateEvaluator(
             val skipped = appendBlockContents(
                 block = block,
                 source = template,
-                slots = slots.lookup(packId, block)
+                slots = slots.lookup(packId, block).map { sourceFile ->
+                    when(sourceFile) {
+                        is SourceTemplate -> {
+                            // TODO should always have a value
+                            val slotPackId = sourceFile.packId ?: packId
+                            evaluateToBuffer(sourceFile, groupId, slotPackId, variables, slots).readString()
+                        }
+                        is StaticSource -> sourceFile.contents.decodeToString()
+                    }
+                }
             )
 
             // where to go next
@@ -197,8 +209,11 @@ internal class SourceFileWriteContext(
 
     override fun append(value: CharSequence?, startIndex: Int, endIndex: Int): Appendable {
         if (value == null) return this
-        require(startIndex <= endIndex) {
+        check(startIndex <= endIndex) {
             "Overlap $startIndex > $endIndex: ${value.substring(endIndex, startIndex)}"
+        }
+        check(endIndex <= value.length) {
+            "End index out of bounds: $endIndex > ${value.length}"
         }
         buffer.writeString(value, startIndex, endIndex)
         return this
@@ -283,7 +298,7 @@ internal class SourceFileWriteContext(
         fun appendBlockContents(
             block: Block,
             source: SourceTemplate,
-            slots: List<SourceFile> = emptyList()
+            slots: List<String> = emptyList()
         ): Boolean =
             when (block) {
                 is SkipBlock -> skipContents()
@@ -293,11 +308,8 @@ internal class SourceFileWriteContext(
                     val indentString = indentSize.stringOf(' ')
                     if (slots.isNotEmpty()) {
                         append(source.text, block.outerStart, block.rangeStart, block.level)
-                        append(slots.joinToString("\n$indentString") { slotSourceFile ->
-                            when (slotSourceFile) {
-                                is SourceTemplate -> slotSourceFile.text.indent(indentString)
-                                is StaticSource -> slotSourceFile.contents.decodeToString()
-                            }
+                        append(slots.joinToString("\n$indentString") { slotText ->
+                            slotText.trimIndent().indent(indentString)
                         })
                     }
                     slots.isEmpty()

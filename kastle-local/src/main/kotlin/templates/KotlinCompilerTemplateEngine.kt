@@ -3,7 +3,9 @@ package org.jetbrains.kastle.templates
 import com.intellij.openapi.util.Disposer
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiFileFactory
+import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.descendantsOfType
+import com.intellij.psi.util.elementType
 import kotlinx.io.files.Path
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.readText
@@ -20,9 +22,14 @@ import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.idea.KotlinFileType
+import org.jetbrains.kotlin.lexer.KtSingleValueToken
+import org.jetbrains.kotlin.psi.KtElement
+import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtScript
+import org.jetbrains.kotlin.psi.psiUtil.endOffset
+import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import java.io.File
 
 /**
@@ -119,28 +126,30 @@ internal class KotlinCompilerTemplateEngine(
                 val slot = repository.slot(target.slotId)
                 require(slot != null) { "Slot ${target.slotId} not found" }
                 // TODO should be able to specify which function
-                val text = ktFile.firstFunctionBody()
-                        ?: throw IllegalArgumentException("${ktFile.name}: Expected single function body for slot")
-                when(slot.context) {
-                    SourceContext.TopLevel -> ktFile.endOfImports()?.let { endOfImports ->
-                        ktFile.text.substring(endOfImports)
-                    } ?: ktFile.text
-                    // TODO other positions, annotations, etc.
-                    SourceContext.Inline -> ktFile.firstFunctionBody()
-                        ?: throw IllegalArgumentException("${ktFile.name}: Expected single function body for slot")
+                val nestedBlocks = when (val functionBody = ktFile.firstFunctionBody()) {
+                    null -> ktFile.findBlocks()
+                    // skip everything outside the function body
+                    else -> {
+                        // skip braces and whitespace
+                        val functionBodyRange = functionBody.bodyRange()
+                        functionBody.findBlocks() +
+                                SkipBlock(position = BlockPosition(0, 0..functionBodyRange.first)) +
+                                SkipBlock(position = BlockPosition(0, functionBodyRange.last..ktFile.textLength))
+                    }
                 }
+
                 SourceTemplate(
-                    text = text,
+                    text = ktFile.text,
                     target = target,
                     imports = ktFile.readImports(),
-                    blocks = ktFile.findBlocks(),
+                    blocks = nestedBlocks,
                 )
             }
             else -> throw IllegalArgumentException("Unsupported target protocol: ${target.protocol}")
         }
     }
 
-    private fun KtFile.firstFunctionBody(): String? {
+    private fun KtFile.firstFunctionBody(): KtExpression? {
         val fileBody = if (name.extension == "kts") {
             declarations
                 .filterIsInstance<KtScript>()
@@ -151,13 +160,27 @@ internal class KotlinCompilerTemplateEngine(
             .filterIsInstance<KtNamedFunction>()
             .singleOrNull() ?: return null
 
-        val functionBody = namedFunction.bodyExpression?.text
-            ?: return null
-
-        return functionBody.trimBraces().trim('\n').trimIndent().trim()
+        return namedFunction.bodyExpression
     }
 
-    private fun KtFile.findBlocks(): List<Block> {
+    private fun KtExpression.bodyRange(): IntRange {
+        val fileText = containingFile.text
+        val startOffset = children.first {
+            it !is PsiWhiteSpace && it.elementType !is KtSingleValueToken
+        }.startOffset.let {
+            fileText.startOfLine(it) ?: it
+        }
+        val endOffset = children.last {
+            it !is PsiWhiteSpace && it.elementType !is KtSingleValueToken
+        }.endOffset
+
+        return startOffset .. endOffset
+    }
+
+    private fun KtExpression.bodyText(): String =
+        text.trimBraces().trim('\n').trimIndent().trim()
+
+    private fun KtElement.findBlocks(): List<Block> {
         // references to project or module
         val templateReferences = findReferencesTo(
             PROPERTIES,

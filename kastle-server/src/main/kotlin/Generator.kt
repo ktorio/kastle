@@ -29,7 +29,7 @@ fun Application.provideGenerator(
     dependencies {
         provide<PackRepository> { getCompiledRepository(sourceDir, compiledDir, log) }
         provide<ProjectGenerator> {
-            ProjectGenerator.fromRepository(
+            ProjectGenerator(
                 repository = resolve(),
                 log = resolve()
             )
@@ -38,7 +38,8 @@ fun Application.provideGenerator(
 }
 
 typealias JavaPath = java.nio.file.Path
-fun JavaPath(str: String) = JavaPath.of(str)
+
+fun JavaPath(str: String): JavaPath = JavaPath.of(str)
 
 @OptIn(ExperimentalSerializationApi::class)
 private suspend fun getCompiledRepository(

@@ -5,7 +5,11 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         for (repository in _project.gradle.repositories) {
-            _unsafe("${repository.gradleFunction}()")
+            if (repository.gradleFunction != null) {
+                _unsafe("${repository.gradleFunction}()")
+            } else {
+                maven(repository.url)
+            }
         }
     }
 }
@@ -14,7 +18,11 @@ dependencyResolutionManagement {
     repositories {
         mavenCentral()
         for (repository in _project.gradle.repositories) {
-            _unsafe("${repository.gradleFunction}()")
+            if (repository.gradleFunction != null) {
+                _unsafe("${repository.gradleFunction}()")
+            } else {
+                maven(repository.url)
+            }
         }
     }
 }

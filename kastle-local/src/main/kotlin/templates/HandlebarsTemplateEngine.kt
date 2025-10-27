@@ -12,6 +12,8 @@ import org.jetbrains.kastle.utils.Expression.VariableRef
 import org.jetbrains.kastle.utils.ListStack
 import org.jetbrains.kastle.utils.*
 
+const val HANDLEBARS_EXTENSION = "hbs"
+
 class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     companion object {
         private const val IF = "if"

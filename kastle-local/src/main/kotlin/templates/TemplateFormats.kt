@@ -1,5 +1,8 @@
 package org.jetbrains.kastle.templates
 
+import org.jetbrains.kastle.kotlin.KT_EXTENSION
+import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
+
 enum class TemplateFormat {
     KOTLIN,
     OTHER,
@@ -7,6 +10,6 @@ enum class TemplateFormat {
 
 val String.extensionFormat: TemplateFormat
     get() = when (substringAfterLast('.')) {
-        "kt", "kts" -> TemplateFormat.KOTLIN
+        KT_EXTENSION, KT_SCRIPT_EXTENSION -> TemplateFormat.KOTLIN
         else -> TemplateFormat.OTHER
     }

@@ -1,6 +1,7 @@
 package org.jetbrains.kastle
 
 import io.kotest.matchers.shouldBe
+import kotlinx.datetime.Clock
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.buffered
@@ -14,11 +15,13 @@ private val DEFAULT_IGNORE_FILES = setOf(
     "gradle-wrapper.jar"
 )
 
+expect fun shouldReplaceSnapshots(): Boolean
+
 fun assertFilesAreEqualWithSnapshot(
     expectedPath: String,
     actualPath: String,
     ignorePaths: Collection<String> = DEFAULT_IGNORE_FILES,
-    replace: Boolean = REPLACE_SNAPSHOTS,
+    replace: Boolean = shouldReplaceSnapshots(),
 ) {
     val fs = SystemFileSystem
     try {
@@ -29,9 +32,10 @@ fun assertFilesAreEqualWithSnapshot(
         )
     } catch (cause: Throwable) {
         // Save a copy of the failed project
-        val destination = if (replace) Path(expectedPath)
-        else Path(fs.metadataOrNull(SystemTemporaryDirectory)?.toString() ?: ".")
-            .resolve("actual-files-${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}")
+        val destination =
+            if (replace) Path(expectedPath)
+            else SystemTemporaryDirectory
+                .resolve("actual-files-${Clock.System.now().toEpochMilliseconds()}")
 
         println("Files changed, see $destination for new snapshot")
 

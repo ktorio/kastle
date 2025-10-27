@@ -1,3 +1,7 @@
 id: org.jetbrains/compose-multiplatform
 name: Compose Multi-platform
 description: A multi-platform UI framework
+repositories:
+  - id: google
+    url: https://maven.google.com/
+    gradleFunction: google

@@ -4,19 +4,13 @@ import io.kotest.core.spec.style.StringSpec
 import kotlinx.coroutines.*
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemTemporaryDirectory
-import org.jetbrains.kastle.gen.ProjectResolver
-import org.jetbrains.kastle.gen.plus
 import org.jetbrains.kastle.io.export
-import org.jetbrains.kastle.logging.ConsoleLogger
-import org.jetbrains.kastle.logging.LogLevel
-import org.jetbrains.kastle.structure.GradleSourceMapping
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 private const val DEFAULT_NAME = "sample"
 private const val DEFAULT_GROUP = "com.acme"
-internal val REPLACE_SNAPSHOTS = true // System.getenv("UPDATE_GENERATOR_SNAPSHOTS") != null
 
 private val testScope = CoroutineScope(CoroutineName("generator-test"))
 
@@ -39,10 +33,8 @@ fun ProjectGeneratorTest(
         name: String,
         properties: Map<VariableId, String> = emptyMap(),
         packs: List<String>
-    ) = ProjectGeneratorImpl(
+    ) = ProjectGenerator(
         repository = repository.await(),
-        projectResolver = ProjectResolver.Default + GradleSourceMapping,
-        log = ConsoleLogger(LogLevel.INFO),
     ).generate(
         ProjectDescriptor(
             name = name,

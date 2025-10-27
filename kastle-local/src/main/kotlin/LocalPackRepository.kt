@@ -20,12 +20,13 @@ import org.jetbrains.kastle.amper.readDependencies
 import org.jetbrains.kastle.amper.readPlatforms
 import org.jetbrains.kastle.io.*
 import org.jetbrains.kastle.io.resolve
+import org.jetbrains.kastle.kotlin.KT_EXTENSION
+import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
 import org.jetbrains.kastle.templates.*
 import org.jetbrains.kastle.utils.extension
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
-import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.psi.KtFile
 
 private const val PACK_YAML = "pack.ksl.yaml"
@@ -93,8 +94,8 @@ class LocalPackRepository(
         val properties = manifest.properties.toMutableList()
         val documentation = projectPath.resolve("README.md").readText()
 
-        val kotlinAnalyzer = KotlinCompilerTemplateEngine(projectPath, repository)
-        val expressionParser = KotlinExpressionParser(kotlinAnalyzer.psiFileFactory)
+        val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath, repository)
+        val expressionParser = KotlinExpressionParser(kotlinTemplateEngine.psiFileFactory)
 
         val projectSources = projectPath.moduleFolders().asFlow().mapNotNull { modulePath ->
             val relativeModulePath = modulePath.relativeTo(projectPath).toString()
@@ -124,19 +125,19 @@ class LocalPackRepository(
 
             suspend fun readModuleSource(file: Path, target: String? = null) =
                 when (file.name.extension.lowercase()) {
-                    "hbs" -> handlebarsTemplateEngine.read(modulePath, file).let { template ->
+                    HANDLEBARS_EXTENSION -> handlebarsTemplateEngine.read(modulePath, file).let { template ->
                         template.copy(
                             target = target ?: template.target,
                             packId = packId,
                         )
                     }
-                    "kt", "kts" -> {
-                        val kotlinAnalyzer = KotlinCompilerTemplateEngine(
+                    KT_EXTENSION, KT_SCRIPT_EXTENSION -> {
+                        val kotlinTemplateEngine = KotlinCompilerTemplateEngine(
                             path = file.parent,
                             repository = repository,
                             onProperty = properties::add,
                         )
-                        kotlinAnalyzer.read(file, file.readText()).let { template ->
+                        kotlinTemplateEngine.read(file, file.readText()).let { template ->
                             template.copy(
                                 target = target ?: template.target,
                                 packId = packId,
@@ -165,13 +166,13 @@ class LocalPackRepository(
                     continue
 
                 // properties are supplied both from the manifest and from declarations in the source files
-                val kotlinAnalyzer = KotlinCompilerTemplateEngine(
+                val kotlinTemplateEngine = KotlinCompilerTemplateEngine(
                     path = sourceFolder,
                     repository = repository,
                     onProperty = properties::add,
                 )
-                sources += kotlinAnalyzer.ktFiles.map { sourceFile ->
-                    kotlinAnalyzer.read(
+                sources += kotlinTemplateEngine.ktFiles.map { sourceFile ->
+                    kotlinTemplateEngine.read(
                         sourceFolder.relativeTo(modulePath).resolvePackageDir(sourceFile),
                         sourceFile,
                     ).copy(packId = packId)
@@ -227,7 +228,7 @@ class LocalPackRepository(
 
             when(format) {
                 TemplateFormat.KOTLIN -> {
-                    kotlinAnalyzer.read(
+                    kotlinTemplateEngine.read(
                         path = path?.let(::Path),
                         text = file.readText() ?: text
                     ).copy(

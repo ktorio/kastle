@@ -126,6 +126,7 @@ fun GradleProjectSettings.toVariableMap() = mapOf(
         mapOf(
             "id" to it.id,
             "name" to it.name,
+            "catalogKey" to it.catalogKey,
             "version" to it.version.toVariableMap()
         )
     },

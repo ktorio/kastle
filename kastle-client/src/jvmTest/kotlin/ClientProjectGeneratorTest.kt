@@ -39,7 +39,7 @@ class TestServer {
                 application {
                     dependencies {
                         provide<PackRepository> { LocalPackRepository(Path("../repository")) }
-                        provide<ProjectGenerator> { ProjectGenerator.fromRepository(resolve()) }
+                        provide<ProjectGenerator> { ProjectGenerator(resolve()) }
                     }
                     json()
                     routing()

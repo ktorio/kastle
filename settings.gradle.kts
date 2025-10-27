@@ -9,6 +9,7 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    @Suppress("UnstableApiUsage")
     repositories {
         mavenCentral()
         google()
@@ -27,4 +28,10 @@ include(
     "kastle-local",
     "kastle-templates",
     "kastle-gradle-plugin",
+)
+
+// Sample repository
+// Requires local maven publication to read changes.
+includeBuild(
+    "repository"
 )

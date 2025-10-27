@@ -168,6 +168,7 @@ data class BlockPosition(
         "$line / $level / ${outer.first},${outer.last} / ${range.first},${range.last} / ${inner.first},${inner.last}"
 }
 
+// TODO currently ignored
 enum class SourceContext {
     TopLevel,
     Inline

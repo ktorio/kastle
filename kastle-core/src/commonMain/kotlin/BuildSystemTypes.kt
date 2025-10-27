@@ -252,6 +252,7 @@ data class GradleProjectSettings(
 data class GradlePlugin(
     val id: String,
     val name: String,
+    val catalogKey: String,
     val version: CatalogVersion,
 )
 

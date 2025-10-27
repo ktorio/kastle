@@ -18,7 +18,8 @@ fun Appendable.writeKotlinSourcePreamble(
     groupId: String,
     target: Url,
     source: SourceTemplate,
-    includeImports: List<SourceImport>,
+    extraImports: List<SourceImport>,
+    skipPackage: Boolean,
 ): Int {
     val dir = target.parentPath
         .replace(Regex("^/?/?(?:src(?:@\\w+)?)?(?:/\\w*(?:main|test)/\\w+)?/?", RegexOption.IGNORE_CASE), "")
@@ -27,16 +28,18 @@ fun Appendable.writeKotlinSourcePreamble(
 
     val pkg = if (dir.isEmpty()) groupId else "${groupId}.$dir"
 
-    append("package $pkg")
+    if (!skipPackage)
+        append("package $pkg")
 
     val importsDeclaration = source.imports ?: return 0
     val sourceImports = importsDeclaration.imports
-    val imports: List<String> = (sourceImports + includeImports).map {
+    val imports: List<String> = (sourceImports + extraImports).map {
         it.toString(groupId)
     }.distinct()
 
     if (imports.isNotEmpty()) {
-        append("\n\n")
+        if (!skipPackage)
+            append("\n\n")
         append(imports.joinToString("\n"))
     }
 

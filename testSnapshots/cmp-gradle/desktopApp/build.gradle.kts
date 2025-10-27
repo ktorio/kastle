@@ -1,4 +1,4 @@
-
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     alias(libs.plugins.kotlin.jvm)
 
@@ -10,11 +10,11 @@ plugins {
 
 compose.desktop {
     application {
-        mainClass = "${_project.group}.MainKt"
+        mainClass = "com.acme.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = _project.group
+            packageName = "com.acme"
             packageVersion = "1.0.0"
         }
     }

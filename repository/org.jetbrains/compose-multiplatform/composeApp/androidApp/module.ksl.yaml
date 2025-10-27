@@ -17,3 +17,4 @@ gradle:
 sources:
   - path: android.gradle.kts
     target: slot://org.gradle/gradle/buildRoot
+  - path: proguard-rules.pro

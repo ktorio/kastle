@@ -7,9 +7,11 @@ import org.jetbrains.kastle.gen.ProjectMapping
 import org.jetbrains.kastle.map
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.capitalizeFirst
+import org.jetbrains.kastle.utils.fileName
 
 internal val GRADLE_PACK_ID = PackId("org.gradle", "gradle")
-internal val SOURCE_FOLDER_REGEX = Regex("(src|test|resources|testResources)(?:@(\\w+))?/")
+internal val SOURCE_FOLDER_REGEX = Regex("(src|test|resources|testResources|res)(?:@(\\w+))?/")
+internal val UNCATEGORIZED_FILES = setOf("AndroidManifest.xml")
 
 /**
  * Transforms Amper source structure with Gradle.
@@ -25,14 +27,19 @@ val GradleSourceMapping = ProjectMapping { project ->
                     if (source.target.protocol == "file" && source.target.contains(SOURCE_FOLDER_REGEX)) {
                         val newTarget = source.target.replace(SOURCE_FOLDER_REGEX) { match ->
                             val sourceRoot = match.groups[1]!!.value
-                            val mainOrTest = if (sourceRoot in setOf("test", "testResources")) "test" else "main"
-                            val kotlinOrResources = if (sourceRoot in setOf("resources", "testResources")) "resources" else "kotlin"
+                            val mainOrTest = (if (sourceRoot in setOf("test", "testResources")) "test" else "main").capitalizeFirst()
+                            val fileCategory = when {
+                                source.target.fileName in UNCATEGORIZED_FILES -> ""
+                                sourceRoot == "res" -> "res/"
+                                sourceRoot in setOf("resources", "testResources") -> "resources/"
+                                else -> "kotlin/"
+                            }
                             when (val target = match.groups[2]?.value) {
                                 null -> when (module.platforms.singleOrNull()) {
-                                    null -> "src/common${mainOrTest.capitalizeFirst()}/$kotlinOrResources/"
-                                    else -> "src/main/$kotlinOrResources/"
+                                    null -> "src/common$mainOrTest/$fileCategory"
+                                    else -> "src/main/$fileCategory"
                                 }
-                                else -> "src/${target}${mainOrTest.capitalizeFirst()}/$kotlinOrResources/"
+                                else -> "src/$target$mainOrTest/$fileCategory"
                             }
                         }
                         when(source) {

@@ -29,5 +29,4 @@ kotlin {
             api(libs.kotest.assertions)
         }
     }
-
 }
