@@ -11,6 +11,14 @@ plugins {
 dependencies {
     debugImplementation(compose.uiTooling)
 }
+android {
+    namespace = "com.acme.cmpGradle"
+    compileSdk = 36
+
+    defaultConfig {
+        minSdk = 24
+    }
+}
 
 kotlin {
     jvm()
@@ -34,14 +42,14 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.animation)
-            implementation(compose.components.resources)
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
+            api(compose.runtime)
+            api(compose.foundation)
+            api(compose.material3)
+            api(compose.ui)
+            api(compose.animation)
+            api(compose.components.resources)
+            api(libs.androidx.lifecycle.viewmodelCompose)
+            api(libs.androidx.lifecycle.runtimeCompose)
         }
 
     }

@@ -1,6 +1,10 @@
 val versionCatalogEnabled: Boolean by _properties
 
 plugins {
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    if (_project.modules.any { it.platform == "jvm" }) {
+        alias(libs.plugins.kotlin.jvm) apply false
+    }
     for (plugin in _project.gradle.plugins) {
         alias(_unsafe("libs.plugins.${plugin.name}")) apply false
     }

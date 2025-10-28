@@ -1,6 +1,9 @@
 id: org.jetbrains/compose-multiplatform
 name: Compose Multi-platform
 description: A multi-platform UI framework
+rootSources:
+  - path: gradle.properties
+    target: slot://org.gradle/gradle/properties
 repositories:
   - id: google
     url: https://maven.google.com/

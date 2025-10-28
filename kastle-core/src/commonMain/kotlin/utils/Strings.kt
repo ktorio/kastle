@@ -21,6 +21,12 @@ fun String.camelCase() =
     splitToSequence(Regex("\\W+"))
         .joinToString("") { it.capitalizeFirst() }
 
+/**
+ * Same as camel case, but the first character is not capitalized.
+ */
+fun String.camelCaseVar() =
+    camelCase().replaceFirstChar { it.lowercase() }
+
 fun String.trimAngleBrackets() =
     trimEnclosingCharacters('<', '>')
 

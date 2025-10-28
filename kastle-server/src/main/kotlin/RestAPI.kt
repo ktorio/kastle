@@ -80,7 +80,7 @@ fun Routing.backEnd(
             post("/download") {
                 val settings: ProjectDescriptor = call.receive()
                 val result: Flow<SourceFileEntry> = generator.generate(settings)
-                call.respondProjectDownload(result)
+                call.respondProjectDownload(settings.name, result)
             }
         }
     }

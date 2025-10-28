@@ -354,14 +354,14 @@ data class ArtifactDependency(
     val group: String,
     val artifact: String,
     val version: String,
-    override val exported: Boolean = false,
+    override val exported: Boolean,
 ): Dependency {
     companion object {
         fun parse(text: String): ArtifactDependency {
             val segments = text.split(':', limit = 3)
             require(segments.size == 3) { "Invalid dependency string: $text" }
             val (group, artifact, version) = segments
-            return ArtifactDependency(group, artifact, version)
+            return ArtifactDependency(group, artifact, version, exported = false)
         }
     }
 
@@ -374,7 +374,7 @@ data class ArtifactDependency(
 @Serializable
 data class ModuleDependency(
     val path: String,
-    override val exported: Boolean = false,
+    override val exported: Boolean,
 ): Dependency {
     override fun toString(): String = buildString {
         append(path)

@@ -6,6 +6,11 @@ plugins {
 
 
 kotlin {
+    js {
+        browser()
+        binaries.executable()
+    
+    }
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
         browser()
@@ -14,7 +19,7 @@ kotlin {
     }
 
     sourceSets {
-        wasmJsMain.dependencies {
+        webMain.dependencies {
             implementation(project(":shared"))
         }
 

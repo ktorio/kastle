@@ -19,6 +19,7 @@ val _attributes: TemplateProperties = object : TemplateProperties {}
 object _project {
     val name: String = ""
     val group: String = ""
+    val namespace: String = ""
     val modules: List<TemplateSourceModule> = emptyList()
     val gradle = TemplateGradleProjectSettings()
 }

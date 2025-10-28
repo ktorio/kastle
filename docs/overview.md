@@ -95,6 +95,8 @@ This API is currently unfinished, so details are pending.
 
 ### Web Interface
 
-With the server running, you can access the web interface at [http://localhost:8080/](http://localhost:8080/).
+With the server running, you can access the web interface at [http://localhost:2626/](http://localhost:2626/).
 
 The web interface provides a simple UI for generating projects and reviewing the available options. It is built using [Ktor](https://ktor.io/) and [HTMX](https://htmx.org/).
+
+A live version is available at [https://ksl.labs.jb.gg/](https://ksl.labs.jb.gg/).

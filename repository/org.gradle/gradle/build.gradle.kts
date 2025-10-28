@@ -65,6 +65,21 @@ if (_module.platform != "jvm") {
                         }
                     }
                 }
+                "web" -> {
+                    js {
+                        browser()
+                        if (isExecutable) {
+                            binaries.executable()
+                        }
+                    }
+                    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+                    wasmJs {
+                        browser()
+                        if (isExecutable) {
+                            binaries.executable()
+                        }
+                    }
+                }
             }
         }
 
@@ -75,13 +90,25 @@ if (_module.platform != "jvm") {
                         for (dependency in e.value) {
                             when (dependency.type) {
                                 "maven" -> {
-                                    implementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                                    if (dependency.exported) {
+                                        api("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                                    } else {
+                                        implementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                                    }
                                 }
                                 "project" -> {
-                                    implementation(project(dependency.gradlePath))
+                                    if (dependency.exported) {
+                                        api(project(dependency.gradlePath))
+                                    } else {
+                                        implementation(project(dependency.gradlePath))
+                                    }
                                 }
                                 "catalog" -> {
-                                    implementation(_unsafe("${dependency.key}"))
+                                    if (dependency.exported) {
+                                        api(_unsafe("${dependency.key}"))
+                                    } else {
+                                        implementation(_unsafe("${dependency.key}"))
+                                    }
                                 }
                             }
                         }
@@ -95,13 +122,25 @@ if (_module.platform != "jvm") {
                         for (dependency in e.value) {
                             when (dependency.type) {
                                 "maven" -> {
-                                    implementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                                    if (dependency.exported) {
+                                        api("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                                    } else {
+                                        implementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                                    }
                                 }
                                 "project" -> {
-                                    implementation(project(dependency.gradlePath))
+                                    if (dependency.exported) {
+                                        api(project(dependency.gradlePath))
+                                    } else {
+                                        implementation(project(dependency.gradlePath))
+                                    }
                                 }
                                 "catalog" -> {
-                                    implementation(_unsafe("${dependency.key}"))
+                                    if (dependency.exported) {
+                                        api(_unsafe("${dependency.key}"))
+                                    } else {
+                                        implementation(_unsafe("${dependency.key}"))
+                                    }
                                 }
                             }
                         }
@@ -115,26 +154,50 @@ if (_module.platform != "jvm") {
         for (dependency in _module.dependencies.values.flatten()) {
             when (dependency.type) {
                 "maven" -> {
-                    implementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                    if (dependency.exported) {
+                        api("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                    } else {
+                        implementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                    }
                 }
                 "project" -> {
-                    implementation(project(dependency.gradlePath))
+                    if (dependency.exported) {
+                        api(project(dependency.gradlePath))
+                    } else {
+                        implementation(project(dependency.gradlePath))
+                    }
                 }
                 "catalog" -> {
-                    implementation(_unsafe("${dependency.key}"))
+                    if (dependency.exported) {
+                        api(_unsafe("${dependency.key}"))
+                    } else {
+                        implementation(_unsafe("${dependency.key}"))
+                    }
                 }
             }
         }
         for (dependency in _module.testDependencies.values.flatten()) {
             when (dependency.type) {
                 "maven" -> {
-                    testImplementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                    if (dependency.exported) {
+                        api("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                    } else {
+                        implementation("${dependency.group}:${dependency.artifact}:${dependency.version}")
+                    }
                 }
                 "project" -> {
-                    testImplementation(project(dependency.gradlePath))
+                    if (dependency.exported) {
+                        api(project(dependency.gradlePath))
+                    } else {
+                        implementation(project(dependency.gradlePath))
+                    }
                 }
                 "catalog" -> {
-                    testImplementation(_unsafe("${dependency.key}"))
+                    if (dependency.exported) {
+                        api(_unsafe("${dependency.key}"))
+                    } else {
+                        implementation(_unsafe("${dependency.key}"))
+                    }
                 }
             }
         }

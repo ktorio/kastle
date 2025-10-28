@@ -10,13 +10,13 @@ plugins {
 
 
 android {
-    namespace = "org.example.project"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    namespace = "com.acme.cmpGradle"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "org.example.project"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        applicationId = "com.acme.cmpGradle"
+        minSdk = 24
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }

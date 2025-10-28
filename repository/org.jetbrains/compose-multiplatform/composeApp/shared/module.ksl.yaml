@@ -25,3 +25,5 @@ sources:
       dependencies {
           debugImplementation(compose.uiTooling)
       }
+  - target: slot://org.gradle/gradle/buildRoot
+    path: android.gradle.kts

@@ -2,6 +2,7 @@ package org.jetbrains.kastle.server
 
 import io.ktor.http.ContentType
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.response.header
 import io.ktor.server.response.respondOutputStream
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.InternalAPI
@@ -22,7 +23,8 @@ fun ByteWriteChannel.writeJsonString(buffer: Buffer) =
 /**
  * Respond with the generated project as a ZIP stream.
  */
-suspend fun ApplicationCall.respondProjectDownload(result: Flow<SourceFileEntry>) {
+suspend fun ApplicationCall.respondProjectDownload(projectName: String, result: Flow<SourceFileEntry>) {
+    response.header("Content-Disposition", "attachment; filename=\"$projectName.zip\"")
     respondOutputStream(ContentType.Application.Zip) {
         ZipOutputStream(this).use { zip ->
             val outputSink = zip.asSink()

@@ -1,11 +1,11 @@
 android {
-    namespace = "org.example.project"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    namespace = "${_project.namespace}"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "org.example.project"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        applicationId = "${_project.namespace}"
+        minSdk = 24
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }

@@ -115,7 +115,7 @@ fun Routing.frontEnd(
         get("download") {
             val descriptor = call.readProjectDescriptor()
             val result: Flow<SourceFileEntry> = generator.generate(descriptor)
-            call.respondProjectDownload(result)
+            call.respondProjectDownload(descriptor.name, result)
         }
     }
 }

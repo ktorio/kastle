@@ -5,6 +5,8 @@ import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.afterProtocol
+import org.jetbrains.kastle.utils.camelCase
+import org.jetbrains.kastle.utils.camelCaseVar
 import org.jetbrains.kastle.utils.isSlot
 import org.jetbrains.kastle.utils.normalize
 import org.jetbrains.kastle.utils.protocol
@@ -34,6 +36,7 @@ fun Project.toVariableEntry(): Pair<String, Any?> =
     "_project" to mapOf(
         "name" to name,
         "group" to group,
+        "namespace" to "$group.${name.camelCaseVar()}",
         "modules" to moduleSources.modules.sortedBy { it.path }.map { it.toVariableMap() },
         "versions" to versions,
         "libraries" to libraries.mapValues { (_, value) -> value.toVariableMap() },

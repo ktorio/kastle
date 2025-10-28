@@ -1,6 +1,7 @@
 package org.jetbrains.kastle.structure
 
 import org.jetbrains.kastle.PackId
+import org.jetbrains.kastle.Platform
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.StaticSource
 import org.jetbrains.kastle.gen.ProjectMapping
@@ -35,9 +36,11 @@ val GradleSourceMapping = ProjectMapping { project ->
                                 else -> "kotlin/"
                             }
                             when (val target = match.groups[2]?.value) {
-                                null -> when (module.platforms.singleOrNull()) {
+                                null -> when(val platform = module.platforms.singleOrNull()) {
                                     null -> "src/common$mainOrTest/$fileCategory"
-                                    else -> "src/main/$fileCategory"
+                                    // only when using the kotlin jvm plugin
+                                    Platform.JVM -> "src/main/$fileCategory"
+                                    else -> "src/${platform.code}$mainOrTest/$fileCategory"
                                 }
                                 else -> "src/$target$mainOrTest/$fileCategory"
                             }

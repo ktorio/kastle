@@ -64,15 +64,25 @@ sealed interface Expression {
 
     @Serializable
     data class Lambda(val paramNames: List<String>, val body: Expression) : Expression {
-        override fun evaluate(variables: Variables): Any? {
+        override fun evaluate(variables: Variables): Function1<List<Any?>, Any?> {
             // Return a function that can be called later with arguments
-            return { args: List<Any?> ->
-                if (args.size != paramNames.size) {
-                    throw IllegalArgumentException("Lambda expected ${paramNames.size} arguments but got ${args.size}")
+            return { args: Any? ->
+                // Push arguments to the scope
+                when(args) {
+                    // multiple args
+                    is List<*> -> {
+                        check(args.size == paramNames.size) { "Lambda expected ${paramNames.size} arguments but got ${args.size}" }
+                        variables += paramNames.zip(args).toMap()
+                    }
+                    // single arg
+                    else -> {
+                        when(paramNames.size) {
+                            0 -> variables += "it" to args
+                            1 -> variables += paramNames.first() to args
+                            else -> throw IllegalArgumentException("Lambda expected multiple arguments but got 1")
+                        }
+                    }
                 }
-
-                // Create a new variables scope that includes the lambda parameters
-                variables += paramNames.zip(args).toMap()
 
                 try {
                     // Evaluate the body with the new scope
@@ -234,6 +244,19 @@ sealed interface Expression {
                             @Suppress("UNCHECKED_CAST")
                             val typedPredicate = predicate as (Any?) -> Boolean
                             receiver.filter { typedPredicate(it) }
+                        }
+                        else -> throw IllegalArgumentException("filter requires a lambda function argument, got ${predicate::class.simpleName}")
+                    }
+                }
+                "any" -> {
+                    val predicate = args.firstOrNull()
+                        ?: throw IllegalArgumentException("any requires a lambda argument")
+
+                    when (predicate) {
+                        is Function1<*, *> -> {
+                            @Suppress("UNCHECKED_CAST")
+                            val typedPredicate = predicate as (Any?) -> Boolean
+                            receiver.any { typedPredicate(it) }
                         }
                         else -> throw IllegalArgumentException("filter requires a lambda function argument, got ${predicate::class.simpleName}")
                     }
