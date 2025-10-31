@@ -54,18 +54,21 @@ class LocalPackRepository(
     constructor(root: String, catalogFile: String): this(Path(root), versionsCatalogFile = catalogFile)
 
     private val repository: PackRepository = object : PackRepository {
-        private val cache = mutableMapOf<PackId, PackDescriptor>()
+        private val metadataCache = mutableMapOf<PackId, PackMetadata>()
+        private val fullCache = mutableMapOf<PackId, PackDescriptor>()
 
         override fun ids(): Flow<PackId> =
             remoteRepository.ids()
 
-        override suspend fun get(packId: PackId): PackDescriptor? =
-            cache[packId] ?: fromLocalOrRemote(packId)?.also {
-                cache[packId] = it
+        override suspend fun get(packId: PackId): PackMetadata? =
+            metadataCache[packId] ?: (this@LocalPackRepository.get(packId) ?: remoteRepository.get(packId))?.also {
+                metadataCache[packId] = it
             }
 
-        private suspend fun fromLocalOrRemote(id: PackId): PackDescriptor? =
-            this@LocalPackRepository.get(id) ?: remoteRepository.get(id)
+        override suspend fun read(packId: PackId): PackDescriptor? =
+            fullCache[packId] ?: (this@LocalPackRepository.read(packId) ?: remoteRepository.read(packId))?.also {
+                fullCache[packId] = it
+            }
 
         override suspend fun versions(): VersionsCatalog =
             remoteRepository.versions() + this@LocalPackRepository.versions()
@@ -82,10 +85,31 @@ class LocalPackRepository(
             else null
         }
 
+    override suspend fun get(packId: PackId): PackMetadata? {
+        val projectPath = root.resolve(packId.toString())
+        val manifest: PackManifest = projectPath.resolve(PACK_YAML).readYaml() ?: return null
+        val properties = manifest.properties.toMutableList()
+        val group = manifest.group
+            ?: projectPath.resolve("../$GROUP_YAML").readYaml()
+            ?: Group(packId.group)
+        val documentation = projectPath.resolve("README.md").readText()
+        val moduleManifests = projectPath.moduleFolders().mapNotNull { modulePath ->
+            readSourceModuleManifest(projectPath, modulePath)
+        }.toList()
+
+        return manifest.copy(
+            id = packId,
+            group = group,
+            properties = properties.distinctBy { it.key },
+            documentation = documentation,
+            modules = moduleManifests
+        )
+    }
+
     private fun Path.isDir(): Boolean =
         fs.metadataOrNull(this)?.isDirectory == true
 
-    override suspend fun get(packId: PackId): PackDescriptor? {
+    override suspend fun read(packId: PackId): PackDescriptor? {
         val projectPath = root.resolve(packId.toString())
         val manifest: PackManifest = projectPath.resolve(PACK_YAML).readYaml() ?: return null
         val group = manifest.group
@@ -93,127 +117,19 @@ class LocalPackRepository(
             ?: Group(packId.group)
         val properties = manifest.properties.toMutableList()
         val documentation = projectPath.resolve("README.md").readText()
-
         val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath, repository)
         val expressionParser = KotlinExpressionParser(kotlinTemplateEngine.psiFileFactory)
 
-        val projectSources = projectPath.moduleFolders().asFlow().mapNotNull { modulePath ->
-            val relativeModulePath = modulePath.relativeTo(projectPath).toString()
-            val moduleYaml = modulePath.resolve(MODULE_YAML)
-                .readYamlNode(fs, yaml)?.yamlMap
-                ?: return@mapNotNull null
-
-            val platforms = moduleYaml.readPlatforms()
-
-            val amperSettings = moduleYaml.get<YamlMap>("amper")?.let { node ->
-                yaml.decodeFromYamlNode<AmperSettings>(node)
-            }
-            val gradleSettings = moduleYaml.get<YamlMap>("gradle")?.let { node ->
-                yaml.decodeFromYamlNode<GradleSettings>(node)
-            }
-            val propertyValues = moduleYaml.get<YamlMap>("propertyValues")?.let { node ->
-                yaml.decodeFromYamlNode<Map<VariableId, String>>(node)
-            }
-
-            // TODO verify this is correct
-            fun readDependencies(dependencies: String): DependenciesMap =
-                platforms.singleOrNull()?.let {
-                    mapOf(it to moduleYaml.readDependencies(dependencies))
-                } ?: (platforms.associateWith { platform ->
-                    moduleYaml.readDependencies("$dependencies@$platform")
-                } + (Platform.COMMON to moduleYaml.readDependencies(dependencies)))
-
-            suspend fun readModuleSource(file: Path, target: String? = null) =
-                when (file.name.extension.lowercase()) {
-                    HANDLEBARS_EXTENSION -> handlebarsTemplateEngine.read(modulePath, file).let { template ->
-                        template.copy(
-                            target = target ?: template.target,
-                            packId = packId,
-                        )
-                    }
-                    KT_EXTENSION, KT_SCRIPT_EXTENSION -> {
-                        val kotlinTemplateEngine = KotlinCompilerTemplateEngine(
-                            path = file.parent,
-                            repository = repository,
-                            onProperty = properties::add,
-                        )
-                        kotlinTemplateEngine.read(file, file.readText()).let { template ->
-                            template.copy(
-                                target = target ?: template.target,
-                                packId = packId,
-                            )
-                        }
-                    }
-                    else -> fs.sourceFile(file, modulePath).let { source ->
-                        source.copy(
-                            target = target ?: source.target,
-                        )
-                    }
-                }
-
-            val dependencies = readDependencies("dependencies")
-            val testDependencies = readDependencies("testDependencies")
-
-            val sources = mutableListOf<SourceFile>()
-            val resources = mutableListOf<SourceFile>()
-            val (sourceFolders, resourceFolders) = getStandardSourceFolders(platforms, modulePath)
-
-            for (sourceFolder in sourceFolders) {
-                if (!fs.exists(sourceFolder))
-                    continue
-
-                // properties are supplied both from the manifest and from declarations in the source files
-                val kotlinTemplateEngine = KotlinCompilerTemplateEngine(
-                    path = sourceFolder,
-                    repository = repository,
-                    onProperty = properties::add,
+        val projectSources = projectPath.moduleFolders().asFlow()
+            .mapNotNull { modulePath ->
+                readSourceModule(
+                    projectPath,
+                    modulePath,
+                    packId,
+                    properties,
+                    expressionParser
                 )
-                sources += kotlinTemplateEngine.ktFiles.map { sourceFile ->
-                    kotlinTemplateEngine.read(
-                        sourceFolder.relativeTo(modulePath).resolvePackageDir(sourceFile),
-                        sourceFile,
-                    ).copy(packId = packId)
-                }
-
-                // include non-kotlin files
-                sources += fs.walkFiles(sourceFolder).filter { file ->
-                    !file.name.endsWith(".kt")
-                }.asFlow().map(::readModuleSource).toList()
-            }
-
-            // resource files included; can be templated
-            for (resourceFolder in resourceFolders) {
-                if (fs.exists(resourceFolder)) {
-                    resources += fs.walkFiles(resourceFolder)
-                        .asFlow()
-                        .map(::readModuleSource)
-                        .toList()
-                }
-            }
-
-            // additional sources defined for module; also assume no kotlin sources
-            // TODO remove duplicates from files in source folders
-            val sourcesFromManifest = moduleYaml.get<YamlList>("sources")?.items.orEmpty()
-            for (manifestSource in sourcesFromManifest) {
-                val (path, text, target, condition) = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
-                val conditionExpression = condition?.let(expressionParser::parse)
-                sources += when(text) {
-                    null -> readModuleSource(modulePath.resolve(path!!), target = target)
-                    else -> handlebarsTemplateEngine.read(target!!, text).copy(packId = packId)
-                }.withCondition(conditionExpression)
-            }
-
-            SourceModule(
-                path = relativeModulePath,
-                platforms = platforms,
-                dependencies = dependencies,
-                testDependencies = testDependencies,
-                sources = sources + resources,
-                amper = amperSettings ?: AmperSettings(),
-                gradle = gradleSettings ?: GradleSettings(),
-                propertyValues = propertyValues ?: emptyMap(),
-            )
-        }.toList().let(ProjectModules::fromList)
+            }.toList().let(ProjectModules::fromList)
 
         val readSource: suspend (SourceDefinition) -> SourceFile = { (path, text, target, condition) ->
             require(target != null) { "Missing target for project-level source: ${path ?: text}" }
@@ -265,10 +181,160 @@ class LocalPackRepository(
             sources = PackSources(
                 common = manifest.commonSources.map { readSource(it) },
                 root = manifest.rootSources.map { readSource(it) },
-                modules = manifest.modules?.let { modules ->
-                    ProjectModules.fromList(modules) + projectSources
-                } ?: projectSources,
+                modules = projectSources,
             )
+        )
+    }
+
+    private fun readSourceModuleManifest(projectPath: Path, modulePath: Path): SourceModuleManifest? {
+        val relativeModulePath = modulePath.relativeTo(projectPath).toString()
+        val moduleYaml = modulePath.resolve(MODULE_YAML)
+            .readYamlNode(fs, yaml)?.yamlMap
+            ?: return null
+
+        val platforms = moduleYaml.readPlatforms()
+
+        val amperSettings = moduleYaml.get<YamlMap>("amper")?.let { node ->
+            yaml.decodeFromYamlNode<AmperSettings>(node)
+        }
+        val gradleSettings = moduleYaml.get<YamlMap>("gradle")?.let { node ->
+            yaml.decodeFromYamlNode<GradleSettings>(node)
+        }
+        val propertyValues = moduleYaml.get<YamlMap>("propertyValues")?.let { node ->
+            yaml.decodeFromYamlNode<Map<VariableId, String>>(node)
+        }
+
+        // TODO verify this is correct
+        fun readDependencies(dependencies: String): DependenciesMap =
+            platforms.singleOrNull()?.let {
+                mapOf(it to moduleYaml.readDependencies(dependencies))
+            } ?: (platforms.associateWith { platform ->
+                moduleYaml.readDependencies("$dependencies@$platform")
+            } + (Platform.COMMON to moduleYaml.readDependencies(dependencies)))
+
+        val dependencies = readDependencies("dependencies")
+        val testDependencies = readDependencies("testDependencies")
+
+        return SourceModuleManifest(
+            path = relativeModulePath,
+            platforms = platforms,
+            dependencies = dependencies,
+            testDependencies = testDependencies,
+            gradle = gradleSettings ?: GradleSettings(),
+            amper = amperSettings ?: AmperSettings(),
+            propertyValues = propertyValues ?: emptyMap(),
+        )
+    }
+
+    private suspend fun readSourceModule(
+        projectPath: Path,
+        modulePath: Path,
+        packId: PackId,
+        properties: MutableList<Property>,
+        expressionParser: KotlinExpressionParser
+    ): SourceModule? {
+        val manifest = readSourceModuleManifest(projectPath, modulePath) ?: return null
+        val moduleYaml = modulePath.resolve(MODULE_YAML)
+            .readYamlNode(fs, yaml)?.yamlMap
+            ?: return null
+
+        suspend fun readModuleSource(file: Path, target: String? = null) =
+            when (file.name.extension.lowercase()) {
+                HANDLEBARS_EXTENSION -> handlebarsTemplateEngine.read(modulePath, file).let { template ->
+                    template.copy(
+                        target = target ?: template.target,
+                        packId = packId,
+                    )
+                }
+
+                KT_EXTENSION, KT_SCRIPT_EXTENSION -> {
+                    val kotlinTemplateEngine = KotlinCompilerTemplateEngine(
+                        path = file.parent,
+                        repository = repository,
+                        onProperty = properties::add,
+                    )
+                    kotlinTemplateEngine.read(file, file.readText()).let { template ->
+                        template.copy(
+                            target = target ?: template.target,
+                            packId = packId,
+                        )
+                    }
+                }
+
+                else -> fs.sourceFile(file, modulePath).let { source ->
+                    source.copy(
+                        target = target ?: source.target,
+                    )
+                }
+            }
+
+        val sources = mutableListOf<SourceFile>()
+        val resources = mutableListOf<SourceFile>()
+        val (sourceFolders, resourceFolders) = getStandardSourceFolders(manifest.platforms, modulePath)
+
+        for (sourceFolder in sourceFolders) {
+            if (!fs.exists(sourceFolder))
+                continue
+
+            // properties are supplied both from the manifest and from declarations in the source files
+            val kotlinTemplateEngine = KotlinCompilerTemplateEngine(
+                path = sourceFolder,
+                repository = repository,
+                onProperty = properties::add,
+            )
+            sources += kotlinTemplateEngine.ktFiles.map { sourceFile ->
+                kotlinTemplateEngine.read(
+                    sourceFolder.relativeTo(modulePath).resolvePackageDir(sourceFile),
+                    sourceFile,
+                ).copy(packId = packId)
+            }
+
+            // include non-kotlin files
+            sources += fs.walkFiles(sourceFolder).filter { file ->
+                !file.name.endsWith(".kt")
+            }.asFlow().map(::readModuleSource).toList()
+        }
+
+        // resource files included; can be templated
+        for (resourceFolder in resourceFolders) {
+            if (fs.exists(resourceFolder)) {
+                resources += fs.walkFiles(resourceFolder)
+                    .asFlow()
+                    .map(::readModuleSource)
+                    .toList()
+            }
+        }
+
+        // additional sources defined for module; also assume no kotlin sources
+        // TODO remove duplicates from files in source folders
+        val sourcesFromManifest = moduleYaml.get<YamlList>("sources")?.items.orEmpty()
+        for (manifestSource in sourcesFromManifest) {
+            val (path, text, target, condition) = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
+            val conditionExpression = condition?.let(expressionParser::parse)
+
+            if (path != null && path.contains('*')) {
+                require(path.endsWith("/*")) { "Wildcard must be at the end of the path: $path" }
+                val wildCardParent = modulePath.resolve(path.removeSuffix("/*"))
+                for (file in fs.walkFiles(wildCardParent)) {
+                    sources += readModuleSource(
+                        file,
+                        target = "file:${file.relativeTo(modulePath)}"
+                    ).withCondition(conditionExpression)
+                }
+            } else {
+                sources += if (text == null) {
+                    require(path != null) { "Path or text is required but both are missing for source: $manifestSource" }
+                    readModuleSource(modulePath.resolve(path), target = target)
+                } else {
+                    require(target != null) { "Target is required when using text for source: $manifestSource" }
+                    handlebarsTemplateEngine.read(target, text).copy(packId = packId)
+                }.withCondition(conditionExpression)
+            }
+        }
+
+        return SourceModule(
+            manifest = manifest,
+            sources = sources + resources,
         )
     }
 

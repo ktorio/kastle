@@ -28,6 +28,7 @@ _slots("buildRoot")
 
 if (_module.platform != "jvm") {
     kotlin {
+        _slots("kotlinRoot")
         for (platform in _module.platforms) {
             when(platform) {
                 "jvm" -> {

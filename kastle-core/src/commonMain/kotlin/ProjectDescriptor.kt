@@ -11,7 +11,7 @@ data class ProjectDescriptor(
     val packs: List<PackId> = emptyList(),
 )
 
-public enum class PackagingStyle {
+enum class PackagingStyle {
     FLAT,
     NESTED,
 }

@@ -5,7 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.ktor.server.testing.*
 import org.jetbrains.kastle.client.asRepository
-import org.jetbrains.kastle.get
+import org.jetbrains.kastle.read
 
 class ClientServerTest : StringSpec({
 
@@ -14,7 +14,7 @@ class ClientServerTest : StringSpec({
             configure("application.conf")
 
             val repository = client.asRepository()
-            val pack = repository.get("com.acme/empty")
+            val pack = repository.read("com.acme/empty")
             pack.shouldNotBeNull()
             pack.name shouldBe "Empty Feature"
             pack.version.toString() shouldBe "1.0.0"

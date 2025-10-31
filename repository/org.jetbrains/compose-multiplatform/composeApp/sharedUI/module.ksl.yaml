@@ -1,0 +1,42 @@
+platforms: [jvm, android, ios, js, wasmJs]
+
+dependencies:
+  - $compose.runtime!
+  - $compose.foundation!
+  - $compose.material3!
+  - $compose.ui!
+  - $compose.animation!
+  - $compose.components.resources!
+  - $libs.androidx.lifecycle.viewmodelCompose!
+  - $libs.androidx.lifecycle.runtimeCompose!
+
+gradle:
+  plugins:
+    - compose.multiplatform
+    - compose.compiler
+    - android.library
+
+amper:
+  compose: enabled
+
+sources:
+  - path: composeResources/*
+  - path: ../iosApp/*
+  - target: slot://org.gradle/gradle/buildRoot
+    text: |-
+      dependencies {
+          debugImplementation(compose.uiTooling)
+      }
+  - target: slot://org.gradle/gradle/kotlinRoot
+    path: android.gradle.kts
+  - target: slot://org.gradle/gradle/iosOverride
+    text: |-
+      listOf(
+          iosArm64(),
+          iosSimulatorArm64()
+      ).forEach { iosTarget ->
+          iosTarget.binaries.framework {
+              baseName = "SharedUI"
+              isStatic = true
+          }
+      }

@@ -12,7 +12,6 @@ import org.jetbrains.kastle.io.FileFormat.CBOR
 import org.jetbrains.kastle.io.FileFormat.JSON
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.Logger
-import kotlin.time.ExperimentalTime
 
 open class FileSystemPackRepository(
     val root: Path,
@@ -39,7 +38,7 @@ open class FileSystemPackRepository(
                 CBOR -> CborFilePackRepository(path, fs)
             }
             export.versions(versions())
-            all().collect { pack ->
+            readAll().collect { pack ->
                 try {
                     export.add(pack)
                 } catch (e: Exception) {
@@ -60,7 +59,11 @@ open class FileSystemPackRepository(
             PackId.parse("${path.parent!!.name}/${path.name.removeSuffix(".${ext}")}")
         }
 
-    override suspend fun get(packId: PackId): PackDescriptor? {
+    // Assume there's no impact of reading sources from the compiled file
+    override suspend fun get(packId: PackId): PackMetadata? =
+        read(packId)
+
+    override suspend fun read(packId: PackId): PackDescriptor? {
         return read(root.resolve("$packId.$ext"))
     }
 

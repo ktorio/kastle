@@ -87,12 +87,6 @@ Here, you'll find the following endpoints:
 
 All endpoints use JSON for serialization unless specified otherwise.
 
-### Agent API
-
-This project is intended to be accessible both by humans and AI agents for creating Kotlin projects.
-
-This API is currently unfinished, so details are pending.
-
 ### Web Interface
 
 With the server running, you can access the web interface at [http://localhost:2626/](http://localhost:2626/).

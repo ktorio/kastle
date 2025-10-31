@@ -29,10 +29,10 @@ kotlin {
             api(libs.kotlinx.datetime)
             api(libs.kotlinx.io.core)
             api(libs.kotlinx.serialization.core)
-
             api(libs.kotlinx.serialization.cbor)
-            implementation(libs.kotlinx.serialization.json)
-            implementation(libs.kotlinx.serialization.json.io)
+            api(libs.kotlinx.serialization.json)
+            api(libs.kotlinx.serialization.json.io)
+
             implementation(libs.kaml)
             implementation(libs.ktoml)
         }

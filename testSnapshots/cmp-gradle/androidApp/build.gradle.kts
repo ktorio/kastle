@@ -10,11 +10,11 @@ plugins {
 
 
 android {
-    namespace = "com.acme.cmpGradle"
+    namespace = "com.acme"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.acme.cmpGradle"
+        applicationId = "com.acme"}
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -46,7 +46,7 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
-            implementation(project(":shared"))
+            implementation(project(":sharedUI"))
             implementation(libs.android.activity.compose)
         }
 

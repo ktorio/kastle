@@ -4,8 +4,9 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.ProjectModules.*
 import org.jetbrains.kastle.utils.TreeMap.Companion.toTreeMap
 import org.jetbrains.kastle.utils.protocol
+import kotlin.collections.flatten
+import kotlin.collections.plus
 import kotlin.jvm.JvmInline
-
 
 @Serializable(RevisionSerializer::class)
 sealed interface Revision {
@@ -140,13 +141,19 @@ fun ProjectModules.map(mapping: (SourceModule) -> SourceModule): ProjectModules 
 fun ProjectModules.flatten(): ProjectModules =
     when (this) {
         is Empty -> this
-        is Single -> Single(module.copy(path = ""))
+        is Single -> Single(module.copy(manifest = module.manifest.copy(path = "")))
         is Multi -> {
             val path = modules.first().path
             val slashIndex = path.indexOf('/', 1) // ignore starting slash
             val firstSegment = if (slashIndex == -1) return this else path.substring(0, slashIndex) + '/'
             if (modules.all { it.path.startsWith(firstSegment) })
-                Multi(modules.map { it.copy(path = it.path.substring(firstSegment.length)) })
+                Multi(modules.map { module ->
+                    module.copy(
+                        manifest = module.manifest.copy(
+                            path = module.path.substring(firstSegment.length)
+                        )
+                    )
+                })
             else this
         }
     }
@@ -170,23 +177,42 @@ private fun merge(modules: List<SourceModule>, other: List<SourceModule>): Multi
 }
 
 @Serializable
-data class SourceModule(
-    val path: String = "",
-    val platforms: Set<Platform> = emptySet(),
-    val dependencies: DependenciesMap = emptyMap(),
-    val testDependencies: DependenciesMap = emptyMap(),
-    val sources: List<SourceFile> = emptyList(),
-    val gradle: GradleSettings = GradleSettings(),
-    val amper: AmperSettings = AmperSettings(),
-    val propertyValues: Map<VariableId, String> = emptyMap(),
-) {
-    val allDependencies: Set<Dependency> =
-        (dependencies.values.flatten() + testDependencies.values.flatten()).toSet()
-
-    val gradlePlugins: List<String> get() = gradle.plugins
-
-    fun fullPath(packId: PackId) = if (path.isEmpty()) packId.toString() else "$packId/$path"
+sealed interface SourceModuleMetadata {
+    val path: String
+    val platforms: Set<Platform>
+    val dependencies: DependenciesMap
+    val testDependencies: DependenciesMap
+    val gradle: GradleSettings
+    val amper: AmperSettings
+    val propertyValues: Map<VariableId, String>
 }
+
+@Serializable
+data class SourceModuleManifest(
+    override val path: String = "",
+    override val platforms: Set<Platform> = emptySet(),
+    override val dependencies: DependenciesMap = emptyMap(),
+    override val testDependencies: DependenciesMap = emptyMap(),
+    override val gradle: GradleSettings = GradleSettings(),
+    override val amper: AmperSettings = AmperSettings(),
+    override val propertyValues: Map<VariableId, String> = emptyMap(),
+): SourceModuleMetadata
+
+
+val SourceModuleMetadata.allDependencies: Set<Dependency> get() =
+    (dependencies.values.flatten() + testDependencies.values.flatten()).toSet()
+
+val SourceModuleMetadata.gradlePlugins: List<String> get() =
+    gradle.plugins
+
+fun SourceModuleMetadata.fullPath(packId: PackId) =
+    if (path.isEmpty()) packId.toString() else "$packId/$path"
+
+@Serializable
+data class SourceModule(
+    val manifest: SourceModuleManifest = SourceModuleManifest(),
+    val sources: List<SourceFile> = emptyList(),
+): SourceModuleMetadata by manifest
 
 typealias DependenciesMap = Map<Platform, Set<Dependency>>
 
@@ -274,7 +300,23 @@ enum class SourceModuleType(val code: String) {
 }
 
 fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
-    return SourceModule(
+    return manifest.tryMerge(other.manifest)?.let {
+        SourceModule(
+            manifest = it,
+            sources = (sources + other.sources).also { mergedSources ->
+                val uniquePaths = mutableSetOf<Url>()
+                mergedSources.forEach {
+                    require(it.target.protocol != "file" || uniquePaths.add(it.target)) {
+                        "Duplicate target in sources: ${it.target}"
+                    }
+                }
+            }
+        )
+    }
+}
+
+fun SourceModuleManifest.tryMerge(other: SourceModuleManifest): SourceModuleManifest? {
+    return SourceModuleManifest(
         path = when {
             other.path.isEmpty() || path == other.path -> path
             path.isEmpty() -> other.path
@@ -283,17 +325,9 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
         platforms = platforms + other.platforms,
         dependencies = dependencies.merge(other.dependencies),
         testDependencies = testDependencies.merge(other.testDependencies),
-        sources = (sources + other.sources).also { mergedSources ->
-            val uniquePaths = mutableSetOf<Url>()
-            mergedSources.forEach {
-                require(it.target.protocol != "file" || uniquePaths.add(it.target)) {
-                    "Duplicate target in sources: ${it.target}"
-                }
-            }
-        },
         gradle = GradleSettings((gradle.plugins + other.gradle.plugins).distinct()),
         amper = AmperSettings(amper.compose ?: other.amper.compose, amper.application ?: other.amper.application),
-        propertyValues = propertyValues + other.propertyValues
+        propertyValues = propertyValues + other.propertyValues,
     )
 }
 

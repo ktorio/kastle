@@ -17,6 +17,7 @@ const val HANDLEBARS_EXTENSION = "hbs"
 class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
     companion object {
         private const val IF = "if"
+        private const val UNLESS = "unless"
         private const val SLOT = "slot"
         private const val SLOTS = "slots"
         private const val WHEN = "when"

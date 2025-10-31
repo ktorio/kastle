@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.decodeFromString
 import org.jetbrains.kastle.PackDescriptor
 import org.jetbrains.kastle.PackId
+import org.jetbrains.kastle.PackMetadata
 import org.jetbrains.kastle.PackRepository
 import org.jetbrains.kastle.Url
 import org.jetbrains.kastle.VersionsCatalog
@@ -48,7 +49,14 @@ class RemoteRepository(private val client: HttpClient): PackRepository {
         emitAll(client.get("/api/packIds").body<List<PackId>>().asFlow())
     }
 
-    override suspend fun get(packId: PackId): PackDescriptor? {
+    override suspend fun get(packId: PackId): PackMetadata? {
+        val response = client.get("/api/packs/$packId")
+        if (!response.status.isSuccess())
+            return null
+        return response.body()
+    }
+
+    override suspend fun read(packId: PackId): PackDescriptor? {
         val response = client.get("/api/packs/$packId")
         if (!response.status.isSuccess())
             return null

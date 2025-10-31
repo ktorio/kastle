@@ -7,7 +7,6 @@ import io.ktor.server.routing.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectIndexed
-import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.*
 
@@ -21,10 +20,10 @@ fun Routing.backEnd(
 ) {
     route("/api") {
         get("/packIds") {
-            val repositoryIds = repository.all().map { it.id }
+            val packIds = repository.ids()
             call.respondBytesWriter(ContentType.Application.Json) {
                 writeByte('['.code.toByte())
-                repositoryIds.collectIndexed { i, id ->
+                packIds.collectIndexed { i, id ->
                     if (i != 0) writeByte(','.code.toByte())
                     writeString(json.encodeToString(id))
                 }
@@ -39,14 +38,10 @@ fun Routing.backEnd(
         }
         route("/packs") {
             get {
-                val packs = repository.all()
+                val packs = repository.getAll()
                 call.respondBytesWriter(ContentType.Application.Json) {
                     writeByte('['.code.toByte())
-                    packs.map { pack ->
-                        pack.copy(
-                            sources = PackSources.Empty
-                        )
-                    }.collectIndexed { i, descriptor ->
+                    packs.collectIndexed { i, descriptor ->
                         if (i != 0) writeByte(','.code.toByte())
                         writeString(json.encodeToString(descriptor))
                     }
@@ -57,7 +52,7 @@ fun Routing.backEnd(
                 val group = call.parameters["group"] ?: return@get call.respond(HttpStatusCode.BadRequest)
                 val pack = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
                 val id = PackId(group, pack)
-                val repository = repository.get(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+                val repository = repository.read(id) ?: return@get call.respond(HttpStatusCode.NotFound)
                 call.respondText(ContentType.Application.Json) {
                     json.encodeToString(repository)
                 }

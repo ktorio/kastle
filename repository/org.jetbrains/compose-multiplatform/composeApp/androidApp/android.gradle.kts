@@ -1,9 +1,9 @@
 android {
-    namespace = "${_project.namespace}"
+    namespace = _project.group
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "${_project.namespace}"
+        applicationId = _project.group}
         minSdk = 24
         targetSdk = 36
         versionCode = 1

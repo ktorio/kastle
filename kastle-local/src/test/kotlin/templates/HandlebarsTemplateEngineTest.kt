@@ -22,7 +22,7 @@ class HandlebarsTemplateEngineTest : StringSpec({
     }
 
     "if and else" {
-        val template = template("{{if someProperty}}Hello!{{else}}Goodbye!{{/if}}")
+        val template = template("{{#if someProperty}}Hello!{{else}}Goodbye!{{/if}}")
 
         template.toString(
             variables = Variables("someProperty" to true)
@@ -34,7 +34,7 @@ class HandlebarsTemplateEngineTest : StringSpec({
     }
 
     "when" {
-        val template = template("{{when name}}{{\"Bob\"}}Hi{{\"Joe\"}}Hello{{else}}Up yours{{/when}}, {{name}}!")
+        val template = template("{{#when name}}{{\"Bob\"}}Hi{{\"Joe\"}}Hello{{else}}Up yours{{/when}}, {{name}}!")
 
         template.toString(
             variables = Variables("name" to "Bob")

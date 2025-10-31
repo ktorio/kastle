@@ -4,7 +4,7 @@ product:
   platforms: [android]
 
 dependencies@android:
-  - ../shared
+  - ../sharedUI
   - $libs.android.activity.compose
 
 settings:

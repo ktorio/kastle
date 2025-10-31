@@ -2,7 +2,6 @@ package org.jetbrains.kastle.server
 
 import io.ktor.http.*
 import io.ktor.server.html.*
-import io.ktor.server.request.path
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.utils.io.*
@@ -26,7 +25,7 @@ fun Routing.frontEnd(
     get {
         val project = call.tryReadProjectDescriptor()
         val view = call.readViewState()
-        val packs = repository.all()
+        val packs = repository.readAll()
             .toList()
             .sortedBy { it.name }
         val previewContents: FlowContent.() -> Unit = view.selectedFile?.let { filePath ->
@@ -39,7 +38,7 @@ fun Routing.frontEnd(
     }
     get("/packs") {
         val search = call.request.queryParameters["search"]
-        val packs = repository.all()
+        val packs = repository.readAll()
             .filter {
                 search == null || listOfNotNull(
                     it.id.toString(),
@@ -64,7 +63,7 @@ fun Routing.frontEnd(
     }
     route("/packs/{group}/{id}") {
         suspend fun RoutingCall.readPack(): PackDescriptor? =
-            repository.get(
+            repository.read(
                 PackId(
                     parameters["group"]!!,
                     parameters["id"]!!

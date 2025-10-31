@@ -3,6 +3,7 @@ package org.jetbrains.kastle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.io.Buffer
+import kotlinx.io.files.Path
 import kotlinx.io.write
 import org.jetbrains.kastle.gen.*
 import org.jetbrains.kastle.structure.GradleSourceMapping
@@ -40,7 +41,7 @@ class ProjectGenerator(
                 }
             }
         }
-        for (module in project.moduleSources.modules) {
+        for (module in project.moduleSources.modules.sortedBy { it.path.ifEmpty { "zz-top" } }) {
             val moduleSources = buildList {
                 addAll((module.sources.filter { it.target.protocol == "file" }))
                 addAll(project.commonSources)
@@ -49,7 +50,7 @@ class ProjectGenerator(
             val slotSources = project.slotSources + module.slotSources
 
             for (source in moduleSources) {
-                val path = module.path.appendPath(source.target.relativeFile)
+                val path = Path(module.path, source.target.relativeFile).normalize().toString()
                 if (source !is SourceTemplate) {
                     if (source !is StaticSource)
                         error("Unsupported source type: ${source::class.simpleName}")

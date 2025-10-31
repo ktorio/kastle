@@ -18,9 +18,9 @@ private const val TEMPLATES_ARTIFACT = "org.jetbrains:kastle-templates:1.0.0-SNA
 
 abstract class KastlePackPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val repository: PackRepository = project.extraProperties[REPOSITORY_PROPERTY] as? PackRepository ?: error { "Repository property is not set" }
-        val pack: PackDescriptor = project.extraProperties[PACK_PROPERTY] as? PackDescriptor ?: error { "Pack property is not set" }
-        val module: SourceModule = project.extraProperties[SOURCE_MODULE_PROPERTY] as? SourceModule ?: error { "Module property is not set" }
+        val repository: PackRepository = project.extraProperties[REPOSITORY_PROPERTY] as? PackRepository ?: error("Repository property is not set")
+        val pack: PackMetadata = project.extraProperties[PACK_PROPERTY] as? PackMetadata ?: error("Pack property is not set")
+        val module: SourceModuleMetadata = project.extraProperties[SOURCE_MODULE_PROPERTY] as? SourceModuleMetadata ?: error("Module property is not set")
         val versionsCatalog = runBlocking { repository.versions() }
 
         project.logger.lifecycle("Pack: ${pack.name}")
@@ -79,7 +79,7 @@ abstract class KastlePackPlugin : Plugin<Project> {
                             for (packId in pack.requires) {
                                 try {
                                     // TODO support direct module references for multi-module packs
-                                    val module = runBlocking { repository.get(packId) }?.sourceModules?.singleOrNull()
+                                    val module = runBlocking { repository.read(packId) }?.sourceModules?.singleOrNull()
                                     if (module == null) {
                                         project.logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
                                         continue

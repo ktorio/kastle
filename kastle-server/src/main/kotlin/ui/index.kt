@@ -124,10 +124,10 @@ fun HTML.indexHtml(
                                 select {
                                     name = "packaging"
                                     option {
+                                        selected = true
                                         +"Flat"
                                     }
                                     option {
-                                        selected = true
                                         +"Nested"
                                     }
                                 }

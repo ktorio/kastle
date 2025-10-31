@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotest)
     alias(libs.plugins.ksp)
+    `maven-publish`
 }
 
 tasks.named("buildOpenApi") {
@@ -37,14 +38,14 @@ dependencies {
     implementation(project(":kastle-core"))
     implementation(project(":kastle-local"))
 
-    implementation(libs.ktor.server.core)
+    api(libs.ktor.server.core)
+    api(libs.ktor.server.di)
     implementation(libs.ktor.server.cio)
     implementation(libs.ktor.server.call.logging)
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.server.sse)
     implementation(libs.ktor.server.htmx)
-    implementation(libs.ktor.server.di)
     implementation(libs.ktor.htmx.html)
     implementation(libs.ktor.server.html.builder)
     implementation(libs.ktor.json)
@@ -59,4 +60,12 @@ dependencies {
 
 application {
     mainClass = "io.ktor.server.cio.EngineMain"
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
 }

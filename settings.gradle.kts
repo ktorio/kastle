@@ -30,8 +30,6 @@ include(
     "kastle-gradle-plugin",
 )
 
-// Sample repository
-// Requires local maven publication to read changes.
-includeBuild(
-    "repository"
-)
+// Sample repository,
+//   Requires plugin to be published.  Uncomment for editing
+//includeBuild("repository")

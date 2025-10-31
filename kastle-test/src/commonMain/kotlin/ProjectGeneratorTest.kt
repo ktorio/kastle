@@ -3,6 +3,7 @@ package org.jetbrains.kastle
 import io.kotest.core.spec.style.StringSpec
 import kotlinx.coroutines.*
 import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.files.SystemTemporaryDirectory
 import org.jetbrains.kastle.io.export
 import kotlin.random.Random
@@ -33,16 +34,20 @@ fun ProjectGeneratorTest(
         name: String,
         properties: Map<VariableId, String> = emptyMap(),
         packs: List<String>
-    ) = ProjectGenerator(
-        repository = repository.await(),
-    ).generate(
-        ProjectDescriptor(
-            name = name,
-            group = DEFAULT_GROUP,
-            properties = properties,
-            packs = packs.map(PackId.Companion::parse),
-        )
-    ).export(outputDir)
+    ) {
+        deleteRecursively(outputDir, SystemFileSystem)
+
+        ProjectGenerator(
+            repository = repository.await(),
+        ).generate(
+            ProjectDescriptor(
+                name = name,
+                group = DEFAULT_GROUP,
+                properties = properties,
+                packs = packs.map(PackId.Companion::parse),
+            )
+        ).export(outputDir)
+    }
 
     suspend fun generateWithPacks(outputDir: Path, name: String, vararg packs: String) =
         generate(outputDir, name, packs = packs.toList())

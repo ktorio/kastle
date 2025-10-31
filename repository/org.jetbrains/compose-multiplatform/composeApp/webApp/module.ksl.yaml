@@ -1,13 +1,15 @@
 platform: web
 
 dependencies:
-  - ../shared
+  - ../sharedUI
+
+gradle:
+  plugins:
+    - compose.multiplatform
+    - compose.compiler
 
 amper:
   compose: enabled
 
 propertyValues:
   org.gradle/gradle/isExecutable: true
-
-sources:
-  - path: webpack.config.d/watch.js

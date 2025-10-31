@@ -1,7 +1,7 @@
 platform: android
 
 dependencies:
-  - ../shared
+  - ../sharedUI
   - $libs.android.activity.compose
 
 amper:
@@ -17,4 +17,3 @@ gradle:
 sources:
   - path: android.gradle.kts
     target: slot://org.gradle/gradle/buildRoot
-  - path: proguard-rules.pro

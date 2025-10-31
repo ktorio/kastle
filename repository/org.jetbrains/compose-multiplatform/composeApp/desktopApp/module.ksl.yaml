@@ -1,7 +1,7 @@
 platform: jvm
 
 dependencies:
-  - ../shared
+  - ../sharedUI
   - $compose.desktop.currentOs
 
 gradle:

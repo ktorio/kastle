@@ -11,9 +11,14 @@ dependencies {
     implementation(libs.gradlePlugin.kotlin)
     implementation(libs.gradlePlugin.androidLibrary)
     implementation(libs.gradlePlugin.composeCompiler)
+
     compileOnly(libs.kotlin.compiler)
+
     implementation(project(":kastle-core"))
     implementation(project(":kastle-local"))
+    implementation(project(":kastle-server"))
+    implementation(libs.ktor.server.cio)
+    implementation(libs.kaml)
 
     testImplementation(libs.gradlePlugin.kotlin)
     testImplementation(libs.kotlin.test)

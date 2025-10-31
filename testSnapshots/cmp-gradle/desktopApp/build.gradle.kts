@@ -21,6 +21,6 @@ compose.desktop {
 }
 
 dependencies {
-    implementation(project(":shared"))
+    implementation(project(":sharedUI"))
     implementation(compose.desktop.currentOs)
 }

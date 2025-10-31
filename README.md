@@ -15,8 +15,15 @@ _**K**otlin **A**pplication **S**ourcecode **T**emplating and **L**ayout **E**ng
 
 ## Documentation
 
-- [How it works](docs/overview.md)
-- [Template DSL Reference](docs/dsl.md)
+About:
+- [How it works](docs/overview.md) <br />
+  A general overview of how it all fits together.
+
+Usage:
+  - [Building Repositories](docs/repositories.md) <br />
+    How you can make your own templates and combine them into a repository.
+  - [Template DSL Reference](docs/dsl.md) <br />
+    How to use the Kotlin DSL for creating templates
 
 ## Building & Running
 

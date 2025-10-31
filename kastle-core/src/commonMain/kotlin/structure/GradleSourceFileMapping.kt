@@ -11,7 +11,7 @@ import org.jetbrains.kastle.utils.capitalizeFirst
 import org.jetbrains.kastle.utils.fileName
 
 internal val GRADLE_PACK_ID = PackId("org.gradle", "gradle")
-internal val SOURCE_FOLDER_REGEX = Regex("(src|test|resources|testResources|res)(?:@(\\w+))?/")
+internal val SOURCE_FOLDER_REGEX = Regex("(src|test|resources|testResources|res|composeResources)(?:@(\\w+))?/")
 internal val UNCATEGORIZED_FILES = setOf("AndroidManifest.xml")
 
 /**
@@ -31,7 +31,7 @@ val GradleSourceMapping = ProjectMapping { project ->
                             val mainOrTest = (if (sourceRoot in setOf("test", "testResources")) "test" else "main").capitalizeFirst()
                             val fileCategory = when {
                                 source.target.fileName in UNCATEGORIZED_FILES -> ""
-                                sourceRoot == "res" -> "res/"
+                                sourceRoot in setOf("res", "composeResources") -> "$sourceRoot/"
                                 sourceRoot in setOf("resources", "testResources") -> "resources/"
                                 else -> "kotlin/"
                             }

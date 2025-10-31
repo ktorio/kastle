@@ -1,15 +1,18 @@
 # ♖ Kastle DSL ♖
 
-The template DSL provided for the KASTLE framework is designed for easy development of 
-KASTLE modules.
+The template DSL provided for the KASTLE framework is designed for easy development of KASTLE packs.
 
 ## Glossary
 
 Below is a list of terms used to describe features in the KASTLE framework.
 
-| Term            | Description                                                                                           |
-|-----------------|-------------------------------------------------------------------------------------------------------|
-| pack            | A selectable unit for project generation logic.  It includes build dependencies and source templates. |
+| Term     | Description                                                                                           |
+|----------|-------------------------------------------------------------------------------------------------------|
+| pack     | A selectable unit for project generation logic.  It includes build dependencies and source templates. |
+| module   | A source module within a _pack_ or templated project.                                                 |
+| target   | Any of the standard gradle targets for Kotlin Multiplatform projects.                                 |
+| property | A value that can be used to configure the generated source files.                                     |
+| slot     | A location where a template can be nested.                                                            |
 
 ## Properties
 

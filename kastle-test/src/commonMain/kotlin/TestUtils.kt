@@ -145,7 +145,7 @@ private fun copyRecursively(source: Path, destination: Path, fs: FileSystem = Sy
     }
 }
 
-private fun deleteRecursively(path: Path, fs: FileSystem = SystemFileSystem) {
+internal fun deleteRecursively(path: Path, fs: FileSystem = SystemFileSystem) {
     if (!fs.exists(path)) return
 
     val metadata = fs.metadataOrNull(path) ?: return

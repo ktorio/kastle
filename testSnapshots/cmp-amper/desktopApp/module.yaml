@@ -4,7 +4,7 @@ product:
   platforms: [jvm]
 
 dependencies@jvm:
-  - ../shared
+  - ../sharedUI
   - $compose.desktop.currentOs
 
 settings:
