@@ -3,7 +3,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = _project.group}
+        applicationId = _project.group
         minSdk = 24
         targetSdk = 36
         versionCode = 1

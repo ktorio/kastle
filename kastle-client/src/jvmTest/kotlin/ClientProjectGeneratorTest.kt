@@ -8,6 +8,7 @@ import kotlinx.coroutines.*
 import kotlinx.io.files.Path
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.server.*
+import kotlin.random.Random
 
 val testServer by lazy { TestServer() }
 
@@ -38,7 +39,7 @@ class TestServer {
             runTestApplication {
                 application {
                     dependencies {
-                        provide<PackRepository> { LocalPackRepository(Path("../repository")) }
+                        provide<PackRepository> { LocalPackRepository(Path("../repository"), random = Random(42L)) }
                         provide<ProjectGenerator> { ProjectGenerator(resolve()) }
                     }
                     json()

@@ -23,11 +23,13 @@ import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.kotlin.KT_EXTENSION
 import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
 import org.jetbrains.kastle.templates.*
+import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.extension
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.psi.KtFile
+import kotlin.random.Random
 
 private const val PACK_YAML = "pack.ksl.yaml"
 private const val GROUP_YAML = "group.ksl.yaml"
@@ -37,9 +39,10 @@ class LocalPackRepository(
     private val root: Path,
     private val fs: FileSystem = SystemFileSystem,
     private val versionsCatalogFile: String = "../gradle/libs.versions.toml",
+    random: Random = Random(System.currentTimeMillis()),
     remoteRepository: PackRepository = PackRepository.EMPTY,
 ): PackRepository {
-    private val handlebarsTemplateEngine = HandlebarsTemplateEngine()
+    private val handlebarsTemplateEngine = HandlebarsTemplateEngine(random)
     private val serializersModule = SerializersModule {
         // TODO this doesn't work for some reason
         polymorphic(SourceFile::class) {
@@ -111,7 +114,8 @@ class LocalPackRepository(
 
     override suspend fun read(packId: PackId): PackDescriptor? {
         val projectPath = root.resolve(packId.toString())
-        val manifest: PackManifest = projectPath.resolve(PACK_YAML).readYaml() ?: return null
+        val rawManifest: YamlMap = projectPath.resolve(PACK_YAML).readYamlNode(fs, yaml)?.yamlMap ?: return null
+        val manifest: PackManifest = yaml.decodeFromYamlNode(rawManifest)
         val group = manifest.group
             ?: projectPath.resolve("../$GROUP_YAML").readYaml()
             ?: Group(packId.group)
@@ -156,7 +160,7 @@ class LocalPackRepository(
                 TemplateFormat.OTHER ->
                     when (file.name.extension.lowercase()) {
                         "hbs" -> handlebarsTemplateEngine.read(
-                            target,
+                            target.removeSuffix(".hbs"),
                             file.readText() ?: text ?: throw IllegalArgumentException("Missing path or text in source definition")
                         ).copy(
                             packId = packId,
@@ -172,7 +176,7 @@ class LocalPackRepository(
         }
 
         return PackDescriptor(
-            info = manifest.copy(
+            manifest = manifest.copy(
                 id = packId,
                 group = group,
                 properties = properties.distinctBy { it.key },
@@ -242,7 +246,7 @@ class LocalPackRepository(
             when (file.name.extension.lowercase()) {
                 HANDLEBARS_EXTENSION -> handlebarsTemplateEngine.read(modulePath, file).let { template ->
                     template.copy(
-                        target = target ?: template.target,
+                        target = (target ?: template.target).removeSuffix(".hbs"),
                         packId = packId,
                     )
                 }
@@ -327,7 +331,7 @@ class LocalPackRepository(
                     readModuleSource(modulePath.resolve(path), target = target)
                 } else {
                     require(target != null) { "Target is required when using text for source: $manifestSource" }
-                    handlebarsTemplateEngine.read(target, text).copy(packId = packId)
+                    handlebarsTemplateEngine.read(target.removeSuffix(".hbs"), text).copy(packId = packId)
                 }.withCondition(conditionExpression)
             }
         }

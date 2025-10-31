@@ -8,11 +8,12 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import org.jetbrains.kastle.io.*
 import org.jetbrains.kastle.io.FileSystemPackRepository.Companion.export
 import kotlin.io.path.ExperimentalPathApi
+import kotlin.random.Random
 
 @OptIn(ExperimentalPathApi::class, ExperimentalSerializationApi::class)
 class CborProjectGeneratorTest: StringSpec(
     ProjectGeneratorTest {
-        val local = LocalPackRepository(Path("../repository"))
+        val local = LocalPackRepository(Path("../repository"), random = Random(42L))
         val exportDir = Path(SystemTemporaryDirectory, "cbor_export")
         SystemFileSystem.deleteRecursively(exportDir)
         SystemFileSystem.createDirectories(exportDir)

@@ -45,7 +45,7 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
 
         val repository = LocalPackRepository(
             root = repositoryDir.absolutePath,
-            catalogFile = catalogPath.relativeTo(repositoryDir).path
+            catalogFile = catalogPath.relativeTo(repositoryDir).path,
         )
         val modules2packs = mutableMapOf<String, Pair<PackMetadata, SourceModuleMetadata>>()
 

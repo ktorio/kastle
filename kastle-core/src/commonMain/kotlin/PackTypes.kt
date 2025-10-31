@@ -1,6 +1,7 @@
 package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.kastle.utils.Expression
 
 @Serializable
 sealed interface PackMetadata {
@@ -44,9 +45,9 @@ data class PackManifest(
 
 @Serializable
 data class PackDescriptor(
-    val info: PackMetadata,
+    val manifest: PackMetadata,
     val sources: PackSources,
-): PackMetadata by info {
+): PackMetadata by manifest {
     val commonSources: List<SourceFile> get() = sources.common
     val rootSources: List<SourceFile> get() = sources.root
     val sourceModules: List<SourceModule> get() = sources.modules.modules

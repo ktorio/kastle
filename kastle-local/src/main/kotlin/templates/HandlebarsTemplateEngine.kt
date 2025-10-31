@@ -11,10 +11,14 @@ import org.jetbrains.kastle.utils.Expression.StringLiteral
 import org.jetbrains.kastle.utils.Expression.VariableRef
 import org.jetbrains.kastle.utils.ListStack
 import org.jetbrains.kastle.utils.*
+import kotlin.random.Random
 
 const val HANDLEBARS_EXTENSION = "hbs"
 
-class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
+class HandlebarsTemplateEngine(
+    private val random: Random = Random(System.currentTimeMillis()),
+    private val fs: FileSystem = SystemFileSystem,
+) {
     companion object {
         private const val IF = "if"
         private const val UNLESS = "unless"
@@ -23,6 +27,7 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         private const val WHEN = "when"
         private const val ELSE = "else"
         private const val EACH = "each"
+        private const val PBX_ID = "pbxId"
         // virtual helper for conditional blocks
         private const val COND = "!cond"
 
@@ -33,6 +38,9 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
         private val variablePattern = Regex("[\\w_.]+")
     }
 
+    private val randomIds = mutableMapOf<Int, String>()
+
+    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     fun read(modulePath: Path, file: Path): SourceTemplate {
         val text = fs.source(file).buffered()
             .readByteArray()
@@ -41,7 +49,15 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
             SourceTemplate(
                 text = text,
                 target = "file:${file.relativeTo(modulePath).toString().removeSuffix(".hbs")}",
-                blocks = findBlocks(text).toList(),
+                blocks = findBlocks(text)
+                    .sortedWith(compareBy<Block> {
+                        it.range.first
+                    }.thenComparing {
+                        when(it) {
+                            is ConditionalBlock -> -1
+                            else -> 1
+                        }
+                    }).toList(),
             )
         }
     }
@@ -172,6 +188,23 @@ class HandlebarsTemplateEngine(val fs: FileSystem = SystemFileSystem) {
                             )
 
                             EACH, WHEN -> stack += blockMatch
+
+                            /**
+                             * Custom function for random IDs, used in the XCode configuration project template.
+                             */
+                            PBX_ID -> {
+                                yield(
+                                    InlineValue(
+                                        expression = StringLiteral(randomIds.computeIfAbsent(blockMatch.expression?.toInt() ?: 0) {
+                                            random.nextStringId()
+                                        }),
+                                        position = BlockPosition(
+                                            line = line,
+                                            range = match.rangeAdjusted,
+                                        ),
+                                    )
+                                )
+                            }
 
                             else -> {
                                 // Value expression can only be used for when clauses

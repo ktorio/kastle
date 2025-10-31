@@ -65,6 +65,7 @@ val SourceModule.slotSources: SourcesByUrl get() =
 
 private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "path" to path,
+    "parent" to path.substringBeforeLast('/').takeIf { it.isNotEmpty() },
     "type" to if (amper.application != null && platforms.size == 1) "${platforms.single()}/app" else "lib",
     "platform" to platforms.singleOrNull()?.code,
     "platforms" to platforms.map { it.code },

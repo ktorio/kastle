@@ -369,7 +369,8 @@ internal class SourceFileWriteContext(
                         }
 
                         is IfBlock -> {
-                            val parent = stack.top ?: error("if without parent: $block")
+                            val parent = stack.top
+                                ?: error("if without parent: $block")
                             log.trace { "  ${block.positionPrefix} IF    ^${parent.lineNumber} ${block.expression} -> !!$value -> ${value.isTruthy()}" }
                             val condition = value.isTruthy().also {
                                 conditions[parent] = it
