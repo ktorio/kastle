@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotest)
@@ -7,65 +7,73 @@ plugins {
     `maven-publish`
 }
 
-tasks.named("buildOpenApi") {
-    enabled = false
-}
+kotlin {
+    jvm()
+    js {
+        browser()
+        binaries.executable()
+    }
 
-tasks.jib {
-    // this will generate the exported repository automatically
-    dependsOn("kotest")
-}
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(project(":kastle-core"))
+            }
+        }
 
-jib {
-    from { image = "amazoncorretto:21" }
-    to { image = "registry.jetbrains.team/p/kastle/containers/kastle:latest" }
-    extraDirectories {
-        paths {
-            path {
-                setFrom("../export")
-                into = "/repository"
+        jsMain {
+            dependencies {
+                implementation(npm("htmx.org", "2.0.8"))
+            }
+        }
+        
+        jvmMain {
+            dependencies {
+                implementation(project(":kastle-local"))
+                
+                api(libs.ktor.server.core)
+                api(libs.ktor.server.di)
+                implementation(libs.ktor.server.cio)
+                implementation(libs.ktor.server.call.logging)
+                implementation(libs.ktor.server.content.negotiation)
+                implementation(libs.ktor.server.status.pages)
+                implementation(libs.ktor.server.sse)
+                implementation(libs.ktor.server.htmx)
+                implementation(libs.ktor.htmx.html)
+                implementation(libs.ktor.server.html.builder)
+                implementation(libs.ktor.json)
+                implementation(libs.logback.classic)
+                implementation(libs.commonmark)
+                implementation(libs.mcp.sdk)
+                implementation(libs.ktoml)
+            }
+        }
+        
+        jvmTest {
+            dependencies {
+                implementation(project(":kastle-client"))
+                implementation(project(":kastle-test"))
+                implementation(libs.ktor.server.test.host)
             }
         }
     }
-    container {
-        ports = listOf("2626")
-        environment = mapOf("REPOSITORY_PATH" to "/repository")
-        creationTime = "USE_CURRENT_TIMESTAMP"
-    }
 }
 
-dependencies {
-    implementation(project(":kastle-core"))
-    implementation(project(":kastle-local"))
-
-    api(libs.ktor.server.core)
-    api(libs.ktor.server.di)
-    implementation(libs.ktor.server.cio)
-    implementation(libs.ktor.server.call.logging)
-    implementation(libs.ktor.server.content.negotiation)
-    implementation(libs.ktor.server.status.pages)
-    implementation(libs.ktor.server.sse)
-    implementation(libs.ktor.server.htmx)
-    implementation(libs.ktor.htmx.html)
-    implementation(libs.ktor.server.html.builder)
-    implementation(libs.ktor.json)
-    implementation(libs.logback.classic)
-    implementation(libs.commonmark)
-    implementation(libs.mcp.sdk)
-    implementation(libs.ktoml)
-    testImplementation(project(":kastle-client"))
-    testImplementation(project(":kastle-test"))
-    testImplementation(libs.ktor.server.test.host)
+// Copy JS distribution to resources so it can be served by the JVM server
+val copyJsDistribution by tasks.registering(Copy::class) {
+    dependsOn("jsBrowserDistribution")
+    from(layout.buildDirectory.dir("dist/js/productionExecutable"))
+    into(layout.buildDirectory.dir("processedResources/jvm/main/js"))
 }
 
-application {
-    mainClass = "io.ktor.server.cio.EngineMain"
+tasks.named("jvmProcessResources") {
+    dependsOn(copyJsDistribution)
 }
 
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            from(components["java"])
+            from(components["kotlin"])
         }
     }
 }

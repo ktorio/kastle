@@ -1,0 +1,1 @@
+This is a wrapper for `ktor-server` to get around the incompatibility with the Gradle "Jib" plugin.
