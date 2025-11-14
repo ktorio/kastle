@@ -27,4 +27,5 @@ build
 
 # application artifacts
 /export
+/*/export
 actual-files

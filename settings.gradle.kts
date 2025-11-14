@@ -24,12 +24,13 @@ include(
     "kastle-core",
     "kastle-test",
     "kastle-client",
-    "kastle-server",
     "kastle-local",
     "kastle-templates",
     "kastle-gradle-plugin",
+    "kastle-server",
+    "kastle-server-jib",
 )
 
 // Sample repository,
 //   Requires plugin to be published.  Uncomment for editing
-//includeBuild("repository")
+// includeBuild("repository")
