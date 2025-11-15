@@ -40,10 +40,12 @@ fun interface ProjectResolver {
                 findPropertyValue(descriptor, propertyValues, variableId, property)
             }
             val repositoryCatalog = repository.versions()
-            val kotlinVersion = repositoryCatalog.versions["kotlin"] ?: missingVersion("kotlin")
-            val versions = mutableMapOf("kotlin" to kotlinVersion)
+            val versions = TreeMap<String, String>().also { versions ->
+                versions["kotlin"] = repositoryCatalog.versions["kotlin"] ?: missingVersion("kotlin")
+            }
             val libraries = TreeMap<String, CatalogArtifact>()
             val gradlePlugins = TreeMap<String, GradlePlugin>()
+
             for (module in moduleSources.modules) {
                 for (pluginKey in module.gradlePlugins) {
                     val catalogKey = CatalogReference.lookupFormat(pluginKey)
