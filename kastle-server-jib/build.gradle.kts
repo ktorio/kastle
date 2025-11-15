@@ -6,6 +6,7 @@ plugins {
 tasks.register<GradleBuild>("exportSamples") {
     dir = layout.settingsDirectory.dir("repository").asFile
     tasks = listOf("kslExportToCbor")
+    startParameter.projectProperties["exportPath"] = layout.projectDirectory.dir("export").asFile.absolutePath
 }
 
 tasks.jib {

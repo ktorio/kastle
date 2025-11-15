@@ -73,14 +73,15 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
                 task.group = "kastle"
                 task.description = "Export the repository to JSON format"
                 task.doLast {
-                    val exportPath = kotlinx.io.files.Path("export") // TODO
-                    logger.lifecycle("Exporting repository to $exportPath...")
+                    val exportPath = kotlinx.io.files.Path(
+                        project.findProperty("exportPath") as? String ?: "export"
+                    )
                     runBlocking {
                         repository.export(
                             path = exportPath,
                             fileFormat = FileFormat.JSON,
                         )
-                        logger.lifecycle("Export done.")
+                        logger.lifecycle("Exported to $exportPath")
                     }
                 }
             }
@@ -89,7 +90,9 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
                 task.group = "kastle"
                 task.description = "Export the repository to CBOR format"
                 task.doLast {
-                    val exportPath = kotlinx.io.files.Path("export") // TODO
+                    val exportPath = kotlinx.io.files.Path(
+                        project.findProperty("exportPath") as? String ?: "export"
+                    )
                     logger.lifecycle("Exporting repository to $exportPath...")
                     runBlocking {
                         repository.export(
