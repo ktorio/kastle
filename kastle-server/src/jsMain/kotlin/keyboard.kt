@@ -44,6 +44,7 @@ internal fun setupUsability() {
                     val input = document.getElementById(forAttr) as? HTMLInputElement
                     if (input != null) {
                         input.checked = keyEvent.key == "ArrowRight"
+                        input.dispatchEvent(Event("change"))
                     }
                 }
             }
