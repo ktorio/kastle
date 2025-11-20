@@ -1,0 +1,30 @@
+name: IDE Theme
+description: IntelliJ Platform theme project
+
+properties:
+  - key: pluginType # TODO: probably not needed
+    hidden: true
+    type: string
+    default: THEME
+  - key: pluginName # TODO: probably not needed?
+    label: Plugin Name
+    type: string
+    default: My Plugin # TODO: delete
+  - key: hiddenInWizard
+    type: boolean
+    default: true
+
+rootSources:
+  # Sources are intentionally in the `sources` directory to avoid being processed by module.ksl.yaml handler
+
+  # Production sources
+  - path: sources/resources/META-INF/plugin.xml.hbs
+    target: file:resources/META-INF/plugin.xml
+  - path: sources/resources/META-INF/pluginIcon.svg
+    target: file:resources/META-INF/pluginIcon.svg
+  - path: sources/resources/theme/mytheme.theme.json.hbs
+    target: file:resources/theme/mytheme.theme.json
+
+  # Git
+  - path: gitignoreItems.hbs
+    target: slot://org.jetbrains.intellij.platform.vcs/git/ignoredItems

@@ -1,0 +1,5 @@
+sources:
+  - target: slot://org.jetbrains.intellij.platform/plugin/platformBundledPlugins
+    text: "  com.intellij.modules.json,\\"
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDependencies
+    text: <plugin id="com.intellij.modules.json"/>

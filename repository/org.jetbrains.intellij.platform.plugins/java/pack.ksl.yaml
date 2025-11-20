@@ -1,0 +1,5 @@
+name: Java
+description: JVM Platform APIs for Java, Kotlin, Groovy and Scala
+icon: AllIcons.FileTypes.Json
+links:
+  home: https://plugins.jetbrains.com/plugin/27368-java

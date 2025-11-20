@@ -1,0 +1,5 @@
+platform: jvm # ignored
+
+sources:
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDependencies
+    text: <plugin id="com.intellij.modules.lsp"/>

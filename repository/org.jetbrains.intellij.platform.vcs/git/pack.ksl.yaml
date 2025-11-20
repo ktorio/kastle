@@ -1,0 +1,12 @@
+name: Git
+description: Generates a `.gitignore` file.
+icon: AllIcons.FileTypes.Gitignore
+
+properties:
+  - key: hiddenInWizard
+    type: boolean
+    default: true
+
+rootSources:
+  - path: .gitignore.hbs
+    target: file:.gitignore

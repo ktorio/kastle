@@ -1,0 +1,5 @@
+platform: jvm # ignored
+
+gradle:
+  plugins:
+    - qodana

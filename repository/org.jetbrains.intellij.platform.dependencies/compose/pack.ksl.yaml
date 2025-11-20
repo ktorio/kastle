@@ -1,0 +1,6 @@
+name: Compose UI
+description: An open-source, declarative framework for building stunning UIs
+icon: AllIcons.FileTypes.UiForm
+links:
+  home: https://www.jetbrains.com/compose-multiplatform
+  guide: https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform.html

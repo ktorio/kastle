@@ -1,0 +1,10 @@
+sources:
+  - path: sources/main/kotlin/toolWindow/ComposeToolWindow.kt
+    target: file:src/main/kotlin/toolWindow/ComposeToolWindow.kt
+    #condition:
+    #TODO: we probably can't check here if a pack is enabled, but we can use a hidden propertyValues, for example:
+
+propertyValues:
+  org.gradle/gradle/isExecutable: true
+
+# TODO so from compose pack, we will need to set true in the toolwindow pack

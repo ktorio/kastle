@@ -1,0 +1,11 @@
+name: Qodana
+description: Add Qodana Code Analysis support
+icon: AllIcons.General.InspectionsEye
+#icon: QodanaIcons.Icons.Qodana TODO: class loader can't find it
+
+rootSources:
+  - path: qodana.yml
+  - path: gitignoreItems.hbs
+    target: slot://org.jetbrains.intellij.platform.vcs/git/ignoredItems
+  - path: inspectCodeWorkflowJob.hbs
+    target: slot://org.jetbrains.intellij.platform.vcs/github/additionalBuildJobs

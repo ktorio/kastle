@@ -1,0 +1,12 @@
+platform: jvm
+
+#dependencies:
+#  - $libs.my.fictional.dependency
+
+# TODO: delete and inline in build.gradle.kts and libs.versions.toml.hbs? additional will be contributed by packs
+gradle:
+  plugins:
+    - changelog
+    - intelliJPlatform
+    - kotlin
+    - kover
