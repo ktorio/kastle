@@ -34,13 +34,7 @@ if (_module.platform != "jvm") {
                 "jvm" -> {
                     jvm()
                 }
-                "android" -> {
-                    androidTarget {
-                        compilerOptions {
-                            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-                        }
-                    }
-                }
+                "android" -> {}
                 "ios" -> {
                     if (_slots.contains("iosOverride")) {
                         _slot("iosOverride")

@@ -3,12 +3,12 @@ platform: jvm
 dependencies:
   - ../sharedUI
   - $compose.desktop.currentOs
+  - $libs.kotlinx.coroutinesSwing
 
 gradle:
   plugins:
     - compose.multiplatform
     - compose.compiler
-    - compose.hotReload
 
 amper:
   compose: enabled

@@ -1,6 +1,7 @@
 package kastle
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,11 +13,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+
+import kastle.sharedui.generated.resources.Res
+import kastle.sharedui.generated.resources.compose_multiplatform
 
 @Composable
-fun App() {
+@Preview
+fun App(viewModel: AppViewModel = viewModel { AppViewModel() }) {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.primaryContainer)
@@ -24,16 +31,16 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Button(onClick = { showContent = !showContent }) {
+            Button(onClick = viewModel::onToggleContent) {
                 Text("Click me!")
             }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
+            AnimatedVisibility(viewModel.showContent) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text("Compose: $greeting")
+                    Image(painterResource(Res.drawable.compose_multiplatform), null)
+                    Text("Compose: ${viewModel.greeting}")
                 }
             }
         }

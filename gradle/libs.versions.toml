@@ -1,27 +1,27 @@
 [versions]
 agp = "8.12.3"
-android-lifecycle = "2.9.5"
-android-activity-compose = "1.11.0"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
+android-lifecycle = "2.9.6"
+android-activity-compose = "1.12.0"
 commonmark = "0.27.0"
 kaml = "0.79.0"
-ktor = "3.3.1"
-kotlin = "2.2.20"
-ksp-version = "2.2.20-2.0.2"
+ktor = "3.3.3"
+kotlin = "2.2.21"
+ksp-version = "2.2.21-2.0.4"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-serialization = "1.9.0"
 kotlinx-coroutines = "1.10.2"
-kotlinx-io = "0.8.0"
+kotlinx-io = "0.8.2"
 ktoml = "0.7.1"
-logback = "1.5.20"
-mcp-sdk = "0.7.4"
-kotest = "6.0.4"
+material3 = "1.10.0-alpha05"
+logback = "1.5.21"
+mcp-sdk = "0.8.0"
+kotest = "6.0.5"
 pluginPublish = "2.0.0"
-composeMultiplatform = "1.9.2"
+composeMultiplatform = "1.10.0-beta02"
 kastle = "1.0.0-SNAPSHOT"
-composeHotReload = "1.0.0-rc02"
 
 [libraries]
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
@@ -62,6 +62,7 @@ kotest-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kote
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
 kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "kotlin" }
+kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }
 mcp-sdk = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp-sdk" }
 ktoml = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
@@ -69,10 +70,18 @@ android-activity-compose = { module = "androidx.activity:activity-compose", vers
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 gradlePlugin-androidLibrary = { module = "com.android.library:com.android.library.gradle.plugin", version.ref = "agp" }
 gradlePlugin-composeCompiler = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "composeMultiplatform" }
+compose-uiTooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "composeMultiplatform" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
+compose-component-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
+compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-multiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotest = { id = "io.kotest", version.ref = "kotest" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -81,6 +90,5 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp-version" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-compose-hotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }
 pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "pluginPublish" }
 kastle = { id = "org.jetbrains.kastle", version.ref = "kastle" }

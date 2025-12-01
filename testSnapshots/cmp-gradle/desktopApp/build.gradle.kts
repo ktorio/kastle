@@ -4,7 +4,6 @@ plugins {
 
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.compose.hotReload)
 }
 
 
@@ -23,4 +22,5 @@ compose.desktop {
 dependencies {
     implementation(project(":sharedUI"))
     implementation(compose.desktop.currentOs)
+    implementation(libs.kotlinx.coroutinesSwing)
 }

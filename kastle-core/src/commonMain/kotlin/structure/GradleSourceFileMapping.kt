@@ -11,7 +11,9 @@ import org.jetbrains.kastle.utils.capitalizeFirst
 import org.jetbrains.kastle.utils.fileName
 
 internal val GRADLE_PACK_ID = PackId("org.gradle", "gradle")
-internal val SOURCE_FOLDER_REGEX = Regex("(src|test|resources|testResources|res|composeResources)(?:@(\\w+))?/")
+internal val SOURCE_OR_RESOURCE_FOLDER_REGEX = Regex("(src|test|resources|testResources|res|composeResources)(?:@(\\w+))?/")
+internal val SOURCE_FOLDER_REGEX = Regex("(src|test)(?:@(\\w+))?/")
+internal val RESOURCE_FOLDER_REGEX = Regex("(resources|testResources|res|composeResources)(?:@(\\w+))?/")
 internal val UNCATEGORIZED_FILES = setOf("AndroidManifest.xml")
 
 /**
@@ -25,8 +27,8 @@ val GradleSourceMapping = ProjectMapping { project ->
         moduleSources = project.moduleSources.map { module ->
             module.copy(
                 sources = module.sources.map { source ->
-                    if (source.target.protocol == "file" && source.target.contains(SOURCE_FOLDER_REGEX)) {
-                        val newTarget = source.target.replace(SOURCE_FOLDER_REGEX) { match ->
+                    if (source.target.protocol == "file" && source.target.contains(SOURCE_OR_RESOURCE_FOLDER_REGEX)) {
+                        val newTarget = source.target.replace(SOURCE_OR_RESOURCE_FOLDER_REGEX) { match ->
                             val sourceRoot = match.groups[1]!!.value
                             val mainOrTest = (if (sourceRoot in setOf("test", "testResources")) "test" else "main").capitalizeFirst()
                             val fileCategory = when {

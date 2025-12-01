@@ -74,6 +74,16 @@ fun interface ProjectResolver {
                         libraries[dependency.lookupKey] = library
                 }
             }
+
+            // Include SDK versions when android is included
+            if (moduleSources.modules.any { Platform.ANDROID in it.platforms }) {
+                versions += repositoryCatalog.versions.entries.mapNotNull { (key, value) ->
+                    if (key.startsWith("android") && key.contains("Sdk")) {
+                        key to value
+                    } else null
+                }
+            }
+
             val gradleSettings = GradleProjectSettings(
                 repositories = packs.flatMap { it.repositories }.distinct(),
                 plugins = gradlePlugins.values.toList(),

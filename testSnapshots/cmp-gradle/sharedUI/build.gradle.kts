@@ -2,9 +2,9 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
 
+    alias(libs.plugins.android.multiplatformLibrary)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.android.library)
 }
 
 
@@ -13,9 +13,20 @@ dependencies {
 }
 
 kotlin {
-    android {
+    androidLibrary {
         namespace = "com.acme"
-        compileSdk = 36
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+    
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+        androidResources {
+            enable = true
+        }
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
     jvm()
 
@@ -48,7 +59,7 @@ kotlin {
             api(compose.foundation)
             api(compose.material3)
             api(compose.ui)
-            api(compose.animation)
+            api(compose.uiToolingPreview)
             api(compose.components.resources)
             api(libs.androidx.lifecycle.viewmodelCompose)
             api(libs.androidx.lifecycle.runtimeCompose)

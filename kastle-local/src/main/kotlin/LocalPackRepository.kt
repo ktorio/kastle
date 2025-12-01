@@ -391,7 +391,8 @@ class LocalPackRepository(
             "Failed to read versions catalog from $versionsCatalogFile"
         }
 
-        return libraryCatalog + builtInCatalog
+        // TODO support other catalogs properly
+        return builtInCatalog + libraryCatalog
     }
 
     private suspend fun Url.getExtensionFromSlot(): TemplateFormat {
