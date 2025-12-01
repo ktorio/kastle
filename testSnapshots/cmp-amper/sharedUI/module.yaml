@@ -4,12 +4,12 @@ product:
   platforms: [jvm, android, ios, js, wasmJs]
 
 dependencies:
-  - $compose.runtime: exported
-  - $compose.foundation: exported
-  - $compose.material3: exported
-  - $compose.ui: exported
-  - $compose.uiToolingPreview: exported
-  - $compose.components.resources: exported
+  - $libs.compose.runtime: exported
+  - $libs.compose.foundation: exported
+  - $libs.compose.material3: exported
+  - $libs.compose.ui: exported
+  - $libs.compose.uiToolingPreview: exported
+  - $libs.compose.component.resources: exported
   - $libs.androidx.lifecycle.viewmodelCompose: exported
   - $libs.androidx.lifecycle.runtimeCompose: exported
 

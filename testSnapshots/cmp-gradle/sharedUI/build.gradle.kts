@@ -9,7 +9,7 @@ plugins {
 
 
 dependencies {
-    debugImplementation(compose.uiTooling)
+    "androidRuntimeClasspath"(libs.compose.uiTooling)
 }
 
 kotlin {
@@ -19,7 +19,7 @@ kotlin {
         minSdk = libs.versions.android.minSdk.get().toInt()
     
         compilerOptions {
-            jvmTarget = JvmTarget.JVM_11
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
         }
         androidResources {
             enable = true
@@ -29,12 +29,6 @@ kotlin {
         }
     }
     jvm()
-
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-        }
-    }
 
     listOf(
         iosArm64(),
@@ -55,12 +49,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(compose.runtime)
-            api(compose.foundation)
-            api(compose.material3)
-            api(compose.ui)
-            api(compose.uiToolingPreview)
-            api(compose.components.resources)
+            api(libs.compose.runtime)
+            api(libs.compose.foundation)
+            api(libs.compose.material3)
+            api(libs.compose.ui)
+            api(libs.compose.uiToolingPreview)
+            api(libs.compose.component.resources)
             api(libs.androidx.lifecycle.viewmodelCompose)
             api(libs.androidx.lifecycle.runtimeCompose)
         }

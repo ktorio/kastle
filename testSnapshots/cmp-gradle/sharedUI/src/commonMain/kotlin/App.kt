@@ -15,6 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import com.acme.sharedui.generated.resources.Res
+import com.acme.sharedui.generated.resources.compose_multiplatform
 
 @Composable
 @Preview
