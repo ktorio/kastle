@@ -1,0 +1,11 @@
+:root {
+    --background-color: #dddddd;
+    --layer-background-color: #ffffff;
+    --highlight-background-color: rgba(128, 128, 64, 0.2);
+    --text-color: #121212;
+    --text-color-strong: #000000;
+    --secondary-text-color: #686868;
+    --link-color: #007faa;
+    --download-button-color: #5eca62;
+    --download-button-shadow-color: forestgreen;
+}

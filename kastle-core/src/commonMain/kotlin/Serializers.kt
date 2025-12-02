@@ -38,18 +38,19 @@ open class CustomParserSerializer<T: Any>(
         parse(decoder.decodeString())
 }
 
-class PackIdSerializer: CustomParserSerializer<PackId>(PackId::class, PackId::parse)
-class SlotIdSerializer: CustomParserSerializer<SlotId>(SlotId::class, SlotId::parse)
-class VariableIdSerializer: CustomParserSerializer<VariableId>(VariableId::class, VariableId::parse)
-class RevisionSerializer: CustomParserSerializer<Revision>(Revision::class, Revision::parse)
-class VersionRangeSerializer: CustomParserSerializer<VersionRange>(VersionRange::class, VersionRange::parse)
-class DependencySerializer: CustomParserSerializer<Dependency>(Dependency::class, Dependency::parse)
-class ArtifactDependencySerializer: CustomParserSerializer<ArtifactDependency>(ArtifactDependency::class, ArtifactDependency::parse)
-class SemanticVersionSerializer: CustomParserSerializer<SemanticVersion>(SemanticVersion::class, SemanticVersion::parse)
+object PackIdSerializer: CustomParserSerializer<PackId>(PackId::class, PackId::parse)
+object SlotIdSerializer: CustomParserSerializer<SlotId>(SlotId::class, SlotId::parse)
+object VariableIdSerializer: CustomParserSerializer<VariableId>(VariableId::class, VariableId::parse)
+object RevisionSerializer: CustomParserSerializer<Revision>(Revision::class, Revision::parse)
+object VersionRangeSerializer: CustomParserSerializer<VersionRange>(VersionRange::class, VersionRange::parse)
+object DependencySerializer: CustomParserSerializer<Dependency>(Dependency::class, Dependency::parse)
+object ArtifactDependencySerializer: CustomParserSerializer<ArtifactDependency>(ArtifactDependency::class, ArtifactDependency::parse)
+object SemanticVersionSerializer: CustomParserSerializer<SemanticVersion>(SemanticVersion::class, SemanticVersion::parse)
 //class SourcePositionSerializer: CustomParserSerializer<SourcePosition>(SourcePosition::class, SourcePosition::parse)
-class BlockPositionSerializer: CustomParserSerializer<BlockPosition>(BlockPosition::class, BlockPosition::parse)
-class PropertyTypeSerializer: CustomParserSerializer<PropertyType>(PropertyType::class, PropertyType::parse)
-class SourceImportSerializer: CustomParserSerializer<SourceImport>(SourceImport::class, SourceImport::parse)
+object BlockPositionSerializer: CustomParserSerializer<BlockPosition>(BlockPosition::class, BlockPosition::parse)
+object PropertyTypeSerializer: CustomParserSerializer<PropertyType>(PropertyType::class, PropertyType::parse)
+object SourceImportSerializer: CustomParserSerializer<SourceImport>(SourceImport::class, SourceImport::parse)
+object PlatformSettingsSerializer: CustomParserSerializer<PlatformSettings>(PlatformSettings::class, PlatformSettings::parse)
 
 
 class CatalogVersionSerializer: KSerializer<CatalogVersion> {

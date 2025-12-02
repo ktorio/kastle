@@ -1,0 +1,78 @@
+/* Header */
+#header {
+    background-color: var(--layer-background-color);
+    grid-area: header;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    overflow: hidden;
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+    h1 {
+        font-size: 18px;
+        margin: 0;
+    }
+    nav {
+        display: flex;
+        gap: 12px;
+    }
+}
+
+/* Side nav */
+#packs {
+    box-sizing: border-box;
+    grid-area: nav;
+    padding: 8px 3px 8px 8px;
+    overflow-y: auto;
+
+    li {
+        position: relative;
+
+        > input[type="radio"] {
+            display: none;
+        }
+        > label {
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin: 4px 0;
+            padding: 8px 40px 8px 14px;
+            background-color: var(--layer-background-color);
+            cursor: pointer;
+        }
+        > label:hover {
+            background-color: var(--highlight-background-color);
+        }
+        > input:checked + label {
+            border: 1px solid var(--secondary-text-color);
+        }
+
+        .include-pack-toggle {
+            position: absolute;
+            right: 6px;
+            top: calc(50% - 10px);
+        }
+    }
+}
+
+/* Main contents */
+main {
+    position: relative;
+    box-sizing: border-box;
+    grid-area: main;
+    padding: 12px 16px;
+    max-width: calc(100vw - 280px);
+
+    > section {
+        background-color: var(--layer-background-color);
+    }
+
+    > .tabs {
+        margin-top: 8px;
+    }
+}

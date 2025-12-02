@@ -14,6 +14,7 @@ fun interface ProjectResolver {
                 .distinctBy { it.id }
             val moduleSources = packs.asSequence()
                 .map { it.sources.modules }
+                .map { it.modules.mapNotNull(descriptor.filterByPlatforms()).let(ProjectModules::fromList) }
                 .reduceOrNull(ProjectModules::plus)
                 ?.flatten() ?: ProjectModules.Empty
             val slotSources: SourcesByUrl = packs.asSequence()
@@ -150,4 +151,20 @@ fun interface ProjectResolver {
         descriptor: ProjectDescriptor,
         repository: PackRepository,
     ): Project
+}
+
+private fun ProjectDescriptor.filterByPlatforms(): (SourceModule) -> SourceModule? {
+    if (platforms == PlatformSettings.All)
+        return { it }
+    else
+        return { module ->
+            val filteredPlatforms = module.manifest.platforms.filter { it in platforms }.toSet()
+            filteredPlatforms.takeIf { it.isNotEmpty() }?.let {
+                module.copy(
+                    manifest = module.manifest.copy(
+                        platforms = filteredPlatforms
+                    ),
+                )
+            }
+        }
 }

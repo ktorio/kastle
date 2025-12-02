@@ -1,0 +1,33 @@
+/* Global stuff */
+/* Default styles (fallback for browsers that don't support theme detection) */
+body {
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: sans-serif;
+    display: grid;
+    grid-template-rows: auto 1fr; /* Header takes only necessary height, rest is main area */
+    grid-template-columns: 280px 1fr; /* Left navigation and content */
+    grid-template-areas:
+        "header header"
+        "nav main";
+}
+
+/* Styles for Dark Theme */
+@media (prefers-color-scheme: dark) {
+    body {
+        --background-color: #121212;
+        --text-color: #f2f2f2;
+        --text-color-strong: #ffffff;
+        --secondary-text-color: #aaaaaa;
+        --layer-background-color: #2b2b2b;
+        --highlight-background-color: rgba(216, 255, 255, 0.2);
+        --link-color: #48b1d5;
+    }
+}
+
+/* Code appearance */
+pre {
+    max-width: 100%;
+    overflow-x: auto;
+}

@@ -131,6 +131,12 @@ private fun RoutingCall.tryReadProjectDescriptor(): ProjectDescriptor? {
     val packaging = request.queryParameters["packaging"]?.let { packaging ->
         PackagingStyle.entries.firstOrNull { it.name.equals(packaging, ignoreCase = true) }
     } ?: PackagingStyle.NESTED
+    val platforms = PlatformSettings.of(
+        request.queryParameters.entries()
+            .filter { it.key.startsWith("platforms-") && "true" in it.value }
+            .map { Platform.parse(it.key.removePrefix("platforms-")) }
+            .toSet()
+    )
 
     return ProjectDescriptor(
         name = name,
@@ -141,7 +147,8 @@ private fun RoutingCall.tryReadProjectDescriptor(): ProjectDescriptor? {
             .toVariableEntries()
             .toMap(),
         packs = request.queryParameters.getAll("pack").orEmpty().map(PackId::parse),
-        packaging = packaging
+        packaging = packaging,
+        platforms = platforms,
     )
 }
 

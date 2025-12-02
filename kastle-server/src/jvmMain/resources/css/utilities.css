@@ -1,0 +1,56 @@
+/* General classes */
+.secondary {
+    color: var(--secondary-text-color);
+    font-size: 0.75em;
+}
+.small-caps {
+    font-variant: small-caps;
+}
+.spaced-letters {
+    letter-spacing: 0.1em;
+}
+.flex-wrapped {
+    display: flex;
+    flex-wrap: wrap;
+}
+.gap-sm {
+    gap: 0.75em;
+}
+.collapsible {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--secondary-text-color);
+    border-left: 1px solid var(--secondary-text-color);
+    border-right: 1px solid var(--secondary-text-color);
+
+    > input[type="checkbox"] {
+        display: none;
+    }
+    > label {
+        cursor: pointer;
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--secondary-text-color);
+
+        > .icon{
+            font-size: 1.5em;
+
+            &::after {
+                content: "+";
+            }
+        }
+    }
+    > .contents {
+        display: none;
+        overflow: auto;
+        border-bottom: 1px solid var(--secondary-text-color);
+    }
+    > input:checked + label > .icon::after {
+        content: "−";
+    }
+    > input:checked ~ .contents {
+        display: block;
+    }
+}

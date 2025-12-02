@@ -233,8 +233,10 @@ enum class Platform(val code: String) {
 
     companion object {
         fun parse(text: String): Platform =
-            entries.firstOrNull { it.code == text }
-                ?: throw IllegalArgumentException("Invalid platform: $text")
+            entries.firstOrNull {
+                it.name.equals(text, ignoreCase = true) ||
+                it.code.equals(text, ignoreCase = true)
+            } ?: throw IllegalArgumentException("Invalid platform: $text")
     }
 
     override fun toString(): String = code

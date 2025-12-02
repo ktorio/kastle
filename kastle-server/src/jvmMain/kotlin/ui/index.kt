@@ -2,12 +2,11 @@ package org.jetbrains.kastle.server.ui
 
 import io.ktor.htmx.html.*
 import io.ktor.utils.io.*
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.html.*
 import org.jetbrains.kastle.PackDescriptor
+import org.jetbrains.kastle.Platform
+import org.jetbrains.kastle.PlatformSettings
 import org.jetbrains.kastle.ProjectDescriptor
-import org.jetbrains.kastle.ProjectGenerator
 
 @OptIn(ExperimentalKtorApi::class)
 fun HTML.indexHtml(
@@ -33,7 +32,7 @@ fun HTML.indexHtml(
             h1 {
                 +"♜"
             }
-            span("secondary small-caps spaced") {
+            span("secondary small-caps spaced-letters") {
                 +"Kotlin Application Sourcecode Templating and Layout Engine"
             }
             // header navigation
@@ -129,6 +128,27 @@ fun HTML.indexHtml(
                                     }
                                     option {
                                         +"Nested"
+                                    }
+                                }
+                            }
+                            div {
+                                label {
+                                    +"Platforms"
+                                }
+                                div("flex-wrapped gap-sm") {
+                                    for (platform in Platform.entries - Platform.COMMON) {
+                                        div("field-sm") {
+                                            label {
+                                                htmlFor = "platform-${platform.name}"
+                                                +platform.name
+                                            }
+                                            input(type = InputType.checkBox) {
+                                                id = "platform-${platform.name}"
+                                                name = "platforms-${platform.name}"
+                                                value = platform.name
+                                                checked = platform in (project?.platforms ?: PlatformSettings.All)
+                                            }
+                                        }
                                     }
                                 }
                             }
