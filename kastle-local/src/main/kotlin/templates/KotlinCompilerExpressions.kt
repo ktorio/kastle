@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.psi.psiUtil.*
 import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.BinaryOperator
 import org.jetbrains.kastle.utils.PostfixOperator
+import org.jetbrains.kastle.utils.PrefixOperator
 import org.jetbrains.kotlin.lexer.KtTokens
 
 fun KtExpression?.toTemplateExpression(): Expression {
@@ -89,6 +90,15 @@ fun KtExpression?.toTemplateExpression(): Expression {
             }
 
             Expression.BinaryOp(binaryOperator, left, right)
+        }
+
+        is KtPrefixExpression -> {
+            val operator = when(operationToken) {
+                KtTokens.EXCL -> PrefixOperator.NOT
+                else -> throw IllegalArgumentException("Unsupported prefix operator: ${operationReference.text}")
+            }
+            Expression.PrefixOp(operator, baseExpression?.toTemplateExpression()
+                ?: throw IllegalArgumentException("Missing base expression"))
         }
 
         // Handle method calls and property access
