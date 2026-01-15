@@ -57,6 +57,12 @@ sealed interface Expression {
     }
 
     @Serializable
+    data class PrefixOp(val op: PrefixOperator, val target: Expression) : Expression {
+        override fun evaluate(variables: Variables): Any? = op.evaluate(target.evaluate(variables))
+        override fun toString(): String = "$op$target"
+    }
+
+    @Serializable
     data class PostfixOp(val op: PostfixOperator, val target: Expression) : Expression {
         override fun evaluate(variables: Variables): Any? = op.evaluate(target.evaluate(variables))
         override fun toString(): String = "$target$op"
