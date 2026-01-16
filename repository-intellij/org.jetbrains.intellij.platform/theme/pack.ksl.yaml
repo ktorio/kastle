@@ -2,10 +2,9 @@ name: IDE Theme
 description: IntelliJ Platform theme project
 
 properties:
-  - key: pluginName # TODO: probably not needed?
+  - key: pluginName
     label: Plugin Name
     type: string
-    default: My Plugin # TODO: delete
   - key: hiddenInWizard
     type: boolean
     default: true

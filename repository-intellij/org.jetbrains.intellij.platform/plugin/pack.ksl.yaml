@@ -2,10 +2,9 @@ name: IDE Plugin
 description: IntelliJ Platform plugin project
 
 properties:
-  - key: pluginName # TODO probably not needed (id taken from artifactId, and the proper name set in plugin.xml later)
+  - key: pluginName
     label: Plugin Name
     type: string
-    default: My Plugin
   - key: addSampleCode
     type: boolean
     default: true
