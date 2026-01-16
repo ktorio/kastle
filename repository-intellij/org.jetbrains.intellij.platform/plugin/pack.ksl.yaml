@@ -17,22 +17,23 @@ properties:
     type: boolean
     default: false
     hidden: true
-
-  # Constants for easier versions management:
-  - key: gradleVersion
-    type: string
-    default: "9.2.1"
-    hidden: true
+  # Values are managed in propertyValues below:
   - key: platformVersion
     type: string
-    default: "2025.3.1"
     hidden: true
   - key: pluginSinceBuild
     type: string
-    default: "253"
+    hidden: true
+  - key: gradleVersion
+    type: string
     hidden: true
 
 propertyValues:
+  # Common versions management:
+  org.jetbrains.intellij.platform/plugin/platformVersion: 2025.3.1
+  org.jetbrains.intellij.platform/plugin/pluginSinceBuild: 253
+  org.jetbrains.intellij.platform/plugin/gradleVersion: 9.2.1
+  # Post-process input properties:
   org.jetbrains.intellij.platform/plugin/pluginName: My Plugin # TODO: expression
 
 rootSources:
