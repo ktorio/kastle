@@ -2,10 +2,6 @@ name: IDE Theme
 description: IntelliJ Platform theme project
 
 properties:
-  - key: pluginType # TODO: probably not needed
-    hidden: true
-    type: string
-    default: THEME
   - key: pluginName # TODO: probably not needed?
     label: Plugin Name
     type: string
@@ -13,6 +9,7 @@ properties:
   - key: hiddenInWizard
     type: boolean
     default: true
+    hidden: true
 
 propertyValues:
   org.jetbrains.intellij.platform/theme/pluginName: My Theme # TODO: expression
