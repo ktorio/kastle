@@ -374,7 +374,7 @@ class LocalPackRepository(
                 it.name.endsWith(".versions.toml") && it.name != REPOSITORY_VERSION_CATALOG
             }.mapNotNull { file ->
                 file.readToml<BuiltInToml>(fs)?.libraries
-            }.reduceOrNull { left, right -> left + right } ?: return VersionsCatalog.Empty
+            }.reduceOrNull { left, right -> left + right }.orEmpty()
 
         val builtInCatalog = VersionsCatalog(
             libraries = builtInArtifacts.mapValues { (_, artifact) ->
