@@ -8,6 +8,11 @@ plugins {
 group = _project.group
 version = "1.0.0-SNAPSHOT"
 
+// Set the JVM language level used to build the project.
+kotlin {
+    jvmToolchain(21)
+}
+
 repositories {
     mavenCentral()
     intellijPlatform {
@@ -44,15 +49,7 @@ intellijPlatform {
 }
 
 tasks {
-    // Set the JVM compatibility versions
-    withType<JavaCompile> {
-        sourceCompatibility = "21"
-        targetCompatibility = "21"
-    }
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    wrapper {
+        gradleVersion = providers.gradleProperty("gradleVersion").get()
     }
 }
