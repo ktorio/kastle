@@ -34,6 +34,7 @@ import kotlin.random.Random
 private const val PACK_YAML = "pack.ksl.yaml"
 private const val GROUP_YAML = "group.ksl.yaml"
 private const val MODULE_YAML = "module.ksl.yaml"
+private const val REPOSITORY_VERSION_CATALOG = "repository.versions.toml"
 
 class LocalPackRepository(
     private val root: Path,
@@ -368,10 +369,9 @@ class LocalPackRepository(
 
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun versions(): VersionsCatalog {
-// TODO support for other catalogs
         val builtInArtifacts =
             fs.list(root).filter {
-                it.name.endsWith(".versions.toml")
+                it.name.endsWith(".versions.toml") && it.name != REPOSITORY_VERSION_CATALOG
             }.mapNotNull { file ->
                 file.readToml<BuiltInToml>(fs)?.libraries
             }.reduceOrNull { left, right -> left + right } ?: return VersionsCatalog.Empty
@@ -387,12 +387,17 @@ class LocalPackRepository(
             }
         )
 
-        val libraryCatalog = root.resolve(versionsCatalogFile).readToml<VersionsCatalog>(fs) ?: error {
-            "Failed to read versions catalog from $versionsCatalogFile"
-        }
+        val libraryCatalog = loadVersionCatalog(versionsCatalogFile)
+        // TODO: allow ignoring repository version catalogs by Renovate
+        val repositoryVersionCatalog = loadVersionCatalog(REPOSITORY_VERSION_CATALOG)
 
-        // TODO support other catalogs properly
-        return builtInCatalog + libraryCatalog
+        return builtInCatalog + libraryCatalog + repositoryVersionCatalog
+    }
+
+    private fun loadVersionCatalog(catalogPath: String): VersionsCatalog {
+        return root.resolve(catalogPath).readToml<VersionsCatalog>(fs) ?: error {
+            "Failed to read versions catalog from $catalogPath"
+        }
     }
 
     private suspend fun Url.getExtensionFromSlot(): TemplateFormat {
