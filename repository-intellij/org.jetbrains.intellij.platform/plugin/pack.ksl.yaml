@@ -18,6 +18,20 @@ properties:
     default: false
     hidden: true
 
+  # Constants for easier versions management:
+  - key: gradleVersion
+    type: string
+    default: "9.2.1"
+    hidden: true
+  - key: platformVersion
+    type: string
+    default: "2025.3.1"
+    hidden: true
+  - key: pluginSinceBuild
+    type: string
+    default: "253"
+    hidden: true
+
 propertyValues:
   org.jetbrains.intellij.platform/plugin/pluginName: My Plugin # TODO: expression
 
@@ -29,7 +43,8 @@ rootSources:
   - path: gradle/libs.versions.toml.hbs
     target: file:gradle/libs.versions.toml
   - path: gradle/wrapper/gradle-wrapper.jar
-  - path: gradle/wrapper/gradle-wrapper.properties
+  - path: gradle/wrapper/gradle-wrapper.properties.hbs
+    target: file:gradle/wrapper/gradle-wrapper.properties
   - path: gradlew
   - path: gradlew.bat
 
