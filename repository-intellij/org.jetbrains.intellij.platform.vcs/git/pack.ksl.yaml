@@ -6,6 +6,7 @@ properties:
   - key: hiddenInWizard
     type: boolean
     default: true
+    hidden: true
 
 rootSources:
   - path: .gitignore.hbs
