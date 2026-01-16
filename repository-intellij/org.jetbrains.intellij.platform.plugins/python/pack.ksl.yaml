@@ -1,0 +1,5 @@
+name: Python
+description: Python language
+icon: AllIcons.Language.Python
+links:
+  home: https://plugins.jetbrains.com/plugin/7322-python-community-edition

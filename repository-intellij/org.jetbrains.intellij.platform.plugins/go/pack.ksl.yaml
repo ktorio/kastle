@@ -1,0 +1,5 @@
+name: Go
+description: Go language
+icon: AllIcons.Language.GO
+links:
+  home: https://plugins.jetbrains.com/plugin/9568-go

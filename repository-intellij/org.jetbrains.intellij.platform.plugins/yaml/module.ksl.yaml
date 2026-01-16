@@ -1,5 +1,5 @@
 sources:
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
-    text: bundledPlugin("com.intellij.modules.json")
+    text: bundledPlugin("org.jetbrains.plugins.yaml")
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
-    text: <depends>com.intellij.modules.json</depends>
+    text: <depends>org.jetbrains.plugins.yaml</depends>

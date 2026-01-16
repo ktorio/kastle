@@ -1,5 +1,3 @@
-# TODO: is this and all other files needed in this repository? ask Bruce
-
 [libraries]
 kotlin-test = "org.jetbrains.kotlin:kotlin-test:2.2.20"
 kotlin-test-junit = "org.jetbrains.kotlin:kotlin-test-junit:2.2.20"

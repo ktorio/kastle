@@ -1,17 +1,9 @@
-platform: jvm # ignored
-
 sources:
-  - target: slot://org.jetbrains.intellij.platform/plugin/platformBundledModules
-    text: "  intellij.libraries.skiko,\\"
-  - target: slot://org.jetbrains.intellij.platform/plugin/platformBundledModules
-    text: "  intellij.libraries.compose.foundation.desktop,\\"
-  - target: slot://org.jetbrains.intellij.platform/plugin/platformBundledModules
-    text: "  intellij.platform.compose,\\"
-  - target: slot://org.jetbrains.intellij.platform/plugin/platformBundledModules
-    text: "  intellij.platform.jewel.foundation,\\"
-  - target: slot://org.jetbrains.intellij.platform/plugin/platformBundledModules
-    text: "  intellij.platform.jewel.ui,\\"
-  - target: slot://org.jetbrains.intellij.platform/plugin/platformBundledModules
-    text: "  intellij.platform.jewel.ideLafBridge,\\"
-  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDependencies
-    text: <module name="intellij.platform.compose"/>
+  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
+    text: composeUI()
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    text: <depends>com.intellij.modules.compose</depends>
+
+gradle:
+  plugins:
+    - compose

@@ -1,0 +1,5 @@
+name: Rust
+description: Rust language
+icon: AllIcons.Language.Rust
+links:
+  home: https://plugins.jetbrains.com/plugin/22407-rust

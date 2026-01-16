@@ -1,5 +1,3 @@
-platform: jvm # ignored
-
 sources:
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
-    text: <depends>com.intellij.modules.lsp</depends>
+    text: <depends>com.intellij.modules.xml</depends>

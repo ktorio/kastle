@@ -1,0 +1,5 @@
+name: YAML
+description: YAML language
+icon: AllIcons.FileTypes.Yaml
+links:
+  home: https://plugins.jetbrains.com/plugin/13126-yaml

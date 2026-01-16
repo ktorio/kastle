@@ -1,0 +1,5 @@
+name: Kotlin
+description: Kotlin plugin
+icon: AllIcons.Language.Kotlin
+links:
+  home: https://plugins.jetbrains.com/plugin/6954-kotlin

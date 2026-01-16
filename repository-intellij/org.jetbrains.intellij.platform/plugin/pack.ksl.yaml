@@ -2,58 +2,39 @@ name: IDE Plugin
 description: IntelliJ Platform plugin project
 
 properties:
-  - key: pluginType # TODO probably not needed
-    hidden: true
-    type: string
-    default: IDE_PLUGIN
-  - key: pluginName # TODO probably not needed (id taken from artifactId)
+  - key: pluginName # TODO probably not needed (id taken from artifactId, and the proper name set in plugin.xml later)
     label: Plugin Name
     type: string
-    default: My Plugin # TODO: delete
+    default: My Plugin
+  - key: addSampleCode
+    type: boolean
+    default: true
+    label: Add Sample Code
   - key: hiddenInWizard
     type: boolean
     default: true
+    hidden: true
+  - key: isComposeEnabled
+    type: boolean
+    default: false
+    hidden: true
 
-#  - key: vendor
-#    label: Vendor
-#    type: string
-#    default: My Company # TODO: delete
+propertyValues:
+  org.jetbrains.intellij.platform/plugin/pluginName: My Plugin # TODO: expression
 
 rootSources:
   # Run configurations
   - path: .run/Run Plugin.run.xml
-  - path: .run/Run Tests.run.xml
-  - path: .run/Run Verifications.run.xml
-
-  # Sources are intentionally in the `sources` directory to avoid being processed by module.ksl.yaml handler
-
-  # Production sources
-  - path: sources/main/kotlin/listeners/MyApplicationActivationListener.kt
-    target: file:src/main/kotlin/listeners/MyApplicationActivationListener.kt
-  - path: sources/main/kotlin/services/MyProjectService.kt
-    target: file:src/main/kotlin/services/MyProjectService.kt
-  - path: sources/main/kotlin/toolWindow/MyToolWindowFactory.kt
-    target: file:src/main/kotlin/toolWindow/MyToolWindowFactory.kt
-  - path: sources/main/kotlin/MyBundle.kt
-    target: file:src/main/kotlin/MyBundle.kt
-  - path: sources/main/resources/messages/MyBundle.properties
-    target: file:src/main/resources/messages/MyBundle.properties
-  - path: sources/main/resources/META-INF/plugin.xml.hbs
-    target: file:src/main/resources/META-INF/plugin.xml
-
-  # Test sources
-  - path: sources/test/kotlin/MyPluginTest.kt
-    target: file:src/test/kotlin/MyPluginTest.kt
 
   # Gradle
+  - path: gradle/libs.versions.toml.hbs
+    target: file:gradle/libs.versions.toml
   - path: gradle/wrapper/gradle-wrapper.jar
   - path: gradle/wrapper/gradle-wrapper.properties
   - path: gradlew
   - path: gradlew.bat
 
   # Gradle build script
-  - path: gradle/libs.versions.toml.hbs
-    target: file:gradle/libs.versions.toml
   - path: build.gradle.kts
   - path: gradle.properties.hbs
     target: file:gradle.properties
@@ -62,9 +43,35 @@ rootSources:
   # README and friends
   - path: README.md.hbs
     target: file:README.md
-  - path: CHANGELOG.md.hbs
-    target: file:CHANGELOG.md
 
   # Git
   - path: gitignoreItems.hbs
     target: slot://org.jetbrains.intellij.platform.vcs/git/ignoredItems
+
+  # Sources are intentionally in the `sources` directory to avoid being processed by module.ksl.yaml handler
+
+  # Production sources
+
+  ## Plugin descriptor, etc.
+  - path: sources/main/resources/META-INF/plugin.xml.hbs
+    target: file:src/main/resources/META-INF/plugin.xml
+  - path: sources/main/resources/META-INF/pluginIcon.svg
+    target: file:src/main/resources/META-INF/pluginIcon.svg
+
+  ## Code samples
+  - path: sources/main/kotlin/MyMessageBundle.kt
+    target: file:src/main/kotlin/MyMessageBundle.kt
+    if: addSampleCode
+  - path: sources/main/resources/messages/MyMessageBundle.properties
+    target: file:src/main/resources/messages/MyMessageBundle.properties
+    if: addSampleCode
+
+  ### Swing UI
+  - path: sources/main/kotlin/MyToolWindowFactory.kt
+    target: file:src/main/kotlin/MyToolWindowFactory.kt
+    if: addSampleCode && !isComposeEnabled
+
+  ### Compose UI
+  - path: sources/main/kotlin/MyToolWindowFactory-compose.kt
+    target: file:src/main/kotlin/MyToolWindowFactory.kt
+    if: addSampleCode && isComposeEnabled

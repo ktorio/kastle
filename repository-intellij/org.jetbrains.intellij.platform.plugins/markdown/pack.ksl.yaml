@@ -1,0 +1,5 @@
+name: Markdown
+description: Markdown language and preview UI
+icon: AllIcons.FileTypes.Text
+links:
+  home: https://plugins.jetbrains.com/plugin/7793-markdown

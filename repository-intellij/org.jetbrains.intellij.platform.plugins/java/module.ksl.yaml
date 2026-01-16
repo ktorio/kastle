@@ -1,5 +1,5 @@
 sources:
-  - target: slot://org.jetbrains.intellij.platform/plugin/platformBundledPlugins
-    text: "  com.intellij.java,\\"
-  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDependencies
-    text: <plugin id="com.intellij.java"/>
+  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
+    text: bundledPlugin("com.intellij.java")
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    text: <depends>com.intellij.java</depends>

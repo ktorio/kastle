@@ -1,27 +1,37 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN, cannot be changed between the plugin versions. -->
     <id>{{_project.group}}.{{_project.name}}</id>
+
+    <!-- Public plugin name should be written in Title Case.
+     Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
     <name>{{pluginName}}</name>
-    <vendor>{{vendor}}</vendor>
 
-    <dependencies>
-    {{#if _slots.pluginDescriptorDependencies}}
-        {{slots pluginDescriptorDependencies}}
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor url="https://www.yourcompany.com">YourCompany</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-description -->
+    <description><![CDATA[
+        Enter short description for your plugin here.<br>
+        <em>most HTML tags may be used</em>
+        ]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    {{#if _slots.pluginDescriptorDepends}}
+        {{slots pluginDescriptorDepends}}
     {{else}}
-        <plugin id="com.intellij.modules.platform"/>{{/if}}
-    </dependencies>
+        <depends>com.intellij.modules.platform</depends>{{/if}}
 
-    <resource-bundle>messages.MyBundle</resource-bundle>
+    {{#if addSampleCode}}
+    <resource-bundle>messages.MyMessageBundle</resource-bundle>{{/if}}
 
+    <!-- Extensions defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow
-                factoryClass="{{_project.group}}.toolWindow.MyToolWindowFactory"
-                id="MyToolWindow"/>
+        {{#if addSampleCode}}
+        <toolWindow id="MyToolWindow" factoryClass="{{_project.group}}.MyToolWindowFactory"
+                    icon="AllIcons.Toolwindows.ToolWindowPalette"/>{{/if}}
     </extensions>
-
-    <applicationListeners>
-        <listener
-                class="{{_project.group}}.listeners.MyApplicationActivationListener"
-                topic="com.intellij.openapi.application.ApplicationActivationListener"/>
-    </applicationListeners>
 </idea-plugin>

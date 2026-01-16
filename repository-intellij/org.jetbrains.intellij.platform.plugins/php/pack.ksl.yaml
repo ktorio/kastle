@@ -1,0 +1,5 @@
+name: PHP
+description: PHP language
+icon: AllIcons.Language.Php
+links:
+  home: https://plugins.jetbrains.com/plugin/6610-php

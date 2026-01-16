@@ -4,3 +4,6 @@ icon: AllIcons.FileTypes.UiForm
 links:
   home: https://www.jetbrains.com/compose-multiplatform
   guide: https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform.html
+
+propertyValues:
+  org.jetbrains.intellij.platform/plugin/isComposeEnabled: true

@@ -1,0 +1,5 @@
+name: Database Tools and SQL
+description: Database tool window, Consoles and SQL
+icon: AllIcons.Nodes.DataTables
+links:
+  home: https://plugins.jetbrains.com/plugin/10925-database-tools-and-sql-for-webstorm

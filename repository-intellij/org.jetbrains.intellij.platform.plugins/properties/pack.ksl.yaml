@@ -1,0 +1,5 @@
+name: Properties
+description: Properties files
+icon: AllIcons.FileTypes.Properties
+links:
+  home: https://plugins.jetbrains.com/plugin/11594-properties

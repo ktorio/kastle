@@ -1,5 +1,0 @@
-name: Tool Window
-description: A tool window code sample. Uses Compose UI if enabled, otherwise uses Swing.
-icon: AllIcons.General.OpenInToolWindow
-links:
-  docs: https://plugins.jetbrains.com/docs/intellij/tool-windows.html
