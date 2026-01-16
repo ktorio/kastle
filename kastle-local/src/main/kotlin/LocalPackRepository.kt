@@ -387,9 +387,8 @@ class LocalPackRepository(
             }
         )
 
-        val libraryCatalog = loadVersionCatalog(versionsCatalogFile) ?: error {
-            "Failed to read versions catalog from $versionsCatalogFile"
-        }
+        val libraryCatalog = loadVersionCatalog(versionsCatalogFile)
+            ?: error("Failed to read versions catalog from $versionsCatalogFile")
         // TODO: allow ignoring repository version catalogs by Renovate
         val repositoryVersionCatalog = loadVersionCatalog(REPOSITORY_VERSION_CATALOG) ?: VersionsCatalog.Empty
 
