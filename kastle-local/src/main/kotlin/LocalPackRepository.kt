@@ -387,17 +387,17 @@ class LocalPackRepository(
             }
         )
 
-        val libraryCatalog = loadVersionCatalog(versionsCatalogFile)
+        val libraryCatalog = loadVersionCatalog(versionsCatalogFile) ?: error {
+            "Failed to read versions catalog from $versionsCatalogFile"
+        }
         // TODO: allow ignoring repository version catalogs by Renovate
-        val repositoryVersionCatalog = loadVersionCatalog(REPOSITORY_VERSION_CATALOG)
+        val repositoryVersionCatalog = loadVersionCatalog(REPOSITORY_VERSION_CATALOG) ?: VersionsCatalog.Empty
 
         return builtInCatalog + libraryCatalog + repositoryVersionCatalog
     }
 
-    private fun loadVersionCatalog(catalogPath: String): VersionsCatalog {
-        return root.resolve(catalogPath).readToml<VersionsCatalog>(fs) ?: error {
-            "Failed to read versions catalog from $catalogPath"
-        }
+    private fun loadVersionCatalog(catalogPath: String): VersionsCatalog? {
+        return root.resolve(catalogPath).readToml<VersionsCatalog>(fs)
     }
 
     private suspend fun Url.getExtensionFromSlot(): TemplateFormat {
