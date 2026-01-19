@@ -23,7 +23,6 @@ import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.kotlin.KT_EXTENSION
 import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
 import org.jetbrains.kastle.templates.*
-import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.extension
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.slotId
@@ -314,7 +313,7 @@ class LocalPackRepository(
         // TODO remove duplicates from files in source folders
         val sourcesFromManifest = moduleYaml.get<YamlList>("sources")?.items.orEmpty()
         for (manifestSource in sourcesFromManifest) {
-            val (path, text, target, condition) = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
+            val (path, text, target, condition, priority) = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
             val conditionExpression = condition?.let(expressionParser::parse)
 
             if (path != null && path.contains('*')) {
@@ -324,7 +323,9 @@ class LocalPackRepository(
                     sources += readModuleSource(
                         file,
                         target = "file:${file.relativeTo(modulePath)}"
-                    ).withCondition(conditionExpression)
+                    )
+                        .withCondition(conditionExpression)
+                        .withTemplatePriority(priority)
                 }
             } else {
                 sources += if (text == null) {
@@ -333,7 +334,9 @@ class LocalPackRepository(
                 } else {
                     require(target != null) { "Target is required when using text for source: $manifestSource" }
                     handlebarsTemplateEngine.read(target.removeSuffix(".hbs"), text).copy(packId = packId)
-                }.withCondition(conditionExpression)
+                }
+                    .withCondition(conditionExpression)
+                    .withTemplatePriority(priority)
             }
         }
 
@@ -342,6 +345,10 @@ class LocalPackRepository(
             sources = sources + resources,
         )
     }
+
+    private fun SourceFile.withTemplatePriority(priority: Int?): SourceFile =
+        if (this is SourceTemplate && priority != null && this.priority != priority) this.copy(priority = priority)
+        else this
 
     private fun getStandardSourceFolders(
         platforms: Set<Platform>,

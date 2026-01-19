@@ -87,6 +87,21 @@ fun ProjectGeneratorTest(
         )
     }
 
+    "with repeating slot and texts sorted by priority then text" {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "sorting-slot-values-consumer", randomString())
+        generateWithPacks(
+            outputDir,
+            "sorting-slot-values-consumer",
+            "com.acme/sorting-slot-values-consumer",
+            "com.acme/sorting-slot-values-test1",
+            "com.acme/sorting-slot-values-test2",
+        )
+        assertFilesAreEqualWithSnapshot(
+            "$snapshots/sorting-slot-values-consumer",
+            outputDir.toString(),
+        )
+    }
+
     "with properties" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "properties", randomString())
         generate(outputDir, "properties", packs = listOf("com.acme/properties"), properties = mapOf(

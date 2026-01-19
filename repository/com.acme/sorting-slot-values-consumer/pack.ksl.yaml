@@ -1,0 +1,6 @@
+name: Sorting slot values consumer
+description: Any
+
+rootSources:
+  - path: test-template.txt.hbs
+    target: file:test-template.txt

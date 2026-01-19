@@ -1,0 +1,11 @@
+sources:
+  - target: slot://com.acme/sorting-slot-values-consumer/testSlot
+    text: priority-100
+    priority: 100
+  - target: slot://com.acme/sorting-slot-values-consumer/testSlot
+    text: priority-1
+    priority: 1 # should go first
+  - target: slot://com.acme/sorting-slot-values-consumer/testSlot
+    text: b-priority
+  - target: slot://com.acme/sorting-slot-values-consumer/testSlot
+    text: x-priority
