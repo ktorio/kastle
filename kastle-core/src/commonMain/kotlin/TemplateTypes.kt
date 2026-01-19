@@ -17,6 +17,7 @@ data class SourceDefinition(
     val text: String? = null,
     val target: Url? = path?.let { "file:$path" },
     val `if`: String? = null,
+    val priority: Int? = null,
 )
 
 @Serializable
@@ -67,6 +68,7 @@ data class SourceTemplate(
     override val condition: Expression? = null,
     // this is here to sort out files after modules are merged
     val packId: PackId? = null,
+    val priority: Int? = null,
 ): SourceFile
 
 @Serializable

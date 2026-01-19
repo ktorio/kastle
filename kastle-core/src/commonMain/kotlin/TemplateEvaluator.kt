@@ -433,5 +433,8 @@ private fun SourcesByUrl.lookup(packId: PackId, block: Block): List<SourceFile> 
     require(block is RepeatingSlot || values.size <= 1) {
         "More than one target for non-repeating slot://$packId/${block.name}"
     }
-    return values
+    return values.sortedWith(
+        compareBy<SourceFile> { (it as? SourceTemplate)?.priority ?: Int.MAX_VALUE }
+            .thenBy { (it as? SourceTemplate)?.text }
+    )
 }

@@ -1,0 +1,11 @@
+sources:
+  - target: slot://com.acme/sorting-slot-values-consumer/testSlot
+    text: priority-200
+    priority: 200
+  - target: slot://com.acme/sorting-slot-values-consumer/testSlot
+    text: priority-50
+    priority: 50
+  - target: slot://com.acme/sorting-slot-values-consumer/testSlot
+    text: z-priority
+  - target: slot://com.acme/sorting-slot-values-consumer/testSlot
+    text: a-priority # without priority, it should go a-z, so before the above
