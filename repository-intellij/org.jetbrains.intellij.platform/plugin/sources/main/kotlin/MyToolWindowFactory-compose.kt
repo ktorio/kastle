@@ -22,11 +22,10 @@ class MyToolWindowFactory : ToolWindowFactory {
     override fun shouldBeAvailable(project: Project) = true
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        toolWindow.addComposeTab("My Tool Window", focusOnClickInside = true) {
+        toolWindow.addComposeTab(MyMessageBundle.message("toolwindow.stripe.MyToolWindow"), focusOnClickInside = true) {
             LaunchedEffect(Unit) {
                 // initial data loading
             }
-
             MyToolWindowContent()
         }
     }
@@ -35,13 +34,17 @@ class MyToolWindowFactory : ToolWindowFactory {
 @Composable
 @Preview
 private fun MyToolWindowContent() {
-    val labelText = remember { mutableStateOf("The random number is: ?") }
+    val labelText = remember {
+        mutableStateOf(MyMessageBundle.message("toolwindow.MyToolWindow.number.label", "?"))
+    }
 
     Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(labelText.value)
 
         OutlinedButton(onClick = {
-            labelText.value = "The random number is: " + Random(System.currentTimeMillis()).nextInt(1000)
-        }) { Text("Shuffle") }
+            labelText.value = MyMessageBundle.message(
+                "toolwindow.MyToolWindow.number.label", Random(System.currentTimeMillis()).nextInt(1000)
+            )
+        }) { Text(MyMessageBundle.message("toolwindow.MyToolWindow.shuffle.button")) }
     }
 }

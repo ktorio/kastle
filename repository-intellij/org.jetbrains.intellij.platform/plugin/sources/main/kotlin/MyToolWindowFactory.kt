@@ -20,12 +20,14 @@ class MyToolWindowFactory : ToolWindowFactory {
 
     class MyToolWindow {
         private val content = JBPanel<JBPanel<*>>().apply {
-            val label = JBLabel("The random number is: ?")
+            val label = JBLabel(MyMessageBundle.message("toolwindow.MyToolWindow.number.label", "?"))
 
             add(label)
-            add(JButton("Shuffle").apply {
+            add(JButton(MyMessageBundle.message("toolwindow.MyToolWindow.shuffle.button")).apply {
                 addActionListener {
-                    label.text = "The random number is: " + Random(System.currentTimeMillis()).nextInt(1000)
+                    label.text = MyMessageBundle.message(
+                        "toolwindow.MyToolWindow.number.label", Random(System.currentTimeMillis()).nextInt(1000)
+                    )
                 }
             })
         }
