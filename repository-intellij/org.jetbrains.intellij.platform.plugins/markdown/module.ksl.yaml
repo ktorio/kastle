@@ -1,5 +1,7 @@
 sources:
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     text: bundledPlugin("org.intellij.plugins.markdown")
+    priority: 100
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     text: <depends>org.intellij.plugins.markdown</depends>
+    priority: 100

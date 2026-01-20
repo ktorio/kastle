@@ -1,5 +1,7 @@
 sources:
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     text: bundledPlugin("org.jetbrains.kotlin")
+    priority: 40
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     text: <depends>org.jetbrains.kotlin</depends>
+    priority: 40

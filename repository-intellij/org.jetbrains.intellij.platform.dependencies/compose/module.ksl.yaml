@@ -1,8 +1,10 @@
 sources:
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     text: composeUI()
+    priority: 10
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     text: <depends>com.intellij.modules.compose</depends>
+    priority: 10
 
 gradle:
   plugins:

@@ -1,5 +1,7 @@
 sources:
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     text: bundledPlugin("org.jetbrains.plugins.yaml")
+    priority: 70
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     text: <depends>org.jetbrains.plugins.yaml</depends>
+    priority: 70

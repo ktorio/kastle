@@ -1,5 +1,7 @@
 sources:
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     text: bundledPlugin("com.intellij.properties")
+    priority: 90
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     text: <depends>com.intellij.properties</depends>
+    priority: 90
