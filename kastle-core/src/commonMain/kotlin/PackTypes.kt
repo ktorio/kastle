@@ -1,7 +1,6 @@
 package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
-import org.jetbrains.kastle.utils.Expression
 
 @Serializable
 sealed interface PackMetadata {
@@ -96,6 +95,7 @@ data class PackLinks(
     val vcs: String? = null,
     val home: String? = null,
     val docs: String? = null,
+    val guide: String? = null,
 )
 
 @Serializable
