@@ -5,7 +5,7 @@ import kotlinx.html.*
 import kotlinx.html.consumers.delayed
 import kotlinx.html.stream.HTMLStreamBuilder
 import org.jetbrains.kastle.PackDescriptor
-import org.jetbrains.kastle.Property
+import org.jetbrains.kastle.PropertyDescriptor
 import org.jetbrains.kastle.PropertyType
 import org.jetbrains.kastle.utils.isTruthy
 
@@ -32,7 +32,7 @@ private val List<*>.shirtSize: String get() = when (size) {
     else -> "lg"
 }
 
-private fun FlowContent.propertyInputAndLabel(pack: PackDescriptor, property: Property) {
+private fun FlowContent.propertyInputAndLabel(pack: PackDescriptor, property: PropertyDescriptor) {
     val inputId = "property/${pack.id}/${property.key}"
 
     div("field") {

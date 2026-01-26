@@ -15,8 +15,7 @@ sealed interface PackMetadata {
     val links: PackLinks?
     val documentation: String?
     val requires: List<PackId>
-    val properties: List<Property>
-    val propertyValues: Map<VariableId, String>
+    val properties: List<PropertyDescriptor>
     val repositories: List<MavenRepository>
     val modules: List<SourceModuleMetadata>
 }
@@ -34,8 +33,7 @@ data class PackManifest(
     override val links: PackLinks? = null,
     override val documentation: String? = null,
     override val requires: List<PackId> = emptyList(),
-    override val properties: List<Property> = emptyList(),
-    override val propertyValues: Map<VariableId, String> = emptyMap(),
+    override val properties: List<PropertyDescriptor> = emptyList(),
     override val repositories: List<MavenRepository> = emptyList(),
     override val modules: List<SourceModuleMetadata> = emptyList(),
     val commonSources: List<SourceDefinition> = emptyList(),
@@ -45,6 +43,7 @@ data class PackManifest(
 @Serializable
 data class PackDescriptor(
     val manifest: PackMetadata,
+    val propertyValues: List<PropertyAssignment>,
     val sources: PackSources,
 ): PackMetadata by manifest {
     val commonSources: List<SourceFile> get() = sources.common
@@ -118,9 +117,13 @@ data class PackId(val group: String, val id: String) {
 @Serializable(VariableIdSerializer::class)
 data class VariableId(val packId: PackId, val name: String) {
     companion object {
-        fun parse(text: String): VariableId {
+        fun parse(text: String, relativePackId: PackId? = null): VariableId {
             val segments = text.split('/', limit = 3)
-            if (segments.size < 3) throw IllegalArgumentException("Invalid variable id: $text")
+            if (segments.size < 3) {
+                if (relativePackId == null)
+                    throw IllegalArgumentException("Invalid variable id: $text")
+                return VariableId(relativePackId, text)
+            }
             val (group, pack, variable) = segments
             return VariableId(PackId(group, pack), variable)
         }

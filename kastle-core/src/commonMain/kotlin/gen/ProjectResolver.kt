@@ -2,6 +2,7 @@ package org.jetbrains.kastle.gen
 
 import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.TreeMap
 import org.jetbrains.kastle.utils.isFile
 import org.jetbrains.kastle.utils.isSlot
@@ -26,18 +27,16 @@ fun interface ProjectResolver {
             val rootSourceFiles = packs
                 .flatMap { it.rootSources }
                 .filter { it.isFile() }
-            val propertyValues = packs.flatMap { pack ->
-                pack.propertyValues.entries
-            }.groupBy({ it.key }) {
-                it.value
-            }
+            val propertyValues: Map<VariableId, List<PropertyAssignment>> = packs.flatMap { pack ->
+                pack.propertyValues
+            }.groupBy({ it.key })
             val propertyDescriptors = packs.flatMap { pack ->
                 pack.properties.map { property ->
                     VariableId(pack.id, property.key) to property
                 }
             }.toMap()
             val properties = propertyDescriptors.mapValues { (variableId, property) ->
-                findPropertyValue(descriptor, propertyValues, variableId, property)
+                resolveProperty(descriptor, propertyValues, variableId, property)
             }
             val repositoryCatalog = repository.versions()
             val versions = TreeMap<String, String>().also { versions ->
@@ -93,7 +92,6 @@ fun interface ProjectResolver {
             Project(
                 descriptor = descriptor,
                 packs = packs,
-                propertyDescriptors = propertyDescriptors,
                 properties = properties,
                 slotSources = slotSources,
                 moduleSources = moduleSources + rootSourceFiles,
@@ -105,23 +103,22 @@ fun interface ProjectResolver {
             )
         }
 
-        private fun findPropertyValue(
-            descriptor: ProjectDescriptor,
-            propertyValues: Map<VariableId, List<String>>,
+        private fun resolveProperty(
+            projectDescriptor: ProjectDescriptor,
+            packPropertyValues: Map<VariableId, List<PropertyAssignment>>,
             variableId: VariableId,
-            property: Property
-        ): Any? {
+            property: PropertyDescriptor
+        ): PropertyInstance {
             try {
-                val stringValue = descriptor.properties[variableId]
-                    ?: propertyValues[variableId]?.let { attrs -> attrs.singleOrNull() ?: attrs.joinToString(",") }
-                    ?: property.default
-                if (stringValue == null) {
-                    require(property.type is PropertyType.Nullable) {
-                        "Missing value for property $variableId"
-                    }
-                    return null
-                }
-                return property.type.parse(stringValue)
+                return projectDescriptor.properties[variableId]?.let {
+                    ResolvedProperty(property, property.type.parse(it))
+                } ?: packPropertyValues[variableId]?.let { assignments ->
+                    DynamicProperty(property, assignments)
+                } ?: property.default?.let {
+                    ResolvedProperty(property, property.type.parse(it))
+                } ?: if (property.type.isNullable())
+                    ResolvedProperty(property, null)
+                else UnresolvedProperty(property)
             } catch (e: Exception) {
                 throw IllegalArgumentException("Failed to read property $variableId: ${e.message}", e)
             }

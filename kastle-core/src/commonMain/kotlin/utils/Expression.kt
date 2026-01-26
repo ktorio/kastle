@@ -1,6 +1,7 @@
 package org.jetbrains.kastle.utils
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.kastle.UndefinedVariableException
 import kotlin.toString
 
 @Serializable
@@ -47,6 +48,8 @@ sealed interface Expression {
     @Serializable
     data class VariableRef(val name: String) : Expression {
         override fun evaluate(variables: Variables): Any? = variables[name]
+             // TODO fix nullability vs missing
+             // ?: throw UndefinedVariableException(name)
         override fun toString(): String = name
     }
 

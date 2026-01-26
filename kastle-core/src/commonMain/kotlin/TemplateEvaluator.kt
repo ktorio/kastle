@@ -147,7 +147,7 @@ class TemplateEvaluator(
             // where to go next
             start = when {
                 child != null -> {
-                    stack += block
+                    stack.push(block)
                     child!!.outerStart
                 }
 

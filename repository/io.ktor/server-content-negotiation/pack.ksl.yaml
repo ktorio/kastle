@@ -1,6 +1,7 @@
 name: Content Negotiation
 description: Negotiates content type headers with custom serializers
 propertyValues:
-  io.ktor/server-core/serverModules: SerializationKt.configureSerialization
+  - key: io.ktor/server-core/serverModules
+    value: SerializationKt.configureSerialization
 requires:
   - io.ktor/server-core

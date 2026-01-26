@@ -46,7 +46,7 @@ internal class KotlinCompilerTemplateEngine(
     private val path: Path? = null,
     private val repository: PackRepository = PackRepository.EMPTY,
     private val log: Logger = ConsoleLogger(),
-    private val onProperty: (Property) -> Unit = {},
+    private val onProperty: (PropertyDescriptor) -> Unit = {},
 ) {
     companion object {
         private val targetRegex = Regex("""@target\s+(\S+)""", RegexOption.IGNORE_CASE)
