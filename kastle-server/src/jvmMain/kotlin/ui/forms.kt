@@ -96,6 +96,12 @@ private fun DIV.propertyInput(
             for ((key, elementType) in type.properties)
                 propertyInput(elementType, null, "$inputId/$key")
         }
+
+        is PropertyType.Map -> {
+            addRemove {
+                propertyInput(type.valueType, null, "$inputId/${inputId.substringAfterLast('/')}")
+            }
+        }
     }
 }
 
