@@ -5,7 +5,6 @@ import com.intellij.psi.util.childrenOfType
 import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.kotlin.psi.KtProperty
-import org.jetbrains.kotlin.psi.psiUtil.asAssignment
 
 class KotlinExpressionParser(val psiFileFactory: PsiFileFactory) {
 

@@ -11,8 +11,7 @@ import org.jetbrains.kastle.utils.relativeFile
 data class Project(
     val descriptor: ProjectDescriptor,
     val packs: List<PackDescriptor>,
-    val propertyDescriptors: Map<VariableId, Property>,
-    val properties: Map<VariableId, Any?>,
+    val properties: Map<VariableId, PropertyInstance>,
     val slotSources: SourcesByUrl,
     val moduleSources: ProjectModules,
     val commonSources: List<SourceFile>,

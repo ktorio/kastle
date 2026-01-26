@@ -13,8 +13,11 @@ interface Stack<E>: Iterable<E> {
     val top: E?
     fun isEmpty(): Boolean = top == null
     fun pop(): E?
-    operator fun plusAssign(element: E)
+    fun push(element: E)
+
+    operator fun plusAssign(element: E) = push(element)
     operator fun plusAssign(elements: Iterable<E>)
+    operator fun plus(element: E): Stack<E>
     operator fun dec(): Stack<E> = apply { pop() }
     fun copy(): Stack<E>
 }
@@ -24,10 +27,11 @@ class ListStack<E>(private val list: MutableList<E> = mutableListOf()) : Stack<E
     override val top: E? get() = list.lastOrNull()
     override fun isEmpty(): Boolean = list.isEmpty()
     override fun pop(): E? = list.removeLastOrNull()
-
-    override fun plusAssign(element: E) {
+    override fun push(element: E) {
         list.add(element)
     }
+    override fun plus(element: E): Stack<E> =
+        ListStack((list + element).toMutableList())
     override fun plusAssign(elements: Iterable<E>) {
         list.addAll(elements)
     }

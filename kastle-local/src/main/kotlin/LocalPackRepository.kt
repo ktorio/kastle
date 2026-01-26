@@ -4,6 +4,7 @@ import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlList
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.yamlMap
+import com.charleskorn.kaml.yamlScalar
 import kotlinx.coroutines.flow.*
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
@@ -28,6 +29,7 @@ import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.psi.KtFile
+import kotlin.collections.filterNot
 import kotlin.random.Random
 
 private const val PACK_YAML = "pack.ksl.yaml"
@@ -90,7 +92,9 @@ class LocalPackRepository(
 
     override suspend fun get(packId: PackId): PackMetadata? {
         val projectPath = root.resolve(packId.toString())
-        val manifest: PackManifest = projectPath.resolve(PACK_YAML).readYaml() ?: return null
+        val manifestYaml = projectPath.resolve(PACK_YAML).readYamlNode()?.yamlMap ?: return null
+        val filteredYaml = YamlMap(manifestYaml.entries.filterNot { it.key.content == "propertyValues" }, manifestYaml.path)
+        val manifest: PackManifest = Yaml.default.decodeFromYamlNode(filteredYaml) ?: return null
         val properties = manifest.properties.toMutableList()
         val group = manifest.group
             ?: projectPath.resolve("../$GROUP_YAML").readYaml()
@@ -115,7 +119,8 @@ class LocalPackRepository(
     override suspend fun read(packId: PackId): PackDescriptor? {
         val projectPath = root.resolve(packId.toString())
         val rawManifest: YamlMap = projectPath.resolve(PACK_YAML).readYamlNode(fs, yaml)?.yamlMap ?: return null
-        val manifest: PackManifest = yaml.decodeFromYamlNode(rawManifest)
+        val filteredManifest = YamlMap(rawManifest.entries.filterNot { it.key.content == "propertyValues" }, rawManifest.path)
+        val manifest: PackManifest = yaml.decodeFromYamlNode(filteredManifest)
         val group = manifest.group
             ?: projectPath.resolve("../$GROUP_YAML").readYaml()
             ?: Group(packId.group)
@@ -123,6 +128,21 @@ class LocalPackRepository(
         val documentation = projectPath.resolve("README.md").readText()
         val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath, repository)
         val expressionParser = KotlinExpressionParser(kotlinTemplateEngine.psiFileFactory)
+        val propertyValues: List<PropertyAssignment> = rawManifest.get<YamlList>("propertyValues")?.items?.map { node ->
+            val nodeMap = node.yamlMap
+            val key = nodeMap.getScalar("key")?.yamlScalar?.content
+            require(key != null) { "Property value key is required: $node" }
+            val variableId = VariableId.parse(key, relativePackId = packId)
+            val value = nodeMap.getScalar("value")?.yamlScalar?.content
+            val expression = nodeMap.getScalar("expression")?.yamlScalar?.content?.let(expressionParser::parse)
+            if (value != null) {
+                ValueAssignment(variableId, value)
+            } else if (expression != null) {
+                ExpressionAssignment(variableId, expression)
+            } else {
+                throw IllegalArgumentException("Property value must contain either value or expression: $node")
+            }
+        }.orEmpty()
 
         val projectSources = projectPath.moduleFolders().asFlow()
             .mapNotNull { modulePath ->
@@ -182,6 +202,7 @@ class LocalPackRepository(
                 properties = properties.distinctBy { it.key },
                 documentation = documentation,
             ),
+            propertyValues = propertyValues,
             sources = PackSources(
                 common = manifest.commonSources.map { readSource(it) },
                 root = manifest.rootSources.map { readSource(it) },
@@ -196,6 +217,13 @@ class LocalPackRepository(
             .readYamlNode(fs, yaml)?.yamlMap
             ?: return null
 
+        return readSourceModuleManifest(moduleYaml, relativeModulePath)
+    }
+
+    private fun readSourceModuleManifest(
+        moduleYaml: YamlMap,
+        relativeModulePath: String
+    ): SourceModuleManifest {
         val platforms = moduleYaml.readPlatforms()
 
         val amperSettings = moduleYaml.get<YamlMap>("amper")?.let { node ->
@@ -203,9 +231,6 @@ class LocalPackRepository(
         }
         val gradleSettings = moduleYaml.get<YamlMap>("gradle")?.let { node ->
             yaml.decodeFromYamlNode<GradleSettings>(node)
-        }
-        val propertyValues = moduleYaml.get<YamlMap>("propertyValues")?.let { node ->
-            yaml.decodeFromYamlNode<Map<VariableId, String>>(node)
         }
 
         // TODO verify this is correct
@@ -226,7 +251,6 @@ class LocalPackRepository(
             testDependencies = testDependencies,
             gradle = gradleSettings ?: GradleSettings(),
             amper = amperSettings ?: AmperSettings(),
-            propertyValues = propertyValues ?: emptyMap(),
         )
     }
 
@@ -234,13 +258,14 @@ class LocalPackRepository(
         projectPath: Path,
         modulePath: Path,
         packId: PackId,
-        properties: MutableList<Property>,
+        properties: MutableList<PropertyDescriptor>,
         expressionParser: KotlinExpressionParser
     ): SourceModule? {
-        val manifest = readSourceModuleManifest(projectPath, modulePath) ?: return null
+        val relativeModulePath = modulePath.relativeTo(projectPath).toString()
         val moduleYaml = modulePath.resolve(MODULE_YAML)
             .readYamlNode(fs, yaml)?.yamlMap
             ?: return null
+        val manifest = readSourceModuleManifest(moduleYaml, relativeModulePath) ?: return null
 
         suspend fun readModuleSource(file: Path, target: String? = null) =
             when (file.name.extension.lowercase()) {
@@ -323,9 +348,7 @@ class LocalPackRepository(
                     sources += readModuleSource(
                         file,
                         target = "file:${file.relativeTo(modulePath)}"
-                    )
-                        .withCondition(conditionExpression)
-                        .withTemplatePriority(priority)
+                    ).copy(condition = conditionExpression, priority = priority)
                 }
             } else {
                 sources += if (text == null) {
@@ -334,9 +357,7 @@ class LocalPackRepository(
                 } else {
                     require(target != null) { "Target is required when using text for source: $manifestSource" }
                     handlebarsTemplateEngine.read(target.removeSuffix(".hbs"), text).copy(packId = packId)
-                }
-                    .withCondition(conditionExpression)
-                    .withTemplatePriority(priority)
+                }.copy(condition = conditionExpression, priority = priority)
             }
         }
 
@@ -345,10 +366,6 @@ class LocalPackRepository(
             sources = sources + resources,
         )
     }
-
-    private fun SourceFile.withTemplatePriority(priority: Int?): SourceFile =
-        if (this is SourceTemplate && priority != null && this.priority != priority) this.copy(priority = priority)
-        else this
 
     private fun getStandardSourceFolders(
         platforms: Set<Platform>,

@@ -26,11 +26,16 @@ sealed interface SourceFile {
     val condition: Expression?
 }
 
-fun SourceFile.withCondition(condition: Expression?) =
-    if (condition == null || this.condition == condition) this else when (this) {
-        is StaticSource -> this.copy(condition = condition)
-        is SourceTemplate -> this.copy(condition = condition)
-    }
+/**
+ * Convenience function for reassigning metadata on source entries.
+ */
+fun SourceFile.copy(
+    condition: Expression?,
+    priority: Int?,
+) = if (condition == null && priority == null) this else when(this) {
+    is StaticSource -> this.copy(condition = condition ?: this.condition)
+    is SourceTemplate -> this.copy(condition = condition ?: this.condition, priority = priority ?: this.priority)
+}
 
 @Serializable
 @SerialName("static")

@@ -111,9 +111,25 @@ fun ProjectGeneratorTest(
             "collection" to "1,2,3",
             "whenProperty" to "yes",
             "literal" to "literal",
-        ).mapKeys { (key) -> VariableId.Companion.parse("com.acme/properties/$key") })
+        ).mapKeys { (key) ->
+            VariableId.parse(key, PackId.parse("com.acme/properties"))
+        })
         assertFilesAreEqualWithSnapshot(
             "$snapshots/properties",
+            outputDir.toString(),
+        )
+    }
+
+    "value expressions" {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "value-expressions", randomString())
+        generate(outputDir, "value-expressions", packs = listOf("com.acme/value-expressions"), properties = mapOf(
+            "booleanProperty" to "true",
+            "integerProperty" to "40",
+            "stringProperty" to "test",
+            "listProperty" to "item1,item2,item3",
+        ).mapKeys { (key) -> VariableId.parse("com.acme/value-expressions/$key") })
+        assertFilesAreEqualWithSnapshot(
+            "$snapshots/value-expressions",
             outputDir.toString(),
         )
     }
@@ -146,7 +162,7 @@ fun ProjectGeneratorTest(
                 "io.ktor/kotlinx-serialization-json",
             ),
             properties = mapOf(
-                VariableId.Companion.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
+                VariableId.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
             )
         )
         assertFilesAreEqualWithSnapshot(

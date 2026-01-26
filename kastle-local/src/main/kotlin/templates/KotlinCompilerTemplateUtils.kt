@@ -72,7 +72,7 @@ fun PsiElement.textIntRange(
 fun TextRange.toIntRange(): IntRange =
     startOffset .. endOffset
 
-fun TemplateParentReference.PropertyDelegate.asProperty(): Property {
+fun TemplateParentReference.PropertyDelegate.asProperty(): PropertyDescriptor {
     val variableName = declaration.name
     require(variableName != null) {
         "Missing variable name on template property declaration: ${declaration.text}"
@@ -93,7 +93,7 @@ fun TemplateParentReference.PropertyDelegate.asProperty(): Property {
 
     val propertyType = PropertyType.parse(typeReference.text)
 
-    return Property(
+    return PropertyDescriptor(
         key = variableName,
         type = propertyType,
         default = null, // TODO

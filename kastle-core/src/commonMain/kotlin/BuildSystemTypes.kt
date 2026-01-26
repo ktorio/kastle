@@ -2,6 +2,7 @@ package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.ProjectModules.*
+import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.TreeMap.Companion.toTreeMap
 import org.jetbrains.kastle.utils.protocol
 import kotlin.collections.flatten
@@ -184,7 +185,6 @@ sealed interface SourceModuleMetadata {
     val testDependencies: DependenciesMap
     val gradle: GradleSettings
     val amper: AmperSettings
-    val propertyValues: Map<VariableId, String>
 }
 
 @Serializable
@@ -195,7 +195,6 @@ data class SourceModuleManifest(
     override val testDependencies: DependenciesMap = emptyMap(),
     override val gradle: GradleSettings = GradleSettings(),
     override val amper: AmperSettings = AmperSettings(),
-    override val propertyValues: Map<VariableId, String> = emptyMap(),
 ): SourceModuleMetadata
 
 
@@ -327,7 +326,6 @@ fun SourceModuleManifest.tryMerge(other: SourceModuleManifest): SourceModuleMani
         testDependencies = testDependencies.merge(other.testDependencies),
         gradle = GradleSettings((gradle.plugins + other.gradle.plugins).distinct()),
         amper = AmperSettings(amper.compose ?: other.amper.compose, amper.application ?: other.amper.application),
-        propertyValues = propertyValues + other.propertyValues,
     )
 }
 

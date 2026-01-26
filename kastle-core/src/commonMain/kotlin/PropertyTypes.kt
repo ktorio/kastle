@@ -2,11 +2,47 @@ package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.trimAngleBrackets
 import org.jetbrains.kastle.utils.trimBraces
 
+sealed interface PropertyInstance {
+    val descriptor: PropertyDescriptor
+}
+
+data class ResolvedProperty(
+    override val descriptor: PropertyDescriptor,
+    val value: Any?
+) : PropertyInstance
+
+data class DynamicProperty(
+    override val descriptor: PropertyDescriptor,
+    val assignments: List<PropertyAssignment>
+) : PropertyInstance
+
+data class UnresolvedProperty(
+    override val descriptor: PropertyDescriptor,
+) : PropertyInstance
+
 @Serializable
-data class Property(
+sealed interface  PropertyAssignment {
+    val key: VariableId
+}
+
+@Serializable
+data class ExpressionAssignment(
+    override val key: VariableId,
+    val expression: Expression,
+) : PropertyAssignment
+
+@Serializable
+data class ValueAssignment(
+    override val key: VariableId,
+    val value: String,
+) : PropertyAssignment
+
+@Serializable
+data class PropertyDescriptor(
     val key: String,
     val type: PropertyType = PropertyType.String,
     val default: String? = null,
@@ -29,6 +65,7 @@ private const val DOUBLE = "double"
 private const val ENUM = "enum"
 private const val LIST = "list"
 private const val OBJECT = "object"
+private const val MAP = "map"
 
 @Serializable(PropertyTypeSerializer::class)
 sealed interface PropertyType {
@@ -50,6 +87,10 @@ sealed interface PropertyType {
                 DOUBLE -> Double
                 ENUM -> Enum(details.trimBraces().trim().split(Regex(",\\s*")))
                 LIST -> List(parse(details.trimAngleBrackets().trim()))
+                MAP -> {
+                    val (keyType, valueType) = details.trimAngleBrackets().split(Regex("\\s*,\\s*"), 2)
+                    Map(parse(keyType), parse(valueType))
+                }
                 OBJECT -> Object(Json.decodeFromString(details.trimBraces()))
                 else -> throw IllegalArgumentException("Invalid property type: $text")
             }
@@ -57,6 +98,15 @@ sealed interface PropertyType {
     }
 
     fun parse(text: kotlin.String): Any?
+
+    // TODO currently a no-op
+    //      but we should actually cast here
+    fun cast(value: Any?) = value
+
+    fun isList() = this is List
+    fun isNullable() = this is Nullable
+
+    val elementType: PropertyType? get() = null
 
     data object String: PropertyType {
         override fun parse(text: kotlin.String) = text
@@ -93,7 +143,7 @@ sealed interface PropertyType {
         override fun toString() = DOUBLE
     }
 
-    data class List(val elementType: PropertyType): PropertyType {
+    data class List(override val elementType: PropertyType): PropertyType {
         override fun parse(text: kotlin.String) = text.split(Regex("\\s*,\\s*")).map(elementType::parse)
         override fun toString() = "list<$elementType>"
     }
@@ -105,9 +155,19 @@ sealed interface PropertyType {
         override fun toString() = "enum{${values.joinToString(", ")}}"
     }
 
-    data class Object(val properties: Map<String, PropertyType>): PropertyType {
+    // TODO string, parse
+    data class Map(val keyType: PropertyType, val valueType: PropertyType): PropertyType {
+        override fun parse(text: kotlin.String) =
+            text.split(Regex("\\s*,\\s*")).associate {
+                val (key, value) = it.split("=")
+                keyType.parse(key) to valueType.parse(value)
+            }
+        override fun toString() = "map<$keyType, $valueType>"
+    }
+
+    data class Object(val properties: kotlin.collections.Map<String, PropertyType>): PropertyType {
         override fun parse(text: kotlin.String): Any =
-            Json.decodeFromString<Map<String, String>>(text).let { stringMap ->
+            Json.decodeFromString<kotlin.collections.Map<String, String>>(text).let { stringMap ->
                 stringMap.mapValues { (key, value) ->
                     properties[key]?.parse(value.toString())
                 }
@@ -122,6 +182,12 @@ sealed interface PropertyType {
             "null" -> null
             else -> type.parse(text)
         }
+
+        override fun isList(): kotlin.Boolean =
+            type.isList()
+
+        override val elementType: PropertyType? =
+            type.elementType
 
         override fun toString(): kotlin.String = "$type?"
     }

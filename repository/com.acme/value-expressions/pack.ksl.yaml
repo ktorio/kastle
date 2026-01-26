@@ -1,0 +1,20 @@
+name: Value Expressions
+description: Populate values from your pack manifests
+properties:
+  - key: booleanProperty
+    type: boolean
+  - key: integerProperty
+    type: int
+  - key: stringProperty
+    type: string
+  - key: listProperty
+    type: list<string>?
+propertyValues:
+  - key: booleanValue
+    expression: "!booleanProperty"
+  - key: integerValue
+    expression: integerProperty + 2
+  - key: stringValue
+    expression: stringProperty.uppercase()
+  - key: listValue
+    expression: listProperty?.map { it.uppercase() }.joinToString(", ")

@@ -115,7 +115,7 @@ fun KtExpression?.toTemplateExpression(): Expression {
         }
 
         // Handle property access
-        is KtDotQualifiedExpression -> {
+        is KtDotQualifiedExpression, is KtSafeQualifiedExpression -> {
             val receiver = receiverExpression.toTemplateExpression()
 
             when (val selector = selectorExpression) {
