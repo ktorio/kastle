@@ -6,4 +6,5 @@ links:
   guide: https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform.html
 
 propertyValues:
-  org.jetbrains.intellij.platform/plugin/isComposeEnabled: true
+  - key: org.jetbrains.intellij.platform/plugin/isComposeEnabled
+    value: true

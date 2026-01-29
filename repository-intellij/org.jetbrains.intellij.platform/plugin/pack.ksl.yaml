@@ -2,9 +2,6 @@ name: IDE Plugin
 description: IntelliJ Platform plugin project
 
 properties:
-  - key: pluginName
-    label: Plugin Name
-    type: string
   - key: addSampleCode
     type: boolean
     default: true
@@ -27,15 +24,22 @@ properties:
   - key: gradleVersion
     type: string
     hidden: true
+  - key: pluginName
+    type: string
+    hidden: true
 
 propertyValues:
   # Common versions management:
-  org.jetbrains.intellij.platform/plugin/platformVersion: 2025.3.1
-  org.jetbrains.intellij.platform/plugin/pluginSinceBuild: 253
-  org.jetbrains.intellij.platform/plugin/gradleVersion: 9.2.1
+  - key: org.jetbrains.intellij.platform/plugin/platformVersion
+    value: "2025.3.1"
+  - key: org.jetbrains.intellij.platform/plugin/pluginSinceBuild
+    value: "253"
+  - key: org.jetbrains.intellij.platform/plugin/gradleVersion
+    value: "9.2.1"
 
-  # Post-process input properties:
-  org.jetbrains.intellij.platform/plugin/pluginName: My Plugin # TODO: expression
+  # Post-processed input properties:
+  - key: pluginName
+    value: My Plugin # TODO: expression
 
 rootSources:
   # Run configurations

@@ -2,16 +2,18 @@ name: IDE Theme
 description: IntelliJ Platform theme project
 
 properties:
-  - key: pluginName
-    label: Plugin Name
-    type: string
   - key: hiddenInWizard
     type: boolean
     default: true
     hidden: true
+  - key: pluginName
+    type: string
+    hidden: true
 
 propertyValues:
-  org.jetbrains.intellij.platform/theme/pluginName: My Theme # TODO: expression
+  # Post-processed input properties:
+  - key: pluginName
+    value: My Theme # TODO: expression
 
 rootSources:
   # Sources are intentionally in the `sources` directory to avoid being processed by module.ksl.yaml handler
