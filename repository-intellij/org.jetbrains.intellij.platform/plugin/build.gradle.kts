@@ -1,7 +1,7 @@
 plugins {
     id("java")
     for (item in _module.gradle.plugins) {
-        alias(_unsafe("libs.plugins.${item}"))
+    alias(_unsafe("libs.plugins.${item}"))
     }
 }
 
