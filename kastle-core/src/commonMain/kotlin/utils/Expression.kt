@@ -206,6 +206,7 @@ sealed interface Expression {
                 }
                 "toUpperCase", "uppercase" -> receiver.uppercase()
                 "toLowerCase", "lowercase" -> receiver.lowercase()
+                "capitalize" -> receiver.capitalizeFirst()
                 "trim" -> receiver.trim()
                 "split" -> {
                     val delimiter = args.firstOrNull()?.toString() ?: throw IllegalArgumentException("split requires a delimiter")
