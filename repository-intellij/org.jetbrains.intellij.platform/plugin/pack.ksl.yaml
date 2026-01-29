@@ -39,7 +39,7 @@ propertyValues:
 
   # Post-processed input properties:
   - key: pluginName
-    value: My Plugin # TODO: expression
+    expression: _project.name.capitalize()
 
 rootSources:
   # Run configurations

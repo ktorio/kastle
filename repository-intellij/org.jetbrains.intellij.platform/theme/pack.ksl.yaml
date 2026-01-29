@@ -9,11 +9,16 @@ properties:
   - key: pluginName
     type: string
     hidden: true
+  - key: themeProviderId
+    type: string
+    hidden: true
 
 propertyValues:
   # Post-processed input properties:
   - key: pluginName
-    value: My Theme # TODO: expression
+    expression: _project.name.capitalize()
+  - key: themeProviderId
+    expression: uuid()
 
 rootSources:
   # Sources are intentionally in the `sources` directory to avoid being processed by module.ksl.yaml handler
