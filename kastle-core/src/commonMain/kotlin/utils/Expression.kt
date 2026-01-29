@@ -1,7 +1,11 @@
 package org.jetbrains.kastle.utils
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.kastle.UndefinedVariableException
 import org.jetbrains.kastle.utils.Expression.Literal
+import kotlin.toString
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @Serializable
 sealed interface StringExpression: Expression {
@@ -152,6 +156,7 @@ sealed interface Expression {
             }
         }
 
+        @OptIn(ExperimentalUuidApi::class)
         private fun evaluateStaticMethod(methodName: String, args: List<Any?>): Any? {
             return when (methodName) {
                 "listOf" -> args
@@ -162,6 +167,7 @@ sealed interface Expression {
                     args.chunked(2).associate { (k, v) -> k to v }
                 }
                 "setOf" -> args.toSet()
+                "uuid" -> Uuid.random().toString()
                 else -> throw IllegalArgumentException("Unknown static method: $methodName")
             }
         }
