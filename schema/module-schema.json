@@ -45,8 +45,19 @@
       }
     },
     "propertyValues": {
-      "type": "object",
-      "additionalProperties": { "type": "string" }
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string" },
+          "value": { "type": "string" },
+          "expression": {
+            "type": "string",
+            "description": "Kotlin expression to be evaluated during project generation."
+          }
+        },
+        "required": ["key"]
+      }
     },
     "sources": {
       "type": "array",
