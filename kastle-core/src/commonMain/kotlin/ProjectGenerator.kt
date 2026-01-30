@@ -154,6 +154,3 @@ class ProjectGenerator(
     }
 
 }
-
-class MissingPackException(pack: PackId) : Exception("Missing pack: $pack")
-class FailedToReadPackException(pack: PackId, cause: Throwable) : Exception("Failed to read pack: $pack", cause)

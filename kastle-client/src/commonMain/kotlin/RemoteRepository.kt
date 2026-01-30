@@ -1,27 +1,20 @@
 package org.jetbrains.kastle.client
 
-import com.akuleshov7.ktoml.Toml
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.plugins.DefaultRequest
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.isSuccess
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.serialization.kotlinx.serialization
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import kotlinx.serialization.decodeFromString
-import org.jetbrains.kastle.PackDescriptor
-import org.jetbrains.kastle.PackId
-import org.jetbrains.kastle.PackMetadata
-import org.jetbrains.kastle.PackRepository
+import kotlinx.io.Source
+import org.jetbrains.kastle.*
 import org.jetbrains.kastle.Url
-import org.jetbrains.kastle.VersionsCatalog
 
 fun HttpClient.asRepository(url: String? = null): RemoteRepository =
     RemoteRepository(config {
@@ -58,6 +51,20 @@ class RemoteRepository(private val client: HttpClient): PackRepository {
 
     override suspend fun read(packId: PackId): PackDescriptor? {
         val response = client.get("/api/packs/$packId")
+        if (!response.status.isSuccess())
+            return null
+        return response.body()
+    }
+
+    override suspend fun readDocs(packId: PackId): String? {
+        val response = client.get("/api/packs/$packId/docs")
+        if (!response.status.isSuccess())
+            return null
+        return response.bodyAsText()
+    }
+
+    override suspend fun readFile(path: String): Source? {
+        val response = client.get("/api/files/$path")
         if (!response.status.isSuccess())
             return null
         return response.body()
