@@ -50,7 +50,8 @@
           "value": { "type": "string" },
           "expression": {
             "type": "string",
-            "description": "Kotlin expression to be evaluated during project generation."
+            "description": "Kotlin expression to be evaluated during project generation.",
+            "x-intellij-language-injection": "kotlin"
           }
         },
         "required": ["key"]
@@ -87,7 +88,11 @@
         "path": { "type": "string" },
         "text": { "type": "string" },
         "target": { "type": "string" },
-        "if": { "type": "string", "description": "Condition expression" }
+        "if": {
+          "type": "string",
+          "description": "Condition expression",
+          "x-intellij-language-injection": "kotlin"
+        }
       }
     }
   }
