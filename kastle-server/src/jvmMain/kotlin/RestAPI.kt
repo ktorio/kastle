@@ -7,7 +7,9 @@ import io.ktor.server.routing.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectIndexed
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.io.encodeToSink
 import org.jetbrains.kastle.*
 
 /**
@@ -18,43 +20,44 @@ fun Routing.backEnd(
     generator: ProjectGenerator,
     json: Json,
 ) {
+
     route("/api") {
+        /**
+         * Get a list of all pack ids.
+         *
+         * Response: 200 application/json A list of all pack IDs.
+         */
         get("/packIds") {
             val packIds = repository.ids()
             call.respondBytesWriter(ContentType.Application.Json) {
-                writeByte('['.code.toByte())
-                packIds.collectIndexed { i, id ->
-                    if (i != 0) writeByte(','.code.toByte())
-                    writeString(json.encodeToString(id))
-                }
-                writeByte(']'.code.toByte())
+                writeJsonFlow(packIds, json)
             }
         }
+        /**
+         * Get the catalog of versions for all artifacts.
+         */
         get("/versions") {
-            call.respondText(
-                json.encodeToString(repository.versions()),
-                ContentType.Application.Json
-            )
+            call.respond(repository.versions())
         }
         route("/packs") {
             get {
                 val packs = repository.getAll()
                 call.respondBytesWriter(ContentType.Application.Json) {
-                    writeByte('['.code.toByte())
-                    packs.collectIndexed { i, descriptor ->
-                        if (i != 0) writeByte(','.code.toByte())
-                        writeString(json.encodeToString(descriptor))
-                    }
-                    writeByte(']'.code.toByte())
+                    writeJsonFlow(packs, json)
                 }
             }
-            get("/{group}/{id}") {
-                val group = call.parameters["group"] ?: return@get call.respond(HttpStatusCode.BadRequest)
-                val pack = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
-                val id = PackId(group, pack)
-                val repository = repository.read(id) ?: return@get call.respond(HttpStatusCode.NotFound)
-                call.respondText(ContentType.Application.Json) {
-                    json.encodeToString(repository)
+            route("/{group}/{id}") {
+                get {
+                    val id = readPackId() ?: return@get call.respond(HttpStatusCode.BadRequest)
+                    val repository = repository.read(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+                    call.respondText(ContentType.Application.Json) {
+                        json.encodeToString(repository)
+                    }
+                }
+                get("/docs") {
+                    val id = readPackId() ?: return@get call.respond(HttpStatusCode.BadRequest)
+                    val docs = repository.readDocs(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+                    call.respondText(docs)
                 }
             }
         }
@@ -79,4 +82,21 @@ fun Routing.backEnd(
             }
         }
     }
+}
+
+private fun RoutingContext.readPackId(): PackId? {
+    val group = call.parameters["group"] ?: return null
+    val pack = call.parameters["id"] ?: return null
+    return PackId(group, pack)
+}
+
+@OptIn(InternalAPI::class, ExperimentalSerializationApi::class)
+private suspend inline fun <reified E> ByteWriteChannel.writeJsonFlow(flow: Flow<E>, json: Json) {
+    writeByte('['.code.toByte())
+    flow.collectIndexed { i, descriptor ->
+        if (i != 0) writeByte(','.code.toByte())
+        json.encodeToSink(descriptor, writeBuffer)
+        writeString(json.encodeToString(descriptor))
+    }
+    writeByte(']'.code.toByte())
 }

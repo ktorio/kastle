@@ -4,10 +4,21 @@ description: An extensible build system for JVM languages
 version: 1.0.0
 tags:
   - buildSystemRoot
+properties:
+  - key: isExecutable
+    type: boolean
+    default: false
+    hidden: true
+  - key: includeWrapper
+    type: boolean
+    default: true
 rootSources:
   - path: gradlew
+    if: includeWrapper
   - path: gradlew.bat
+    if: includeWrapper
   - path: gradle/wrapper/gradle-wrapper.jar
+    if: includeWrapper
   - path: gradle/wrapper/gradle-wrapper.properties
   - path: settings.gradle.kts
   - path: gradle.properties.hbs
@@ -19,8 +30,5 @@ rootSources:
     target: file:gradle/libs.versions.toml
 commonSources:
   - path: build.gradle.kts
-properties:
-  - key: isExecutable
-    type: boolean
-    default: false
-    hidden: true
+links:
+  vcs: https://github.com/gradle/gradle

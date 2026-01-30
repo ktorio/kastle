@@ -77,9 +77,11 @@ val PackDescriptor.allSources: Sequence<SourceFile> get() =
 
 @Serializable
 data class Group(
-    val id: String,
+    val id: String = "",
     val name: String? = null,
     val icon: String? = null,
+    val url: String? = null,
+    val email: String? = null,
 )
 
 // TODO use versioned requirements
@@ -106,7 +108,9 @@ data class SlotDescriptor(
 @Serializable(PackIdSerializer::class)
 data class PackId(val group: String, val id: String) {
     companion object {
-        fun parse(text: String) = text.split('/', limit = 2).let { (group, pack) ->
+        fun parse(text: String) = text.split('/', limit = 2).let { split ->
+            require(split.size == 2) { "Invalid pack id: $text" }
+            val (group, pack) = split
             PackId(group, pack)
         }
     }

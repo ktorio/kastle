@@ -1,13 +1,6 @@
-package org.jetbrains.kastle.amper
+package org.jetbrains.kastle
 
 import com.charleskorn.kaml.*
-import org.jetbrains.kastle.ArtifactDependency
-import org.jetbrains.kastle.CatalogReference
-import org.jetbrains.kastle.Dependency
-import org.jetbrains.kastle.ModuleDependency
-import org.jetbrains.kastle.Platform
-import org.jetbrains.kastle.SourceModuleType
-import org.jetbrains.kastle.VersionsCatalog
 
 fun YamlMap.readPlatforms(): Set<Platform> =
     (
