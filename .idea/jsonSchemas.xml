@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JsonSchemaMappingsProjectConfiguration">
+    <state>
+      <map>
+        <entry key="Kastle Module Schema">
+          <value>
+            <SchemaInfo>
+              <option name="name" value="Kastle Module Schema" />
+              <option name="relativePathToSchema" value="schema/module-schema.json" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="pattern" value="true" />
+                    <option name="path" value="*/module.ksl.yaml" />
+                    <option name="mappingKind" value="Pattern" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+        <entry key="Kastle Pack Schema">
+          <value>
+            <SchemaInfo>
+              <option name="name" value="Kastle Pack Schema" />
+              <option name="relativePathToSchema" value="schema/pack-schema.json" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="pattern" value="true" />
+                    <option name="path" value="*/pack.ksl.yaml" />
+                    <option name="mappingKind" value="Pattern" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+      </map>
+    </state>
+  </component>
+</project>
