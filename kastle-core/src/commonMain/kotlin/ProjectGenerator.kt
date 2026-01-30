@@ -69,12 +69,7 @@ class ProjectGenerator(
                     log.warn { "Skipping ${source.target}; missing pack ID" }
                     continue
                 }
-                val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
-                val baseVariables = project.getVariables(pack) +
-                        project.toVariableEntry() +
-                        module.toVariableEntry() +
-                        module.slotsVariableEntry(project, packId)
-                val variables = baseVariables + loadDynamicProperties(project, baseVariables)
+                val variables = collectVariables(project, packId, module)
 
                 if (source.condition != null) {
                     val conditionValue = source.condition.evaluate(variables)
@@ -93,7 +88,7 @@ class ProjectGenerator(
                     templateEvaluator.evaluateToBuffer(
                         template = source,
                         groupId = project.group,
-                        packId = pack.id,
+                        packId = packId,
                         variables = variables,
                         slots = slotSources,
                     )
@@ -107,7 +102,7 @@ class ProjectGenerator(
         val sourceTargetExpressions = source.targetExpressions
         return if (sourcePackId != null && sourceTargetExpressions != null) {
             // Interpolate target expressions if present
-            val variables = collectVariablesForPack(project, sourcePackId, module)
+            val variables = collectVariables(project, sourcePackId, module)
             val interpolatedTarget = interpolateTargetUrl(source.target, sourceTargetExpressions, variables)
             Path(module.path, interpolatedTarget.relativeFile).normalize().toString()
         } else {
@@ -115,18 +110,13 @@ class ProjectGenerator(
         }
     }
 
-    private fun collectVariablesForPack(
-        project: Project,
-        packId: PackId,
-        module: SourceModule
-    ): Stack<Map<String, Any?>> {
+    private fun collectVariables(project: Project, packId: PackId, module: SourceModule): Stack<Map<String, Any?>> {
         val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
         val baseVariables = project.getVariables(pack) +
                 project.toVariableEntry() +
                 module.toVariableEntry() +
                 module.slotsVariableEntry(project, packId)
-        val variables = baseVariables + loadDynamicProperties(project, baseVariables)
-        return variables
+        return baseVariables + loadDynamicProperties(project, baseVariables)
     }
 
     fun interpolateTargetUrl(url: String, targetExpressions: List<TargetExpression>, variables: Variables): String {
