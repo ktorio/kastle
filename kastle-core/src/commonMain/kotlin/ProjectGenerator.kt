@@ -50,7 +50,7 @@ class ProjectGenerator(
             val slotSources = project.slotSources + module.slotSources
 
             for (source in moduleSources) {
-                val path = Path(module.path, source.target.relativeFile).normalize().toString()
+                val path = getActualPath(source, module, project)
                 if (source !is SourceTemplate) {
                     if (source !is StaticSource)
                         error("Unsupported source type: ${source::class.simpleName}")
@@ -99,6 +99,39 @@ class ProjectGenerator(
                     )
                 })
             }
+        }
+    }
+
+    private fun getActualPath(source: SourceFile, module: SourceModule, project: Project): String {
+        val sourcePackId = source.packId
+        val sourceTargetExpressions = source.targetExpressions
+        return if (sourcePackId != null && sourceTargetExpressions != null) {
+            // Interpolate target expressions if present
+            val variables = collectVariablesForPack(project, sourcePackId, module)
+            val interpolatedTarget = interpolateTargetUrl(source.target, sourceTargetExpressions, variables)
+            Path(module.path, interpolatedTarget.relativeFile).normalize().toString()
+        } else {
+            Path(module.path, source.target.relativeFile).normalize().toString()
+        }
+    }
+
+    private fun collectVariablesForPack(
+        project: Project,
+        packId: PackId,
+        module: SourceModule
+    ): Stack<Map<String, Any?>> {
+        val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
+        val baseVariables = project.getVariables(pack) +
+                project.toVariableEntry() +
+                module.toVariableEntry() +
+                module.slotsVariableEntry(project, packId)
+        val variables = baseVariables + loadDynamicProperties(project, baseVariables)
+        return variables
+    }
+
+    fun interpolateTargetUrl(url: String, targetExpressions: List<TargetExpression>, variables: Variables): String {
+        return targetExpressions.fold(url) { acc, expr ->
+            acc.replace(expr.placeholder, expr.expression.evaluate(variables).toString())
         }
     }
 

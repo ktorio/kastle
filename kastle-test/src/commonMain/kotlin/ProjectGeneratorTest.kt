@@ -134,6 +134,17 @@ fun ProjectGeneratorTest(
         )
     }
 
+    "target expressions" {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "target-expressions", randomString())
+        generate(outputDir, "target-expressions", packs = listOf("com.acme/target-expressions"), properties = mapOf(
+            "folderName" to "my-folder",
+        ).mapKeys { (key) -> VariableId.parse("com.acme/target-expressions/$key") })
+        assertFilesAreEqualWithSnapshot(
+            "$snapshots/target-expressions",
+            outputDir.toString(),
+        )
+    }
+
     "ktor server gradle" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server", randomString())
         generateWithPacks(

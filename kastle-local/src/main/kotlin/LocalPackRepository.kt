@@ -37,6 +37,8 @@ private const val GROUP_YAML = "group.ksl.yaml"
 private const val MODULE_YAML = "module.ksl.yaml"
 private const val REPOSITORY_VERSION_CATALOG = "repository.versions.toml"
 
+private val EXPRESSION_PATTERN = Regex("""\$\{([^}]+)}""")
+
 class LocalPackRepository(
     private val root: Path,
     private val fs: FileSystem = SystemFileSystem,
@@ -165,8 +167,9 @@ class LocalPackRepository(
                 ?: target.takeIfSlot()?.getExtensionFromSlot()
                 ?: target.extensionFormat
             val conditionExpression = condition?.let(expressionParser::parse)
+            val targetExpressions = parseTargetExpressions(expressionParser, target)
 
-            when(format) {
+            when (format) {
                 TemplateFormat.KOTLIN -> {
                     kotlinTemplateEngine.read(
                         path = path?.let(::Path),
@@ -174,7 +177,8 @@ class LocalPackRepository(
                     ).copy(
                         packId = packId,
                         target = target,
-                        condition = conditionExpression
+                        condition = conditionExpression,
+                        targetExpressions = targetExpressions
                     )
                 }
                 TemplateFormat.OTHER ->
@@ -184,12 +188,15 @@ class LocalPackRepository(
                             file.readText() ?: text ?: throw IllegalArgumentException("Missing path or text in source definition")
                         ).copy(
                             packId = packId,
-                            condition = conditionExpression
+                            condition = conditionExpression,
+                            targetExpressions = targetExpressions
                         )
                         else -> StaticSource(
                             contents = fs.source(file).buffered().use { it.readByteString() },
                             target = target,
                             condition = conditionExpression,
+                            targetExpressions = targetExpressions,
+                            packId = packId,
                         )
                     }
             }
@@ -210,6 +217,28 @@ class LocalPackRepository(
             )
         )
     }
+
+    private fun parseTargetExpressions(
+        expressionParser: KotlinExpressionParser,
+        target: String
+    ): List<TargetExpression>? {
+        val placeholders = extractExpressionPlaceholders(target)
+        if (placeholders.isEmpty()) return null
+        return placeholders.map { (placeholder, expressionContent) ->
+            TargetExpression(placeholder, expressionParser.parse(expressionContent))
+        }
+    }
+
+    /**
+     * Extracts all ${expression} placeholders from a string.
+     * Returns a list of pairs: (full placeholder including ${}, expression content inside).
+     *
+     * Example: "file:theme/\${themeName}.json" -> [("\${themeName}", "themeName")]
+     */
+    fun extractExpressionPlaceholders(template: String): List<Pair<String, String>> =
+        EXPRESSION_PATTERN.findAll(template).map { match ->
+            match.value to match.groupValues[1]
+        }.toList()
 
     private fun readSourceModuleManifest(projectPath: Path, modulePath: Path): SourceModuleManifest? {
         val relativeModulePath = modulePath.relativeTo(projectPath).toString()
@@ -267,12 +296,14 @@ class LocalPackRepository(
             ?: return null
         val manifest = readSourceModuleManifest(moduleYaml, relativeModulePath) ?: return null
 
-        suspend fun readModuleSource(file: Path, target: String? = null) =
+        suspend fun readModuleSource(file: Path, target: String? = null): SourceFile =
             when (file.name.extension.lowercase()) {
                 HANDLEBARS_EXTENSION -> handlebarsTemplateEngine.read(modulePath, file).let { template ->
+                    val actualTarget = (target ?: template.target).removeSuffix(".hbs")
                     template.copy(
-                        target = (target ?: template.target).removeSuffix(".hbs"),
+                        target = actualTarget,
                         packId = packId,
+                        targetExpressions = parseTargetExpressions(expressionParser, actualTarget),
                     )
                 }
 
@@ -283,16 +314,21 @@ class LocalPackRepository(
                         onProperty = properties::add,
                     )
                     kotlinTemplateEngine.read(file, file.readText()).let { template ->
+                        val actualTarget = target ?: template.target
                         template.copy(
-                            target = target ?: template.target,
+                            target = actualTarget,
                             packId = packId,
+                            targetExpressions = parseTargetExpressions(expressionParser, actualTarget),
                         )
                     }
                 }
 
                 else -> fs.sourceFile(file, modulePath).let { source ->
+                    val actualTarget = target ?: source.target
                     source.copy(
-                        target = target ?: source.target,
+                        target = actualTarget,
+                        targetExpressions = parseTargetExpressions(expressionParser, actualTarget),
+                        packId = packId,
                     )
                 }
             }
@@ -356,7 +392,11 @@ class LocalPackRepository(
                     readModuleSource(modulePath.resolve(path), target = target)
                 } else {
                     require(target != null) { "Target is required when using text for source: $manifestSource" }
-                    handlebarsTemplateEngine.read(target.removeSuffix(".hbs"), text).copy(packId = packId)
+                    val targetExpressions = parseTargetExpressions(expressionParser, target)
+                    handlebarsTemplateEngine.read(target.removeSuffix(".hbs"), text).copy(
+                        packId = packId,
+                        targetExpressions = targetExpressions
+                    )
                 }.copy(condition = conditionExpression, priority = priority)
             }
         }
@@ -451,10 +491,8 @@ class LocalPackRepository(
         return resolve(packageDir)
     }
 
-
     @Serializable
     data class BuiltInToml(
         val libraries: Map<String, ArtifactDependency>,
     )
 }
-

@@ -24,6 +24,10 @@ data class SourceDefinition(
 sealed interface SourceFile {
     val target: Url
     val condition: Expression?
+    // Pack ID for variable resolution when target has expressions
+    val packId: PackId?
+    // Parsed expressions from ${...} patterns in the target URL
+    val targetExpressions: List<TargetExpression>?
 }
 
 /**
@@ -44,6 +48,8 @@ data class StaticSource(
     val contents: ByteString,
     override val target: Url,
     override val condition: Expression? = null,
+    override val packId: PackId? = null,
+    override val targetExpressions: List<TargetExpression>? = null,
 ): SourceFile {
     companion object {
         fun FileSystem.sourceFile(
@@ -71,9 +77,10 @@ data class SourceTemplate(
     val imports: SourceImports? = null,
     val blocks: List<Block>? = null,
     override val condition: Expression? = null,
-    // this is here to sort out files after modules are merged
-    val packId: PackId? = null,
     val priority: Int? = null,
+    // this is here also to sort out files after modules are merged
+    override val packId: PackId? = null,
+    override val targetExpressions: List<TargetExpression>? = null,
 ): SourceFile
 
 @Serializable
@@ -290,6 +297,18 @@ data class WhenClauseBlock(
 ): Block, StructuralBlock {
     override fun toString(): String = "-> ${value.joinToString(", ") { "\"$it\"" }})"
 }
+
+/**
+ * Represents a parsed expression placeholder in a target URL.
+ * Example: for target "file:theme/${themeName}.json", this would store:
+ * - placeholder: "${themeName}"
+ * - expression: the parsed Expression for "themeName"
+ */
+@Serializable
+data class TargetExpression(
+    val placeholder: String,
+    val expression: Expression,
+)
 
 typealias Url = String
 
