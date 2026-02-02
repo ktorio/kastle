@@ -1,5 +1,5 @@
 /**
- * @target slot://io.ktor/server-core/engineMain
+ * slot://io.ktor/server-core/engineMain
  */
 package kastle
 

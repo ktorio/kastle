@@ -8,11 +8,15 @@ import com.intellij.psi.util.descendantsOfType
 import com.intellij.psi.util.elementType
 import kotlinx.io.files.Path
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.BlockPosition
+import org.jetbrains.kastle.SkipBlock
+import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.io.readText
 import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.*
+import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
@@ -34,24 +38,18 @@ import java.io.File
 
 /**
  * Provides analysis capabilities for Kotlin source files within a specified path.
- * This class utilizes Kotlin compiler's source analysis with a predefined environment setup.
+ * This class uses Kotlin compiler's source analysis with a predefined environment setup.
  *
  * @constructor Initializes the source analyzer with the specified path and repository.
  * The environment is configured for JVM production with basic compiler settings.
  *
  * @property path The path to the Kotlin source files to be analyzed.
- * @property repository An optional pack repository for additional data or functionality.
  */
 internal class KotlinCompilerTemplateEngine(
     private val path: Path? = null,
-    private val repository: PackRepository = PackRepository.EMPTY,
     private val log: Logger = ConsoleLogger(),
     private val onProperty: (PropertyDescriptor) -> Unit = {},
 ) {
-    companion object {
-        private val targetRegex = Regex("""@target\s+(\S+)""", RegexOption.IGNORE_CASE)
-    }
-
     val environment: KotlinCoreEnvironment
     val psiFileFactory: PsiFileFactory
     // TODO verify compilation, etc.
@@ -80,7 +78,7 @@ internal class KotlinCompilerTemplateEngine(
         environment.getSourceFiles()
     }
 
-    suspend fun read(
+    fun read(
         path: Path? = null,
         text: String? = null,
     ): SourceTemplate {
@@ -100,7 +98,7 @@ internal class KotlinCompilerTemplateEngine(
      *
      * @throws IllegalArgumentException if the source file specified in the reference cannot be found.
      */
-    suspend fun read(
+    fun read(
         sourcePath: Path,
         ktFile: KtFile,
     ): SourceTemplate {
@@ -109,8 +107,10 @@ internal class KotlinCompilerTemplateEngine(
         val targetFromHeader = ktFile
             .descendantsOfType<PsiComment>()
             .firstOrNull()
-            ?.let {
-                targetRegex.find(it.text)?.groupValues?.getOrNull(1)
+            ?.text?.lines()?.map {
+                it.trimStart('/', '*', ' ', '\t').trimEnd()
+            }?.firstOrNull {
+                it.startsWith("slot:")
             }
         val target = targetFromHeader ?: "file:${sourcePath.resolve(ktFile.name)}"
         log.debug { "Compiling $target..." }
@@ -123,8 +123,6 @@ internal class KotlinCompilerTemplateEngine(
                 blocks = ktFile.findBlocks(),
             )
             "slot" -> {
-                val slot = repository.slot(target.slotId)
-                require(slot != null) { "Slot ${target.slotId} not found" }
                 // TODO should be able to specify which function
                 val nestedBlocks = when (val functionBody = ktFile.firstFunctionBody()) {
                     null -> ktFile.findBlocks()

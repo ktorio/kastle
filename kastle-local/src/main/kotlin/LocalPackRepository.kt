@@ -1,10 +1,6 @@
 package org.jetbrains.kastle
 
-import com.charleskorn.kaml.Yaml
-import com.charleskorn.kaml.YamlList
-import com.charleskorn.kaml.YamlMap
-import com.charleskorn.kaml.yamlMap
-import com.charleskorn.kaml.yamlScalar
+import com.charleskorn.kaml.*
 import kotlinx.coroutines.flow.*
 import kotlinx.io.Source
 import kotlinx.io.buffered
@@ -19,7 +15,6 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import org.jetbrains.kastle.StaticSource.Companion.sourceFile
 import org.jetbrains.kastle.io.*
-import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.kotlin.KT_EXTENSION
 import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
 import org.jetbrains.kastle.templates.*
@@ -28,18 +23,17 @@ import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.psi.KtFile
-import kotlin.collections.filterNot
 import kotlin.random.Random
 
 private const val PACK_YAML = "pack.ksl.yaml"
 private const val GROUP_YAML = "group.ksl.yaml"
 private const val MODULE_YAML = "module.ksl.yaml"
 private const val REPOSITORY_VERSION_CATALOG = "repository.versions.toml"
+private const val DEFAULT_VERSION_CATALOG = "../gradle/libs.versions.toml"
 
 class LocalPackRepository(
     private val root: Path,
     private val fs: FileSystem = SystemFileSystem,
-    private val versionsCatalogFile: String = "../gradle/libs.versions.toml",
     random: Random = Random(System.currentTimeMillis()),
     remoteRepository: PackRepository = PackRepository.EMPTY,
 ): PackRepository {
@@ -55,7 +49,6 @@ class LocalPackRepository(
     private val yaml = Yaml(serializersModule)
 
     constructor(root: String): this(Path(root))
-    constructor(root: String, catalogFile: String): this(Path(root), versionsCatalogFile = catalogFile)
 
     private val repository: PackRepository = object : PackRepository {
         private val metadataCache = mutableMapOf<PackId, PackMetadata>()
@@ -140,7 +133,7 @@ class LocalPackRepository(
             }
             val properties = manifest.properties.toMutableList()
             val documentation = projectPath.resolve("README.md").readText()
-            val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath, repository)
+            val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath)
             val expressionParser = KotlinExpressionParser(kotlinTemplateEngine.psiFileFactory)
             val propertyValues: List<PropertyAssignment> =
                 rawManifest.get<YamlList>("propertyValues")?.items?.map { node ->
@@ -310,7 +303,6 @@ class LocalPackRepository(
                 KT_EXTENSION, KT_SCRIPT_EXTENSION -> {
                     val kotlinTemplateEngine = KotlinCompilerTemplateEngine(
                         path = file.parent,
-                        repository = repository,
                         onProperty = properties::add,
                     )
                     kotlinTemplateEngine.read(file, file.readText()).let { template ->
@@ -328,7 +320,14 @@ class LocalPackRepository(
                 }
             }
 
-        val sources = mutableListOf<SourceFile>()
+        val sources = mutableMapOf<String, SourceFile>()
+        operator fun MutableMap<String, SourceFile>.plusAssign(source: SourceFile) {
+            this[source.target] = source
+        }
+        operator fun MutableMap<String, SourceFile>.plusAssign(sources: List<SourceFile>) {
+            for (source in sources)
+                this += source
+        }
         val resources = mutableListOf<SourceFile>()
         val (sourceFolders, resourceFolders) = getStandardSourceFolders(manifest.platforms, modulePath)
 
@@ -339,7 +338,6 @@ class LocalPackRepository(
             // properties are supplied both from the manifest and from declarations in the source files
             val kotlinTemplateEngine = KotlinCompilerTemplateEngine(
                 path = sourceFolder,
-                repository = repository,
                 onProperty = properties::add,
             )
             sources += kotlinTemplateEngine.ktFiles.map { sourceFile ->
@@ -366,7 +364,6 @@ class LocalPackRepository(
         }
 
         // additional sources defined for module; also assume no kotlin sources
-        // TODO remove duplicates from files in source folders
         val sourcesFromManifest = moduleYaml.get<YamlList>("sources")?.items.orEmpty()
         for (manifestSource in sourcesFromManifest) {
             val (path, text, target, condition, priority) = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
@@ -394,7 +391,7 @@ class LocalPackRepository(
 
         return SourceModule(
             manifest = manifest,
-            sources = sources + resources,
+            sources = sources.values + resources,
         )
     }
 
@@ -424,6 +421,7 @@ class LocalPackRepository(
 
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun versions(): VersionsCatalog {
+        // TODO we should try to drop this
         val builtInArtifacts =
             fs.list(root).filter {
                 it.name.endsWith(".versions.toml") && it.name != REPOSITORY_VERSION_CATALOG
@@ -442,8 +440,7 @@ class LocalPackRepository(
             }
         )
 
-        val libraryCatalog = loadVersionCatalog(versionsCatalogFile) ?: VersionsCatalog()
-        // TODO: allow ignoring repository version catalogs by Renovate
+        val libraryCatalog = loadVersionCatalog(DEFAULT_VERSION_CATALOG) ?: VersionsCatalog()
         val repositoryVersionCatalog = loadVersionCatalog(REPOSITORY_VERSION_CATALOG) ?: VersionsCatalog.Empty
 
         return builtInCatalog + libraryCatalog + repositoryVersionCatalog

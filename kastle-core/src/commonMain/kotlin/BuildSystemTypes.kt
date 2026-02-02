@@ -299,14 +299,14 @@ enum class SourceModuleType(val code: String) {
 }
 
 fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
-    return manifest.tryMerge(other.manifest)?.let {
+    return manifest.tryMerge(other.manifest)?.let { manifest ->
         SourceModule(
-            manifest = it,
+            manifest = manifest,
             sources = (sources + other.sources).also { mergedSources ->
                 val uniquePaths = mutableSetOf<Url>()
                 mergedSources.forEach {
                     require(it.target.protocol != "file" || uniquePaths.add(it.target)) {
-                        "Duplicate target in sources: ${it.target}"
+                        "Duplicate file: ${it.target}"
                     }
                 }
             }

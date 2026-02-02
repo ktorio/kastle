@@ -6,7 +6,7 @@ Here is what the source looks like:
 
 ```kotlin
 /**
- * @target slot://com.acme/parent/install
+ * slot://com.acme/parent/install
  */
 import java.nio.file.Paths
 

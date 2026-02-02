@@ -1,7 +1,7 @@
 package kastle
 
 /**
- * @target slot://com.acme/parent/install
+ * slot://com.acme/parent/install
  */
 import java.nio.file.Paths
 

@@ -39,14 +39,7 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
             }
             return
         }
-        val catalogPath =
-            repositoryDir.resolve("gradle/libs.versions.toml").takeIf { it.exists() }
-                ?: repositoryDir.resolve("../gradle/libs.versions.toml")
-
-        val repository = LocalPackRepository(
-            root = repositoryDir.absolutePath,
-            catalogFile = catalogPath.relativeTo(repositoryDir).path,
-        )
+        val repository = LocalPackRepository(repositoryDir.absolutePath)
         val modules2packs = mutableMapOf<String, Pair<PackMetadata, SourceModuleMetadata>>()
 
         // Discover all modules and create subprojects
