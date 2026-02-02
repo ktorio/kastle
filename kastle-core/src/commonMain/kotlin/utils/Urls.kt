@@ -4,14 +4,16 @@ import org.jetbrains.kastle.PackId
 import org.jetbrains.kastle.SlotId
 import org.jetbrains.kastle.Url
 
-val Url.protocol: String get() = substringBefore(':')
-val Url.afterProtocol: String get() = substringAfter(':')
-val Url.parentPath: String get() = relativeFile.replaceAfterLast('/', "").dropLast(1)
-val Url.relativeFile: String get() = afterProtocol.trimStart('/')
-val Url.fileName: String get() = afterProtocol.substringAfterLast('/')
-val Url.slotId: SlotId get() = afterProtocol.split('/')
+val StringExpression.protocol: String get() = toString().protocol
+val String.protocol: String get() = substringBefore(':')
+val StringExpression.afterProtocol: String get() = toString().substringAfter(':')
+val StringExpression.relativeFile: String get() = toString().relativeFile
+val String.parentPath: String get() = relativeFile.replaceAfterLast('/', "").dropLast(1)
+val String.relativeFile: String get() = removePrefix("file:").trimStart('/')
+val StringExpression.fileName: String get() = afterProtocol.substringAfterLast('/')
+val StringExpression.slotId: SlotId get() = afterProtocol.split('/')
     .filter { it.isNotEmpty() }
     .let { (group, pack, slot) -> SlotId(PackId(group, pack), slot) }
-val Url.extension: String get() = substringAfterLast('.', "").lowercase()
-
-fun Url.takeIfSlot() = takeIf { it.protocol == "slot" }
+val StringExpression.extension: String get() = toString().extension
+val String.extension: String get() = toString().substringAfterLast('.', "").lowercase()
+fun StringExpression.takeIfSlot() = takeIf { it.protocol == "slot" }

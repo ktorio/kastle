@@ -1,6 +1,7 @@
 package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.kastle.utils.StringExpression
 
 @Serializable
 sealed interface PackMetadata {
@@ -100,7 +101,7 @@ data class PackLinks(
 @Serializable
 data class SlotDescriptor(
     val slot: Slot,
-    val parent: Url,
+    val parent: StringExpression,
 ): Slot by slot
 
 @Serializable(PackIdSerializer::class)

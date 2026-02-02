@@ -24,12 +24,14 @@ import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.kotlin.KT_EXTENSION
 import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
 import org.jetbrains.kastle.templates.*
+import org.jetbrains.kastle.utils.StringExpression
 import org.jetbrains.kastle.utils.extension
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.psi.KtFile
 import kotlin.collections.filterNot
+import kotlin.math.exp
 import kotlin.random.Random
 
 private const val PACK_YAML = "pack.ksl.yaml"
@@ -163,39 +165,37 @@ class LocalPackRepository(
             if (!fs.exists(file))
                 throw IllegalArgumentException("Missing source file: $file")
 
-            val format = path?.extensionFormat
-                ?: target.takeIfSlot()?.getExtensionFromSlot()
-                ?: target.extensionFormat
+            val targetExpression = expressionParser.parseTemplate(target)
             val conditionExpression = condition?.let(expressionParser::parse)
-            val targetExpressions = parseTargetExpressions(expressionParser, target)
+            val format = path?.extensionFormat
+                ?: targetExpression.takeIfSlot()?.getExtensionFromSlot()
+                ?: target.extensionFormat
 
             when (format) {
                 TemplateFormat.KOTLIN -> {
                     kotlinTemplateEngine.read(
-                        path = path?.let(::Path),
+                        path = path?.let { Path(it).parent },
                         text = file.readText() ?: text
                     ).copy(
                         packId = packId,
-                        target = target,
+                        target = targetExpression,
                         condition = conditionExpression,
-                        targetExpressions = targetExpressions
                     )
                 }
                 TemplateFormat.OTHER ->
                     when (file.name.extension.lowercase()) {
                         "hbs" -> handlebarsTemplateEngine.read(
-                            target.removeSuffix(".hbs"),
+                            targetExpression,
                             file.readText() ?: text ?: throw IllegalArgumentException("Missing path or text in source definition")
                         ).copy(
                             packId = packId,
+                            target = targetExpression,
                             condition = conditionExpression,
-                            targetExpressions = targetExpressions
                         )
                         else -> StaticSource(
                             contents = fs.source(file).buffered().use { it.readByteString() },
-                            target = target,
+                            target = expressionParser.parseTemplate(target),
                             condition = conditionExpression,
-                            targetExpressions = targetExpressions,
                             packId = packId,
                         )
                     }
@@ -299,11 +299,10 @@ class LocalPackRepository(
         suspend fun readModuleSource(file: Path, target: String? = null): SourceFile =
             when (file.name.extension.lowercase()) {
                 HANDLEBARS_EXTENSION -> handlebarsTemplateEngine.read(modulePath, file).let { template ->
-                    val actualTarget = (target ?: template.target).removeSuffix(".hbs")
+                    val actualTarget = target?.let(expressionParser::parseTemplate) ?: template.target.removeExtension("hbs")
                     template.copy(
                         target = actualTarget,
                         packId = packId,
-                        targetExpressions = parseTargetExpressions(expressionParser, actualTarget),
                     )
                 }
 
@@ -314,20 +313,18 @@ class LocalPackRepository(
                         onProperty = properties::add,
                     )
                     kotlinTemplateEngine.read(file, file.readText()).let { template ->
-                        val actualTarget = target ?: template.target
+                        val actualTarget = target?.let(expressionParser::parseTemplate) ?: template.target
                         template.copy(
                             target = actualTarget,
                             packId = packId,
-                            targetExpressions = parseTargetExpressions(expressionParser, actualTarget),
                         )
                     }
                 }
 
                 else -> fs.sourceFile(file, modulePath).let { source ->
-                    val actualTarget = target ?: source.target
+                    val actualTarget = target?.let(expressionParser::parseTemplate) ?: source.target
                     source.copy(
                         target = actualTarget,
-                        targetExpressions = parseTargetExpressions(expressionParser, actualTarget),
                         packId = packId,
                     )
                 }
@@ -355,9 +352,10 @@ class LocalPackRepository(
             }
 
             // include non-kotlin files
-            sources += fs.walkFiles(sourceFolder).filter { file ->
-                !file.name.endsWith(".kt")
-            }.asFlow().map(::readModuleSource).toList()
+            sources += fs.walkFiles(sourceFolder)
+                .filter { file -> !file.name.endsWith(".kt") }
+                .asFlow()
+                .map(::readModuleSource).toList()
         }
 
         // resource files included; can be templated
@@ -374,7 +372,7 @@ class LocalPackRepository(
         // TODO remove duplicates from files in source folders
         val sourcesFromManifest = moduleYaml.get<YamlList>("sources")?.items.orEmpty()
         for (manifestSource in sourcesFromManifest) {
-            val (path, text, target, condition, priority) = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
+            val (path, text, targetUrl, condition, priority) = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
             val conditionExpression = condition?.let(expressionParser::parse)
 
             if (path != null && path.contains('*')) {
@@ -389,14 +387,13 @@ class LocalPackRepository(
             } else {
                 sources += if (text == null) {
                     require(path != null) { "Path or text is required but both are missing for source: $manifestSource" }
-                    readModuleSource(modulePath.resolve(path), target = target)
+                    readModuleSource(modulePath.resolve(path), target = targetUrl)
                 } else {
-                    require(target != null) { "Target is required when using text for source: $manifestSource" }
-                    val targetExpressions = parseTargetExpressions(expressionParser, target)
-                    handlebarsTemplateEngine.read(target.removeSuffix(".hbs"), text).copy(
-                        packId = packId,
-                        targetExpressions = targetExpressions
-                    )
+                    require(targetUrl != null) { "Target is required when using text for source: $manifestSource" }
+                    handlebarsTemplateEngine.read(
+                        expressionParser.parseTemplate(targetUrl.removeSuffix(".hbs")),
+                        text
+                    ).copy(packId = packId)
                 }.copy(condition = conditionExpression, priority = priority)
             }
         }
@@ -463,12 +460,12 @@ class LocalPackRepository(
         return root.resolve(catalogPath).readToml<VersionsCatalog>(fs)
     }
 
-    private suspend fun Url.getExtensionFromSlot(): TemplateFormat {
+    private suspend fun StringExpression.getExtensionFromSlot(): TemplateFormat {
         if (protocol != "slot") return TemplateFormat.OTHER
         val parentUrl = repository.slot(slotId)?.parent
             ?: throw IllegalArgumentException("Slot missing: $this")
         return when(parentUrl.protocol) {
-            "file" -> parentUrl.extensionFormat
+            "file" -> parentUrl.toString().extensionFormat
             "slot" -> parentUrl.getExtensionFromSlot()
             else -> error("Unknown source target protocol: $parentUrl")
         }

@@ -6,6 +6,7 @@ import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.StaticSource
 import org.jetbrains.kastle.gen.ProjectMapping
 import org.jetbrains.kastle.map
+import org.jetbrains.kastle.utils.StringLiteral
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.capitalizeFirst
 import org.jetbrains.kastle.utils.fileName
@@ -27,8 +28,9 @@ val GradleSourceMapping = ProjectMapping { project ->
         moduleSources = project.moduleSources.map { module ->
             module.copy(
                 sources = module.sources.map { source ->
-                    if (source.target.protocol == "file" && source.target.contains(SOURCE_OR_RESOURCE_FOLDER_REGEX)) {
-                        val newTarget = source.target.replace(SOURCE_OR_RESOURCE_FOLDER_REGEX) { match ->
+                    // TODO support string templates
+                    if (source.target.protocol == "file" && source.target.toString().contains(SOURCE_OR_RESOURCE_FOLDER_REGEX)) {
+                        val newTarget = source.target.toString().replace(SOURCE_OR_RESOURCE_FOLDER_REGEX) { match ->
                             val sourceRoot = match.groups[1]!!.value
                             val mainOrTest = (if (sourceRoot in setOf("test", "testResources")) "test" else "main").capitalizeFirst()
                             val fileCategory = when {
@@ -48,8 +50,8 @@ val GradleSourceMapping = ProjectMapping { project ->
                             }
                         }
                         when(source) {
-                            is StaticSource -> source.copy(target = newTarget)
-                            is SourceTemplate -> source.copy(target = newTarget)
+                            is StaticSource -> source.copy(target = StringLiteral(newTarget))
+                            is SourceTemplate -> source.copy(target = StringLiteral(newTarget))
                         }
                     }
                     else source

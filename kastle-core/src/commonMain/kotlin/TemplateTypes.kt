@@ -9,6 +9,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.io.relativeTo
 import org.jetbrains.kastle.utils.Expression
+import org.jetbrains.kastle.utils.StringExpression
+import org.jetbrains.kastle.utils.StringLiteral
 import kotlin.jvm.JvmInline
 
 @Serializable
@@ -22,12 +24,10 @@ data class SourceDefinition(
 
 @Serializable
 sealed interface SourceFile {
-    val target: Url
+    val target: StringExpression
     val condition: Expression?
     // Pack ID for variable resolution when target has expressions
     val packId: PackId?
-    // Parsed expressions from ${...} patterns in the target URL
-    val targetExpressions: List<TargetExpression>?
 }
 
 /**
@@ -46,10 +46,9 @@ fun SourceFile.copy(
 data class StaticSource(
     @Serializable(with = ByteStringSerializer::class)
     val contents: ByteString,
-    override val target: Url,
+    override val target: StringExpression,
     override val condition: Expression? = null,
     override val packId: PackId? = null,
-    override val targetExpressions: List<TargetExpression>? = null,
 ): SourceFile {
     companion object {
         fun FileSystem.sourceFile(
@@ -62,7 +61,7 @@ data class StaticSource(
             }
             return StaticSource(
                 contents = bytes,
-                target = "file:${file.relativeTo(basePath)}",
+                target = StringLiteral("file:${file.relativeTo(basePath)}"),
                 condition = condition,
             )
         }
@@ -73,14 +72,13 @@ data class StaticSource(
 @SerialName("template")
 data class SourceTemplate(
     val text: String,
-    override val target: Url,
+    override val target: StringExpression,
     val imports: SourceImports? = null,
     val blocks: List<Block>? = null,
     override val condition: Expression? = null,
     val priority: Int? = null,
     // this is here also to sort out files after modules are merged
     override val packId: PackId? = null,
-    override val targetExpressions: List<TargetExpression>? = null,
 ): SourceFile
 
 @Serializable
@@ -89,7 +87,7 @@ data class SourceImports(
     val imports: List<SourceImport>,
 )
 
-typealias SourcesByUrl = Map<Url, List<SourceFile>>
+typealias SourcesByUrl = Map<String, List<SourceFile>>
 
 /**
  * Represents an import in a source file.

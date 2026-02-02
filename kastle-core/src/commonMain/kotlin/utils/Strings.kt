@@ -43,6 +43,8 @@ fun String.unwrapQuotes() =
         substring(1, length - 1)
     else this
 
+fun String.wrapQuotes() = "\"$this\""
+
 fun String.appendPath(vararg paths: String): String =
     sequenceOf(this, *paths)
         .filter(String::isNotEmpty)

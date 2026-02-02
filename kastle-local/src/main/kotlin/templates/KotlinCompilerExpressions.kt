@@ -6,32 +6,54 @@ import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.BinaryOperator
 import org.jetbrains.kastle.utils.PostfixOperator
 import org.jetbrains.kastle.utils.PrefixOperator
+import org.jetbrains.kastle.utils.StringLiteral
 import org.jetbrains.kotlin.lexer.KtTokens
 
 fun KtExpression?.toTemplateExpression(): Expression {
     return when (this) {
         null -> Expression.NullLiteral
 
-        // Handle string literals
-        // TODO this is not ok
+        // Handle string templates
         is KtStringTemplateExpression -> {
             if (entries.isEmpty()) {
                 // Empty string
-                Expression.StringLiteral("")
+                StringLiteral("")
             } else if (entries.size == 1 && entries[0] is KtLiteralStringTemplateEntry) {
                 // Simple string without interpolation
-                Expression.StringLiteral((entries[0] as KtLiteralStringTemplateEntry).text)
+                StringLiteral((entries[0] as KtLiteralStringTemplateEntry).text)
             } else {
-                // More complex string template - we could process interpolation here
-                // For now, just concatenate text parts
-                val text = entries.joinToString("") {
-                    when (it) {
-                        is KtLiteralStringTemplateEntry -> it.text
-                        is KtSimpleNameStringTemplateEntry -> "\${${it.expression?.text ?: ""}}"
-                        else -> it.text
+                // Interpolated string template:
+                // - Return Expression.StringTemplate
+                // - Each entry expression is produced recursively via toTemplateExpression()
+                org.jetbrains.kastle.utils.StringTemplate(
+                    entries = entries.map { entry ->
+                        val entryExpression: Expression = when (entry) {
+                            is KtLiteralStringTemplateEntry -> StringLiteral(entry.text)
+
+                            // Escapes like \n, \t, \$, etc.
+                            // Keep it conservative: use the entry's text as it appears in the template.
+                            is KtEscapeStringTemplateEntry -> StringLiteral(entry.text)
+
+                            // "$name"
+                            is KtSimpleNameStringTemplateEntry -> {
+                                val embedded = entry.expression
+                                embedded?.toTemplateExpression()
+                                    ?: Expression.VariableRef(entry.text.removePrefix("$"))
+                            }
+
+                            // "${ ... }"
+                            is KtBlockStringTemplateEntry -> {
+                                val embedded = entry.expression
+                                    ?: throw IllegalArgumentException("Missing expression in string template entry: ${entry.text}")
+                                embedded.toTemplateExpression()
+                            }
+
+                            else -> StringLiteral(entry.text)
+                        }
+
+                        entryExpression
                     }
-                }
-                Expression.StringLiteral(text)
+                )
             }
         }
 
@@ -45,7 +67,7 @@ fun KtExpression?.toTemplateExpression(): Expression {
                     // Try parsing as number
                     try {
                         if (text.startsWith('"') && text.endsWith('"'))
-                            Expression.StringLiteral(text.substring(1, text.length - 1))
+                            StringLiteral(text.substring(1, text.length - 1))
                         else if (text.startsWith('\'') && text.endsWith('\''))
                             Expression.CharLiteral(text[1]) // TODO handle escape
                         else if (text.contains('.'))
@@ -54,7 +76,7 @@ fun KtExpression?.toTemplateExpression(): Expression {
                             Expression.LongLiteral(text.toLong())
                     } catch (e: NumberFormatException) {
                         // Fallback to string if not a valid number
-                        Expression.StringLiteral(text)
+                        StringLiteral(text)
                     }
                 }
             }

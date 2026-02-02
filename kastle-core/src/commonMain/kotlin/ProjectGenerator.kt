@@ -99,15 +99,13 @@ class ProjectGenerator(
 
     private fun getActualPath(source: SourceFile, module: SourceModule, project: Project): String {
         val sourcePackId = source.packId
-        val sourceTargetExpressions = source.targetExpressions
-        return if (sourcePackId != null && sourceTargetExpressions != null) {
-            // Interpolate target expressions if present
-            val variables = collectVariables(project, sourcePackId, module)
-            val interpolatedTarget = interpolateTargetUrl(source.target, sourceTargetExpressions, variables)
-            Path(module.path, interpolatedTarget.relativeFile).normalize().toString()
-        } else {
-            Path(module.path, source.target.relativeFile).normalize().toString()
-        }
+        val variables = sourcePackId
+            ?.takeIf { source.target is StringTemplate }
+            ?.let { collectVariables(project, sourcePackId, module) }
+            ?: Variables()
+        val evaluatedTarget = source.target.evaluate(variables)
+        val relativePath = evaluatedTarget.toString().relativeFile
+        return Path(module.path, relativePath).normalize().toString()
     }
 
     private fun collectVariables(project: Project, packId: PackId, module: SourceModule): Stack<Map<String, Any?>> {
