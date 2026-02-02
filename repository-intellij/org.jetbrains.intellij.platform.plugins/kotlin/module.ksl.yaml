@@ -5,3 +5,8 @@ sources:
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     text: <depends>org.jetbrains.kotlin</depends>
     priority: 40
+  - target: slot://org.jetbrains.intellij.platform/plugin/customPluginDescriptorExtensions
+    text: |-
+      <extensions defaultExtensionNs="org.jetbrains.kotlin">
+          <supportsKotlinPluginMode supportsK2="true" />
+      </extensions>
