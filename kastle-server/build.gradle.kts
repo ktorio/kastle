@@ -54,6 +54,7 @@ kotlin {
                 implementation(project(":kastle-client"))
                 implementation(project(":kastle-test"))
                 implementation(libs.ktor.server.test.host)
+                implementation(libs.ktor.client.content.negotiation)
             }
         }
     }

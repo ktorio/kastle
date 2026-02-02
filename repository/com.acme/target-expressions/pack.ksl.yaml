@@ -1,0 +1,20 @@
+name: Target Expressions
+description: Test target expressions with property values
+properties:
+  - key: folderName
+    type: string
+  - key: computedFolder
+    type: string
+    hidden: true
+  - key: jsonFileName
+    type: string
+    hidden: true
+propertyValues:
+  - key: computedFolder
+    expression: folderName.replace("-", "")
+  - key: jsonFileName
+    expression: _project.name.lowercase() + "-2.json"
+
+rootSources:
+  - path: sources/root-source.json.hbs
+    target: file:src/${jsonFileName}

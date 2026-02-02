@@ -54,6 +54,7 @@ internal class KotlinCompilerTemplateEngine(
 
     val environment: KotlinCoreEnvironment
     val psiFileFactory: PsiFileFactory
+    val expressionParser: KotlinExpressionParser
     // TODO verify compilation, etc.
     //private val analyzer = TopDownAnalyzerFacadeForJVM
 
@@ -74,6 +75,7 @@ internal class KotlinCompilerTemplateEngine(
             EnvironmentConfigFiles.JVM_CONFIG_FILES
         )
         psiFileFactory = PsiFileFactory.getInstance(environment.project)
+        expressionParser = KotlinExpressionParser(psiFileFactory)
     }
 
     val ktFiles: List<KtFile> by lazy {
@@ -112,7 +114,8 @@ internal class KotlinCompilerTemplateEngine(
             ?.let {
                 targetRegex.find(it.text)?.groupValues?.getOrNull(1)
             }
-        val target = targetFromHeader ?: "file:${sourcePath.resolve(ktFile.name)}"
+        val targetString = targetFromHeader ?: "file:${sourcePath.resolve(ktFile.name)}"
+        val target = expressionParser.parseTemplate(targetString)
         log.debug { "Compiling $target..." }
 
         return when (target.protocol) {

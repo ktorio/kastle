@@ -7,7 +7,6 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.relativeTo
-import org.jetbrains.kastle.utils.Expression.StringLiteral
 import org.jetbrains.kastle.utils.Expression.VariableRef
 import org.jetbrains.kastle.utils.ListStack
 import org.jetbrains.kastle.utils.*
@@ -48,7 +47,7 @@ class HandlebarsTemplateEngine(
         return with(processEscapedBraces(text)) {
             SourceTemplate(
                 text = text,
-                target = "file:${file.relativeTo(modulePath).toString().removeSuffix(".hbs")}",
+                target = StringLiteral("file:${file.relativeTo(modulePath).toString().removeSuffix(".hbs")}"),
                 blocks = findBlocks(text)
                     .sortedWith(compareBy<Block> {
                         it.range.first
@@ -62,7 +61,7 @@ class HandlebarsTemplateEngine(
         }
     }
 
-    fun read(target: Url, text: String): SourceTemplate =
+    fun read(target: StringExpression, text: String): SourceTemplate =
         with(processEscapedBraces(text)) {
             SourceTemplate(
                 text = template,

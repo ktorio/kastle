@@ -78,7 +78,7 @@ class TemplateEvaluator(
         variables: Variables,
         slots: SourcesByUrl,
     ): Buffer = withSourceContext(template.text) {
-        log.trace { template.target }
+        log.trace { template.target.toString() }
         val slotImports = template.blocks?.asSequence().orEmpty()
             .flatMap { block -> slots.lookup(packId, block) }
             .filterIsInstance<SourceTemplate>()
@@ -88,7 +88,7 @@ class TemplateEvaluator(
             KT_EXTENSION, KT_SCRIPT_EXTENSION ->
                 writeKotlinSourcePreamble(
                     groupId = groupId,
-                    target = template.target,
+                    target = template.target.toString(),
                     source = template,
                     extraImports = slotImports,
                     skipPackage = template.target.extension == KT_SCRIPT_EXTENSION,

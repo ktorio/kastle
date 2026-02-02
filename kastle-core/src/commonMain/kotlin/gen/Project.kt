@@ -57,10 +57,11 @@ fun SourceModule.slotsVariableEntry(project: Project, packId: PackId): Pair<Stri
         url.relativeFile.removePrefix(packId.toString()).trimStart('/')
     }
 
+// TODO support string templates
 val SourceModule.slotSources: SourcesByUrl get() =
     sources
         .filter { it.isSlot() }
-        .groupBy { it.target }
+        .groupBy { it.target.toString() }
 
 private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "path" to path,

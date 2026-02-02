@@ -50,7 +50,7 @@ class ProjectGenerator(
             val slotSources = project.slotSources + module.slotSources
 
             for (source in moduleSources) {
-                val path = Path(module.path, source.target.relativeFile).normalize().toString()
+                val path = getActualPath(source, module, project)
                 if (source !is SourceTemplate) {
                     if (source !is StaticSource)
                         error("Unsupported source type: ${source::class.simpleName}")
@@ -69,12 +69,7 @@ class ProjectGenerator(
                     log.warn { "Skipping ${source.target}; missing pack ID" }
                     continue
                 }
-                val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
-                val baseVariables = project.getVariables(pack) +
-                        project.toVariableEntry() +
-                        module.toVariableEntry() +
-                        module.slotsVariableEntry(project, packId)
-                val variables = baseVariables + loadDynamicProperties(project, baseVariables)
+                val variables = collectVariables(project, packId, module)
 
                 if (source.condition != null) {
                     val conditionValue = source.condition.evaluate(variables)
@@ -93,12 +88,38 @@ class ProjectGenerator(
                     templateEvaluator.evaluateToBuffer(
                         template = source,
                         groupId = project.group,
-                        packId = pack.id,
+                        packId = packId,
                         variables = variables,
                         slots = slotSources,
                     )
                 })
             }
+        }
+    }
+
+    private fun getActualPath(source: SourceFile, module: SourceModule, project: Project): String {
+        val sourcePackId = source.packId
+        val variables = sourcePackId
+            ?.takeIf { source.target is StringTemplate }
+            ?.let { collectVariables(project, sourcePackId, module) }
+            ?: Variables()
+        val evaluatedTarget = source.target.evaluate(variables)
+        val relativePath = evaluatedTarget.toString().relativeFile
+        return Path(module.path, relativePath).normalize().toString()
+    }
+
+    private fun collectVariables(project: Project, packId: PackId, module: SourceModule): Stack<Map<String, Any?>> {
+        val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
+        val baseVariables = project.getVariables(pack) +
+                project.toVariableEntry() +
+                module.toVariableEntry() +
+                module.slotsVariableEntry(project, packId)
+        return baseVariables + loadDynamicProperties(project, baseVariables)
+    }
+
+    fun interpolateTargetUrl(url: String, targetExpressions: List<TargetExpression>, variables: Variables): String {
+        return targetExpressions.fold(url) { acc, expr ->
+            acc.replace(expr.placeholder, expr.expression.evaluate(variables).toString())
         }
     }
 

@@ -1,0 +1,6 @@
+platform: jvm
+sources:
+  - path: output.txt.hbs
+    target: file:${folderName}/output.txt
+  - path: computed.txt.hbs
+    target: file:${computedFolder}/computed.txt

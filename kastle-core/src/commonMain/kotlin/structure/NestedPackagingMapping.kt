@@ -5,6 +5,7 @@ import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.StaticSource
 import org.jetbrains.kastle.gen.ProjectMapping
 import org.jetbrains.kastle.map
+import org.jetbrains.kastle.utils.StringLiteral
 import org.jetbrains.kastle.utils.protocol
 
 /**
@@ -19,13 +20,14 @@ val NestedPackagingMapping = ProjectMapping { project ->
         moduleSources = project.moduleSources.map { module ->
             module.copy(
                 sources = module.sources.map { source ->
-                    if (source.target.protocol == "file" && source.target.contains(SOURCE_FOLDER_REGEX)) {
-                        val newTarget = source.target.replace(SOURCE_FOLDER_REGEX) { match ->
+                    // TODO support string templates
+                    if (source.target.protocol == "file" && source.target.toString().contains(SOURCE_FOLDER_REGEX)) {
+                        val newTarget = source.target.toString().replace(SOURCE_FOLDER_REGEX) { match ->
                             match.value + groupFolder + '/'
                         }
                         when(source) {
-                            is StaticSource -> source.copy(target = newTarget)
-                            is SourceTemplate -> source.copy(target = newTarget)
+                            is StaticSource -> source.copy(target = StringLiteral(newTarget))
+                            is SourceTemplate -> source.copy(target = StringLiteral(newTarget))
                         }
                     }
                     else source
