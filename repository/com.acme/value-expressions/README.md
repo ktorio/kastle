@@ -7,5 +7,7 @@ You can provide values for other modules, or you can use them to populate your o
 ```yaml
 propertyValues:
   - key: modulePathUpper
-    value: _module.path.uppercase()
+    expression: _module.path.uppercase()
+  - key: com.acme/parent/logLevel
+    value: verbose
 ```

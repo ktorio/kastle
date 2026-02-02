@@ -6,6 +6,7 @@ import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
 import kotlinx.coroutines.flow.*
+import kotlinx.io.Source
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
@@ -17,8 +18,6 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import org.jetbrains.kastle.StaticSource.Companion.sourceFile
-import org.jetbrains.kastle.amper.readDependencies
-import org.jetbrains.kastle.amper.readPlatforms
 import org.jetbrains.kastle.io.*
 import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.kotlin.KT_EXTENSION
@@ -95,75 +94,91 @@ class LocalPackRepository(
         }
 
     override suspend fun get(packId: PackId): PackMetadata? {
-        val projectPath = root.resolve(packId.toString())
-        val manifestYaml = projectPath.resolve(PACK_YAML).readYamlNode()?.yamlMap ?: return null
-        val filteredYaml = YamlMap(manifestYaml.entries.filterNot { it.key.content == "propertyValues" }, manifestYaml.path)
-        val manifest: PackManifest = Yaml.default.decodeFromYamlNode(filteredYaml) ?: return null
-        val properties = manifest.properties.toMutableList()
-        val group = manifest.group
-            ?: projectPath.resolve("../$GROUP_YAML").readYaml()
-            ?: Group(packId.group)
-        val documentation = projectPath.resolve("README.md").readText()
-        val moduleManifests = projectPath.moduleFolders().mapNotNull { modulePath ->
-            readSourceModuleManifest(projectPath, modulePath)
-        }.toList()
+        try {
+            val projectPath = root.resolve(packId.toString())
+            val groupPath = projectPath.parent!!
+            val manifestYaml = projectPath.resolve(PACK_YAML).readYamlNode()?.yamlMap ?: return null
+            val filteredYaml =
+                YamlMap(manifestYaml.entries.filterNot { it.key.content == "propertyValues" }, manifestYaml.path)
+            val manifest: PackManifest = Yaml.default.decodeFromYamlNode(filteredYaml) ?: return null
+            val properties = manifest.properties.toMutableList()
+            val group = (manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml() ?: Group()).let { group ->
+                group.copy(
+                    id = packId.group,
+                    icon = group.icon?.let { groupPath.resolve(it).relativeTo(root) }?.toString()
+                )
+            }
+            val documentation = projectPath.resolve("README.md").readText()
+            val moduleManifests = projectPath.moduleFolders().mapNotNull { modulePath ->
+                readSourceModuleManifest(projectPath, modulePath)
+            }.toList()
 
-        return manifest.copy(
-            id = packId,
-            group = group,
-            properties = properties.distinctBy { it.key },
-            documentation = documentation,
-            modules = moduleManifests
-        )
+            return manifest.copy(
+                id = packId,
+                group = group,
+                properties = properties.distinctBy { it.key },
+                documentation = documentation,
+                modules = moduleManifests
+            )
+        } catch (e: Exception) {
+            throw PackReadException(packId, e)
+        }
     }
 
     private fun Path.isDir(): Boolean =
         fs.metadataOrNull(this)?.isDirectory == true
 
     override suspend fun read(packId: PackId): PackDescriptor? {
-        val projectPath = root.resolve(packId.toString())
-        val rawManifest: YamlMap = projectPath.resolve(PACK_YAML).readYamlNode(fs, yaml)?.yamlMap ?: return null
-        val filteredManifest = YamlMap(rawManifest.entries.filterNot { it.key.content == "propertyValues" }, rawManifest.path)
-        val manifest: PackManifest = yaml.decodeFromYamlNode(filteredManifest)
-        val group = manifest.group
-            ?: projectPath.resolve("../$GROUP_YAML").readYaml()
-            ?: Group(packId.group)
-        val properties = manifest.properties.toMutableList()
-        val documentation = projectPath.resolve("README.md").readText()
-        val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath, repository)
-        val expressionParser = KotlinExpressionParser(kotlinTemplateEngine.psiFileFactory)
-        val propertyValues: List<PropertyAssignment> = rawManifest.get<YamlList>("propertyValues")?.items?.map { node ->
-            val nodeMap = node.yamlMap
-            val key = nodeMap.getScalar("key")?.yamlScalar?.content
-            require(key != null) { "Property value key is required: $node" }
-            val variableId = VariableId.parse(key, relativePackId = packId)
-            val value = nodeMap.getScalar("value")?.yamlScalar?.content
-            val expression = nodeMap.getScalar("expression")?.yamlScalar?.content?.let(expressionParser::parse)
-            if (value != null) {
-                ValueAssignment(variableId, value)
-            } else if (expression != null) {
-                ExpressionAssignment(variableId, expression)
-            } else {
-                throw IllegalArgumentException("Property value must contain either value or expression: $node")
-            }
-        }.orEmpty()
-
-        val projectSources = projectPath.moduleFolders().asFlow()
-            .mapNotNull { modulePath ->
-                readSourceModule(
-                    projectPath,
-                    modulePath,
-                    packId,
-                    properties,
-                    expressionParser
+        try {
+            val projectPath = root.resolve(packId.toString())
+            val groupPath = projectPath.parent!!
+            val rawManifest: YamlMap = projectPath.resolve(PACK_YAML).readYamlNode(fs, yaml)?.yamlMap ?: return null
+            val filteredManifest =
+                YamlMap(rawManifest.entries.filterNot { it.key.content == "propertyValues" }, rawManifest.path)
+            val manifest: PackManifest = yaml.decodeFromYamlNode(filteredManifest)
+            val group = (manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml() ?: Group()).let { group ->
+                group.copy(
+                    id = packId.group,
+                    icon = group.icon?.let { groupPath.resolve(it).relativeTo(root) }?.toString()
                 )
-            }.toList().let(ProjectModules::fromList)
+            }
+            val properties = manifest.properties.toMutableList()
+            val documentation = projectPath.resolve("README.md").readText()
+            val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath, repository)
+            val expressionParser = KotlinExpressionParser(kotlinTemplateEngine.psiFileFactory)
+            val propertyValues: List<PropertyAssignment> =
+                rawManifest.get<YamlList>("propertyValues")?.items?.map { node ->
+                    val nodeMap = node.yamlMap
+                    val key = nodeMap.getScalar("key")?.yamlScalar?.content
+                    require(key != null) { "Property value key is required: $node" }
+                    val variableId = VariableId.parse(key, relativePackId = packId)
+                    val value = nodeMap.getScalar("value")?.yamlScalar?.content
+                    val expression = nodeMap.getScalar("expression")?.yamlScalar?.content?.let(expressionParser::parse)
+                    if (value != null) {
+                        ValueAssignment(variableId, value)
+                    } else if (expression != null) {
+                        ExpressionAssignment(variableId, expression)
+                    } else {
+                        throw IllegalArgumentException("Property value must contain either value or expression: $node")
+                    }
+                }.orEmpty()
 
-        val readSource: suspend (SourceDefinition) -> SourceFile = { (path, text, target, condition) ->
-            require(target != null) { "Missing target for project-level source: ${path ?: text}" }
-            val file = projectPath.resolve(path ?: "source.kt")
-            if (!fs.exists(file))
-                throw IllegalArgumentException("Missing source file: $file")
+            val projectSources = projectPath.moduleFolders().asFlow()
+                .mapNotNull { modulePath ->
+                    readSourceModule(
+                        projectPath,
+                        modulePath,
+                        packId,
+                        properties,
+                        expressionParser
+                    )
+                }.toList().let(ProjectModules::fromList)
+
+            val readSource: suspend (SourceDefinition) -> SourceFile = { (path, text, target, condition) ->
+                require(target != null) { "Missing target for project-level source: ${path ?: text}" }
+                val file = projectPath.resolve(path ?: "source.kt")
+                if (!fs.exists(file))
+                    throw IllegalArgumentException("Missing source file: $file")
 
             val targetExpression = expressionParser.parseTemplate(target)
             val conditionExpression = condition?.let(expressionParser::parse)
@@ -202,20 +217,33 @@ class LocalPackRepository(
             }
         }
 
-        return PackDescriptor(
-            manifest = manifest.copy(
-                id = packId,
-                group = group,
-                properties = properties.distinctBy { it.key },
-                documentation = documentation,
-            ),
-            propertyValues = propertyValues,
-            sources = PackSources(
-                common = manifest.commonSources.map { readSource(it) },
-                root = manifest.rootSources.map { readSource(it) },
-                modules = projectSources,
+            return PackDescriptor(
+                manifest = manifest.copy(
+                    id = packId,
+                    group = group,
+                    properties = properties.distinctBy { it.key },
+                    documentation = documentation,
+                ),
+                propertyValues = propertyValues,
+                sources = PackSources(
+                    common = manifest.commonSources.map { readSource(it) },
+                    root = manifest.rootSources.map { readSource(it) },
+                    modules = projectSources,
+                )
             )
-        )
+        } catch (e: Exception) {
+            throw PackReadException(packId, e)
+        }
+    }
+
+    // TODO just read the docs
+    override suspend fun readDocs(packId: PackId): String? =
+        read(packId)?.documentation
+
+    override suspend fun readFile(path: String): Source? {
+        val file = root.resolve(path)
+        if (!fs.exists(file)) return null
+        return fs.source(file).buffered()
     }
 
     private fun parseTargetExpressions(
@@ -448,8 +476,7 @@ class LocalPackRepository(
             }
         )
 
-        val libraryCatalog = loadVersionCatalog(versionsCatalogFile)
-            ?: error("Failed to read versions catalog from $versionsCatalogFile")
+        val libraryCatalog = loadVersionCatalog(versionsCatalogFile) ?: VersionsCatalog()
         // TODO: allow ignoring repository version catalogs by Renovate
         val repositoryVersionCatalog = loadVersionCatalog(REPOSITORY_VERSION_CATALOG) ?: VersionsCatalog.Empty
 

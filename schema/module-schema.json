@@ -45,8 +45,20 @@
       }
     },
     "propertyValues": {
-      "type": "object",
-      "additionalProperties": { "type": "string" }
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string" },
+          "value": { "type": "string" },
+          "expression": {
+            "type": "string",
+            "description": "Kotlin expression to be evaluated during project generation.",
+            "x-intellij-language-injection": "kotlin"
+          }
+        },
+        "required": ["key"]
+      }
     },
     "sources": {
       "type": "array",
@@ -56,7 +68,10 @@
           "path": { "type": "string" },
           "text": { "type": "string" },
           "target": { "type": "string" },
-          "condition": { "type": "string" },
+          "condition": {
+            "type": "string",
+            "x-intellij-language-injection": "kotlin"
+          },
           "priority": { "type": "integer" }
         }
       }

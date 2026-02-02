@@ -42,9 +42,21 @@
       "description": "List of Pack IDs this pack depends on"
     },
     "propertyValues": {
-      "type": "object",
-      "additionalProperties": { "type": "string" },
-      "description": "Mapping of Variable IDs to their values"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string" },
+          "value": { "type": "string" },
+          "expression": {
+            "type": "string",
+            "description": "Kotlin expression to be evaluated during project generation.",
+            "x-intellij-language-injection": "kotlin"
+          }
+        },
+        "required": ["key"]
+      },
+      "description": "List of property assignments with key and value or expression"
     },
     "properties": {
       "type": "array",
@@ -76,7 +88,11 @@
         "path": { "type": "string" },
         "text": { "type": "string" },
         "target": { "type": "string" },
-        "if": { "type": "string", "description": "Condition expression" }
+        "if": {
+          "type": "string",
+          "description": "Condition expression",
+          "x-intellij-language-injection": "kotlin"
+        }
       }
     }
   }

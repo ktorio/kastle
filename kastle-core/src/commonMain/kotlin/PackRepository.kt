@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.io.Source
 import org.jetbrains.kastle.utils.slots
 
 interface PackRepository {
@@ -17,6 +18,8 @@ interface PackRepository {
             override suspend fun get(packId: PackId): PackMetadata? = null
             override fun readAll(): Flow<PackDescriptor> = emptyFlow()
             override suspend fun read(packId: PackId): PackDescriptor? = null
+            override suspend fun readDocs(packId: PackId): String? = null
+            override suspend fun readFile(path: String): Source? = null
             override suspend fun slot(slotId: SlotId): SlotDescriptor? = null
             override suspend fun versions(): VersionsCatalog = VersionsCatalog.Empty
         }
@@ -35,7 +38,9 @@ interface PackRepository {
     /**
      * Get metadata for all packs in this repository, ignoring sources.
      */
-    fun getAll(): Flow<PackMetadata> = ids().map { get(it) ?: throw MissingPackException(it) }
+    fun getAll(): Flow<PackMetadata> = ids().map {
+        get(it) ?: throw MissingPackException(it)
+    }
 
     /**
      * Get the version catalog for this repository.
@@ -46,6 +51,16 @@ interface PackRepository {
      * Get a pack by its ID.  Includes sources.
      */
     suspend fun read(packId: PackId): PackDescriptor?
+
+    /**
+     * Convenience function for reading documentation.  Pulls down the README.md file.
+     */
+    suspend fun readDocs(packId: PackId): String? = null
+
+    /**
+     * Read a file from the repository. Used for items referenced, but not included, in the metadata, such as images.
+     */
+    suspend fun readFile(path: String): Source? = null
 
     /**
      * Get full details for all packs in this repository.
@@ -73,7 +88,7 @@ interface PackRepository {
                     emit(pack)
                     emitAll(getAllWithRequirements(pack.requires.filter { it !in packIds }))
                 } catch (cause: Throwable) {
-                    throw FailedToReadPackException(packId, cause)
+                    throw PackReadException(packId, cause)
                 }
             }
         }
