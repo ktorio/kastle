@@ -1,5 +1,7 @@
 sources:
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
+    #language=kotlin
     text: compatiblePlugin("org.jetbrains.plugins.go")
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    #language=xml
     text: <depends>org.jetbrains.plugins.go</depends>

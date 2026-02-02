@@ -1,4 +1,5 @@
 sources:
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    #language=xml
     text: <depends>com.intellij.modules.xml</depends>
     priority: 80
