@@ -180,42 +180,44 @@ class LocalPackRepository(
                 if (!fs.exists(file))
                     throw IllegalArgumentException("Missing source file: $file")
 
-            val targetExpression = expressionParser.parseTemplate(target)
-            val conditionExpression = condition?.let(expressionParser::parse)
-            val format = path?.extensionFormat
-                ?: targetExpression.takeIfSlot()?.getExtensionFromSlot()
-                ?: target.extensionFormat
+                val targetExpression = expressionParser.parseTemplate(target)
+                val conditionExpression = condition?.let(expressionParser::parse)
+                val format = path?.extensionFormat
+                    ?: targetExpression.takeIfSlot()?.getExtensionFromSlot()
+                    ?: target.extensionFormat
 
-            when (format) {
-                TemplateFormat.KOTLIN -> {
-                    kotlinTemplateEngine.read(
-                        path = path?.let { Path(it).parent },
-                        text = file.readText() ?: text
-                    ).copy(
-                        packId = packId,
-                        target = targetExpression,
-                        condition = conditionExpression,
-                    )
-                }
-                TemplateFormat.OTHER ->
-                    when (file.name.extension.lowercase()) {
-                        "hbs" -> handlebarsTemplateEngine.read(
-                            targetExpression,
-                            file.readText() ?: text ?: throw IllegalArgumentException("Missing path or text in source definition")
+                when (format) {
+                    TemplateFormat.KOTLIN -> {
+                        kotlinTemplateEngine.read(
+                            path = path?.let(::Path),
+                            text = file.readText() ?: text
                         ).copy(
                             packId = packId,
                             target = targetExpression,
                             condition = conditionExpression,
                         )
-                        else -> StaticSource(
-                            contents = fs.source(file).buffered().use { it.readByteString() },
-                            target = expressionParser.parseTemplate(target),
-                            condition = conditionExpression,
-                            packId = packId,
-                        )
                     }
+                    TemplateFormat.OTHER ->
+                        when (file.name.extension.lowercase()) {
+                            HANDLEBARS_EXTENSION -> {
+                                handlebarsTemplateEngine.read(
+                                    targetExpression,
+                                    file.readText() ?: text ?: throw IllegalArgumentException("Missing path or text in source definition")
+                                ).copy(
+                                    packId = packId,
+                                    target = targetExpression.removeExtension(HANDLEBARS_EXTENSION),
+                                    condition = conditionExpression,
+                                )
+                            }
+                            else -> StaticSource(
+                                contents = fs.source(file).buffered().use { it.readByteString() },
+                                target = targetExpression,
+                                condition = conditionExpression,
+                                packId = packId,
+                            )
+                        }
+                }
             }
-        }
 
             return PackDescriptor(
                 manifest = manifest.copy(
@@ -245,28 +247,6 @@ class LocalPackRepository(
         if (!fs.exists(file)) return null
         return fs.source(file).buffered()
     }
-
-    private fun parseTargetExpressions(
-        expressionParser: KotlinExpressionParser,
-        target: String
-    ): List<TargetExpression>? {
-        val placeholders = extractExpressionPlaceholders(target)
-        if (placeholders.isEmpty()) return null
-        return placeholders.map { (placeholder, expressionContent) ->
-            TargetExpression(placeholder, expressionParser.parse(expressionContent))
-        }
-    }
-
-    /**
-     * Extracts all ${expression} placeholders from a string.
-     * Returns a list of pairs: (full placeholder including ${}, expression content inside).
-     *
-     * Example: "file:theme/\${themeName}.json" -> [("\${themeName}", "themeName")]
-     */
-    fun extractExpressionPlaceholders(template: String): List<Pair<String, String>> =
-        EXPRESSION_PATTERN.findAll(template).map { match ->
-            match.value to match.groupValues[1]
-        }.toList()
 
     private fun readSourceModuleManifest(projectPath: Path, modulePath: Path): SourceModuleManifest? {
         val relativeModulePath = modulePath.relativeTo(projectPath).toString()
@@ -326,12 +306,14 @@ class LocalPackRepository(
 
         suspend fun readModuleSource(file: Path, target: String? = null): SourceFile =
             when (file.name.extension.lowercase()) {
-                HANDLEBARS_EXTENSION -> handlebarsTemplateEngine.read(modulePath, file).let { template ->
-                    val actualTarget = target?.let(expressionParser::parseTemplate) ?: template.target.removeExtension("hbs")
-                    template.copy(
-                        target = actualTarget,
-                        packId = packId,
-                    )
+                HANDLEBARS_EXTENSION -> {
+                    handlebarsTemplateEngine.read(modulePath, file).let { template ->
+                        val targetExpression = target?.let(expressionParser::parseTemplate) ?: template.target
+                        template.copy(
+                            target = targetExpression.removeExtension(HANDLEBARS_EXTENSION),
+                            packId = packId,
+                        )
+                    }
                 }
 
                 KT_EXTENSION, KT_SCRIPT_EXTENSION -> {
@@ -418,11 +400,14 @@ class LocalPackRepository(
                     readModuleSource(modulePath.resolve(path), target = targetUrl)
                 } else {
                     require(targetUrl != null) { "Target is required when using text for source: $manifestSource" }
-                    handlebarsTemplateEngine.read(
-                        expressionParser.parseTemplate(targetUrl.removeSuffix(".hbs")),
-                        text
-                    ).copy(packId = packId)
-                }.copy(condition = conditionExpression, priority = priority)
+                    val targetExpression = expressionParser.parseTemplate(targetUrl)
+                        .removeExtension(HANDLEBARS_EXTENSION)
+                    handlebarsTemplateEngine.read(targetExpression, text)
+                        .copy(packId = packId)
+                }.copy(
+                    condition = conditionExpression,
+                    priority = priority
+                )
             }
         }
 
