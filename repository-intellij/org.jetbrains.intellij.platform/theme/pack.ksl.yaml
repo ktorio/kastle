@@ -9,6 +9,9 @@ properties:
   - key: pluginName
     type: string
     hidden: true
+  - key: themeFileNameBase
+    type: string
+    hidden: true
   - key: themeProviderId
     type: string
     hidden: true
@@ -17,6 +20,8 @@ propertyValues:
   # Post-processed input properties:
   - key: pluginName
     expression: _project.name.capitalize()
+  - key: themeFileNameBase
+    expression: sanitizePackageName(_project.name)
   - key: themeProviderId
     expression: uuid()
 
@@ -29,7 +34,7 @@ rootSources:
   - path: sources/resources/META-INF/pluginIcon.svg
     target: file:resources/META-INF/pluginIcon.svg
   - path: sources/resources/theme/mytheme.theme.json.hbs
-    target: file:resources/theme/mytheme.theme.json
+    target: file:resources/theme/${themeFileNameBase}.theme.json
 
   # Git
   - path: gitignoreItems.hbs

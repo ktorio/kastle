@@ -167,7 +167,14 @@ sealed interface Expression {
                     args.chunked(2).associate { (k, v) -> k to v }
                 }
                 "setOf" -> args.toSet()
+
+                // TODO: these are plugins-specific methods; move them to a custom methods class, not sure about a new module
                 "uuid" -> Uuid.random().toString()
+                "sanitizePackageName" -> {
+                    val arg = args.singleOrNull()
+                        ?: throw IllegalArgumentException("sanitizePackageName requires one argument")
+                    arg.toString().replace(Regex("^\\d|[^a-zA-Z\\d_.]"), "_")
+                }
                 else -> throw IllegalArgumentException("Unknown static method: $methodName")
             }
         }
