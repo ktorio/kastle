@@ -1,8 +1,38 @@
 package org.jetbrains.kastle.utils
 
 import kotlinx.serialization.Serializable
-import org.jetbrains.kastle.UndefinedVariableException
-import kotlin.toString
+import org.jetbrains.kastle.utils.Expression.Literal
+
+@Serializable
+sealed interface StringExpression: Expression {
+    fun removeExtension(ext: String): StringExpression
+}
+
+@Serializable
+data class StringLiteral(override val value: String) : Literal<String>, StringExpression {
+    override fun removeExtension(ext: String): StringLiteral =
+        StringLiteral(value.removeSuffix(".${ext}"))
+    override fun toString(): String = value
+}
+
+@Serializable
+data class StringTemplate(val entries: List<Expression>): StringExpression {
+    override fun removeExtension(ext: String): StringExpression =
+        when(val last = entries.lastOrNull()) {
+            is StringExpression -> StringTemplate(entries.dropLast(1) + last.removeExtension(ext))
+            else -> this
+        }
+    override fun evaluate(variables: Variables): String =
+        entries.joinToString("") { it.evaluate(variables).toString() }
+    override fun toString(): String =
+        entries.joinToString("") {
+            when(it) {
+                is StringLiteral -> it.value
+                is Expression.VariableRef -> $$"$$${it.name}"
+                else -> $$"${$${it}}"
+            }
+        }
+}
 
 @Serializable
 sealed interface Expression {
@@ -11,11 +41,6 @@ sealed interface Expression {
     sealed interface Literal<E> : Expression {
         val value: E
         override fun evaluate(variables: Variables): Any? = value
-    }
-
-    @Serializable
-    data class StringLiteral(override val value: String) : Literal<String> {
-        override fun toString(): String = "\"$value\""
     }
 
     @Serializable

@@ -3,6 +3,7 @@ package org.jetbrains.kastle
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.ProjectModules.*
 import org.jetbrains.kastle.utils.Expression
+import org.jetbrains.kastle.utils.StringExpression
 import org.jetbrains.kastle.utils.TreeMap.Companion.toTreeMap
 import org.jetbrains.kastle.utils.protocol
 import kotlin.collections.flatten
@@ -303,7 +304,7 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
         SourceModule(
             manifest = manifest,
             sources = (sources + other.sources).also { mergedSources ->
-                val uniquePaths = mutableSetOf<Url>()
+                val uniquePaths = mutableSetOf<StringExpression>()
                 mergedSources.forEach {
                     require(it.target.protocol != "file" || uniquePaths.add(it.target)) {
                         "Duplicate file: ${it.target}"

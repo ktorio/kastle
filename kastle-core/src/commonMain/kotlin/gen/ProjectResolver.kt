@@ -20,7 +20,7 @@ fun interface ProjectResolver {
             val slotSources: SourcesByUrl = packs.asSequence()
                 .flatMap { it.commonAndRootSources }
                 .filter { it.isSlot() }
-                .groupBy { it.target }
+                .groupBy { it.target.toString() }
             val commonSourceFiles = packs
                 .flatMap { it.commonSources }
                 .filter { it.isFile() }

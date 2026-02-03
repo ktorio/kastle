@@ -9,6 +9,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.io.relativeTo
 import org.jetbrains.kastle.utils.Expression
+import org.jetbrains.kastle.utils.StringExpression
+import org.jetbrains.kastle.utils.StringLiteral
 import kotlin.jvm.JvmInline
 
 @Serializable
@@ -22,8 +24,10 @@ data class SourceDefinition(
 
 @Serializable
 sealed interface SourceFile {
-    val target: Url
+    val target: StringExpression
     val condition: Expression?
+    // Pack ID for variable resolution when target has expressions
+    val packId: PackId?
 }
 
 /**
@@ -42,8 +46,9 @@ fun SourceFile.copy(
 data class StaticSource(
     @Serializable(with = ByteStringSerializer::class)
     val contents: ByteString,
-    override val target: Url,
+    override val target: StringExpression,
     override val condition: Expression? = null,
+    override val packId: PackId? = null,
 ): SourceFile {
     companion object {
         fun FileSystem.sourceFile(
@@ -56,7 +61,7 @@ data class StaticSource(
             }
             return StaticSource(
                 contents = bytes,
-                target = "file:${file.relativeTo(basePath)}",
+                target = StringLiteral("file:${file.relativeTo(basePath)}"),
                 condition = condition,
             )
         }
@@ -67,13 +72,13 @@ data class StaticSource(
 @SerialName("template")
 data class SourceTemplate(
     val text: String,
-    override val target: Url,
+    override val target: StringExpression,
     val imports: SourceImports? = null,
     val blocks: List<Block>? = null,
     override val condition: Expression? = null,
-    // this is here to sort out files after modules are merged
-    val packId: PackId? = null,
     val priority: Int? = null,
+    // this is here also to sort out files after modules are merged
+    override val packId: PackId? = null,
 ): SourceFile
 
 @Serializable
@@ -82,7 +87,7 @@ data class SourceImports(
     val imports: List<SourceImport>,
 )
 
-typealias SourcesByUrl = Map<Url, List<SourceFile>>
+typealias SourcesByUrl = Map<String, List<SourceFile>>
 
 /**
  * Represents an import in a source file.
@@ -290,6 +295,18 @@ data class WhenClauseBlock(
 ): Block, StructuralBlock {
     override fun toString(): String = "-> ${value.joinToString(", ") { "\"$it\"" }})"
 }
+
+/**
+ * Represents a parsed expression placeholder in a target URL.
+ * Example: for target "file:theme/${themeName}.json", this would store:
+ * - placeholder: "${themeName}"
+ * - expression: the parsed Expression for "themeName"
+ */
+@Serializable
+data class TargetExpression(
+    val placeholder: String,
+    val expression: Expression,
+)
 
 typealias Url = String
 

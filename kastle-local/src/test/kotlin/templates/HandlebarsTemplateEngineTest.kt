@@ -4,15 +4,16 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.TemplateEvaluator.Companion.toString
+import org.jetbrains.kastle.utils.StringLiteral
 import org.jetbrains.kastle.utils.Variables
 
 class HandlebarsTemplateEngineTest : StringSpec({
 
     val engine = HandlebarsTemplateEngine()
-    val path = "templates/test.txt"
+    val target = StringLiteral("file://templates/test.txt")
 
     fun template(text: String): SourceTemplate =
-        engine.read(path, text)
+        engine.read(target, text)
 
     "literals" {
         val actual = template("Hello, {{ someProperty }}!").toString(

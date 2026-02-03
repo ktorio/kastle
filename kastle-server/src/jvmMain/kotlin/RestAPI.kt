@@ -7,6 +7,7 @@ import io.ktor.server.routing.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectIndexed
+import kotlinx.io.writeString
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.io.encodeToSink
@@ -92,11 +93,11 @@ private fun RoutingContext.readPackId(): PackId? {
 
 @OptIn(InternalAPI::class, ExperimentalSerializationApi::class)
 private suspend inline fun <reified E> ByteWriteChannel.writeJsonFlow(flow: Flow<E>, json: Json) {
-    writeByte('['.code.toByte())
+    val buffer = writeBuffer
+    buffer.writeByte('['.code.toByte())
     flow.collectIndexed { i, descriptor ->
-        if (i != 0) writeByte(','.code.toByte())
-        json.encodeToSink(descriptor, writeBuffer)
-        writeString(json.encodeToString(descriptor))
+        if (i != 0) buffer.writeByte(','.code.toByte())
+        json.encodeToSink(descriptor, buffer)
     }
-    writeByte(']'.code.toByte())
+    buffer.writeByte(']'.code.toByte())
 }
