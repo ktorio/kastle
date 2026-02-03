@@ -104,7 +104,7 @@ Then the contents can be provided from a child pack using comments:
 
 ```kotlin
 /**
- * @target slot:/org.parent/parent/install
+ * slot:/org.parent/parent/install
  */
 fun Parent.install() {
     // child source here

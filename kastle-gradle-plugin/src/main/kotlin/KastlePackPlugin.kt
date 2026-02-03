@@ -6,6 +6,7 @@ import kotlinx.coroutines.runBlocking
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradleSubplugin
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -21,7 +22,6 @@ abstract class KastlePackPlugin : Plugin<Project> {
         val repository: PackRepository = project.extraProperties[REPOSITORY_PROPERTY] as? PackRepository ?: error("Repository property is not set")
         val pack: PackMetadata = project.extraProperties[PACK_PROPERTY] as? PackMetadata ?: error("Pack property is not set")
         val module: SourceModuleMetadata = project.extraProperties[SOURCE_MODULE_PROPERTY] as? SourceModuleMetadata ?: error("Module property is not set")
-        val versionsCatalog = runBlocking { repository.versions() }
 
         project.logger.lifecycle("Pack: ${pack.name}")
 
@@ -91,10 +91,10 @@ abstract class KastlePackPlugin : Plugin<Project> {
                                 }
                             }
 
-                            // Module dependencies
+                            // Explicit artifact dependencies
                             for (dependency in requiredDependencies) {
                                 try {
-                                    project.dependency(this, dependency, versionsCatalog, fullModulePath)
+                                    project.dependency(this, dependency, fullModulePath)
                                 } catch (e: Exception) {
                                     project.logger.error("Cannot resolve {}", dependency, e)
                                 }
@@ -137,14 +137,14 @@ abstract class KastlePackPlugin : Plugin<Project> {
     private fun Project.dependency(
         sourceSet: KotlinSourceSet,
         dependency: Dependency,
-        versionsCatalog: VersionsCatalog,
         modulePath: String
     ) {
         when (dependency) {
             is CatalogReference -> {
-                val artifact = dependency.gradleFormat(versionsCatalog)
-                    ?: error("Failed to resolve catalog reference: ${dependency.key}")
-                dependencies.add(sourceSet.apiConfigurationName, artifact)
+                val keys = dependency.key.removePrefix("$").split(".").toMutableList()
+                val catalog = extensions.getByType(VersionCatalogsExtension::class.java).named(keys.removeFirst())
+                val provider = catalog.findLibrary(keys.joinToString(".")).orElseThrow()
+                dependencies.add(sourceSet.apiConfigurationName, provider)
             }
             is ModuleDependency -> {
                 val projectRef = dependency.toProjectRef(modulePath)

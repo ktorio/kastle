@@ -307,7 +307,7 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
                 val uniquePaths = mutableSetOf<StringExpression>()
                 mergedSources.forEach {
                     require(it.target.protocol != "file" || uniquePaths.add(it.target)) {
-                        "Duplicate target in sources: ${it.target}"
+                        "Duplicate file: ${it.target}"
                     }
                 }
             }

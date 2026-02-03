@@ -2,7 +2,6 @@ package org.jetbrains.kastle.gen
 
 import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.*
-import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.TreeMap
 import org.jetbrains.kastle.utils.isFile
 import org.jetbrains.kastle.utils.isSlot
@@ -24,7 +23,7 @@ fun interface ProjectResolver {
             val commonSourceFiles = packs
                 .flatMap { it.commonSources }
                 .filter { it.isFile() }
-            val rootSourceFiles = packs
+            val rootSources = packs
                 .flatMap { it.rootSources }
                 .filter { it.isFile() }
             val propertyValues: Map<VariableId, List<PropertyAssignment>> = packs.flatMap { pack ->
@@ -94,7 +93,7 @@ fun interface ProjectResolver {
                 packs = packs,
                 properties = properties,
                 slotSources = slotSources,
-                moduleSources = moduleSources + rootSourceFiles,
+                moduleSources = moduleSources + rootSources,
                 commonSources = commonSourceFiles,
                 versions = versions,
                 libraries = libraries,

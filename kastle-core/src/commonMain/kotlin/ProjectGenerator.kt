@@ -117,12 +117,6 @@ class ProjectGenerator(
         return baseVariables + loadDynamicProperties(project, baseVariables)
     }
 
-    fun interpolateTargetUrl(url: String, targetExpressions: List<TargetExpression>, variables: Variables): String {
-        return targetExpressions.fold(url) { acc, expr ->
-            acc.replace(expr.placeholder, expr.expression.evaluate(variables).toString())
-        }
-    }
-
     private fun loadDynamicProperties(project: Project, variables: Variables): Map<String, Any?> {
         require(project.properties.values.none { it is UnresolvedProperty }) {
             "Undefined properties: ${project.properties.values.filterIsInstance<UnresolvedProperty>().map { it.descriptor.key }}"

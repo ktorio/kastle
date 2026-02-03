@@ -1,5 +1,5 @@
 /**
- * @target slot://io.ktor/server-content-negotiation/install
+ * slot://io.ktor/server-content-negotiation/install
  */
 package kastle
 

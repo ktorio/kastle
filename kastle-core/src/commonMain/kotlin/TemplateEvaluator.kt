@@ -134,11 +134,13 @@ class TemplateEvaluator(
                 source = template,
                 slots = slots.lookup(packId, block).map { sourceFile ->
                     when(sourceFile) {
-                        is SourceTemplate -> {
-                            // TODO should always have a value
-                            val slotPackId = sourceFile.packId ?: packId
-                            evaluateToBuffer(sourceFile, groupId, slotPackId, variables, slots).readString()
-                        }
+                        is SourceTemplate -> evaluateToBuffer(
+                            sourceFile,
+                            groupId,
+                            sourceFile.packId ?: packId,
+                            variables,
+                            slots
+                        ).readString()
                         is StaticSource -> sourceFile.contents.decodeToString()
                     }
                 }

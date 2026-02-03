@@ -1,13 +1,10 @@
 package org.jetbrains.kastle
 
-import com.charleskorn.kaml.Yaml
-import com.charleskorn.kaml.YamlList
-import com.charleskorn.kaml.YamlMap
-import com.charleskorn.kaml.yamlMap
-import com.charleskorn.kaml.yamlScalar
+import com.charleskorn.kaml.*
 import kotlinx.coroutines.flow.*
 import kotlinx.io.Source
 import kotlinx.io.buffered
+import kotlinx.io.bytestring.ByteString
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -19,7 +16,6 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import org.jetbrains.kastle.StaticSource.Companion.sourceFile
 import org.jetbrains.kastle.io.*
-import org.jetbrains.kastle.io.resolve
 import org.jetbrains.kastle.kotlin.KT_EXTENSION
 import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
 import org.jetbrains.kastle.templates.*
@@ -30,20 +26,17 @@ import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.psi.KtFile
 import kotlin.collections.filterNot
-import kotlin.math.exp
 import kotlin.random.Random
 
 private const val PACK_YAML = "pack.ksl.yaml"
 private const val GROUP_YAML = "group.ksl.yaml"
 private const val MODULE_YAML = "module.ksl.yaml"
 private const val REPOSITORY_VERSION_CATALOG = "repository.versions.toml"
-
-private val EXPRESSION_PATTERN = Regex("""\$\{([^}]+)}""")
+private const val DEFAULT_VERSION_CATALOG = "../gradle/libs.versions.toml"
 
 class LocalPackRepository(
     private val root: Path,
     private val fs: FileSystem = SystemFileSystem,
-    private val versionsCatalogFile: String = "../gradle/libs.versions.toml",
     random: Random = Random(System.currentTimeMillis()),
     remoteRepository: PackRepository = PackRepository.EMPTY,
 ): PackRepository {
@@ -59,7 +52,6 @@ class LocalPackRepository(
     private val yaml = Yaml(serializersModule)
 
     constructor(root: String): this(Path(root))
-    constructor(root: String, catalogFile: String): this(Path(root), versionsCatalogFile = catalogFile)
 
     private val repository: PackRepository = object : PackRepository {
         private val metadataCache = mutableMapOf<PackId, PackMetadata>()
@@ -144,7 +136,7 @@ class LocalPackRepository(
             }
             val properties = manifest.properties.toMutableList()
             val documentation = projectPath.resolve("README.md").readText()
-            val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath, repository)
+            val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath)
             val expressionParser = KotlinExpressionParser(kotlinTemplateEngine.psiFileFactory)
             val propertyValues: List<PropertyAssignment> =
                 rawManifest.get<YamlList>("propertyValues")?.items?.map { node ->
@@ -174,12 +166,9 @@ class LocalPackRepository(
                     )
                 }.toList().let(ProjectModules::fromList)
 
-            val readSource: suspend (SourceDefinition) -> SourceFile = { (path, text, target, condition) ->
+            val readSource: suspend (SourceDefinition) -> SourceFile = { (path, text, target, condition, priority) ->
                 require(target != null) { "Missing target for project-level source: ${path ?: text}" }
-                val file = projectPath.resolve(path ?: "source.kt")
-                if (!fs.exists(file))
-                    throw IllegalArgumentException("Missing source file: $file")
-
+                val file = path?.let(projectPath::resolve)
                 val targetExpression = expressionParser.parseTemplate(target)
                 val conditionExpression = condition?.let(expressionParser::parse)
                 val format = path?.extensionFormat
@@ -190,27 +179,31 @@ class LocalPackRepository(
                     TemplateFormat.KOTLIN -> {
                         kotlinTemplateEngine.read(
                             path = path?.let(::Path),
-                            text = file.readText() ?: text
+                            text = text ?: file?.takeIf(fs::exists)?.readText() ?: error("Missing source file: $targetExpression")
                         ).copy(
                             packId = packId,
                             target = targetExpression,
                             condition = conditionExpression,
+                            priority = priority,
                         )
                     }
                     TemplateFormat.OTHER ->
-                        when (file.name.extension.lowercase()) {
+                        when (file?.name?.extension?.lowercase()) {
                             HANDLEBARS_EXTENSION -> {
                                 handlebarsTemplateEngine.read(
                                     targetExpression,
-                                    file.readText() ?: text ?: throw IllegalArgumentException("Missing path or text in source definition")
+                                    text ?: file.takeIf(fs::exists)?.readText() ?: error("Missing source file: $targetExpression")
                                 ).copy(
                                     packId = packId,
                                     target = targetExpression.removeExtension(HANDLEBARS_EXTENSION),
                                     condition = conditionExpression,
+                                    priority = priority,
                                 )
                             }
                             else -> StaticSource(
-                                contents = fs.source(file).buffered().use { it.readByteString() },
+                                contents = text?.toByteArray()?.let(::ByteString)
+                                    ?: file?.takeIf(fs::exists)?.let { fs.source(file).buffered().use { it.readByteString() } }
+                                    ?: error("Missing source file: $targetExpression"),
                                 target = targetExpression,
                                 condition = conditionExpression,
                                 packId = packId,
@@ -319,7 +312,6 @@ class LocalPackRepository(
                 KT_EXTENSION, KT_SCRIPT_EXTENSION -> {
                     val kotlinTemplateEngine = KotlinCompilerTemplateEngine(
                         path = file.parent,
-                        repository = repository,
                         onProperty = properties::add,
                     )
                     kotlinTemplateEngine.read(file, file.readText()).let { template ->
@@ -351,7 +343,6 @@ class LocalPackRepository(
             // properties are supplied both from the manifest and from declarations in the source files
             val kotlinTemplateEngine = KotlinCompilerTemplateEngine(
                 path = sourceFolder,
-                repository = repository,
                 onProperty = properties::add,
             )
             sources += kotlinTemplateEngine.ktFiles.map { sourceFile ->
@@ -379,7 +370,6 @@ class LocalPackRepository(
         }
 
         // additional sources defined for module; also assume no kotlin sources
-        // TODO remove duplicates from files in source folders
         val sourcesFromManifest = moduleYaml.get<YamlList>("sources")?.items.orEmpty()
         for (manifestSource in sourcesFromManifest) {
             val (path, text, targetUrl, condition, priority) = yaml.decodeFromYamlNode<SourceDefinition>(manifestSource)
@@ -392,7 +382,10 @@ class LocalPackRepository(
                     sources += readModuleSource(
                         file,
                         target = "file:${file.relativeTo(modulePath)}"
-                    ).copy(condition = conditionExpression, priority = priority)
+                    ).copy(
+                        condition = conditionExpression,
+                        priority = priority
+                    )
                 }
             } else {
                 sources += if (text == null) {
@@ -413,9 +406,25 @@ class LocalPackRepository(
 
         return SourceModule(
             manifest = manifest,
-            sources = sources + resources,
+            sources = sources.dedupeFiles() + resources,
         )
     }
+
+    /**
+     * Allows for overriding details for files under src dir.
+     *
+     * Slots are allowed to be duplicate, so they are ignored.
+     */
+    private fun List<SourceFile>.dedupeFiles(): List<SourceFile> =
+        groupBy { it.target }
+            .flatMap { (target, files) ->
+                when(target.protocol) {
+                    // The last entry is always provided in the manifest
+                    "file" -> files.subList(files.size - 1, files.size)
+                    "slot" -> files
+                    else -> error("Unknown protocol: ${target.protocol}")
+                }
+            }
 
     private fun getStandardSourceFolders(
         platforms: Set<Platform>,
@@ -443,6 +452,7 @@ class LocalPackRepository(
 
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun versions(): VersionsCatalog {
+        // TODO we should try to drop this
         val builtInArtifacts =
             fs.list(root).filter {
                 it.name.endsWith(".versions.toml") && it.name != REPOSITORY_VERSION_CATALOG
@@ -461,8 +471,7 @@ class LocalPackRepository(
             }
         )
 
-        val libraryCatalog = loadVersionCatalog(versionsCatalogFile) ?: VersionsCatalog()
-        // TODO: allow ignoring repository version catalogs by Renovate
+        val libraryCatalog = loadVersionCatalog(DEFAULT_VERSION_CATALOG) ?: VersionsCatalog()
         val repositoryVersionCatalog = loadVersionCatalog(REPOSITORY_VERSION_CATALOG) ?: VersionsCatalog.Empty
 
         return builtInCatalog + libraryCatalog + repositoryVersionCatalog

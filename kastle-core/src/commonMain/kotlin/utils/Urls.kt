@@ -9,7 +9,7 @@ val String.protocol: String get() = substringBefore(':')
 val StringExpression.afterProtocol: String get() = toString().substringAfter(':')
 val StringExpression.relativeFile: String get() = toString().relativeFile
 val String.parentPath: String get() = relativeFile.replaceAfterLast('/', "").dropLast(1)
-val String.relativeFile: String get() = removePrefix("file:").trimStart('/')
+val String.relativeFile: String get() = substringAfter(':').trimStart('/')
 val StringExpression.fileName: String get() = afterProtocol.substringAfterLast('/')
 val StringExpression.slotId: SlotId get() = afterProtocol.split('/')
     .filter { it.isNotEmpty() }
