@@ -1,6 +1,1 @@
 platform: jvm
-
-gradle:
-  plugins:
-    - kotlin
-    - intelliJPlatform

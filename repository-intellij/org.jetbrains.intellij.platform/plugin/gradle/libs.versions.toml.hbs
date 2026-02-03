@@ -1,4 +1,5 @@
 [versions]
+intellijPlatform = "2.10.5"
 {{#each _project.versions.entries }}
 {{ key }} = "{{ value }}"
 {{/each}}
@@ -9,6 +10,8 @@
 {{/each}}
 
 [plugins]
+intellijPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intellijPlatform" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 {{#each _project.gradle.plugins}}
 {{ catalogKey }} = { id = "{{ id }}", version.ref = "{{ version.ref }}" }
 {{/each}}

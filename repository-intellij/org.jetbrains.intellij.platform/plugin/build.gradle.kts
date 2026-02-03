@@ -1,5 +1,7 @@
 plugins {
     id("java")
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.intellijPlatform)
     for (item in _module.gradle.plugins) {
     alias(_unsafe("libs.plugins.${item}"))
     }
