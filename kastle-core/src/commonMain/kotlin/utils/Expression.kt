@@ -1,11 +1,8 @@
 package org.jetbrains.kastle.utils
 
 import kotlinx.serialization.Serializable
-import org.jetbrains.kastle.UndefinedVariableException
 import org.jetbrains.kastle.utils.Expression.Literal
-import kotlin.toString
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
+import org.jetbrains.kastle.utils.intellij.IntellijPlatformSpecificUtilMethods
 
 @Serializable
 sealed interface StringExpression: Expression {
@@ -156,8 +153,10 @@ sealed interface Expression {
             }
         }
 
-        @OptIn(ExperimentalUuidApi::class)
         private fun evaluateStaticMethod(methodName: String, args: List<Any?>): Any? {
+            if (IntellijPlatformSpecificUtilMethods.supportsStaticMethod(methodName)) {
+                return IntellijPlatformSpecificUtilMethods.evaluateStaticMethod(methodName, args)
+            }
             return when (methodName) {
                 "listOf" -> args
                 "mapOf" -> {
@@ -167,14 +166,6 @@ sealed interface Expression {
                     args.chunked(2).associate { (k, v) -> k to v }
                 }
                 "setOf" -> args.toSet()
-
-                // TODO: these are plugins-specific methods; move them to a custom methods class, not sure about a new module
-                "uuid" -> Uuid.random().toString()
-                "sanitizePackageName" -> {
-                    val arg = args.singleOrNull()
-                        ?: throw IllegalArgumentException("sanitizePackageName requires one argument")
-                    arg.toString().replace(Regex("^\\d|[^a-zA-Z\\d_.]"), "_")
-                }
                 else -> throw IllegalArgumentException("Unknown static method: $methodName")
             }
         }
