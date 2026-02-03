@@ -7,6 +7,10 @@ import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.isSlot
 import org.jetbrains.kastle.utils.normalize
 import org.jetbrains.kastle.utils.relativeFile
+import kotlin.collections.buildMap
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.plus
 
 data class Project(
     val descriptor: ProjectDescriptor,
@@ -53,8 +57,14 @@ fun SourceModule.toVariableEntry(): Pair<String, Any?> =
     "_module" to toVariableMap()
 
 fun SourceModule.slotsVariableEntry(project: Project, packId: PackId): Pair<String, Any?> =
-    "_slots" to (project.slotSources + this.slotSources).mapKeys { (url, _) ->
-        url.relativeFile.removePrefix(packId.toString()).trimStart('/')
+    "_slots" to buildMap {
+        for ((url, value) in project.slotSources + this@slotsVariableEntry.slotSources) {
+            // insert relative value
+            if (packId.toString() in url)
+                put(url.relativeFile.removePrefix(packId.toString()).trimStart('/'), value)
+            // insert absolute value
+            put(url, value)
+        }
     }
 
 // TODO support string templates

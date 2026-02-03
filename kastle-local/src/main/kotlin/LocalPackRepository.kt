@@ -4,6 +4,7 @@ import com.charleskorn.kaml.*
 import kotlinx.coroutines.flow.*
 import kotlinx.io.Source
 import kotlinx.io.buffered
+import kotlinx.io.bytestring.ByteString
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -165,12 +166,9 @@ class LocalPackRepository(
                     )
                 }.toList().let(ProjectModules::fromList)
 
-            val readSource: suspend (SourceDefinition) -> SourceFile = { (path, text, target, condition) ->
+            val readSource: suspend (SourceDefinition) -> SourceFile = { (path, text, target, condition, priority) ->
                 require(target != null) { "Missing target for project-level source: ${path ?: text}" }
-                val file = projectPath.resolve(path ?: "source.kt")
-                if (!fs.exists(file))
-                    throw IllegalArgumentException("Missing source file: $file")
-
+                val file = path?.let(projectPath::resolve)
                 val targetExpression = expressionParser.parseTemplate(target)
                 val conditionExpression = condition?.let(expressionParser::parse)
                 val format = path?.extensionFormat
@@ -181,27 +179,31 @@ class LocalPackRepository(
                     TemplateFormat.KOTLIN -> {
                         kotlinTemplateEngine.read(
                             path = path?.let(::Path),
-                            text = file.readText() ?: text
+                            text = text ?: file?.takeIf(fs::exists)?.readText() ?: error("Missing source file: $targetExpression")
                         ).copy(
                             packId = packId,
                             target = targetExpression,
                             condition = conditionExpression,
+                            priority = priority,
                         )
                     }
                     TemplateFormat.OTHER ->
-                        when (file.name.extension.lowercase()) {
+                        when (file?.name?.extension?.lowercase()) {
                             HANDLEBARS_EXTENSION -> {
                                 handlebarsTemplateEngine.read(
                                     targetExpression,
-                                    file.readText() ?: text ?: throw IllegalArgumentException("Missing path or text in source definition")
+                                    text ?: file.takeIf(fs::exists)?.readText() ?: error("Missing source file: $targetExpression")
                                 ).copy(
                                     packId = packId,
                                     target = targetExpression.removeExtension(HANDLEBARS_EXTENSION),
                                     condition = conditionExpression,
+                                    priority = priority,
                                 )
                             }
                             else -> StaticSource(
-                                contents = fs.source(file).buffered().use { it.readByteString() },
+                                contents = text?.toByteArray()?.let(::ByteString)
+                                    ?: file?.takeIf(fs::exists)?.let { fs.source(file).buffered().use { it.readByteString() } }
+                                    ?: error("Missing source file: $targetExpression"),
                                 target = targetExpression,
                                 condition = conditionExpression,
                                 packId = packId,
@@ -330,14 +332,7 @@ class LocalPackRepository(
                 }
             }
 
-        val sources = mutableMapOf<String, SourceFile>()
-        operator fun MutableMap<String, SourceFile>.plusAssign(source: SourceFile) {
-            this[source.target] = source
-        }
-        operator fun MutableMap<String, SourceFile>.plusAssign(sources: List<SourceFile>) {
-            for (source in sources)
-                this += source
-        }
+        val sources = mutableListOf<SourceFile>()
         val resources = mutableListOf<SourceFile>()
         val (sourceFolders, resourceFolders) = getStandardSourceFolders(manifest.platforms, modulePath)
 
@@ -387,7 +382,10 @@ class LocalPackRepository(
                     sources += readModuleSource(
                         file,
                         target = "file:${file.relativeTo(modulePath)}"
-                    ).copy(condition = conditionExpression, priority = priority)
+                    ).copy(
+                        condition = conditionExpression,
+                        priority = priority
+                    )
                 }
             } else {
                 sources += if (text == null) {
@@ -408,9 +406,25 @@ class LocalPackRepository(
 
         return SourceModule(
             manifest = manifest,
-            sources = sources.values + resources,
+            sources = sources.dedupeFiles() + resources,
         )
     }
+
+    /**
+     * Allows for overriding details for files under src dir.
+     *
+     * Slots are allowed to be duplicate, so they are ignored.
+     */
+    private fun List<SourceFile>.dedupeFiles(): List<SourceFile> =
+        groupBy { it.target }
+            .flatMap { (target, files) ->
+                when(target.protocol) {
+                    // The last entry is always provided in the manifest
+                    "file" -> files.subList(files.size - 1, files.size)
+                    "slot" -> files
+                    else -> error("Unknown protocol: ${target.protocol}")
+                }
+            }
 
     private fun getStandardSourceFolders(
         platforms: Set<Platform>,
