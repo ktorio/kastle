@@ -1,4 +1,4 @@
-package com.example.demo17currentbuilder
+package kastle
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.Nls
