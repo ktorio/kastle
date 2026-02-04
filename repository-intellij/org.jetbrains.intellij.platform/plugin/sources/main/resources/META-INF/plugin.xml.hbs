@@ -20,9 +20,9 @@
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     {{#if _slots.pluginDescriptorDepends}}
-        {{slots pluginDescriptorDepends}}
+    {{slots pluginDescriptorDepends}}
     {{else}}
-        <depends>com.intellij.modules.platform</depends>{{/if}}
+    <depends>com.intellij.modules.platform</depends>{{/if}}
 
     {{#if addSampleCode}}
     <resource-bundle>messages.MyMessageBundle</resource-bundle>{{/if}}
