@@ -55,7 +55,8 @@ rootSources:
   - path: gradlew.bat
 
   # Gradle build script
-  - path: build.gradle.kts
+  - path: build.gradle-template.kts
+    target: file:build.gradle.kts
   - path: gradle.properties.hbs
     target: file:gradle.properties
   - path: settings.gradle.kts
