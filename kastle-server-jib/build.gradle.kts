@@ -3,19 +3,22 @@ plugins {
     alias(libs.plugins.ktor)
 }
 
-tasks.register<GradleBuild>("exportSamples") {
-    dir = layout.settingsDirectory.dir("repository").asFile
+tasks.register<GradleBuild>("exportPluginRepository") {
+    dir = layout.settingsDirectory.dir("repository-intellij").asFile
     tasks = listOf("kslExportToCbor")
     startParameter.projectProperties["exportPath"] = layout.projectDirectory.dir("export").asFile.absolutePath
 }
 
 tasks.jib {
-    dependsOn("exportSamples")
+    dependsOn("exportPluginRepository")
+}
+tasks.jibBuildTar {
+    dependsOn("exportPluginRepository")
 }
 
 jib {
     from { image = "amazoncorretto:21" }
-    to { image = "registry.jetbrains.team/p/kastle/containers/kastle:latest" }
+    to { image = "registry.jetbrains.team/p/kastle/containers/kastle-intellij-plugins:latest" }
     extraDirectories {
         paths {
             path {
