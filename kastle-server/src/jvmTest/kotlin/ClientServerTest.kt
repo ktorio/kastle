@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.ktor.server.testing.*
+import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.client.asRepository
 import org.jetbrains.kastle.read
 
@@ -19,6 +20,22 @@ class ClientServerTest : StringSpec({
             pack.name shouldBe "Empty Feature"
             pack.version.toString() shouldBe "1.0.0"
             pack.group?.id shouldBe "com.acme"
+        }
+    }
+
+    "get files" {
+        testApplication {
+            configure("application.conf")
+
+            val repository = client.asRepository()
+            val fileList = repository.files().toList().sorted().joinToString("\n")
+            val expected = """
+                io.ktor/icon.svg
+                org.gradle/icon.svg
+                org.jetbrains/icon.svg
+            """.trimIndent()
+
+            fileList shouldBe expected
         }
     }
 

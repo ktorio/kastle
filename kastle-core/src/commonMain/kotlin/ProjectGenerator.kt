@@ -25,7 +25,7 @@ class ProjectGenerator(
 
     val templateEvaluator = TemplateEvaluator(log)
 
-    fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> = flow {
+    suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> {
         val project = projectResolver.resolve(projectDescriptor, repository)
         log.trace { project.name }
         log.trace {
@@ -41,58 +41,60 @@ class ProjectGenerator(
                 }
             }
         }
-        for (module in project.moduleSources.modules.sortedBy { it.path.ifEmpty { "zz-top" } }) {
-            val moduleSources = buildList {
-                addAll((module.sources.filter { it.target.protocol == "file" }))
-                addAll(project.commonSources)
-            }
-            val outputtedPaths = mutableSetOf<String>()
-            val slotSources = project.slotSources + module.slotSources
-
-            for (source in moduleSources) {
-                val path = getActualPath(source, module, project)
-                if (source !is SourceTemplate) {
-                    if (source !is StaticSource)
-                        error("Unsupported source type: ${source::class.simpleName}")
-
-                    log.debug { "Include ${source.target}; skip templating" }
-                    emit(SourceFileEntry(path) {
-                        Buffer().apply {
-                            write(source.contents)
-                        }
-                    })
-                    continue
+        return flow {
+            for (module in project.moduleSources.modules.sortedBy { it.path.ifEmpty { "zz-top" } }) {
+                val moduleSources = buildList {
+                    addAll((module.sources.filter { it.target.protocol == "file" }))
+                    addAll(project.commonSources)
                 }
+                val outputtedPaths = mutableSetOf<String>()
+                val slotSources = project.slotSources + module.slotSources
 
-                val packId = source.packId
-                if (packId == null) {
-                    log.warn { "Skipping ${source.target}; missing pack ID" }
-                    continue
-                }
-                val variables = collectVariables(project, packId, module)
+                for (source in moduleSources) {
+                    val path = getActualPath(source, module, project)
+                    if (source !is SourceTemplate) {
+                        if (source !is StaticSource)
+                            error("Unsupported source type: ${source::class.simpleName}")
 
-                if (source.condition != null) {
-                    val conditionValue = source.condition.evaluate(variables)
-                    if (!conditionValue.isTruthy()) {
-                        log.debug { "Skipping ${source.target}; ${source.condition} = $conditionValue" }
+                        log.debug { "Include ${source.target}; skip templating" }
+                        emit(SourceFileEntry(path) {
+                            Buffer().apply {
+                                write(source.contents)
+                            }
+                        })
                         continue
                     }
-                }
 
-                if (!outputtedPaths.add(path)) {
-                    log.debug { "Skipping ${source.target}; duplicate path $path" }
-                    continue
-                }
+                    val packId = source.packId
+                    if (packId == null) {
+                        log.warn { "Skipping ${source.target}; missing pack ID" }
+                        continue
+                    }
+                    val variables = collectVariables(project, packId, module)
 
-                emit(SourceFileEntry(path) {
-                    templateEvaluator.evaluateToBuffer(
-                        template = source,
-                        groupId = project.group,
-                        packId = packId,
-                        variables = variables,
-                        slots = slotSources,
-                    )
-                })
+                    if (source.condition != null) {
+                        val conditionValue = source.condition.evaluate(variables)
+                        if (!conditionValue.isTruthy()) {
+                            log.debug { "Skipping ${source.target}; ${source.condition} = $conditionValue" }
+                            continue
+                        }
+                    }
+
+                    if (!outputtedPaths.add(path)) {
+                        log.debug { "Skipping ${source.target}; duplicate path $path" }
+                        continue
+                    }
+
+                    emit(SourceFileEntry(path) {
+                        templateEvaluator.evaluateToBuffer(
+                            template = source,
+                            groupId = project.group,
+                            packId = packId,
+                            variables = variables,
+                            slots = slotSources,
+                        )
+                    })
+                }
             }
         }
     }

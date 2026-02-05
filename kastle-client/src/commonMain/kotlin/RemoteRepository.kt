@@ -42,6 +42,14 @@ class RemoteRepository(private val client: HttpClient): PackRepository {
         emitAll(client.get("/api/packIds").body<List<PackId>>().asFlow())
     }
 
+    override fun groups(): Flow<Group> = flow {
+        emitAll(client.get("/api/groups").body<List<Group>>().asFlow())
+    }
+
+    override fun files(): Flow<String> = flow {
+        emitAll(client.get("/api/files").body<List<String>>().asFlow())
+    }
+
     override suspend fun get(packId: PackId): PackMetadata? {
         val response = client.get("/api/packs/$packId")
         if (!response.status.isSuccess())
@@ -54,13 +62,6 @@ class RemoteRepository(private val client: HttpClient): PackRepository {
         if (!response.status.isSuccess())
             return null
         return response.body()
-    }
-
-    override suspend fun readDocs(packId: PackId): String? {
-        val response = client.get("/api/packs/$packId/docs")
-        if (!response.status.isSuccess())
-            return null
-        return response.bodyAsText()
     }
 
     override suspend fun readFile(path: String): Source? {
