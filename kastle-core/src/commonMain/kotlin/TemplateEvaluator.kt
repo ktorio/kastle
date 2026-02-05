@@ -34,11 +34,6 @@ import org.jetbrains.kastle.utils.positionPrefix
 import org.jetbrains.kastle.utils.rangeEnd
 import org.jetbrains.kastle.utils.rangeStart
 import org.jetbrains.kastle.utils.stringOf
-import kotlin.text.Appendable
-import kotlin.text.buildString
-import kotlin.text.isWhitespace
-import kotlin.text.padEnd
-import kotlin.text.replace
 import kotlin.text.substring
 
 /**
@@ -318,8 +313,7 @@ internal class SourceFileWriteContext(
                 }
 
                 is WhenClauseBlock -> {
-                    val parent = stack.top as? WhenBlock
-                        ?: error("when clause with no parent: $block")
+                    val parent = stack.top as? WhenBlock ?: error("when clause with no parent: $block")
                     val value = parent.expression.evaluate(variables)
                     val matched = value in block.value.map { it.evaluate(variables) } // TODO types?
                     conditions[parent] = matched || conditions[parent] ?: false

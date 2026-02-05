@@ -7,7 +7,6 @@ import io.ktor.server.routing.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectIndexed
-import kotlinx.io.writeString
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.io.encodeToSink
@@ -40,6 +39,12 @@ fun Routing.backEnd(
         get("/versions") {
             call.respond(repository.versions())
         }
+        get("/groups") {
+            val groups = repository.groups()
+            call.respondBytesWriter(ContentType.Application.Json) {
+                writeJsonFlow(groups, json)
+            }
+        }
         route("/packs") {
             get {
                 val packs = repository.getAll()
@@ -57,9 +62,27 @@ fun Routing.backEnd(
                 }
                 get("/docs") {
                     val id = readPackId() ?: return@get call.respond(HttpStatusCode.BadRequest)
-                    val docs = repository.readDocs(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+                    val docs = repository.get(id)?.documentation ?: return@get call.respond(HttpStatusCode.NotFound)
                     call.respondText(docs)
                 }
+            }
+        }
+        route("/files") {
+            get {
+                val files = repository.files()
+                call.respondBytesWriter(ContentType.Application.Json) {
+                    writeJsonFlow(files, json)
+                }
+            }
+            get("/{path...}") {
+                val path = call.parameters.getAll("path")?.joinToString("/")
+                    ?: return@get call.respond(HttpStatusCode.BadRequest)
+                val contents = repository.readFile(path)
+                    ?: return@get call.respond(HttpStatusCode.NotFound)
+                val contentType = ContentType.fromFileExtension(path.substringAfterLast('.')).firstOrNull()
+                    ?: ContentType.Application.OctetStream
+
+                call.respondSource(contents, contentType)
             }
         }
         route("/generate") {

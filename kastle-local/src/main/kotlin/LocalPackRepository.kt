@@ -26,6 +26,7 @@ import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.psi.KtFile
 import kotlin.collections.filterNot
+import kotlin.io.path.isRegularFile
 import kotlin.random.Random
 
 private const val PACK_YAML = "pack.ksl.yaml"
@@ -60,6 +61,12 @@ class LocalPackRepository(
         override fun ids(): Flow<PackId> =
             remoteRepository.ids()
 
+        override fun groups(): Flow<Group> =
+            remoteRepository.groups()
+
+        override suspend fun readFile(path: String): Source? =
+            remoteRepository.readFile(path)
+
         override suspend fun get(packId: PackId): PackMetadata? =
             metadataCache[packId] ?: (this@LocalPackRepository.get(packId) ?: remoteRepository.get(packId))?.also {
                 metadataCache[packId] = it
@@ -85,13 +92,22 @@ class LocalPackRepository(
             else null
         }
 
+    override fun groups(): Flow<Group> =
+        fs.list(root).asFlow().mapNotNull { dir ->
+            if (dir.isDir() && fs.exists(dir.resolve(GROUP_YAML))) {
+                // icons must be relative to root
+                dir.resolve(GROUP_YAML).readYaml<Group>()?.let { group ->
+                    group.copy(icon = group.icon?.let { dir.relativeTo(root).resolve(it).toString() })
+                }
+            } else null
+        }
+
     override suspend fun get(packId: PackId): PackMetadata? {
         try {
             val projectPath = root.resolve(packId.toString())
             val groupPath = projectPath.parent!!
             val manifestYaml = projectPath.resolve(PACK_YAML).readYamlNode()?.yamlMap ?: return null
-            val filteredYaml =
-                YamlMap(manifestYaml.entries.filterNot { it.key.content == "propertyValues" }, manifestYaml.path)
+            val filteredYaml = YamlMap(manifestYaml.entries.filterNot { it.key.content == "propertyValues" }, manifestYaml.path)
             val manifest: PackManifest = Yaml.default.decodeFromYamlNode(filteredYaml) ?: return null
             val properties = manifest.properties.toMutableList()
             val group = (manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml() ?: Group()).let { group ->
@@ -231,12 +247,8 @@ class LocalPackRepository(
         }
     }
 
-    // TODO just read the docs
-    override suspend fun readDocs(packId: PackId): String? =
-        read(packId)?.documentation
-
     override suspend fun readFile(path: String): Source? {
-        val file = root.resolve(path)
+        val file = root.resolve(path.trimStart('/'))
         if (!fs.exists(file)) return null
         return fs.source(file).buffered()
     }
