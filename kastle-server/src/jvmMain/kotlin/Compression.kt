@@ -3,7 +3,6 @@ package org.jetbrains.kastle.server
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.compression.*
-import io.ktor.server.plugins.compression.zstd.zstd
 
 private const val MINIMUM_COMPRESSED_BYTES_SIZE = 1024L
 
