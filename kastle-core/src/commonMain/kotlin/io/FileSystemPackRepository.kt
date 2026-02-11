@@ -3,6 +3,8 @@ package org.jetbrains.kastle.io
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.io.Source
+import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -37,7 +39,16 @@ open class FileSystemPackRepository(
                 JSON -> JsonFilePackRepository(path, fs)
                 CBOR -> CborFilePackRepository(path, fs)
             }
+
+            // versions catalog
             export.versions(versions())
+
+            // extra files
+            files().collect { path ->
+                readFile(path)?.let { export.file(path, it) }
+            }
+
+            // sources and manifests
             readAll().collect { pack ->
                 try {
                     export.add(pack)
@@ -57,6 +68,14 @@ open class FileSystemPackRepository(
         }.asFlow().mapNotNull { path ->
             if (!path.toString().endsWith(ext)) return@mapNotNull null
             PackId.parse("${path.parent!!.name}/${path.name.removeSuffix(".${ext}")}")
+        }
+
+    override fun groups(): Flow<Group> =
+        fs.list(root).asFlow().mapNotNull { groupPath ->
+            fs.list(groupPath).firstOrNull()?.let { path ->
+                if (!path.toString().endsWith(ext)) return@mapNotNull null
+                read(path)?.group
+            }
         }
 
     // Assume there's no impact of reading sources from the compiled file
@@ -82,5 +101,24 @@ open class FileSystemPackRepository(
 
     override suspend fun versions(versions: VersionsCatalog) {
         writeVersions(root.resolve("libs.versions.$ext"), versions() + versions)
+    }
+
+    override fun files(): Flow<String> =
+        fs.walkFiles(root).filter {
+            !it.name.endsWith(".$ext")
+        }.map {
+            it.relativeTo(root).toString()
+        }.asFlow()
+
+    override suspend fun readFile(path: String): Source? =
+        root.resolve(path.trimStart('/'))
+            .takeIf(fs::exists)?.let(fs::source)?.buffered()
+
+    override suspend fun file(path: String, bytes: Source) {
+        val path = root.resolve(path.trimStart('/'))
+        path.parent?.let(fs::createDirectories)
+        fs.sink(path).use { sink ->
+            bytes.transferTo(sink)
+        }
     }
 }
