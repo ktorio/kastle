@@ -1,0 +1,27 @@
+name: Conditions
+description: Test including templates and files conditionally
+properties:
+  - key: myFlag
+    type: boolean
+    default: false
+
+rootSources:
+  - path: sources/template.txt.hbs
+    target: file:src/template.txt
+    if: myFlag
+  - path: sources/template.kt
+    target: file:src/template.kt
+    if: myFlag
+  - path: sources/static.txt
+    target: file:src/static.txt
+    if: myFlag
+
+  - path: sources/notIncludedTemplate.txt.hbs
+    target: file:src/notIncludedTemplate.txt
+    if: "!myFlag"
+  - path: sources/notIncludedTemplate.kt
+    target: file:src/notIncludedTemplate.kt
+    if: "!myFlag"
+  - path: sources/not-included-static.txt
+    target: file:src/not-included-static.txt
+    if: "!myFlag"
