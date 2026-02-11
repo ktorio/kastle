@@ -4,7 +4,7 @@ description: IntelliJ Platform plugin project
 properties:
   - key: addSampleCode
     type: boolean
-    default: true
+    default: false
     label: Add Sample Code
   - key: hiddenInWizard
     type: boolean
