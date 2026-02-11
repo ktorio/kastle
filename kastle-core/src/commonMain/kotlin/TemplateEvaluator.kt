@@ -2,15 +2,14 @@ package org.jetbrains.kastle
 
 import kotlinx.io.Buffer
 import kotlinx.io.bytestring.decodeToString
-import kotlinx.io.readString
-import kotlinx.io.writeCodePointValue
-import kotlinx.io.writeString
+import kotlinx.io.write
 import org.jetbrains.kastle.kotlin.KT_EXTENSION
 import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
 import org.jetbrains.kastle.kotlin.writeKotlinSourcePreamble
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
 import org.jetbrains.kastle.logging.Logger
+import org.jetbrains.kastle.utils.BufferAppendable
 import org.jetbrains.kastle.utils.ListStack
 import org.jetbrains.kastle.utils.Stack
 import org.jetbrains.kastle.utils.Variables
@@ -57,132 +56,163 @@ class TemplateEvaluator(
             packId: PackId = PackId("com.example", "project"),
             variables: Variables = ListStack(),
             slots: SourcesByUrl = emptyMap(),
-        ) = evaluator.evaluateToBuffer(
-            this,
-            groupId,
-            packId,
-            variables,
-            slots
-        ).readString()
+        ): String {
+            val parameters = SourceTemplateIR.Parameters(
+                path = "(n/a)",
+                template = this,
+                groupId = groupId,
+                packId = packId,
+                variables = variables,
+                slots = slots,
+            )
+            return with(evaluator) {
+                buildString {
+                    evaluateTo(parameters, this)
+                }
+            }
+        }
     }
 
-    fun evaluateToBuffer(
-        template: SourceTemplate,
-        groupId: String,
-        packId: PackId,
-        variables: Variables,
-        slots: SourcesByUrl,
-    ): Buffer = withSourceContext(template.text) {
-        log.trace { template.target.toString() }
-        val slotImports = template.blocks?.asSequence().orEmpty()
-            .flatMap { block -> slots.lookup(packId, block) }
-            .filterIsInstance<SourceTemplate>()
-            .flatMap { it.imports?.imports.orEmpty() }
-            .toList()
-        val startPosition = when (template.target.extension) {
-            KT_EXTENSION, KT_SCRIPT_EXTENSION ->
-                writeKotlinSourcePreamble(
-                    groupId = groupId,
-                    target = template.target.toString(),
-                    source = template,
-                    extraImports = slotImports,
-                    skipPackage = template.target.extension == KT_SCRIPT_EXTENSION,
-                )
-            else -> 0
+    fun evaluateToBuffer(template: SourceTemplateIR) =
+        Buffer().also { buffer ->
+            when (template) {
+                is SourceTemplateIR.Static ->
+                    buffer.write(template.contents)
+                is SourceTemplateIR.Parameters ->
+                    evaluateTo(template, buffer)
+            }
         }
 
-        if (template.blocks.isNullOrEmpty()) {
-            log.trace { "  Not templated; returning verbatim" }
-            append(template.text, startPosition, template.text.length)
-            return@withSourceContext
-        }
+    fun evaluateTo(params: SourceTemplateIR.Parameters, buffer: Buffer) =
+        evaluateTo(params, BufferAppendable(buffer))
 
-        // print debug info to logs
-        if (log.level == LogLevel.TRACE) {
+    fun evaluateTo(params: SourceTemplateIR.Parameters, appendable: Appendable) {
+        val (path, template, groupId, packId, variables, slots) = params
+
+        withSourceContext(template.text, appendable) {
+            log.trace { template.target.toString() }
+            val slotImports = template.blocks?.asSequence().orEmpty()
+                .flatMap { block -> slots.lookup(packId, block) }
+                .filterIsInstance<SourceTemplate>()
+                .flatMap { it.imports?.imports.orEmpty() }
+                .toList()
+            val startPosition = when (template.target.extension) {
+                KT_EXTENSION, KT_SCRIPT_EXTENSION ->
+                    writeKotlinSourcePreamble(
+                        groupId = groupId,
+                        target = template.target.toString(),
+                        source = template,
+                        extraImports = slotImports,
+                        skipPackage = template.target.extension == KT_SCRIPT_EXTENSION,
+                    )
+
+                else -> 0
+            }
+
+            if (template.blocks.isNullOrEmpty()) {
+                log.trace { "  Not templated; returning verbatim" }
+                append(template.text, startPosition, template.text.length)
+                return@withSourceContext
+            }
+
+            // print debug info to logs
+            if (log.level == LogLevel.TRACE) {
+                forEachBlock(template.blocks, startPosition, variables) { block ->
+                    log.trace {
+                        buildString {
+                            append("  ${block.lineNumber.toString().padEnd(5)} ")
+                            append(((block.level * 2).stringOf(' ') + block::class.simpleName).padEnd(30))
+                            append("\"${block.outerContents.replace("\n", "\\n")}\"".padEnd(100))
+                            append("\"${block.bodyContents.replace("\n", "\\n")}\"")
+                        }
+                    }
+                }
+                log.trace { "" } // log empty line
+            }
+
             forEachBlock(template.blocks, startPosition, variables) { block ->
-                log.trace {
-                    buildString {
-                        append("  ${block.lineNumber.toString().padEnd(5)} ")
-                        append(((block.level * 2).stringOf(' ') + block::class.simpleName).padEnd(30))
-                        append("\"${block.outerContents.replace("\n", "\\n")}\"".padEnd(100))
-                        append("\"${block.bodyContents.replace("\n", "\\n")}\"")
-                    }
-                }
-            }
-            log.trace { "" } // log empty line
-        }
-
-        forEachBlock(template.blocks, startPosition, variables) { block ->
-            // exited blocks
-            val parent = stack.popUntil({ block in it }) { parent ->
-                parent.close()
-                if (parent.tryLoopBack())
-                    return@forEachBlock
-            }
-
-            // interstitial
-            append(template.text, start, block.outerStart, parent?.level ?: 0)
-
-            // current block
-            val skipped = appendBlockContents(
-                block = block,
-                source = template,
-                slots = slots.lookup(packId, block).map { sourceFile ->
-                    when(sourceFile) {
-                        is SourceTemplate -> evaluateToBuffer(
-                            sourceFile,
-                            groupId,
-                            sourceFile.packId ?: packId,
-                            variables,
-                            slots
-                        ).readString()
-                        is StaticSource -> sourceFile.contents.decodeToString()
-                    }
-                }
-            )
-
-            // where to go next
-            start = when {
-                child != null -> {
-                    stack.push(block)
-                    child!!.outerStart
-                }
-
-                else -> block.rangeEnd
-            }
-
-            // Remove empty lines after skipped blocks
-            if (skipped && start < template.text.length) {
-                val initial = start
-                var next = template.text[start]
-                if (next.isWhitespace()) {
-                    while (next.isWhitespace() && start + 1 < template.text.length) {
-                        next = template.text[++start]
-                    }
-                    while (next != '\n' && start > initial) {
-                        next = template.text[--start]
-                    }
-                }
-            }
-
-            if (isLast()) {
-                // trailing ancestors
-                stack.popSequence().forEach { parent ->
+                // exited blocks
+                val parent = stack.popUntil({ block in it }) { parent ->
                     parent.close()
                     if (parent.tryLoopBack())
                         return@forEachBlock
                 }
 
-                // trailing content
-                append(template.text, start, template.text.length)
+                // interstitial
+                append(template.text, start, block.outerStart, parent?.level ?: 0)
+
+                // current block
+                val skipped = appendBlockContents(
+                    block = block,
+                    source = template,
+                    slots = slots.lookup(packId, block).map { sourceFile ->
+                        when (sourceFile) {
+                            is SourceTemplate -> buildString {
+                                evaluateTo(
+                                    SourceTemplateIR.Parameters(
+                                        path = path,
+                                        template = sourceFile,
+                                        groupId = groupId,
+                                        packId = sourceFile.packId ?: packId,
+                                        variables = variables,
+                                        slots = slots,
+                                    ),
+                                    this
+                                )
+                            }
+
+                            is StaticSource -> sourceFile.contents.decodeToString()
+                        }
+                    }
+                )
+
+                // where to go next
+                start = when {
+                    child != null -> {
+                        stack.push(block)
+                        child!!.outerStart
+                    }
+
+                    else -> block.rangeEnd
+                }
+
+                // Remove empty lines after skipped blocks
+                if (skipped && start < template.text.length) {
+                    val initial = start
+                    var next = template.text[start]
+                    if (next.isWhitespace()) {
+                        while (next.isWhitespace() && start + 1 < template.text.length) {
+                            next = template.text[++start]
+                        }
+                        while (next != '\n' && start > initial) {
+                            next = template.text[--start]
+                        }
+                    }
+                }
+
+                if (isLast()) {
+                    // trailing ancestors
+                    stack.popSequence().forEach { parent ->
+                        parent.close()
+                        if (parent.tryLoopBack())
+                            return@forEachBlock
+                    }
+
+                    // trailing content
+                    append(template.text, start, template.text.length)
+                }
             }
         }
     }
 
-    private fun withSourceContext(body: CharSequence, action: SourceFileWriteContext.() -> Unit): Buffer =
-        SourceFileWriteContext(log, body)
-            .apply(action)
-            .buffer
+
+    private fun withSourceContext(
+        body: CharSequence,
+        appendable: Appendable,
+        action: SourceFileWriteContext.() -> Unit
+    ) {
+        SourceFileWriteContext(log, body, appendable).apply(action)
+    }
 }
 
 /**
@@ -191,35 +221,12 @@ class TemplateEvaluator(
 internal class SourceFileWriteContext(
     val log: Logger,
     val body: CharSequence,
-    val buffer: Buffer = Buffer(),
-) : Appendable {
+    val output: Appendable,
+) : Appendable by output {
     val Block.outerContents: String
         get() = body.substring(outerStart, outerEnd)
     val Block.bodyContents: String
         get() = body.substring(bodyStart, bodyEnd)
-
-    override fun append(value: CharSequence?): Appendable {
-        if (value == null) return this
-        buffer.writeString(value)
-        return this
-    }
-
-    override fun append(value: CharSequence?, startIndex: Int, endIndex: Int): Appendable {
-        if (value == null) return this
-        check(startIndex <= endIndex) {
-            "Overlap $startIndex > $endIndex: ${value.substring(endIndex, startIndex)}"
-        }
-        check(endIndex <= value.length) {
-            "End index out of bounds: $endIndex > ${value.length}"
-        }
-        buffer.writeString(value, startIndex, endIndex)
-        return this
-    }
-
-    override fun append(c: Char): Appendable {
-        buffer.writeCodePointValue(c.code)
-        return this
-    }
 
     fun forEachBlock(
         blocks: List<Block>?,

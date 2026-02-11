@@ -23,6 +23,7 @@ import org.jetbrains.kastle.server.routing
 import org.jetbrains.kastle.server.serialization
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
+import java.nio.file.Paths
 
 abstract class KastleGradlePlugin : Plugin<Settings> {
     private val logger = Logging.getLogger(KastleGradlePlugin::class.java)
@@ -100,11 +101,11 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
             // TODO input / output args
             project.tasks.register("kslRunProject") { task ->
                 task.group = "kastle"
-                task.description = "Build a test project from descriptor file"
+                task.description = "Build a test project from descriptor file project.ksl.yaml"
                 task.doLast {
-                    val descriptorFile = kotlinx.io.files.Path("project.ksl")
-                    val exportPath = kotlinx.io.files.Path("export") // TODO
-                    logger.lifecycle("Templating to ./project...")
+                    val descriptorFile = kotlinx.io.files.Path("project.ksl.yaml") // TODO
+                    val exportPath = kotlinx.io.files.Path("build", "project") // TODO
+                    logger.lifecycle("Templating to ./build/project...")
                     runBlocking {
                         val fs = SystemFileSystem
                         val projectDescriptor = if (fs.exists(descriptorFile)) {
@@ -118,7 +119,7 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
                         )
                         ProjectGenerator(repository)
                             .generate(projectDescriptor)
-                            .export(exportPath)
+                            .export(exportPath, fs)
                     }
                 }
             }
