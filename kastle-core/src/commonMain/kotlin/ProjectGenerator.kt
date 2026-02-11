@@ -52,6 +52,23 @@ class ProjectGenerator(
 
                 for (source in moduleSources) {
                     val path = getActualPath(source, module, project)
+                    val packId = source.packId
+                    if (packId == null) {
+                        log.warn { "Skipping ${source.target}; missing pack ID" }
+                        continue
+                    }
+
+                    val variables = collectVariables(project, packId, module)
+
+                    val condition = source.condition
+                    if (condition != null) {
+                        val conditionValue = condition.evaluate(variables)
+                        if (!conditionValue.isTruthy()) {
+                            log.debug { "Skipping ${source.target}; $condition = $conditionValue" }
+                            continue
+                        }
+                    }
+
                     if (source !is SourceTemplate) {
                         if (source !is StaticSource)
                             error("Unsupported source type: ${source::class.simpleName}")
@@ -63,21 +80,6 @@ class ProjectGenerator(
                             }
                         })
                         continue
-                    }
-
-                    val packId = source.packId
-                    if (packId == null) {
-                        log.warn { "Skipping ${source.target}; missing pack ID" }
-                        continue
-                    }
-                    val variables = collectVariables(project, packId, module)
-
-                    if (source.condition != null) {
-                        val conditionValue = source.condition.evaluate(variables)
-                        if (!conditionValue.isTruthy()) {
-                            log.debug { "Skipping ${source.target}; ${source.condition} = $conditionValue" }
-                            continue
-                        }
                     }
 
                     if (!outputtedPaths.add(path)) {
