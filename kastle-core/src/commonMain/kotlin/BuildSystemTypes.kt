@@ -6,6 +6,8 @@ import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.StringExpression
 import org.jetbrains.kastle.utils.TreeMap.Companion.toTreeMap
 import org.jetbrains.kastle.utils.protocol
+import org.jetbrains.kastle.utils.unwrapQuotes
+import org.jetbrains.kastle.utils.wrapQuotes
 import kotlin.collections.flatten
 import kotlin.collections.plus
 import kotlin.jvm.JvmInline
@@ -128,8 +130,8 @@ operator fun ProjectModules.plus(other: ProjectModules): ProjectModules =
     if (this is Empty) other
     else if (other is Empty) this
     else if (this is Single && other is Single) {
-        Single(this.module.tryMerge(other.module)
-            ?: throw IllegalArgumentException("Cannot merge modules"))
+        this.module.tryMerge(other.module)?.let(::Single)
+            ?: Multi(listOf(this.module, other.module))
     }
     else merge(this.modules, other.modules)
 
@@ -337,6 +339,9 @@ sealed interface Dependency {
         fun parse(input: String): Dependency {
             val exported = input.endsWith("!")
             val text = if (exported) input.dropLast(1) else input
+            FunctionDependency.tryParse(text)?.let { functionDependency ->
+                return functionDependency
+            }
             if (text.startsWith("$"))
                 return CatalogReference(text.substring(1), exported = exported)
             if (!text.contains(":"))
@@ -387,7 +392,7 @@ data class ArtifactDependency(
     val group: String,
     val artifact: String,
     val version: String,
-    override val exported: Boolean,
+    override val exported: Boolean = false,
 ): Dependency {
     companion object {
         fun parse(text: String): ArtifactDependency {
@@ -401,6 +406,31 @@ data class ArtifactDependency(
     override fun toString(): String = buildString {
         append("$group:$artifact:$version")
         if (exported) append(":!")
+    }
+}
+
+@Serializable
+data class FunctionDependency(
+    val functionName: String,
+    val args: List<String> = emptyList()
+): Dependency {
+    companion object {
+        private val functionPattern = Regex("""^([a-zA-Z_]\w*)(?:\((.*)\))?$""")
+
+        fun tryParse(text: String): FunctionDependency? {
+            val match = functionPattern.matchEntire(text) ?: return null
+            val (functionName, args) = match.destructured
+            return FunctionDependency(functionName, args.split(',').map { it.trim().unwrapQuotes() })
+        }
+    }
+    override val exported: Boolean get() = false
+
+    override fun toString(): String = buildString {
+        append(functionName)
+        append("(")
+        if (args.isNotEmpty())
+            append(args.joinToString(", ") { it.wrapQuotes() })
+        append(")")
     }
 }
 

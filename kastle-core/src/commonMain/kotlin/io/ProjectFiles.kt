@@ -12,9 +12,25 @@ suspend fun Flow<SourceFileEntry>.export(path: Path, fs: FileSystem = SystemFile
     fs.createDirectories(path)
     collect { (name, content) ->
         val file = path.resolve(name)
-        file.parent?.let(fs::createDirectories)
-        fs.sink(path.resolve(name)).buffered().use { sink ->
+        createPathTo(path, file, fs)
+        fs.sink(file).buffered().use { sink ->
             content().transferTo(sink)
         }
+    }
+}
+
+/**
+ * For some reason `createDirectories` doesn't work in Gradle tasks, so here we write our own function.
+ */
+private fun createPathTo(root: Path, path: Path, fs: FileSystem) {
+    val ancestors = mutableListOf<Path>()
+    var current: Path? = path
+    generateSequence {
+        current?.parent
+            .takeIf { it != root }
+            .also { current = it }
+    }.forEach(ancestors::add)
+    ancestors.reversed().forEach {
+        fs.createDirectories(it)
     }
 }

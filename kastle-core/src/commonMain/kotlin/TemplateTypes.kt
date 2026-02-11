@@ -11,6 +11,7 @@ import org.jetbrains.kastle.io.relativeTo
 import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.StringExpression
 import org.jetbrains.kastle.utils.StringLiteral
+import org.jetbrains.kastle.utils.Variables
 import kotlin.jvm.JvmInline
 
 @Serializable
@@ -296,17 +297,23 @@ data class WhenClauseBlock(
     override fun toString(): String = "-> ${value.joinToString(", ") { "\"$it\"" }})"
 }
 
-/**
- * Represents a parsed expression placeholder in a target URL.
- * Example: for target "file:theme/${themeName}.json", this would store:
- * - placeholder: "${themeName}"
- * - expression: the parsed Expression for "themeName"
- */
-@Serializable
-data class TargetExpression(
-    val placeholder: String,
-    val expression: Expression,
-)
+sealed interface SourceTemplateIR {
+    val path: String
+
+    data class Parameters(
+        override val path: String,
+        val template: SourceTemplate,
+        val groupId: String,
+        val packId: PackId,
+        val variables: Variables,
+        val slots: SourcesByUrl,
+    ): SourceTemplateIR
+
+    data class Static(
+        override val path: String,
+        val contents: ByteString
+    ): SourceTemplateIR
+}
 
 typealias Url = String
 

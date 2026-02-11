@@ -7,6 +7,7 @@ import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.isSlot
 import org.jetbrains.kastle.utils.normalize
 import org.jetbrains.kastle.utils.relativeFile
+import org.jetbrains.kastle.utils.wrapQuotes
 import kotlin.collections.buildMap
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -111,6 +112,13 @@ fun Dependency.toVariableMap(modulePath: String) =
         is CatalogReference -> mapOf(
             "type" to "catalog",
             "key" to key,
+            "exported" to exported,
+        )
+        is FunctionDependency -> mapOf(
+            "type" to "function",
+            "functionName" to functionName,
+            // TODO should use expressions
+            "args" to args.map { it.wrapQuotes() },
             "exported" to exported,
         )
     }
