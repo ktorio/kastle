@@ -10,6 +10,7 @@ import kotlinx.html.FlowContent
 import kotlinx.html.body
 import kotlinx.html.ul
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.server.ui.*
 
 val DEFAULT_PROJECT = ProjectDescriptor(
@@ -20,6 +21,7 @@ val DEFAULT_PROJECT = ProjectDescriptor(
 fun Routing.frontEnd(
     repository: PackRepository,
     generator: ProjectGenerator,
+    log: Logger,
 ) {
     // main page
     get {
@@ -115,6 +117,7 @@ fun Routing.frontEnd(
             val descriptor = call.readProjectDescriptor()
             val result: Flow<SourceFileEntry> = generator.generate(descriptor)
             call.respondProjectDownload(descriptor.name, result)
+            log.info { "Generated project for $descriptor" }
         }
     }
 }

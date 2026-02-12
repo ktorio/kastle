@@ -11,6 +11,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.io.encodeToSink
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.logging.Logger
 
 /**
  * Server API called from clients.
@@ -19,6 +20,7 @@ fun Routing.backEnd(
     repository: PackRepository,
     generator: ProjectGenerator,
     json: Json,
+    log: Logger,
 ) {
 
     route("/api") {
@@ -103,6 +105,7 @@ fun Routing.backEnd(
                 val settings: ProjectDescriptor = call.receive()
                 val result: Flow<SourceFileEntry> = generator.generate(settings)
                 call.respondProjectDownload(settings.name, result)
+                log.info { "Generated project for $settings" }
             }
         }
     }
