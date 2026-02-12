@@ -11,6 +11,7 @@ import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.structure.NestedPackagingMapping
 import org.jetbrains.kastle.utils.*
+import kotlin.text.ifEmpty
 
 class ProjectGenerator(
     private val repository: PackRepository,
@@ -23,7 +24,7 @@ class ProjectGenerator(
                 GradleSourceMapping
     }
 
-    val templateEvaluator = TemplateEvaluator(log)
+    private val templateEvaluator = TemplateEvaluator(log)
 
     suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> {
         val project = projectResolver.resolve(projectDescriptor, repository)
@@ -41,62 +42,73 @@ class ProjectGenerator(
                 }
             }
         }
+
+        // 1. Dry run to validate configuration
+        project.forEachTemplate { template ->
+            if (template is SourceTemplateIR.Parameters)
+                templateEvaluator.evaluateTo(template, DevNull)
+        }
+
+        // 2. Write actual source file entries
         return flow {
-            for (module in project.moduleSources.modules.sortedBy { it.path.ifEmpty { "zz-top" } }) {
-                val moduleSources = buildList {
-                    addAll((module.sources.filter { it.target.protocol == "file" }))
-                    addAll(project.commonSources)
+            project.forEachTemplate { template ->
+                emit(SourceFileEntry(template.path) {
+                    templateEvaluator.evaluateToBuffer(template)
+                })
+            }
+        }
+    }
+
+    private suspend fun Project.forEachTemplate(action: suspend (SourceTemplateIR) -> Unit) {
+        for (module in moduleSources.modules.sortedBy { it.path.ifEmpty { "zz-top" } }) {
+            val moduleSources = buildList {
+                addAll((module.sources.filter { it.target.protocol == "file" }))
+                addAll(commonSources)
+            }
+            val outputtedPaths = mutableSetOf<String>()
+            val slotSources = slotSources + module.slotSources
+
+            for (source in moduleSources) {
+                val path = getActualPath(source, module, this)
+                val packId = source.packId ?: run {
+                    log.warn { "Skipping ${source.target}; missing pack ID" }
+                    continue
                 }
-                val outputtedPaths = mutableSetOf<String>()
-                val slotSources = project.slotSources + module.slotSources
+                val variables = collectVariables(this, packId, module)
 
-                for (source in moduleSources) {
-                    val path = getActualPath(source, module, project)
-                    val packId = source.packId
-                    if (packId == null) {
-                        log.warn { "Skipping ${source.target}; missing pack ID" }
+                source.condition?.evaluate(variables)?.let { conditionResult ->
+                    if (!conditionResult.isTruthy()) {
+                        log.debug { "Skipping ${source.target}; ${source.condition} = $conditionResult" }
                         continue
+                    } else {
+                        log.trace { "Include ${source.target}; ${source.condition} = $conditionResult" }
                     }
-
-                    val variables = collectVariables(project, packId, module)
-
-                    val condition = source.condition
-                    if (condition != null) {
-                        val conditionValue = condition.evaluate(variables)
-                        if (!conditionValue.isTruthy()) {
-                            log.debug { "Skipping ${source.target}; $condition = $conditionValue" }
-                            continue
-                        }
-                    }
-
-                    if (source !is SourceTemplate) {
-                        if (source !is StaticSource)
-                            error("Unsupported source type: ${source::class.simpleName}")
-
-                        log.debug { "Include ${source.target}; skip templating" }
-                        emit(SourceFileEntry(path) {
-                            Buffer().apply {
-                                write(source.contents)
-                            }
-                        })
-                        continue
-                    }
-
-                    if (!outputtedPaths.add(path)) {
-                        log.debug { "Skipping ${source.target}; duplicate path $path" }
-                        continue
-                    }
-
-                    emit(SourceFileEntry(path) {
-                        templateEvaluator.evaluateToBuffer(
-                            template = source,
-                            groupId = project.group,
-                            packId = packId,
-                            variables = variables,
-                            slots = slotSources,
-                        )
-                    })
                 }
+
+                if (source !is SourceTemplate) {
+                    check(source is StaticSource) {
+                        "Unsupported source type: ${source::class.simpleName}"
+                    }
+                    log.debug { "Include ${source.target}; skip templating" }
+                    action(SourceTemplateIR.Static(path, source.contents))
+                    continue
+                }
+
+                if (!outputtedPaths.add(path)) {
+                    log.debug { "Skipping ${source.target}; duplicate path $path" }
+                    continue
+                }
+
+                action(
+                    SourceTemplateIR.Parameters(
+                        path = path,
+                        template = source,
+                        groupId = group,
+                        packId = packId,
+                        variables = variables,
+                        slots = slotSources,
+                    )
+                )
             }
         }
     }

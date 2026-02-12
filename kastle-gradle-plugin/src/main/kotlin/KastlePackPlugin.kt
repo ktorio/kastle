@@ -11,6 +11,8 @@ import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradleSubplug
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.*
+import org.jetbrains.kotlin.gradle.targets.js.npm.NpmDependency
+import org.jetbrains.kotlin.gradle.targets.js.npm.NpmDependency.Scope
 
 internal const val REPOSITORY_PROPERTY = "kastle.repository"
 internal const val PACK_PROPERTY = "kastle.pack"
@@ -153,6 +155,18 @@ abstract class KastlePackPlugin : Plugin<Project> {
             is ArtifactDependency -> {
                 val artifact = "${dependency.group}:${dependency.artifact}:${dependency.version}"
                 dependencies.add(sourceSet.apiConfigurationName, artifact)
+            }
+            is FunctionDependency -> {
+                when(dependency.functionName) {
+                    "npm" -> {
+                        val (name, version) = dependency.args
+                        dependencies.add(
+                            sourceSet.apiConfigurationName,
+                            NpmDependency(objects, Scope.NORMAL, name, version)
+                        )
+                    }
+                    else -> error("Unsupported function dependency ${dependency.functionName}")
+                }
             }
         }
     }

@@ -5,18 +5,33 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.PackDescriptor
+import org.jetbrains.kastle.PackMetadata
 import org.jetbrains.kastle.VersionsCatalog
 
 class JsonFilePackRepository(
     root: Path,
     fs: FileSystem = SystemFileSystem,
-    json: Json = Json,
+    val json: Json = Json,
 ): FileSystemPackRepository(
     root = root,
     fs = fs,
     ext = "json",
-    read = { it.readJson<PackDescriptor>(fs, json) },
-    write = { path, descriptor -> path.writeJson(descriptor, fs, json) },
-    readVersions = { it.readJson<VersionsCatalog>(fs, json) ?: VersionsCatalog.Empty },
-    writeVersions = { path, versions -> path.writeJson(versions, fs, json) },
-)
+) {
+    override fun readMetadata(path: Path): PackMetadata? =
+        path.readJson<PackMetadata>(fs, json)
+
+    override fun writeMetadata(path: Path, metadata: PackMetadata) =
+        path.writeJson(metadata, fs, json)
+
+    override fun readDescriptor(path: Path): PackDescriptor? =
+        path.readJson<PackDescriptor>(fs, json)
+
+    override fun writeDescriptor(path: Path, descriptor: PackDescriptor) =
+        path.writeJson(descriptor, fs, json)
+
+    override fun readVersions(path: Path): VersionsCatalog =
+        path.readJson<VersionsCatalog>(fs, json) ?: VersionsCatalog.Empty
+
+    override fun writeVersions(path: Path, versions: VersionsCatalog) =
+        path.writeJson(versions, fs, json)
+}

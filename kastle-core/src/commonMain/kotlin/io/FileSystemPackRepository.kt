@@ -15,14 +15,10 @@ import org.jetbrains.kastle.io.FileFormat.JSON
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.Logger
 
-open class FileSystemPackRepository(
+abstract class FileSystemPackRepository(
     val root: Path,
     val fs: FileSystem = SystemFileSystem,
     val ext: String,
-    val read: (Path) -> PackDescriptor?,
-    val write: (Path, PackDescriptor) -> Unit,
-    val readVersions: (Path) -> VersionsCatalog,
-    val writeVersions: (Path, VersionsCatalog) -> Unit,
 ) : MutablePackRepository {
     companion object {
         @OptIn(ExperimentalSerializationApi::class)
@@ -60,6 +56,13 @@ open class FileSystemPackRepository(
         }
     }
 
+    abstract fun readDescriptor(path: Path): PackDescriptor?
+    abstract fun writeDescriptor(path: Path, descriptor: PackDescriptor)
+    abstract fun readMetadata(path: Path): PackMetadata?
+    abstract fun writeMetadata(path: Path, metadata: PackMetadata)
+    abstract fun readVersions(path: Path): VersionsCatalog
+    abstract fun writeVersions(path: Path, versions: VersionsCatalog)
+
     override fun ids(): Flow<PackId> =
         fs.list(root).flatMap { groupPath ->
             if (fs.isDirectory(groupPath)) {
@@ -74,22 +77,34 @@ open class FileSystemPackRepository(
         fs.list(root).asFlow().mapNotNull { groupPath ->
             fs.list(groupPath).firstOrNull()?.let { path ->
                 if (!path.toString().endsWith(ext)) return@mapNotNull null
-                read(path)?.group
+                readDescriptor(path)?.group
             }
         }
 
-    // Assume there's no impact of reading sources from the compiled file
-    override suspend fun get(packId: PackId): PackMetadata? =
-        read(packId)
+    override fun getAll(): Flow<PackMetadata> =
+        allPackFiles()
+            .filter { it.name.endsWith(".meta.${ext}") }
+            .mapNotNull(::readMetadata)
+            .asFlow()
 
-    override suspend fun read(packId: PackId): PackDescriptor? {
-        return read(root.resolve("$packId.$ext"))
-    }
+    override fun readAll(): Flow<PackDescriptor> =
+        allPackFiles()
+            .filter { it.name.endsWith(".${ext}") && !it.name.endsWith(".meta.${ext}") }
+            .mapNotNull(::readDescriptor)
+            .asFlow()
+
+    override suspend fun get(packId: PackId): PackMetadata? =
+        readMetadata(root.resolve("$packId.$ext"))
+
+    override suspend fun read(packId: PackId): PackDescriptor? =
+        readDescriptor(root.resolve("$packId.$ext"))
 
     override suspend fun add(descriptor: PackDescriptor) {
-        val file = root.resolve("${descriptor.id}.$ext")
-        file.parent?.let(fs::createDirectories)
-        write(file, descriptor)
+        val completeFile = root.resolve("${descriptor.id}.$ext")
+        val metaFile = root.resolve("${descriptor.id}.meta.$ext")
+        completeFile.parent?.let(fs::createDirectories)
+        writeDescriptor(completeFile, descriptor)
+        writeMetadata(metaFile, descriptor.manifest)
     }
 
     override suspend fun remove(id: PackId) {
@@ -120,5 +135,10 @@ open class FileSystemPackRepository(
         fs.sink(path).use { sink ->
             bytes.transferTo(sink)
         }
+    }
+
+    private fun allPackFiles(): Sequence<Path> = fs.list(root).asSequence().flatMap { groupDir ->
+        if (!fs.isDirectory(groupDir)) return@flatMap emptySequence()
+        fs.list(groupDir).asSequence()
     }
 }

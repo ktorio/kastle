@@ -11,6 +11,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.io.encodeToSink
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.utils.requireValidRelativePath
 import org.jetbrains.kastle.logging.Logger
 
 /**
@@ -22,8 +23,8 @@ fun Routing.backEnd(
     json: Json,
     log: Logger,
 ) {
-
     route("/api") {
+
         /**
          * Get a list of all pack ids.
          *
@@ -41,6 +42,9 @@ fun Routing.backEnd(
         get("/versions") {
             call.respond(repository.versions())
         }
+        /**
+         * List all groups present in the repository.
+         */
         get("/groups") {
             val groups = repository.groups()
             call.respondBytesWriter(ContentType.Application.Json) {
@@ -48,6 +52,9 @@ fun Routing.backEnd(
             }
         }
         route("/packs") {
+            /**
+             * List all packs in the repository.
+             */
             get {
                 val packs = repository.getAll()
                 call.respondBytesWriter(ContentType.Application.Json) {
@@ -55,6 +62,9 @@ fun Routing.backEnd(
                 }
             }
             route("/{group}/{id}") {
+                /**
+                 * Get details for the provided pack ID.
+                 */
                 get {
                     val id = readPackId() ?: return@get call.respond(HttpStatusCode.BadRequest)
                     val repository = repository.read(id) ?: return@get call.respond(HttpStatusCode.NotFound)
@@ -62,23 +72,32 @@ fun Routing.backEnd(
                         json.encodeToString(repository)
                     }
                 }
-                get("/docs") {
-                    val id = readPackId() ?: return@get call.respond(HttpStatusCode.BadRequest)
-                    val docs = repository.get(id)?.documentation ?: return@get call.respond(HttpStatusCode.NotFound)
-                    call.respondText(docs)
-                }
             }
         }
         route("/files") {
+            /**
+             * List all supplementary files in the repository.
+             */
             get {
                 val files = repository.files()
                 call.respondBytesWriter(ContentType.Application.Json) {
                     writeJsonFlow(files, json)
                 }
             }
+            /**
+             * Get the contents of a file.
+             */
             get("/{path...}") {
                 val path = call.parameters.getAll("path")?.joinToString("/")
-                    ?: return@get call.respond(HttpStatusCode.BadRequest)
+                try {
+                    requireNotNull(path) { "Path is required" }
+                    requireValidRelativePath(path)
+                } catch (e: IllegalArgumentException) {
+                    return@get call.respondText(
+                        text = e.message ?: "Invalid path",
+                        status = HttpStatusCode.BadRequest
+                    )
+                }
                 val contents = repository.readFile(path)
                     ?: return@get call.respond(HttpStatusCode.NotFound)
                 val contentType = ContentType.fromFileExtension(path.substringAfterLast('.')).firstOrNull()
@@ -88,6 +107,9 @@ fun Routing.backEnd(
             }
         }
         route("/generate") {
+            /**
+             * Generate a JSON preview of the project using a map of path-content pairs.
+             */
             post("/preview") {
                 val settings: ProjectDescriptor = call.receive()
                 val result: Flow<SourceFileEntry> = generator.generate(settings)
@@ -101,6 +123,9 @@ fun Routing.backEnd(
                     writeByte('}'.code.toByte())
                 }
             }
+            /**
+             * Generate a ZIP file containing the project files.
+             */
             post("/download") {
                 val settings: ProjectDescriptor = call.receive()
                 val result: Flow<SourceFileEntry> = generator.generate(settings)
