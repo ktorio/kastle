@@ -70,28 +70,28 @@ class ProjectGenerator(
 
             for (source in moduleSources) {
                 val path = getActualPath(source, module, this)
-                if (source !is SourceTemplate) {
-                    if (source !is StaticSource)
-                        error("Unsupported source type: ${source::class.simpleName}")
-
-                    log.debug { "Include ${source.target}; skip templating" }
-                    action(SourceTemplateIR.Static(path, source.contents))
-                    continue
-                }
-
-                val packId = source.packId
-                if (packId == null) {
+                val packId = source.packId ?: run {
                     log.warn { "Skipping ${source.target}; missing pack ID" }
                     continue
                 }
                 val variables = collectVariables(this, packId, module)
 
-                if (source.condition != null) {
-                    val conditionValue = source.condition.evaluate(variables)
-                    if (!conditionValue.isTruthy()) {
-                        log.debug { "Skipping ${source.target}; ${source.condition} = $conditionValue" }
+                source.condition?.evaluate(variables)?.let { conditionResult ->
+                    if (!conditionResult.isTruthy()) {
+                        log.debug { "Skipping ${source.target}; ${source.condition} = $conditionResult" }
                         continue
+                    } else {
+                        log.trace { "Include ${source.target}; ${source.condition} = $conditionResult" }
                     }
+                }
+
+                if (source !is SourceTemplate) {
+                    check(source is StaticSource) {
+                        "Unsupported source type: ${source::class.simpleName}"
+                    }
+                    log.debug { "Include ${source.target}; skip templating" }
+                    action(SourceTemplateIR.Static(path, source.contents))
+                    continue
                 }
 
                 if (!outputtedPaths.add(path)) {
