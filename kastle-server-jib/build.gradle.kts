@@ -31,6 +31,9 @@ jib {
         ports = listOf("2626")
         environment = mapOf("REPOSITORY_PATH" to "/repository")
         creationTime = "USE_CURRENT_TIMESTAMP"
+        jvmFlags = listOf(
+            "-Dlogback.configurationFile=logback-cloud.xml"
+        )
     }
 }
 
