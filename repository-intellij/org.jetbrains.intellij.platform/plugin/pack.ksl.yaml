@@ -83,8 +83,7 @@ rootSources:
   - path: sources/main/kotlin/MyMessageBundle.kt
     target: file:src/main/kotlin/MyMessageBundle.kt
     if: addSampleCode
-    # TODO: this should be a static files, but it is a template as a workaround for https://github.com/ktorio/kastle/pull/69:
-  - path: sources/main/resources/messages/MyMessageBundle.properties.hbs
+  - path: sources/main/resources/messages/MyMessageBundle.properties
     target: file:src/main/resources/messages/MyMessageBundle.properties
     if: addSampleCode
 
