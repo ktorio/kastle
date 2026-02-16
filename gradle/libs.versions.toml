@@ -1,5 +1,5 @@
 [versions]
-kaml = "0.85.0"
+kaml = "0.79.0"
 ktor = "3.4.0"
 kotlin = "2.3.20-Beta2"
 ksp-version = "2.3.4"
