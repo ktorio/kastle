@@ -365,7 +365,7 @@ data class CatalogReference(
 ): Dependency {
     companion object {
         fun lookupFormat(key: String): String =
-            key.removePrefix("libs.").replace('.', '-')
+            key.trimStart('$').removePrefix("libs.").replace('.', '-')
     }
 
     override fun toString(): String = buildString {

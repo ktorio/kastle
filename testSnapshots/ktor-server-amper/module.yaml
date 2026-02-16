@@ -2,7 +2,8 @@
 product: jvm/app
 
 dependencies@jvm:
-  - $libs.ktor.server.core
-  - $libs.ktor.server.cio
-  - $libs.ktor.server.content.negotiation
-  - $libs.ktor.json
+  - $ktorLibs.server.core
+  - $libs.logback.classic
+  - $ktorLibs.server.netty
+  - $ktorLibs.server.contentNegotiation
+  - $ktorLibs.serialization.kotlinx.json

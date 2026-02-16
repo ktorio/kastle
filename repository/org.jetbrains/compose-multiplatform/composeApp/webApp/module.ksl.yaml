@@ -5,8 +5,8 @@ dependencies:
 
 gradle:
   plugins:
-    - compose.multiplatform
-    - compose.compiler
+    - $libs.composeMultiplatform
+    - $libs.composeCompiler
 
 amper:
   compose: enabled

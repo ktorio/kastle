@@ -163,7 +163,7 @@ fun ProjectGeneratorTest(
             "ktor-server",
             "org.gradle/gradle",
             "io.ktor/server-core",
-            "io.ktor/server-cio",
+            "io.ktor/server-netty",
         )
         assertFilesAreEqualWithSnapshot(
             "$snapshots/ktor-server",
@@ -179,9 +179,9 @@ fun ProjectGeneratorTest(
             packs = listOf(
                 "org.gradle/gradle",
                 "io.ktor/server-core",
-                "io.ktor/server-cio",
+                "io.ktor/server-netty",
                 "io.ktor/server-content-negotiation",
-                "io.ktor/kotlinx-serialization-json",
+                "io.ktor/server-kotlinx-serialization",
             ),
             properties = mapOf(
                 VariableId.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
@@ -200,9 +200,9 @@ fun ProjectGeneratorTest(
             "ktor-server-amper",
             "org.jetbrains/amper",
             "io.ktor/server-core",
-            "io.ktor/server-cio",
+            "io.ktor/server-netty",
             "io.ktor/server-content-negotiation",
-            "io.ktor/kotlinx-serialization-json",
+            "io.ktor/server-kotlinx-serialization",
         )
         assertFilesAreEqualWithSnapshot(
             "$snapshots/ktor-server-amper",

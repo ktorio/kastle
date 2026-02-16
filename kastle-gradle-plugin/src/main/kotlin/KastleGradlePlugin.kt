@@ -23,7 +23,6 @@ import org.jetbrains.kastle.server.routing
 import org.jetbrains.kastle.server.serialization
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
-import java.nio.file.Paths
 
 abstract class KastleGradlePlugin : Plugin<Settings> {
     private val logger = Logging.getLogger(KastleGradlePlugin::class.java)
@@ -43,7 +42,7 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
         val repository = LocalPackRepository(repositoryDir.absolutePath)
         val modules2packs = mutableMapOf<String, Pair<PackMetadata, SourceModuleMetadata>>()
 
-        // Discover all modules and create subprojects
+        // associate modules and packs
         runBlocking {
             val packs = repository.getAll().toList()
             for (pack in packs) {
@@ -59,7 +58,9 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
                     modules2packs[projectRef] = pack to module
                 }
             }
+
         }
+        val versionsCatalog = runBlocking { repository.versions() }
 
         // Register top-level tasks on the root project
         settings.gradle.rootProject { project ->
@@ -169,13 +170,35 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
         }
 
         settings.gradle.beforeProject { project ->
-            if (project.name.startsWith("ksl-")) {
-                val (pack, module) = modules2packs[project.path] ?: return@beforeProject
-                project.extraProperties[REPOSITORY_PROPERTY] = repository
-                project.extraProperties[PACK_PROPERTY] = pack
-                project.extraProperties[SOURCE_MODULE_PROPERTY] = module
+            if (!project.name.startsWith("ksl-")) return@beforeProject
 
-                project.pluginManager.apply(KastlePackPlugin::class.java)
+            val (pack, module) = modules2packs[project.path] ?: return@beforeProject
+            project.extraProperties[REPOSITORY_PROPERTY] = repository
+            project.extraProperties[PACK_PROPERTY] = pack
+            project.extraProperties[SOURCE_MODULE_PROPERTY] = module
+            project.extraProperties[VERSIONS_PROPERTY] = versionsCatalog
+
+            project.pluginManager.apply(KastlePackPlugin::class.java)
+
+            project.buildscript.repositories.apply {
+                gradlePluginPortal()
+                mavenCentral()
+                google()
+
+                // Needed for org.jetbrains.compose (Compose Multiplatform plugin artifacts)
+                maven { it.url = project.uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
+            }
+
+            // Add gradle plugins to buildscript classpath
+            // So that we can apply them later
+            for (pluginAlias in module.gradlePlugins) {
+                val (pluginId, version) = versionsCatalog.plugins[pluginAlias.removePrefix($$"$libs.")] ?: continue
+                val versionNumber = when(version) {
+                    is CatalogVersion.Ref -> versionsCatalog.versions[version.ref]
+                    is CatalogVersion.Number -> version.number
+                }
+                val markerArtifact = "$pluginId:$pluginId.gradle.plugin:$versionNumber"
+                project.buildscript.dependencies.add("classpath", markerArtifact)
             }
         }
     }

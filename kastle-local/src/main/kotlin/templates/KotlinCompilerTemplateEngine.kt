@@ -17,6 +17,7 @@ import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.*
 import org.jetbrains.kastle.utils.protocol
+import org.jetbrains.kotlin.K1Deprecation
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
@@ -67,6 +68,7 @@ internal class KotlinCompilerTemplateEngine(
 
             path?.let { addKotlinSourceRoot(path.toString()) }
         }
+        @OptIn(K1Deprecation::class)
         environment = KotlinCoreEnvironment.createForProduction(
             Disposer.newDisposable(),
             configuration,
