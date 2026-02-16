@@ -1,6 +1,8 @@
 package org.jetbrains.kastle.server
 
 import io.ktor.server.application.*
+import io.ktor.server.config.property
+import io.ktor.server.config.propertyOrNull
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.response.respondText
@@ -15,10 +17,11 @@ fun Application.routing() {
     val repository: PackRepository by dependencies
     val generator: ProjectGenerator by dependencies
     val json: Json by dependencies
+    val basePath = propertyOrNull<String>("frontEnd.basePath") ?: ""
 
     routing {
         staticResources("/assets", "/assets")
-        frontEnd(repository, generator)
+        frontEnd(repository, generator, basePath)
         backEnd(repository, generator, json)
 
         // health check needed for cloud deployment
