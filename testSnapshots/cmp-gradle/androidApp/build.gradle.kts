@@ -2,9 +2,9 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
 
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.compose.multiplatform)
-    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.$libs.androidApplication)
+    alias(libs.plugins.$libs.composeMultiplatform)
+    alias(libs.plugins.$libs.composeCompiler)
 }
 
 
@@ -40,7 +40,7 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             implementation(project(":sharedUI"))
-            implementation(libs.android.activity.compose)
+            implementation(libs.androidx.activity.compose)
         }
 
     }

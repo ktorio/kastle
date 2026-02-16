@@ -2,13 +2,13 @@ platform: jvm
 
 dependencies:
   - ../sharedUI
-  - $compose.desktop.currentOs
+  - $composeLibs.desktop.currentOs
   - $libs.kotlinx.coroutinesSwing
 
 gradle:
   plugins:
-    - compose.multiplatform
-    - compose.compiler
+    - $libs.composeMultiplatform
+    - $libs.composeCompiler
 
 amper:
   compose: enabled

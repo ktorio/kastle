@@ -25,6 +25,11 @@ dependencyResolutionManagement {
             }
         }
     }
+    if (_slots.contains("versionCatalogs")) {
+        versionCatalogs {
+            _slots("versionCatalogs")
+        }
+    }
 }
 
 plugins {

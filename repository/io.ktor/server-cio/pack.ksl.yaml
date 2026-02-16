@@ -1,4 +1,0 @@
-name: Ktor Server CIO Engine
-description: Configures your Ktor server to use the CIO engine
-requires:
-  - io.ktor/server-core

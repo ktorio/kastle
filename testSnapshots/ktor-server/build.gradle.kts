@@ -2,15 +2,16 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
 
-    alias(libs.plugins.ktor)
+    alias(libs.plugins.$libs.ktor)
 }
 
 
 application {
-    mainClass = "io.ktor.server.cio.EngineMain"
+    mainClass = "io.ktor.server.netty.EngineMain"
 }
 
 dependencies {
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.cio)
+    implementation(ktorLibs.server.core)
+    implementation(libs.logback.classic)
+    implementation(ktorLibs.server.netty)
 }

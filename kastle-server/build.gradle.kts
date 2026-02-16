@@ -26,13 +26,14 @@ kotlin {
                 implementation(npm("htmx.org", "2.0.8"))
             }
         }
-        
+
         jvmMain {
             dependencies {
                 implementation(project(":kastle-local"))
-                
+
                 api(libs.ktor.server.core)
                 api(libs.ktor.server.di)
+
                 implementation(libs.ktor.server.cio)
                 implementation(libs.ktor.server.call.logging)
                 implementation(libs.ktor.server.content.negotiation)
@@ -47,9 +48,10 @@ kotlin {
                 implementation(libs.commonmark)
                 implementation(libs.mcp.sdk)
                 implementation(libs.ktoml)
+                implementation(libs.kotlin.compiler)
             }
         }
-        
+
         jvmTest {
             dependencies {
                 implementation(project(":kastle-client"))

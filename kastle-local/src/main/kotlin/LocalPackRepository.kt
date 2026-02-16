@@ -307,7 +307,7 @@ class LocalPackRepository(
         val moduleYaml = modulePath.resolve(MODULE_YAML)
             .readYamlNode(fs, yaml)?.yamlMap
             ?: return null
-        val manifest = readSourceModuleManifest(moduleYaml, relativeModulePath) ?: return null
+        val manifest = readSourceModuleManifest(moduleYaml, relativeModulePath)
 
         suspend fun readModuleSource(file: Path, target: String? = null): SourceFile =
             when (file.name.extension.lowercase()) {

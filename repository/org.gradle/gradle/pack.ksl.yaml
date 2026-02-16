@@ -1,9 +1,7 @@
-id: org.gradle/gradle
 name: Gradle
 description: An extensible build system for JVM languages
-version: 1.0.0
 tags:
-  - buildSystemRoot
+  - core
 properties:
   - key: isExecutable
     type: boolean
