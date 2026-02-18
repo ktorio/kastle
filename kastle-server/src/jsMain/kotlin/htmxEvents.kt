@@ -11,7 +11,7 @@ fun setupHtmxEvents() {
         val customEvent = event.asDynamic()
         val triggeringElement = customEvent.target
         val swapId = triggeringElement.dataset?.swapId as? String
-        
+
         if (swapId != null) {
             val existingElement = document.getElementById(swapId)
             if (triggeringElement.tagName == "INPUT" && !(triggeringElement.checked as? Boolean ?: false)) {
@@ -34,15 +34,15 @@ fun setupHtmxEvents() {
         var requestPath = detail.path as String
 
         // Always populate preview params from project settings
-        if (requestPath.startsWith("/project")) {
+        if (requestPath.startsWith("project")) {
             val url = buildProjectGenerationUrl(requestPath)
             detail.path = url
         }
         // Include current selected pack for docs request on load
-        else if (requestPath == "/packs/docs") {
+        else if (requestPath == "packs/docs") {
             val packId = (document.querySelector("input[name=\"selected-pack\"]:checked") as? HTMLInputElement)?.value
             if (packId != null) {
-                detail.path = "/packs/$packId/docs"
+                detail.path = "packs/$packId/docs"
             } else {
                 // if nothing selected, abort request
                 event.preventDefault()
@@ -58,7 +58,7 @@ fun setupHtmxEvents() {
             val customEvent = event.asDynamic()
             val target = customEvent.target
             val tab = target.dataset?.tab as? String
-            
+
             if (tab != null) {
                 val tabInput = document.getElementById(tab) as? HTMLInputElement
                 if (tabInput != null) {
@@ -70,7 +70,7 @@ fun setupHtmxEvents() {
         } catch (e: Throwable) {
             console.error("Failed to select tab")
         }
-        
+
         // Find any new code blocks inside the swapped content
         val customEvent = event.asDynamic()
         val target = customEvent.target
@@ -86,7 +86,7 @@ fun setupHtmxEvents() {
         // Only update URL for requests that should push state
         val customEvent = event.asDynamic()
         val requestPath = customEvent.detail.pathInfo.requestPath as String
-        if (requestPath.startsWith("/project")) {
+        if (requestPath.startsWith("project")) {
             val url = buildProjectGenerationUrl(window.location.pathname)
             val newUrl = window.location.pathname + url.substringAfter(window.location.pathname)
             window.history.replaceState(null, "", newUrl)
@@ -99,7 +99,7 @@ fun setupHtmxEvents() {
             val customEvent = event.asDynamic()
             val target = customEvent.target
             val detail = customEvent.detail
-            
+
             if (target.id == "dynamic-properties" && detail.requestConfig?.triggeringEvent?.type == "change") {
                 js("htmx.trigger('#preview-panel-tree', 'refreshPreview')")
             }

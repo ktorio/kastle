@@ -11,7 +11,7 @@ internal fun setupAppearance() {
 
     if (highlightStyle != null) {
         highlightStyle.href =
-            if (darkModeQuery.matches) "/assets/a11y-dark.min.css"
-            else "/assets/a11y-light.min.css"
+            if (darkModeQuery.matches) "assets/a11y-dark.min.css"
+            else "assets/a11y-light.min.css"
     }
 }
