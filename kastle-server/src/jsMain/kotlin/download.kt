@@ -30,7 +30,8 @@ suspend fun downloadProject() {
         progressDiv.textContent = "Fetching file..."
 
         // Replace with your API endpoint
-        val url = buildProjectGenerationUrl("project/download")
+        val basePath = window["BASE_PATH"] ?: ""
+        val url = buildProjectGenerationUrl("$basePath/project/download")
 
         val response = window.fetch(url).await()
 

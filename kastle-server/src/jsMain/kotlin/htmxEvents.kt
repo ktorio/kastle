@@ -1,11 +1,13 @@
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.get
 
 /**
  * Set up custom HTMX event handlers for toggles, request configuration, and content swapping.
  */
 fun setupHtmxEvents() {
+    val basePath = window["BASE_PATH"] ?: ""
     // Custom logic for toggles and preventing duplicate content based on `data-swap-id`.
     document.addEventListener("htmx:beforeRequest", { event ->
         val customEvent = event.asDynamic()
@@ -34,15 +36,15 @@ fun setupHtmxEvents() {
         var requestPath = detail.path as String
 
         // Always populate preview params from project settings
-        if (requestPath.startsWith("project")) {
+        if (requestPath.startsWith("$basePath/project")) {
             val url = buildProjectGenerationUrl(requestPath)
             detail.path = url
         }
         // Include current selected pack for docs request on load
-        else if (requestPath == "packs/docs") {
+        else if (requestPath == "$basePath/packs/docs") {
             val packId = (document.querySelector("input[name=\"selected-pack\"]:checked") as? HTMLInputElement)?.value
             if (packId != null) {
-                detail.path = "packs/$packId/docs"
+                detail.path = "$basePath/packs/$packId/docs"
             } else {
                 // if nothing selected, abort request
                 event.preventDefault()
@@ -86,7 +88,7 @@ fun setupHtmxEvents() {
         // Only update URL for requests that should push state
         val customEvent = event.asDynamic()
         val requestPath = customEvent.detail.pathInfo.requestPath as String
-        if (requestPath.startsWith("project")) {
+        if (requestPath == "$basePath/project") {
             val url = buildProjectGenerationUrl(window.location.pathname)
             val newUrl = window.location.pathname + url.substringAfter(window.location.pathname)
             window.history.replaceState(null, "", newUrl)

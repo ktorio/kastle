@@ -25,7 +25,14 @@ fun HTML.indexHtml(
         link(rel = "stylesheet") { id = "highlight-style" }
         script(src = "$basePath/assets/htmx.min.js") {}
         script(src = "$basePath/assets/highlight.min.js") {}
-        script { unsafe { +Resources.script } }
+        script {
+            unsafe {
+                if (basePath.isNotEmpty()) {
+                    +"window.BASE_PATH = '$basePath';\n"
+                }
+                +Resources.script
+            }
+        }
     }
     body {
         div {

@@ -20,7 +20,7 @@ fun Application.routing() {
     val basePath = propertyOrNull<String>("frontEnd.basePath") ?: ""
 
     routing {
-        staticResources("/assets", "/assets")
+        staticResources("$basePath/assets", "/assets")
         frontEnd(repository, generator, basePath)
         backEnd(repository, generator, json)
 
