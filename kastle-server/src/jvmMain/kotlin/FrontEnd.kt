@@ -98,7 +98,7 @@ fun Routing.frontEnd(
                 .map { it.path }
                 .toList()
             call.respondHtml {
-                fileTreeHtml(files, selectedFile)
+                fileTreeHtml(basePath, files, selectedFile)
             }
         }
         get("file/{path...}") {
