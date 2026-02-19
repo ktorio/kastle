@@ -4,10 +4,11 @@ import io.ktor.htmx.html.*
 import io.ktor.utils.io.*
 import kotlinx.html.*
 
-fun HTML.fileTreeHtml(fileNames: List<String>, selectedFile: String? = null) {
+fun HTML.fileTreeHtml(basePath: String, fileNames: List<String>, selectedFile: String? = null) {
     body {
         ul {
             buildTree(
+                basePath,
                 fileNames.map { it.split("/") },
                 selectedFile = selectedFile
             )
@@ -18,6 +19,7 @@ fun HTML.fileTreeHtml(fileNames: List<String>, selectedFile: String? = null) {
 // Recursively builds the tree structure as UL/LI elements.
 @OptIn(ExperimentalKtorApi::class)
 private fun UL.buildTree(
+    basePath: String,
     paths: List<List<String>>,
     prefix: List<String> = emptyList(),
     selectedFile: String? = null
@@ -40,7 +42,7 @@ private fun UL.buildTree(
                         checked = selected
                         attributes["data-file-path"] = fullPath
                         attributes.hx {
-                            get = "/project/file/$fullPath"
+                            get = "$basePath/project/file/$fullPath"
                             target = "#preview-panel-contents"
                             trigger = updatePreviewTrigger
                         }
@@ -66,6 +68,7 @@ private fun UL.buildTree(
                 }
                 ul {
                     buildTree(
+                        basePath,
                         group.map { it.drop(1) },
                         prefix + key,
                         selectedFile
