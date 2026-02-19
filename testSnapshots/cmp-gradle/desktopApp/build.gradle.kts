@@ -2,8 +2,8 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     alias(libs.plugins.kotlin.jvm)
 
-    alias(libs.plugins.compose.multiplatform)
-    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.$libs.composeMultiplatform)
+    alias(libs.plugins.$libs.composeCompiler)
 }
 
 
@@ -21,6 +21,6 @@ compose.desktop {
 
 dependencies {
     implementation(project(":sharedUI"))
-    implementation(compose.desktop.currentOs)
+    implementation(composeLibs.desktop.currentOs)
     implementation(libs.kotlinx.coroutinesSwing)
 }

@@ -22,6 +22,7 @@ fun Routing.frontEnd(
     repository: PackRepository,
     generator: ProjectGenerator,
     log: Logger,
+    basePath: String = "",
 ) {
     // main page
     get {
@@ -30,12 +31,15 @@ fun Routing.frontEnd(
         val packs = repository.readAll()
             .toList()
             .sortedBy { it.name }
+        // Currently showing file in the preview
         val previewContents: FlowContent.() -> Unit = view.selectedFile?.let { filePath ->
-            generator.generate(project ?: DEFAULT_PROJECT).filter { it.path == filePath }.singleOrNull()
+            generator.generate(project ?: DEFAULT_PROJECT)
+                .filter { it.path == filePath }
+                .singleOrNull()
         }?.htmlContent ?: {}
 
         call.respondHtml {
-            indexHtml(view, packs, project, previewContents)
+            indexHtml(basePath, view, packs, project, previewContents)
         }
     }
     get("/packs") {
@@ -58,7 +62,7 @@ fun Routing.frontEnd(
             body {
                 ul {
                     for (pack in packs)
-                        packListItem(pack)
+                        packListItem(basePath, pack)
                 }
             }
         }
@@ -96,7 +100,7 @@ fun Routing.frontEnd(
                 .map { it.path }
                 .toList()
             call.respondHtml {
-                fileTreeHtml(files, selectedFile)
+                fileTreeHtml(basePath, files, selectedFile)
             }
         }
         get("file/{path...}") {

@@ -9,8 +9,10 @@ version = libs.plugins.kastle.get().version
 dependencies {
     implementation(gradleApi())
     implementation(libs.gradlePlugin.kotlin)
-    implementation(libs.gradlePlugin.androidLibrary)
+    implementation(libs.gradlePlugin.androidApplication)
+    implementation(libs.gradlePlugin.androidMultiplatformLibrary)
     implementation(libs.gradlePlugin.composeCompiler)
+    implementation(libs.gradlePlugin.composeMultiplatform)
 
     compileOnly(libs.kotlin.compiler)
 

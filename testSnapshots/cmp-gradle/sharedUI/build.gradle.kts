@@ -2,9 +2,9 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
 
-    alias(libs.plugins.android.multiplatformLibrary)
-    alias(libs.plugins.compose.multiplatform)
-    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.$libs.androidMultiplatformLibrary)
+    alias(libs.plugins.$libs.composeMultiplatform)
+    alias(libs.plugins.$libs.composeCompiler)
 }
 
 
@@ -54,7 +54,7 @@ kotlin {
             api(libs.compose.material3)
             api(libs.compose.ui)
             api(libs.compose.uiToolingPreview)
-            api(libs.compose.component.resources)
+            api(libs.compose.components.resources)
             api(libs.androidx.lifecycle.viewmodelCompose)
             api(libs.androidx.lifecycle.runtimeCompose)
         }

@@ -2,16 +2,16 @@ platform: android
 
 dependencies:
   - ../sharedUI
-  - $libs.android.activity.compose
+  - $libs.androidx.activity.compose
 
 amper:
   compose: enabled
 
 gradle:
   plugins:
-    - android.application
-    - compose.multiplatform
-    - compose.compiler
+    - $libs.androidApplication
+    - $libs.composeMultiplatform
+    - $libs.composeCompiler
 
 sources:
   - path: android.gradle.kts

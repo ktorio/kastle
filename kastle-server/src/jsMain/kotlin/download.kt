@@ -30,7 +30,8 @@ suspend fun downloadProject() {
         progressDiv.textContent = "Fetching file..."
 
         // Replace with your API endpoint
-        val url = buildProjectGenerationUrl("/project/download")
+        val basePath = window["BASE_PATH"] ?: ""
+        val url = buildProjectGenerationUrl("$basePath/project/download")
 
         val response = window.fetch(url).await()
 
@@ -52,7 +53,7 @@ suspend fun downloadProject() {
         while (true) {
             val readPromise = reader.read() as Promise<dynamic>
             val result = readPromise.await()
-            
+
             if (result.done) break
 
             val value = result.value as? Uint8Array ?: continue

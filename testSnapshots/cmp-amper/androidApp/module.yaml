@@ -5,7 +5,7 @@ product:
 
 dependencies@android:
   - ../sharedUI
-  - $libs.android.activity.compose
+  - $libs.androidx.activity.compose
 
 settings:
   compose: enabled

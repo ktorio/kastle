@@ -1,5 +1,5 @@
 package com.acme
 
 fun main(args: Array<String>) {
-    io.ktor.server.cio.EngineMain.main(args)
+    io.ktor.server.netty.EngineMain.main(args)
 }

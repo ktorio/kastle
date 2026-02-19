@@ -1,99 +1,303 @@
 package org.jetbrains.kastle
 
-import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.LibraryPlugin
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import kotlinx.coroutines.runBlocking
-import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
-import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradleSubplugin
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.plugin.*
+import org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmDependency
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmDependency.Scope
 
 internal const val REPOSITORY_PROPERTY = "kastle.repository"
 internal const val PACK_PROPERTY = "kastle.pack"
 internal const val SOURCE_MODULE_PROPERTY = "kastle.sourceModule"
+internal const val VERSIONS_PROPERTY = "kastle.versions"
+
 private const val TEMPLATES_ARTIFACT = "org.jetbrains:kastle-templates:1.0.0-SNAPSHOT"
 
 abstract class KastlePackPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val repository: PackRepository = project.extraProperties[REPOSITORY_PROPERTY] as? PackRepository ?: error("Repository property is not set")
+        val repository: PackRepository =
+            project.extraProperties[REPOSITORY_PROPERTY] as? PackRepository ?: error("Repository property is not set")
         val pack: PackMetadata = project.extraProperties[PACK_PROPERTY] as? PackMetadata ?: error("Pack property is not set")
         val module: SourceModuleMetadata = project.extraProperties[SOURCE_MODULE_PROPERTY] as? SourceModuleMetadata ?: error("Module property is not set")
+        val versions: VersionsCatalog = project.extraProperties[VERSIONS_PROPERTY] as? VersionsCatalog ?: error("Module property is not set")
 
         project.logger.lifecycle("Pack: ${pack.name}")
 
-        /**
-         * Manually apply plugins based on metadata
-         */
-        project.plugins.apply(KotlinMultiplatformPluginWrapper::class.java)
-
-        if (Platform.ANDROID in module.platforms) {
-            project.plugins.apply(LibraryPlugin::class.java)
-            project.extensions.configure(LibraryExtension::class.java) { android ->
-                android.namespace = pack.id.toString().replace(Regex("\\W+"), ".")
-                android.compileSdk = 36
-                android.compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_11
-                    targetCompatibility = JavaVersion.VERSION_11
-                }
+        when(module.buildStrategy) {
+            ModuleBuildStrategy.JVM -> {
+                configureKotlinJvm(project, module, pack, repository)
+                applyCustomPlugins(module, project, pack, versions)
+            }
+            ModuleBuildStrategy.ANDROID_APP -> {
+                configureAndroidApp(project, module, pack, repository)
+                applyCustomPlugins(module, project, pack, versions)
+            }
+            ModuleBuildStrategy.KMP -> {
+                // IMPORTANT: apply Android/KMP-related plugins BEFORE configuring KMP targets.
+                // This prevents "compileSdk version is not set" when using com.android.kotlin.multiplatform.library
+                configureKotlinMultiplatform(project, module, pack, repository)
+                applyCustomPlugins(module, project, pack, versions)
             }
         }
-        if (module.amper.compose == "enabled")
-            project.plugins.apply(ComposeCompilerGradleSubplugin::class.java)
+    }
 
-        /**
-         * Include all source sets and dependencies.
-         */
-        project.afterEvaluate {
-            project.extensions.configure(KotlinMultiplatformExtension::class.java) { kotlinExt ->
-                val isSinglePlatform = module.platforms.size == 1
-                val platforms =
-                    if (isSinglePlatform) listOf(module.platforms.single())
-                    else listOf(Platform.COMMON) + module.platforms
+    private fun applyCustomPlugins(
+        module: SourceModuleMetadata,
+        project: Project,
+        pack: PackMetadata,
+        versionsCatalog: VersionsCatalog,
+    ) {
+        for (pluginAlias in module.gradlePlugins) {
+            try {
+                val (pluginId, _) = versionsCatalog.plugins[pluginAlias.removePrefix($$"$libs.")] ?: continue
+                when (pluginId) {
+                    // TODO get sdk versions from catalog
+                    "com.android.application" -> {
+                        project.plugins.apply(pluginId)
+                        project.extensions.configure(ApplicationExtension::class.java) { app ->
+                            app.namespace = pack.id.toString().replace(Regex("\\W+"), ".")
+                            app.compileSdk { version = release(36) }
+                        }
+                    }
 
-                for (platform in platforms) {
-                    kotlinExt.configurePlatform(platform)
+                    "com.android.kotlin.multiplatform.library" -> {
+                        project.plugins.apply(pluginId)
 
-                    kotlinExt.sourceSets.apply {
-                        findByName(platform.kotlinSourceSetName)?.apply {
-                            // Configure source directories
-                            if (isSinglePlatform || platform == Platform.COMMON) {
-                                kotlin.srcDir("src")
-                                resources.srcDir("resources")
-                            } else {
-                                kotlin.srcDir(platform.srcDir)
-                                resources.srcDir(platform.resourcesDir)
+                        // Configure the SDK where the plugin actually expects it: kotlin { android { ... } }
+                        project.pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
+                            project.extensions.configure(KotlinMultiplatformExtension::class.java) { kotlinExt ->
+                                kotlinExt.extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("androidLibrary") { target ->
+                                    target.namespace = pack.id.toString().replace(Regex("\\W+"), ".")
+                                    target.compileSdk { version = release(36) }
+                                    target.minSdk = 21
+                                }
                             }
+                        }
+                    }
 
+                    else -> {
+                        if (!project.plugins.hasPlugin(pluginId))
+                            project.plugins.apply(pluginId)
+                    }
+                }
+            } catch (e: Exception) {
+                project.logger.error("Cannot apply {} in {}", pluginAlias, project.path, e)
+            }
+        }
+    }
+
+    private fun configureKotlinJvm(
+        project: Project,
+        module: SourceModuleMetadata,
+        pack: PackMetadata,
+        repository: PackRepository,
+    ) {
+        project.pluginManager.apply("org.jetbrains.kotlin.jvm")
+
+        project.afterEvaluate {
+            project.extensions.configure(KotlinJvmProjectExtension::class.java) { kotlinExt ->
+                kotlinExt.jvmToolchain(21)
+
+                kotlinExt.sourceSets.apply {
+                    val main = findByName("main") ?: error("Missing Kotlin JVM source set: main")
+
+                    main.apply {
+                        // Keep JVM layout consistent with the single-platform KMP layout
+                        kotlin.srcDir("src")
+                        resources.srcDir("resources")
+
+                        project.afterEvaluate {
                             // Always include templates
                             project.dependencies.add(implementationConfigurationName, TEMPLATES_ARTIFACT)
 
-                            val requiredDependencies = module.dependencies[platform] ?: emptyList()
+                            val requiredDependencies = module.dependencies[Platform.JVM] ?: emptyList()
                             val fullModulePath = module.fullPath(pack.id)
-                            project.logger.lifecycle("Add {} dependencies to {}", requiredDependencies.size, this)
+
+                            project.logger.lifecycle(
+                                "Add {} dependencies to {}",
+                                requiredDependencies.size,
+                                main
+                            )
 
                             // Inter-pack dependencies
                             for (packId in pack.requires) {
                                 try {
                                     // TODO support direct module references for multi-module packs
-                                    val module = runBlocking { repository.read(packId) }?.sourceModules?.singleOrNull()
-                                    if (module == null) {
+                                    val requiredModule =
+                                        runBlocking { repository.read(packId) }?.sourceModules?.singleOrNull()
+                                    if (requiredModule == null) {
                                         project.logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
                                         continue
                                     }
-                                    val projectRef = packId.toProjectRef(module.path)
+                                    val projectRef = packId.toProjectRef(requiredModule.path)
+
+                                    // For plain JVM modules we wire these as implementation deps (no 'api' unless we also apply java-library)
+                                    project.dependencies.add(
+                                        implementationConfigurationName,
+                                        project.project(projectRef)
+                                    )
+                                } catch (e: Exception) {
+                                    project.logger.error("Cannot resolve {}", packId, e)
+                                }
+                            }
+
+                            // Explicit artifact/module dependencies
+                            for (dependency in requiredDependencies) {
+                                try {
+                                    project.dependency(implementationConfigurationName, dependency, fullModulePath)
+                                } catch (e: Exception) {
+                                    project.logger.error("Cannot resolve {}", dependency, e)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun configureAndroidApp(
+        project: Project,
+        module: SourceModuleMetadata,
+        pack: PackMetadata,
+        repository: PackRepository,
+    ) {
+        project.pluginManager.apply("com.android.application")
+
+        project.pluginManager.withPlugin("com.android.application") {
+            project.extensions.configure(ApplicationExtension::class.java) { android ->
+                android.namespace = pack.id.toString().replace(Regex("\\W+"), ".")
+                android.compileSdk = 36
+
+                android.defaultConfig {
+                    minSdk = 21
+                    targetSdk = 36
+                }
+
+                android.sourceSets.named("main") { main ->
+                    main.java.srcDir("src")
+                }
+                android.sourceSets.named("test") { test ->
+                    test.java.srcDir("test")
+                }
+            }
+
+            // Kotlin Android config
+            project.extensions.configure(KotlinAndroidProjectExtension::class.java) { kotlin ->
+                kotlin.compilerOptions {
+                    jvmTarget.set(JvmTarget.JVM_11)
+                }
+            }
+        }
+
+        project.afterEvaluate {
+            // Always include templates
+            project.dependencies.add("implementation", TEMPLATES_ARTIFACT)
+
+            val requiredDependencies = module.dependencies[Platform.ANDROID] ?: emptyList()
+            val fullModulePath = module.fullPath(pack.id)
+
+            project.logger.lifecycle(
+                "Add {} dependencies to Android app {}",
+                requiredDependencies.size,
+                project.path
+            )
+
+            // Inter-pack dependencies
+            for (packId in pack.requires) {
+                try {
+                    val requiredModule =
+                        runBlocking { repository.read(packId) }?.sourceModules?.singleOrNull()
+                    if (requiredModule == null) {
+                        project.logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
+                        continue
+                    }
+                    val projectRef = packId.toProjectRef(requiredModule.path)
+                    project.dependencies.add("implementation", project.project(projectRef))
+                } catch (e: Exception) {
+                    project.logger.error("Cannot resolve {}", packId, e)
+                }
+            }
+
+            // Explicit artifact/module dependencies
+            for (dependency in requiredDependencies) {
+                try {
+                    project.dependency("implementation", dependency, fullModulePath)
+                } catch (e: Exception) {
+                    project.logger.error("Cannot resolve {}", dependency, e)
+                }
+            }
+        }
+    }
+
+    private fun configureKotlinMultiplatform(
+        project: Project,
+        module: SourceModuleMetadata,
+        pack: PackMetadata,
+        repository: PackRepository
+    ) {
+        project.plugins.apply(KotlinMultiplatformPluginWrapper::class.java)
+
+        // Do NOT delay target/source set creation to afterEvaluate:
+        // - other plugins may look for tasks (like jvmJar) during configuration
+        // - Android KMP plugin wants compileSdk set during configuration
+        project.extensions.configure(KotlinMultiplatformExtension::class.java) { kotlinExt ->
+            val isSinglePlatform = module.platforms.size == 1
+            val platforms =
+                if (isSinglePlatform) listOf(module.platforms.single())
+                else listOf(Platform.COMMON) + module.platforms
+
+            for (platform in platforms) {
+                kotlinExt.configurePlatform(platform)
+
+                kotlinExt.sourceSets.apply {
+                    findByName(platform.kotlinSourceSetName)?.apply {
+                        if (isSinglePlatform || platform == Platform.COMMON) {
+                            kotlin.srcDir("src")
+                            resources.srcDir("resources")
+                        } else {
+                            kotlin.srcDir(platform.srcDir)
+                            resources.srcDir(platform.resourcesDir)
+                        }
+
+                        project.afterEvaluate {
+                            project.dependencies.add(implementationConfigurationName, TEMPLATES_ARTIFACT)
+
+                            val requiredDependencies = module.dependencies[platform] ?: emptyList()
+                            val fullModulePath = module.fullPath(pack.id)
+
+                            project.logger.lifecycle(
+                                "Add {} dependencies to {}",
+                                requiredDependencies.size,
+                                this
+                            )
+
+                            for (packId in pack.requires) {
+                                try {
+                                    val requiredModule =
+                                        runBlocking { repository.read(packId) }?.sourceModules?.singleOrNull()
+                                    if (requiredModule == null) {
+                                        project.logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
+                                        continue
+                                    }
+                                    val projectRef = packId.toProjectRef(requiredModule.path)
                                     project.dependencies.add(apiConfigurationName, project.project(projectRef))
                                 } catch (e: Exception) {
                                     project.logger.error("Cannot resolve {}", packId, e)
                                 }
                             }
 
-                            // Explicit artifact dependencies
                             for (dependency in requiredDependencies) {
                                 try {
                                     project.dependency(this, dependency, fullModulePath)
@@ -101,9 +305,8 @@ abstract class KastlePackPlugin : Plugin<Project> {
                                     project.logger.error("Cannot resolve {}", dependency, e)
                                 }
                             }
-                        } ?: project.logger.error("Missing source set ${platform.kotlinSourceSetName}")
-                    }
-
+                        }
+                    } ?: project.logger.error("Missing source set ${platform.kotlinSourceSetName}")
                 }
             }
         }
@@ -113,8 +316,8 @@ abstract class KastlePackPlugin : Plugin<Project> {
     private fun KotlinMultiplatformExtension.configurePlatform(platform: Platform) {
         when (platform) {
             Platform.COMMON -> {}
+            Platform.ANDROID -> {} // configured in specific plugin
             Platform.JVM -> jvm()
-            Platform.ANDROID -> androidTarget()
             Platform.WASM -> wasmJs()
             Platform.JS -> js()
             Platform.WEB -> wasmJs()
@@ -124,17 +327,47 @@ abstract class KastlePackPlugin : Plugin<Project> {
         }
     }
 
-    private val Platform.kotlinSourceSetName get() =
-        when(this) {
-            Platform.COMMON -> "commonMain"
-            Platform.JVM -> "jvmMain"
-            Platform.ANDROID -> "androidMain"
-            Platform.WASM -> "wasmJsMain"
-            Platform.NATIVE -> "nativeMain"
-            Platform.IOS -> "iosArm64Main"
-            Platform.JS -> "jsMain"
-            Platform.WEB -> "wasmJsMain"
+    private val Platform.kotlinSourceSetName
+        get() =
+            when (this) {
+                Platform.COMMON -> "commonMain"
+                Platform.JVM -> "jvmMain"
+                Platform.ANDROID -> "androidMain"
+                Platform.WASM -> "wasmJsMain"
+                Platform.NATIVE -> "nativeMain"
+                Platform.IOS -> "iosArm64Main"
+                Platform.JS -> "jsMain"
+                Platform.WEB -> "wasmJsMain"
+            }
+
+    private fun Project.dependency(
+        configurationName: String,
+        dependency: Dependency,
+        modulePath: String,
+    ) {
+        when (dependency) {
+            is CatalogReference -> {
+                val keys = dependency.key.removePrefix("$").split(".").toMutableList()
+                val catalog = extensions.getByType(VersionCatalogsExtension::class.java).named(keys.removeFirst())
+                val provider = catalog.findLibrary(keys.joinToString(".")).orElseThrow()
+                dependencies.add(configurationName, provider)
+            }
+
+            is ModuleDependency -> {
+                val projectRef = dependency.toProjectRef(modulePath)
+                dependencies.add(configurationName, project(projectRef))
+            }
+
+            is ArtifactDependency -> {
+                val artifact = "${dependency.group}:${dependency.artifact}:${dependency.version}"
+                dependencies.add(configurationName, artifact)
+            }
+
+            is FunctionDependency -> {
+                error("Unsupported function dependency ${dependency.functionName} for JVM module")
+            }
         }
+    }
 
     private fun Project.dependency(
         sourceSet: KotlinSourceSet,
@@ -148,16 +381,19 @@ abstract class KastlePackPlugin : Plugin<Project> {
                 val provider = catalog.findLibrary(keys.joinToString(".")).orElseThrow()
                 dependencies.add(sourceSet.apiConfigurationName, provider)
             }
+
             is ModuleDependency -> {
                 val projectRef = dependency.toProjectRef(modulePath)
                 dependencies.add(sourceSet.apiConfigurationName, project(projectRef))
             }
+
             is ArtifactDependency -> {
                 val artifact = "${dependency.group}:${dependency.artifact}:${dependency.version}"
                 dependencies.add(sourceSet.apiConfigurationName, artifact)
             }
+
             is FunctionDependency -> {
-                when(dependency.functionName) {
+                when (dependency.functionName) {
                     "npm" -> {
                         val (name, version) = dependency.args
                         dependencies.add(
@@ -165,6 +401,7 @@ abstract class KastlePackPlugin : Plugin<Project> {
                             NpmDependency(objects, Scope.NORMAL, name, version)
                         )
                     }
+
                     else -> error("Unsupported function dependency ${dependency.functionName}")
                 }
             }

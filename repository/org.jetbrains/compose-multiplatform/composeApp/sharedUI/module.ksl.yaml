@@ -6,15 +6,15 @@ dependencies:
   - $libs.compose.material3!
   - $libs.compose.ui!
   - $libs.compose.uiToolingPreview!
-  - $libs.compose.component.resources!
+  - $libs.compose.components.resources!
   - $libs.androidx.lifecycle.viewmodelCompose!
   - $libs.androidx.lifecycle.runtimeCompose!
 
 gradle:
   plugins:
-    - android.multiplatformLibrary
-    - compose.multiplatform
-    - compose.compiler
+    - $libs.androidMultiplatformLibrary
+    - $libs.composeMultiplatform
+    - $libs.composeCompiler
 
 amper:
   compose: enabled

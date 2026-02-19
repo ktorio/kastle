@@ -20,11 +20,13 @@ dependencies {
     api(libs.kotlinx.io.core)
 
     implementation(libs.kaml)
-    implementation(libs.kotlin.compiler)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.serialization.json.io)
     implementation(libs.ktoml)
 
+    compileOnly(libs.kotlin.compiler)
+
+    testImplementation(libs.kotlin.compiler)
     testImplementation(project(":kastle-templates"))
     testImplementation(project(":kastle-test"))
     testImplementation(libs.kotest.junit5)

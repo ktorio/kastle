@@ -2,17 +2,19 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
 
-    alias(libs.plugins.ktor)
+    alias(libs.plugins.$libs.ktor)
+    alias(libs.plugins.$kotlin.serialization)
 }
 
 
 application {
-    mainClass = "io.ktor.server.cio.EngineMain"
+    mainClass = "io.ktor.server.netty.EngineMain"
 }
 
 dependencies {
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.cio)
-    implementation(libs.ktor.server.content.negotiation)
-    implementation(libs.ktor.json)
+    implementation(ktorLibs.server.core)
+    implementation(libs.logback.classic)
+    implementation(ktorLibs.server.netty)
+    implementation(ktorLibs.server.contentNegotiation)
+    implementation(ktorLibs.serialization.kotlinx.json)
 }

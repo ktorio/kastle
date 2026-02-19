@@ -11,6 +11,7 @@ import org.jetbrains.kastle.ProjectGenerator
 
 @OptIn(ExperimentalKtorApi::class)
 fun HTML.indexHtml(
+    basePath: String = "",
     view: View = View(),
     packs: List<PackDescriptor> = emptyList(),
     project: ProjectDescriptor? = null,
@@ -19,12 +20,19 @@ fun HTML.indexHtml(
     head {
         title { +"K A S T L E" }
         style { unsafe { +Resources.stylesheet } }
-        styleLink("/assets/a11y-light.min.css")
-        styleLink("/assets/a11y-dark.min.css")
+        styleLink("$basePath/assets/a11y-light.min.css")
+        styleLink("$basePath/assets/a11y-dark.min.css")
         link(rel = "stylesheet") { id = "highlight-style" }
-        script(src = "/assets/htmx.min.js") {}
-        script(src = "/assets/highlight.min.js") {}
-        script { unsafe { +Resources.script } }
+        script(src = "$basePath/assets/htmx.min.js") {}
+        script(src = "$basePath/assets/highlight.min.js") {}
+        script {
+            unsafe {
+                if (basePath.isNotEmpty()) {
+                    +"window.BASE_PATH = '$basePath';\n"
+                }
+                +Resources.script
+            }
+        }
     }
     body {
         div {
@@ -50,7 +58,7 @@ fun HTML.indexHtml(
                     placeholder = "Search"
 
                     attributes.hx {
-                        get = "/packs"
+                        get = "$basePath/packs"
                         trigger = "changed, keyup[key=='Enter']"
                         target = "#packs-list"
                         vals = "js:{search: event.target.value}"
@@ -61,7 +69,7 @@ fun HTML.indexHtml(
             ul {
                 id = "packs-list"
                 for (pack in packs)
-                    packListItem(pack)
+                    packListItem(basePath, pack)
             }
         }
         main {
@@ -151,7 +159,7 @@ fun HTML.indexHtml(
 
                     attributes["data-tab"] = "pack-details-tab"
                     attributes.hx {
-                        get = "/packs/docs"
+                        get = "$basePath/packs/docs"
                         trigger = "load"
                     }
 
@@ -168,7 +176,7 @@ fun HTML.indexHtml(
                         div {
                             id = "preview-panel-tree"
                             attributes.hx {
-                                get = "/project/listing"
+                                get = "$basePath/project/listing"
                                 trigger = "refreshPreview, load, change from:#project-form input"
                             }
                         }
@@ -184,13 +192,13 @@ fun HTML.indexHtml(
 }
 
 @OptIn(ExperimentalKtorApi::class)
-fun UL.packListItem(pack: PackDescriptor) {
+fun UL.packListItem(basePath: String, pack: PackDescriptor) {
     li {
         // TODO role is tab?
         val inputId = "toggle/${pack.id}"
         input(type = InputType.radio, name = "selected-pack") {
             attributes.hx {
-                get = "/packs/${pack.id}/docs"
+                get = "$basePath/packs/${pack.id}/docs"
                 target = "#pack-details-docs"
                 trigger = "change"
             }
@@ -211,7 +219,7 @@ fun UL.packListItem(pack: PackDescriptor) {
             attributes["data-pack-id"] = pack.id.toString()
             attributes["data-swap-id"] = "properties/${pack.id}"
             attributes.hx {
-                get = "/packs/${pack.id}/properties"
+                get = "$basePath/packs/${pack.id}/properties"
                 target = "#dynamic-properties"
                 trigger = "change, load"
                 swap = "afterend"

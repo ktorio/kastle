@@ -16,8 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.acme.sharedui.generated.resources.Res
-import com.acme.sharedui.generated.resources.compose_multiplatform
+
+// This magic does not currently work
+//import kastle.sharedui.generated.resources.Res
+//import kastle.sharedui.generated.resources.compose_multiplatform
 
 @Composable
 @Preview
@@ -38,7 +40,7 @@ fun App(viewModel: AppViewModel = viewModel { AppViewModel() }) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
+//                    Image(painterResource(Res.drawable.compose_multiplatform), null)
                     Text("Compose: ${viewModel.greeting}")
                 }
             }
