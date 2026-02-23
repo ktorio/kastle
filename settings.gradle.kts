@@ -13,6 +13,7 @@ dependencyResolutionManagement {
     repositories {
         mavenCentral()
         google()
+        maven("https://packages.jetbrains.team/maven/p/apl/product-analytics-platform-public")
     }
 }
 
@@ -29,6 +30,7 @@ include(
     "kastle-gradle-plugin",
     "kastle-server",
     "kastle-server-jib",
+    "kastle-analytics-fus",
 )
 
 // Sample repository,

@@ -11,8 +11,9 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.io.encodeToSink
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.analytics.AnalyticsRepository
+import org.jetbrains.kastle.analytics.NoOpAnalyticsRepository
 import org.jetbrains.kastle.utils.requireValidRelativePath
-import org.jetbrains.kastle.logging.Logger
 
 /**
  * Server API called from clients.
@@ -20,8 +21,8 @@ import org.jetbrains.kastle.logging.Logger
 fun Routing.backEnd(
     repository: PackRepository,
     generator: ProjectGenerator,
+    analyticsRepository: AnalyticsRepository = NoOpAnalyticsRepository,
     json: Json,
-    log: Logger,
 ) {
     route("/api") {
 
@@ -130,7 +131,7 @@ fun Routing.backEnd(
                 val settings: ProjectDescriptor = call.receive()
                 val result: Flow<SourceFileEntry> = generator.generate(settings)
                 call.respondProjectDownload(settings.name, result)
-                log.info { "Generated project for $settings" }
+                call.recordAnalyticsEvent(analyticsRepository, settings)
             }
         }
     }

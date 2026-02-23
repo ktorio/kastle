@@ -30,6 +30,7 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation(project(":kastle-local"))
+                implementation(project(":kastle-analytics-fus"))
 
                 api(libs.ktor.server.core)
                 api(libs.ktor.server.di)
