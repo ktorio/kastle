@@ -10,6 +10,8 @@ import com.jetbrains.fus.reporting.schema.VarargEventId
 
 object FusSchema {
 
+    val VERSION_REGEX = Regex("Unknown|unknown.format|unknown|UNKNOWN|((\\d+\\.?)*\\d+)")
+
     /**
      * EventLogGroup for tracking usage of the IntelliJ Platform Plugin Generator.
      * Reports events when users generate plugin projects through the web interface.
@@ -32,7 +34,7 @@ object FusSchema {
             Enum("client_type", ClientType::class.java, "The client used in the request")
         )
         var clientVersion by field(
-            StringValidatedByInlineRegexp("client_version", VERSION_REGEXP, "The client version used in the request")
+            StringValidatedByInlineRegexp("client_version", VERSION_REGEX.pattern, "The client version used in the request")
         )
         var browser by field(
             Enum("browser", Browser::class.java, "The browser used in the request")
@@ -55,12 +57,6 @@ object FusSchema {
     )
 
     class ThemeGeneratedFields : ProjectGeneratedFields()
-
-    /**
-     * Validation regexp for IDE versions.
-     * Matches patterns like: "2023.1", "2023.1.1", "2023.1 EAP"
-     */
-    private const val VERSION_REGEXP = """^\d+\.\d+(?:\.\d+)*(\s\w+)?$"""
 
     enum class Browser {
         Chrome,

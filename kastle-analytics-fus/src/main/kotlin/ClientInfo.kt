@@ -1,6 +1,7 @@
 package org.jetbrains.kastle.analytics.fus
 
 import org.jetbrains.kastle.analytics.fus.ClientInfo.ClientType.Other
+import org.jetbrains.kastle.analytics.fus.event.FusSchema
 
 /**
  * The `User-Agent` header wrapper extracting the information about:
@@ -13,7 +14,6 @@ class ClientInfo private constructor(
     val clientVersion: ClientVersion? = null,
 ) {
     companion object {
-        val VERSION_EXTENDED_REGEX_V2 = Regex("((\\d+\\.?)*\\d+)|(((\\d+\\.?)*\\d+)-(beta|eap|rc)-\\d+)")
         private val productRegex = Regex("""(?<client>\w+(?: \w+)*?)/(?<version>[\w.-]+)""")
 
         val Unknown = ClientInfo(Other)
@@ -31,7 +31,7 @@ class ClientInfo private constructor(
     value class ClientVersion private constructor(val value: String) {
         companion object {
             fun parse(value: String): ClientVersion? {
-                return if (VERSION_EXTENDED_REGEX_V2.matches(value)) ClientVersion(value) else null
+                return if (FusSchema.VERSION_REGEX.matches(value)) ClientVersion(value) else null
             }
         }
     }
