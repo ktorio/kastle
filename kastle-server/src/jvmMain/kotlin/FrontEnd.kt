@@ -27,7 +27,7 @@ fun Routing.frontEnd(
 ) {
     // main page
     get {
-        initUserIdCookie()
+        initClientIdCookie()
         val project = call.tryReadProjectDescriptor()
         val view = call.readViewState()
         val packs = repository.readAll()

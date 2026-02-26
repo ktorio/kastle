@@ -13,8 +13,8 @@ import org.jetbrains.kastle.VariableId
  * @property packaging Packaging style used (FLAT or NESTED)
  * @property packs List of packs used in the generation
  * @property properties Map of property values used per pack
- * @property additionalParameters Additional parameters extracted from the request (e.g., userAgent, productName, userId).
- *           See [RequestMappings] for details.
+ * @property additionalParameters Additional parameters extracted from the request
+ *           (e.g., userAgent, productName, clientId). See [RequestMappings] for details.
  */
 data class GenerationEvent(
     val projectName: String,

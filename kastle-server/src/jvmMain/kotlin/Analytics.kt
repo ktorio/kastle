@@ -49,18 +49,18 @@ fun Application.configureAnalytics(
     }
 }
 
-const val USER_ID_COOKIE_NAME = "kastle_user_id"
+const val CLIENT_ID_COOKIE_NAME = "kastle_client_id"
 
 /**
- * Sets or updates the [user ID cookie][USER_ID_COOKIE_NAME] with 400-day expiration.
+ * Sets or updates the [client ID cookie][CLIENT_ID_COOKIE_NAME] with 400-day expiration.
  */
-fun RoutingContext.initUserIdCookie() {
-    val existingCookieValue = call.request.cookies[USER_ID_COOKIE_NAME]
+fun RoutingContext.initClientIdCookie() {
+    val existingCookieValue = call.request.cookies[CLIENT_ID_COOKIE_NAME]
     val cookieValue = existingCookieValue ?: generateRandomHash()
     val maxAgeInSeconds = 400 * 24 * 60 * 60 // 400 days
     call.response.cookies.append(
         Cookie(
-            name = USER_ID_COOKIE_NAME,
+            name = CLIENT_ID_COOKIE_NAME,
             value = cookieValue,
             maxAge = maxAgeInSeconds,
             path = "/"

@@ -35,15 +35,15 @@ class FusAnalyticsRepository(
     override val requestMappings: RequestMappings = RequestMappings(
         headerMappings = mapOf(
             "User-Agent" to USER_AGENT_PARAMETER_NAME,
-            "X-User-ID" to USER_ID_PARAMETER_NAME
+            "X-Machine-ID" to MACHINE_ID_PARAMETER_NAME
         ),
         cookieMappings = mapOf(
-            "kastle_user_id" to USER_ID_PARAMETER_NAME
+            "kastle_client_id" to MACHINE_ID_PARAMETER_NAME
         )
     )
 
     override suspend fun record(event: GenerationEvent) {
-        val machineId = event.additionalParameters[USER_ID_PARAMETER_NAME] ?: generateRandomHash()
+        val machineId = event.additionalParameters[MACHINE_ID_PARAMETER_NAME] ?: generateRandomHash()
 
         val fusLogger = logger(
             machineId = machineId,
@@ -151,7 +151,7 @@ class FusAnalyticsRepository(
         }
 
     companion object {
-        const val USER_ID_PARAMETER_NAME = "userId"
+        const val MACHINE_ID_PARAMETER_NAME = "machineId"
         const val USER_AGENT_PARAMETER_NAME = "userAgent"
     }
 }
