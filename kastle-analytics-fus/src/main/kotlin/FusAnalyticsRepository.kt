@@ -145,7 +145,7 @@ class FusAnalyticsRepository(
                 jsonSerializer,
                 fileStorage,
                 bundledFileStorage,
-                metadataUpdateDelay = MetadataUpdateDelay.SHORT,
+                metadataUpdateDelay = MetadataUpdateDelay.LONG,
                 buildParser = DEFAULT_BUILD_PARSER,
             )
         }
