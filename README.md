@@ -32,7 +32,7 @@ This project uses Gradle as a build system.
 You can start the server using:
 
 ```
-./gradlew :kastle-server:run
+./gradlew :kastle-server:jvmRun
 ```
 
 You should see the following in the console:
