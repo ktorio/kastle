@@ -1,0 +1,59 @@
+package org.jetbrains.kastle.server.`intellij-plugins-ui`
+
+import kotlinx.html.*
+
+fun FlowContent.tabList(
+    name: String,
+    tabs: TabsContent.() -> Unit
+) {
+    div("tabs") {
+        val tabsContent = TabsContent(this).also(tabs)
+
+        for (tab in tabsContent) {
+            input(type = InputType.radio, name = name) {
+                id = "${tab.id}-tab"
+                checked = tab.checked
+                attributes["data-tab-title"] = tab.title
+            }
+        }
+
+        div("tabs-header") {
+            for (tab in tabsContent) {
+                horizontalNavLabel("${tab.id}-tab", "main-tabs") {
+                    div {
+                        unsafe { +"${tab.icon}&nbsp;" }
+                        +tab.title
+                    }
+                }
+            }
+        }
+
+        div("tabs-content") {
+            for (tab in tabsContent) {
+                div("tab-content") {
+                    id = tab.id
+                    tab.contents(this)
+                }
+            }
+        }
+    }
+}
+
+class TabsContent(private val flowContent: FlowContent): FlowContent by flowContent, Iterable<TabsContent.Tab> {
+    private val tabs = mutableListOf<Tab>()
+
+    fun tab(id: String, icon: String, title: String, checked: Boolean = false, contents: DIV.() -> Unit) {
+        tabs += Tab(id, icon, title, checked, contents)
+    }
+
+    override fun iterator(): Iterator<Tab> =
+        tabs.iterator()
+
+    class Tab(
+        val id: String,
+        val icon: String,
+        val title: String,
+        val checked: Boolean = false,
+        val contents: DIV.() -> Unit
+    )
+}
