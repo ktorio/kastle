@@ -11,6 +11,7 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.PackRepository
 import org.jetbrains.kastle.ProjectGenerator
 import org.jetbrains.kastle.analytics.AnalyticsRepository
+import org.jetbrains.kastle.server.ui.wizard.wizardFrontEnd
 
 @OptIn(ExperimentalKtorApi::class)
 fun Application.routing() {
@@ -22,9 +23,11 @@ fun Application.routing() {
 
     routing {
         staticResources("/assets", "/assets")
+        staticResources("/assets/js", "/js")
         frontEnd(repository, generator, analytics, basePath)
         frontEndIntellijPlugins(repository, generator, analytics, basePath)
         backEnd(repository, generator, analytics, json)
+        wizardFrontEnd(repository, generator, analytics, "/wizard")
 
         // health check needed for cloud deployment
         get("/healthz") {

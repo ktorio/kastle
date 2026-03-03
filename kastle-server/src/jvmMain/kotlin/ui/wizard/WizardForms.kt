@@ -1,0 +1,142 @@
+package org.jetbrains.kastle.server.ui.wizard
+
+import io.ktor.htmx.html.*
+import io.ktor.utils.io.ExperimentalKtorApi
+import kotlinx.html.*
+
+/**
+ * Renders the config box (right side of title row) with internal 50/50 split.
+ */
+@OptIn(ExperimentalKtorApi::class)
+fun FlowContent.wizardConfigBox(view: WizardView) {
+    div("wizard-config-box") {
+        id = "wizard-config-box"
+
+        // Left side - form fields
+        div("wizard-config-fields") {
+            form {
+                id = "wizard-form"
+                onSubmit = "event.preventDefault();"
+
+                when (view.pluginType) {
+                    PluginType.PLUGIN -> pluginConfigFields(view)
+                    PluginType.THEME -> themeConfigFields(view)
+                }
+            }
+        }
+
+        // Right side - download section
+        div("wizard-download-section") {
+            button(classes = "wizard-download-btn") {
+                id = "wizard-download-button"
+                type = ButtonType.button
+                onClick = "wizardDownloadProject()"
+
+                downloadIcon()
+                span { +"Download" }
+            }
+
+            // Generated filename
+            div("wizard-download-filename") {
+                id = "wizard-download-filename"
+                +"${view.artifactId}.zip"
+            }
+
+            div("wizard-download-progress") {
+                id = "wizard-download-progress"
+            }
+        }
+    }
+}
+
+/**
+ * Plugin-specific configuration fields.
+ */
+private fun FORM.pluginConfigFields(view: WizardView) {
+    div("wizard-form-group") {
+        label("wizard-form-label") {
+            htmlFor = "wizard-group-id"
+            +"Group ID"
+        }
+        input(type = InputType.text, classes = "wizard-form-input") {
+            id = "wizard-group-id"
+            name = "group"
+            placeholder = "com.example"
+            value = view.groupId
+        }
+    }
+
+    div("wizard-form-group") {
+        label("wizard-form-label") {
+            htmlFor = "wizard-artifact-id"
+            +"Artifact ID"
+        }
+        input(type = InputType.text, classes = "wizard-form-input") {
+            id = "wizard-artifact-id"
+            name = "name"
+            placeholder = "my-plugin"
+            value = view.artifactId
+        }
+    }
+
+    div("wizard-checkbox-group") {
+        input(type = InputType.checkBox) {
+            id = "wizard-add-sample-code"
+            name = "org.jetbrains.intellij.platform/plugin/addSampleCode"
+            checked = view.addSampleCode
+        }
+        label {
+            htmlFor = "wizard-add-sample-code"
+            +"Add sample code"
+        }
+    }
+}
+
+/**
+ * Theme-specific configuration fields.
+ */
+private fun FORM.themeConfigFields(view: WizardView) {
+    // Hidden group field (required by framework but unused for themes)
+    input(type = InputType.hidden) {
+        name = "group"
+        value = "dummy"
+    }
+
+    div("wizard-form-group") {
+        label("wizard-form-label") {
+            htmlFor = "wizard-theme-name"
+            +"Theme Name"
+        }
+        input(type = InputType.text, classes = "wizard-form-input") {
+            id = "wizard-theme-name"
+            name = "name"
+            placeholder = "My Theme"
+            value = view.artifactId
+        }
+    }
+}
+
+/**
+ * Renders the download icon SVG.
+ */
+private fun FlowContent.downloadIcon() {
+    span {
+        unsafe {
+            +"""<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>"""
+        }
+    }
+}
+
+/**
+ * Renders a partial config box update (for HTMX).
+ */
+@OptIn(ExperimentalKtorApi::class)
+fun HTML.wizardConfigBoxHtml(view: WizardView) {
+    body {
+        wizardConfigBox(view)
+    }
+}

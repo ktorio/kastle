@@ -1,6 +1,7 @@
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import wizard.initWizard
 
 fun main() {
     // Set up appearance (syntax highlighting based on color scheme)
@@ -25,4 +26,7 @@ fun main() {
             downloadProject()
         }
     }
+
+    // Initialize wizard functionality
+    initWizard()
 }
