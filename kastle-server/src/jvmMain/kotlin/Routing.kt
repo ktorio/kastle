@@ -23,7 +23,7 @@ fun Application.routing() {
     routing {
         staticResources("/assets", "/assets")
         frontEnd(repository, generator, analytics, basePath)
-        frontEndIntellijPlugins(repository, generator, basePath)
+        frontEndIntellijPlugins(repository, generator, analytics, basePath)
         backEnd(repository, generator, analytics, json)
 
         // health check needed for cloud deployment

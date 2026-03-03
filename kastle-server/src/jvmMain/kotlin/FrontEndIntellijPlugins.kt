@@ -1,15 +1,22 @@
 package org.jetbrains.kastle.server
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.html.*
+import io.ktor.server.response.respond
 import io.ktor.server.routing.*
+import io.ktor.utils.io.readText
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.FlowContent
+import kotlinx.html.body
+import kotlinx.html.ul
 import org.jetbrains.kastle.*
-import org.jetbrains.kastle.server.`intellij-plugins-ui`.pluginsIndexHtml
-import org.jetbrains.kastle.server.`intellij-plugins-ui`.View
-import org.jetbrains.kastle.server.`intellij-plugins-ui`.htmlContent
+import org.jetbrains.kastle.analytics.AnalyticsRepository
+import org.jetbrains.kastle.analytics.NoOpAnalyticsRepository
+import org.jetbrains.kastle.server.`intellij-plugins-ui`.*
 
 val DEFAULT_PLUGIN_PROJECT = ProjectDescriptor(
     group = "com.example",
@@ -19,10 +26,11 @@ val DEFAULT_PLUGIN_PROJECT = ProjectDescriptor(
 fun Routing.frontEndIntellijPlugins(
     repository: PackRepository,
     generator: ProjectGenerator,
+    analyticsRepository: AnalyticsRepository = NoOpAnalyticsRepository,
     basePath: String = "",
 ) {
     // main page - plugins
-    get("/generator") {
+    get {
         initClientIdCookie()
         val project = call.tryReadProjectDescriptor()
         val view = call.readViewState()
@@ -40,6 +48,94 @@ fun Routing.frontEndIntellijPlugins(
             pluginsIndexHtml(basePath, packs, previewContents)
         }
     }
+    get("/packs") {
+        val search = call.request.queryParameters["search"]
+        val packs = repository.readAll()
+            .filter {
+                search == null || listOfNotNull(
+                    it.id.toString(),
+                    it.name,
+                    it.group?.name,
+                    it.description,
+                ).any { part ->
+                    part.contains(search, ignoreCase = true)
+                }
+            }
+            .toList()
+            .sortedBy { it.name }
+
+        call.respondHtml {
+            body {
+                ul {
+                    for (pack in packs)
+                        packListItem(basePath, pack)
+                }
+            }
+        }
+    }
+    route("/packs/{group}/{id}") {
+        suspend fun RoutingCall.readPack(): PackDescriptor? =
+            repository.read(
+                PackId(
+                    parameters["group"]!!,
+                    parameters["id"]!!
+                )
+            )
+
+        get("docs") {
+            val pack = call.readPack()
+            call.respondHtml {
+                packDetailsHtml(pack)
+            }
+        }
+        get("properties") {
+            val pack = call.readPack()
+            if (pack == null) {
+                call.respond(HttpStatusCode.NotFound)
+            } else call.respondHtml {
+                packPropertiesHtml(pack)
+            }
+        }
+    }
+    // project preview and download
+    route("/project") {
+        get("listing") {
+            val descriptor = call.readProjectDescriptor()
+            val selectedFile = call.readViewState().selectedFile
+            val files = generator.generate(descriptor)
+                .map { it.path }
+                .toList()
+            call.respondHtml {
+                fileTreeHtml(basePath, files, selectedFile)
+            }
+        }
+        get("file/{path...}") {
+            val path = call.pathParameters.getAll("path").orEmpty().joinToString("/")
+            val descriptor = call.readProjectDescriptor()
+            val fileEntry = generator.generate(descriptor)
+                .filter { it.path == path }
+                .singleOrNull()
+            if (fileEntry == null) {
+                call.respond(HttpStatusCode.NotFound)
+            } else {
+                call.respondHtml {
+                    fileContentsHtml(fileEntry.path, fileEntry.content().readText())
+                }
+            }
+        }
+        get("download") {
+            val descriptor = call.readProjectDescriptor()
+            val result: Flow<SourceFileEntry> = generator.generate(descriptor)
+            call.respondProjectDownload(descriptor.name, result)
+            call.recordAnalyticsEvent(analyticsRepository, descriptor)
+        }
+    }
+}
+
+private fun RoutingCall.readProjectDescriptor(): ProjectDescriptor {
+    val descriptor = tryReadProjectDescriptor()
+    requireNotNull(descriptor) { "Project parameters 'name' and 'group' are required" }
+    return descriptor
 }
 
 private fun RoutingCall.tryReadProjectDescriptor(): ProjectDescriptor? {
