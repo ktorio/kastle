@@ -7,8 +7,14 @@ fun main() {
     setupAppearance()
 
     // Set up HTMX event handlers
-    setupHtmxEvents()
-
+    when (window.location.pathname) {
+        "/classic" -> {
+            setupHtmxEvents()
+        }
+        "/" -> {
+            setupHtmxEventsIntellijPlugins()
+        }
+    }
     // Set up keyboard navigation
     setupUsability()
 
