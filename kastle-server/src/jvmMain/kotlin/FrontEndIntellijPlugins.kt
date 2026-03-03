@@ -9,7 +9,6 @@ import kotlinx.html.FlowContent
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.server.`intellij-plugins-ui`.pluginsIndexHtml
 import org.jetbrains.kastle.server.`intellij-plugins-ui`.View
-import org.jetbrains.kastle.server.`intellij-plugins-ui`.ViewTab
 import org.jetbrains.kastle.server.`intellij-plugins-ui`.htmlContent
 
 val DEFAULT_PLUGIN_PROJECT = ProjectDescriptor(
@@ -38,7 +37,7 @@ fun Routing.frontEndIntellijPlugins(
         }?.htmlContent ?: {}
 
         call.respondHtml {
-            pluginsIndexHtml(basePath, view, packs, previewContents)
+            pluginsIndexHtml(basePath, packs, previewContents)
         }
     }
 }
@@ -64,14 +63,9 @@ private fun RoutingCall.tryReadProjectDescriptor(): ProjectDescriptor? {
 }
 
 private fun RoutingCall.readViewState(): View {
-    val tab = request.queryParameters["tab"]?.let { tabName ->
-        ViewTab.entries.firstOrNull {
-            it.name.equals(tabName, ignoreCase = true)
-        }
-    } ?: return View()
     val pack = request.queryParameters["selectedPack"]?.let(PackId::parse)
     val file = request.queryParameters["selectedFile"]
-    return View(tab, pack, file)
+    return View(pack, file)
 }
 
 /**

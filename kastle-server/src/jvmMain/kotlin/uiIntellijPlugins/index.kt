@@ -8,7 +8,6 @@ import org.jetbrains.kastle.PackDescriptor
 @OptIn(ExperimentalKtorApi::class)
 fun HTML.pluginsIndexHtml(
     basePath: String = "",
-    view: View = View(),
     packs: List<PackDescriptor> = emptyList(),
     previewContents: FlowContent.() -> Unit = {},
 ) {
@@ -78,18 +77,11 @@ fun HTML.pluginsIndexHtml(
                     +"Download ⤓"
                 }
             }
+            div {
+                id = "form-panel-contents"
 
-            tabList("main-tabs") {
-                tab(
-                    id = "form-panel",
-                    icon = "&#9881;",
-                    title = "Settings",
-                    checked = view.tab == ViewTab.SETTINGS
-                ) {
-                    id = "form-panel-contents"
-
-                    form {
-                        id = "project-form"
+                form {
+                    id = "project-form"
 
                         div("properties") {
                             h3 {
