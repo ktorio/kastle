@@ -27,6 +27,13 @@ private fun UL.buildTree(
     val grouped = paths
         .filter { it.isNotEmpty() }
         .groupBy { it.first() }
+        .entries
+        .sortedWith(compareBy(
+            // folders first, then files
+            { (_, group) -> group.all { it.size == 1 } },
+            // then alphabetically
+            { (key, _) -> key }
+        ))
 
     for ((key, group) in grouped) {
         if (group.all { it.size == 1 }) {
