@@ -83,63 +83,56 @@ fun HTML.pluginsIndexHtml(
                 form {
                     id = "project-form"
 
-                        div("properties") {
-                            h3 {
-                                +"Project"
+                    div("properties") {
+                        h3 {
+                            +"Project"
+                        }
+                        div("field") {
+                            label {
+                                htmlFor = "group-name"
+                                +"Group"
                             }
-                            div("field") {
-                                label {
-                                    htmlFor = "group-name"
-                                    +"Group"
-                                }
-                                input(type = InputType.text) {
-                                    id = "group-name"
-                                    name = "group"
-                                    placeholder = "com.example"
-                                    value = "com.example"
-                                }
-                            }
-                            div("field") {
-                                label {
-                                    htmlFor = "project-name"
-                                    +"Artifact"
-                                }
-                                input(type = InputType.text) {
-                                    id = "project-name"
-                                    name = "name"
-                                    placeholder = "my-plugin"
-                                    value = "my-plugin"
-                                }
+                            input(type = InputType.text) {
+                                id = "group-name"
+                                name = "group"
+                                placeholder = "com.example"
+                                value = "com.example"
                             }
                         }
-                        div {
-                            id = "dynamic-properties"
+                        div("field") {
+                            label {
+                                htmlFor = "project-name"
+                                +"Artifact"
+                            }
+                            input(type = InputType.text) {
+                                id = "project-name"
+                                name = "name"
+                                placeholder = "my-plugin"
+                                value = "my-plugin"
+                            }
                         }
-                        div {
-                            id = "selected-packs-config"
-                        }
+                        input(type = InputType.hidden) { name = "packaging"; value = "Flat" }
+                    }
+                    div {
+                        id = "dynamic-properties"
+                    }
+                    div {
+                        id = "selected-packs-config"
                     }
                 }
-                tab(
-                    id = "preview-panel",
-                    icon = "&#9778;",
-                    title = "Preview",
-                    checked = view.tab == ViewTab.PREVIEW,
-                ) {
-                    div {
-                        id = "preview-panel-container"
-                        div {
-                            id = "preview-panel-tree"
-                            attributes.hx {
-                                get = "$basePath/project/listing"
-                                trigger = "refreshPreview, load, change from:#project-form input"
-                            }
-                        }
-                        div {
-                            id = "preview-panel-contents"
-                            previewContents()
-                        }
+            }
+            div {
+                id = "preview-panel-container"
+                div {
+                    id = "preview-panel-tree"
+                    attributes.hx {
+                        get = "$basePath/project/listing"
+                        trigger = "refreshPreview, load, change from:#project-form input"
                     }
+                }
+                div {
+                    id = "preview-panel-contents"
+                    previewContents()
                 }
             }
         }

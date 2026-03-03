@@ -20,7 +20,7 @@ internal fun buildProjectGenerationUrl(requestPath: String): String {
         val key = removeUpToFirstSlash(input.name)
 
         when (input.type) {
-            "text", "number", "password", "email", "url", "search" -> {
+            "text", "number", "password", "email", "url", "search", "hidden" -> {
                 url.searchParams.append(key, input.value)
             }
             "checkbox" -> {
