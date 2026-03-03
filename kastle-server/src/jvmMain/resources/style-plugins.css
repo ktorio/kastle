@@ -40,7 +40,7 @@ body {
     margin: 0;
     background-color: var(--background-color);
     color: var(--text-color);
-    font-family: sans-serif;
+    font-family: "JetBrains Sans", Inter, system-ui, -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Droid Sans", "Helvetica Neue", Arial, sans-serif;
     display: grid;
     grid-template-rows: auto 1fr; /* Header takes only necessary height, rest is main area */
     grid-template-columns: 280px 1fr; /* Left navigation and content */
@@ -199,20 +199,48 @@ form {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 16px;
+    padding: 12px 16px;
     overflow: hidden;
 
-    a {
-        text-decoration: none;
-        color: inherit;
-    }
-    h1 {
-        font-size: 18px;
-        margin: 0;
-    }
-    nav {
+    .header-left {
         display: flex;
+        align-items: center;
         gap: 12px;
+    }
+
+    .header-right {
+        display: flex;
+        gap: 16px;
+    }
+
+    .header-logo-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+    }
+
+    .header-logo {
+        width: 48px;
+        height: 48px;
+        display: block;
+    }
+
+    .header-product-name {
+        font-weight: 600;
+        font-size: 19px;
+        color: var(--text-color-strong);
+    }
+
+    nav a {
+        color: var(--secondary-text-color);
+        text-decoration: none;
+        font-size: 19px;
+        font-weight: 400;
+        padding: 0 12px;
+
+        &:hover {
+            color: var(--text-color);
+        }
     }
 }
 
@@ -394,4 +422,34 @@ main {
 #preview-panel-contents {
     padding: 8px 16px;
     overflow: auto;
+}
+
+@font-face {
+    font-family: JetBrains Sans;
+    src: url(https://resources.jetbrains.com/storage/jetbrains-sans/JetBrainsSans-Light.woff2) format("woff2"),url(https://resources.jetbrains.com/storage/jetbrains-sans/JetBrainsSans-Light.woff) format("woff");
+    font-weight: 300;
+    font-style: normal
+}
+
+@font-face {
+    font-family: JetBrains Sans;
+    src: url(https://resources.jetbrains.com/storage/jetbrains-sans/JetBrainsSans-Regular.woff2) format("woff2"),url(https://resources.jetbrains.com/storage/jetbrains-sans/JetBrainsSans-Regular.woff) format("woff");
+    font-weight: 400;
+    font-style: normal
+}
+
+@font-face {
+    font-family: JetBrains Sans;
+    src: url(https://resources.jetbrains.com/storage/jetbrains-sans/JetBrainsSans-SemiBold.woff2) format("woff2"),url(https://resources.jetbrains.com/storage/jetbrains-sans/JetBrainsSans-SemiBold.woff) format("woff");
+    font-weight: 600;
+    font-style: normal
+}
+
+@supports (font-variation-settings: normal) {
+    @font-face {
+        font-family:JetBrains Sans;
+        src: url(https://resources.jetbrains.com/storage/jetbrains-sans/JetBrainsSans.woff2) format("woff2 supports variations"),url(https://resources.jetbrains.com/storage/jetbrains-sans/JetBrainsSans.woff2) format("woff2-variations"),url(https://resources.jetbrains.com/storage/jetbrains-sans/JetBrainsSans.woff) format("woff-variations");
+        font-weight: 100 900;
+        font-style: normal
+    }
 }

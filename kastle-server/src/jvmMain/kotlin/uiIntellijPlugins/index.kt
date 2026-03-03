@@ -32,13 +32,25 @@ fun HTML.pluginsIndexHtml(
         div {
             id = "header"
 
-            h1 {
-                +"♜"
+            div("header-left") {
+                a(href = "/") {
+                    classes = setOf("header-logo-link")
+                    img(src = "$basePath/assets/intellij-plugins/intellij-platform-icon.svg") {
+                        classes = setOf("header-logo")
+                        alt = "IntelliJ Platform"
+                    }
+                }
+                div("header-product-name") {
+                    +"IntelliJ Platform Plugin Generator"
+                }
             }
-            span("secondary small-caps spaced") {
-                +"Kotlin Application Sourcecode Templating and Layout Engine"
+            nav("header-right") {
+                a(href = "https://plugins.jetbrains.com/docs/intellij", target="_blank") { +"Documentation" }
+                a(href = "https://plugins.jetbrains.com/", target="_blank") { +"Plugins" }
+                a(href = "https://plugins.jetbrains.com/search?tags=Theme", target="_blank") { +"Themes" }
+                a(href = "https://plugins.jetbrains.com/plugin-ideas", target="_blank") { +"Plugin Ideas" }
+                a(href = "https://jb.gg/ipe", target="_blank") { +"IntelliJ Platform Explorer" }
             }
-            // header navigation
         }
         nav {
             id = "packs"
