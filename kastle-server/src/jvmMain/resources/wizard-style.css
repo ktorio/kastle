@@ -164,6 +164,13 @@ body {
     flex-direction: column;
 }
 
+/* Vertical separator */
+.wizard-config-separator {
+    width: 1px;
+    background-color: var(--wizard-border);
+    align-self: stretch;
+}
+
 /* Right column - download section */
 .wizard-download-section {
     flex: 1;
@@ -743,6 +750,10 @@ body {
     .wizard-config-box {
         min-width: 100%;
         flex-direction: column;
+    }
+
+    .wizard-config-separator {
+        display: none;
     }
 
     .wizard-download-section {

@@ -25,6 +25,8 @@ fun FlowContent.wizardConfigBox(view: WizardView) {
             }
         }
 
+        div("wizard-config-separator") {}
+
         // Right side - download section
         div("wizard-download-section") {
             button(classes = "wizard-download-btn") {
