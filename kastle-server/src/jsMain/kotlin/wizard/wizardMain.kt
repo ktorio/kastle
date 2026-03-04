@@ -8,11 +8,36 @@ import org.w3c.dom.get
 
 private val wizardScope = MainScope()
 
+// Track selected packs globally
+private val selectedPacks = mutableSetOf<String>()
+
+/**
+ * Sync selected packs from DOM checkboxes
+ */
+private fun syncSelectedPacks() {
+    selectedPacks.clear()
+    val checkboxes = document.querySelectorAll("input[name='wizard-pack']:checked")
+    for (i in 0 until checkboxes.length) {
+        val checkbox = checkboxes[i].asDynamic()
+        val packId = checkbox.dataset?.packId as? String
+        if (packId != null) {
+            selectedPacks.add(packId)
+        }
+    }
+    console.log("[Wizard] Synced selected packs: ${selectedPacks.toTypedArray()}")
+}
+
 /**
  * Initialize wizard functionality - called from main.kt
  */
 fun initWizard() {
-    // Export functions to global scope (can be done immediately)
+    // Export functions to global scope
+    window.asDynamic().getWizardSelectedPacks = {
+        selectedPacks.toTypedArray()
+    }
+    window.asDynamic().wizardSyncSelectedPacks = {
+        syncSelectedPacks()
+    }
     window.asDynamic().wizardDownloadProject = {
         wizardScope.launch {
             downloadWizardProject()
@@ -41,6 +66,7 @@ fun initWizard() {
     fun setupDomHandlers() {
         setupWizardHtmxEvents()
         setupWizardKeyboard()
+        syncSelectedPacks()  // Initialize selected packs from DOM
     }
 
     // Check if DOM is already loaded
@@ -72,10 +98,14 @@ private fun changePluginType(value: String) {
  */
 private fun togglePack(checkbox: dynamic) {
     val card = checkbox.closest(".wizard-pack-card")
+    val packId = checkbox.dataset?.packId as? String
+
     if (checkbox.checked as Boolean) {
         card?.classList?.add("selected")
+        if (packId != null) selectedPacks.add(packId)
     } else {
         card?.classList?.remove("selected")
+        if (packId != null) selectedPacks.remove(packId)
     }
     // Refresh the preview
     refreshPreview()

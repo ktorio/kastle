@@ -24,12 +24,13 @@ fun FlowContent.wizardPacksPanel(
             }
             input(type = InputType.text, classes = "wizard-packs-search") {
                 id = "wizard-packs-search"
+                name = "search"
                 placeholder = "Search..."
                 attributes.hx {
                     get = "$basePath/packs"
                     trigger = "keyup changed delay:300ms"
                     target = "#wizard-packs-grid"
-                    vals = "js:{search: this.value}"
+                    include = "#wizard-plugin-type"
                 }
             }
         }

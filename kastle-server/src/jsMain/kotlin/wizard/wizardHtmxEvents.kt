@@ -12,12 +12,27 @@ private fun encodeURIComponent(str: String): String = js("encodeURIComponent(str
 fun setupWizardHtmxEvents() {
     val basePath = getWizardBasePath()
 
-    // Configure requests to include form data for preview
+    // Configure requests to include form data
     document.addEventListener("htmx:configRequest", { event ->
         val detail = event.asDynamic().detail
         val requestPath = detail.path as? String ?: return@addEventListener
 
         console.log("[Wizard] htmx:configRequest - path: $requestPath, basePath: $basePath")
+
+        // Add selected packs to pack search requests
+        if (requestPath.startsWith("$basePath/packs")) {
+            val selectedPacks = js("window.getWizardSelectedPacks ? window.getWizardSelectedPacks() : []")
+            val packParams = mutableListOf<String>()
+            for (i in 0 until (selectedPacks.length as Int)) {
+                val packId = selectedPacks[i] as String
+                packParams.add("selectedPack=${encodeURIComponent(packId)}")
+            }
+            if (packParams.isNotEmpty()) {
+                val separator = if (requestPath.contains("?")) "&" else "?"
+                detail.path = requestPath + separator + packParams.joinToString("&")
+            }
+            console.log("[Wizard] Pack search with selections: ${detail.path}")
+        }
 
         // Populate preview params from wizard form
         if (requestPath.startsWith("$basePath/project")) {
@@ -110,6 +125,11 @@ fun setupWizardHtmxEvents() {
         for (i in 0 until (codeBlocks.length as Int)) {
             val block = codeBlocks[i]
             js("hljs.highlightElement(block)")
+        }
+
+        // Re-sync selected packs after grid swap
+        if (target.id == "wizard-packs-grid") {
+            js("window.wizardSyncSelectedPacks && window.wizardSyncSelectedPacks()")
         }
     })
 }

@@ -75,7 +75,7 @@ fun Routing.wizardFrontEnd(
 
             val selectedPacks = call.request.queryParameters.getAll("selectedPack")
                 .orEmpty()
-                .map(PackId::parse)
+                .mapNotNull { runCatching { PackId.parse(it) }.getOrNull() }
                 .toSet()
 
             call.respondHtml {
