@@ -872,13 +872,16 @@ body {
     font-size: 0.9em;
 }
 
-.wizard-modal-links ul {
-    list-style: none;
-    padding: 0;
+.wizard-modal-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
 }
 
-.wizard-modal-links li {
-    margin: 8px 0;
+.wizard-modal-link-separator {
+    margin: 0 4px;
 }
 
 .wizard-modal-links a {

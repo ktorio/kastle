@@ -72,28 +72,19 @@ fun FlowContent.wizardPackModalContent(pack: PackDescriptor) {
 
     // Links section
     pack.links?.let { links ->
-        div("wizard-modal-links") {
-            h4 { +"Links" }
-            ul {
-                links.home?.let { home ->
-                    li {
-                        a(href = home, target = "_blank") { +"Homepage" }
+        val linkItems = buildList {
+            links.home?.let { add("Homepage" to it) }
+            links.docs?.let { add("Documentation" to it) }
+            links.vcs?.let { add("Source Code" to it) }
+            links.guide?.let { add("Guide" to it) }
+        }
+        if (linkItems.isNotEmpty()) {
+            div("wizard-modal-links") {
+                linkItems.forEachIndexed { index, (label, url) ->
+                    if (index > 0) {
+                        span("wizard-modal-link-separator") { +"·" }
                     }
-                }
-                links.docs?.let { docs ->
-                    li {
-                        a(href = docs, target = "_blank") { +"Documentation" }
-                    }
-                }
-                links.vcs?.let { vcs ->
-                    li {
-                        a(href = vcs, target = "_blank") { +"Source Code" }
-                    }
-                }
-                links.guide?.let { guide ->
-                    li {
-                        a(href = guide, target = "_blank") { +"Guide" }
-                    }
+                    a(href = url, target = "_blank") { +label }
                 }
             }
         }
