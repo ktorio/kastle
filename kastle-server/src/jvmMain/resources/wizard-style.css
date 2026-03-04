@@ -277,10 +277,6 @@ body {
 .wizard-preview-panel {
     flex: 1;
     min-width: 0;
-    background-color: var(--wizard-surface);
-    border: 1px solid var(--wizard-border);
-    border-radius: 8px;
-    overflow: hidden;
 }
 
 .wizard-preview-panel.full-width {
@@ -288,17 +284,26 @@ body {
 }
 
 .wizard-preview-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--wizard-border);
-    background-color: #fafafa;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--wizard-text-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    margin-top: 4px;
+}
+
+.wizard-preview-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
 }
 
 .wizard-preview-content {
     display: flex;
     height: 500px;
+    background-color: var(--wizard-surface);
+    border: 1px solid var(--wizard-border);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .wizard-file-tree {
@@ -414,14 +419,14 @@ body {
 }
 
 .wizard-packs-title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     margin: 0;
 }
 
 .wizard-packs-search {
     width: 180px;
-    padding: 8px 12px;
+    padding: 7px 12px;
     font-size: 13px;
     border: 1px solid var(--wizard-border);
     border-radius: 4px;

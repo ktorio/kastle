@@ -19,7 +19,9 @@ fun FlowContent.wizardPreviewPanel(
         id = "wizard-preview-panel"
 
         div("wizard-preview-header") {
-            +"Project Preview"
+            h2("wizard-preview-title") {
+                +"Preview"
+            }
         }
 
         div("wizard-preview-content") {
