@@ -142,9 +142,22 @@ body {
 
 .wizard-description {
     color: rgba(25, 25, 28, 0.5);
-    font-size: 20px;
-    line-height: 28px;
+    font-size: 18px;
+    line-height: 1.6;
     margin: 0;
+}
+.wizard-description p {
+    margin-block-end: 16px;
+}
+
+.wizard-description a {
+    color: rgba(25, 25, 28, 0.7);
+    border-bottom: 1px solid rgba(25, 25, 28, 0.4);
+    text-decoration: none;
+}
+.wizard-description a:hover {
+    color: rgba(25, 25, 28);
+    border-bottom: 2px solid rgba(25, 25, 28);
 }
 
 /* Config box - internal 50/50 layout */

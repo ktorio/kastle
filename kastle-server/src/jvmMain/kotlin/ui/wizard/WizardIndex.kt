@@ -66,10 +66,32 @@ fun HTML.wizardIndexHtml(
                             }
                         }
                     }
-                    p("wizard-description") {
+                    div("wizard-description") {
                         when (view.pluginType) {
-                            PluginType.PLUGIN -> +"Create a new IntelliJ Platform plugin with optional packs for additional functionality."
-                            PluginType.THEME -> +"Create a new IntelliJ Platform UI theme for customizing the IDE appearance."
+                            PluginType.PLUGIN -> {
+                                p {
+                                    +"Create a new IntelliJ Platform plugin that adds a new functionality to the IDE. "
+                                    +"See the "
+                                    a(
+                                        href = "https://plugins.jetbrains.com/docs/intellij/welcome.html",
+                                        target = "_blank"
+                                    ) { +"Plugin SDK" }
+                                    +" documentation for details."
+                                }
+                            }
+
+                            PluginType.THEME -> {
+                                p {
+                                    +"Create a new IntelliJ Platform UI theme for customizing the IDE appearance. "
+                                    +"See the "
+                                    a(
+                                        href = "https://plugins.jetbrains.com/docs/intellij/themes-getting-started.html",
+                                        target = "_blank"
+                                    ) { +"Themes" }
+                                    +" documentation for details."
+                                }
+
+                            }
                         }
                     }
                 }
