@@ -75,6 +75,7 @@ body {
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     font-size: 19px;
+    font-weight: 300;
     transition: color 0.2s;
 }
 
@@ -86,7 +87,7 @@ body {
 .wizard-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 32px 24px;
+    padding: 42px 24px;
 }
 
 /* Title row - side by side layout */
@@ -104,9 +105,9 @@ body {
 }
 
 .wizard-title {
-    font-size: 32px;
+    font-size: 38px;
     font-weight: 600;
-    margin: 0 0 8px 0;
+    margin: 0 0 12px 0;
     line-height: 1.3;
 }
 
@@ -140,9 +141,9 @@ body {
 }
 
 .wizard-description {
-    color: var(--wizard-text-secondary);
-    font-size: 16px;
-    line-height: 1.4;
+    color: rgba(25, 25, 28, 0.5);
+    font-size: 20px;
+    line-height: 28px;
     margin: 0;
 }
 
@@ -514,7 +515,7 @@ body {
 
 .wizard-pack-description {
     font-size: 12px;
-    color: var(--wizard-text-secondary);
+    color: rgba(25, 25, 28, 0.7);
     margin: 0;
     overflow: hidden;
     display: -webkit-box;
