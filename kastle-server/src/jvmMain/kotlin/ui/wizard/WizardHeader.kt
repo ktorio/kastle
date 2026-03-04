@@ -20,26 +20,10 @@ fun FlowContent.wizardHeader() {
                 }
             }
             nav("wizard-header-nav") {
-                a(href = "https://plugins.jetbrains.com/") {
-                    target = "_blank"
-                    +"Plugins"
-                }
-                a(href = "https://plugins.jetbrains.com/organizations") {
-                    target = "_blank"
-                    +"Teams"
-                }
-                a(href = "https://plugins.jetbrains.com/docs/intellij/welcome.html") {
-                    target = "_blank"
-                    +"For Authors"
-                }
-                a(href = "https://plugins.jetbrains.com/docs/marketplace/about-marketplace.html") {
-                    target = "_blank"
-                    +"Knowledge Base"
-                }
-                a(href = "https://blog.jetbrains.com/platform/") {
-                    target = "_blank"
-                    +"Blog"
-                }
+                a(href = "https://plugins.jetbrains.com/", target="_blank") { +"Plugins" }
+                a(href = "https://plugins.jetbrains.com/search?tags=Theme", target="_blank") { +"Themes" }
+                a(href = "https://plugins.jetbrains.com/plugin-ideas", target="_blank") { +"Plugin Ideas" }
+                a(href = "https://jb.gg/ipe", target="_blank") { +"IntelliJ Platform Explorer" }
             }
         }
     }
