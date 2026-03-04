@@ -29,105 +29,107 @@ fun Routing.frontEndIntellijPlugins(
     analyticsRepository: AnalyticsRepository = NoOpAnalyticsRepository,
     basePath: String = "",
 ) {
-    // main page - plugins
-    get {
-        initClientIdCookie()
-        val project = call.tryReadProjectDescriptor()
-        val view = call.readViewState()
-        val packs = repository.readAll()
-            .toList()
-            .sortedBy { it.name }
-        // Currently showing file in the preview
-        val previewContents: FlowContent.() -> Unit = view.selectedFile?.let { filePath ->
-            generator.generate(project ?: DEFAULT_PLUGIN_PROJECT)
-                .filter { it.path == filePath }
-                .singleOrNull()
-        }?.htmlContent ?: {}
-
-        call.respondHtml {
-            pluginsIndexHtml(basePath, packs, previewContents)
-        }
-    }
-    get("/packs") {
-        val search = call.request.queryParameters["search"]
-        val packs = repository.readAll()
-            .filter {
-                search == null || listOfNotNull(
-                    it.id.toString(),
-                    it.name,
-                    it.group?.name,
-                    it.description,
-                ).any { part ->
-                    part.contains(search, ignoreCase = true)
-                }
-            }
-            .toList()
-            .sortedBy { it.name }
-
-        call.respondHtml {
-            body {
-                ul {
-                    for (pack in packs)
-                        packListItem(basePath, pack)
-                }
-            }
-        }
-    }
-    route("/packs/{group}/{id}") {
-        suspend fun RoutingCall.readPack(): PackDescriptor? =
-            repository.read(
-                PackId(
-                    parameters["group"]!!,
-                    parameters["id"]!!
-                )
-            )
-
-        get("docs") {
-            val pack = call.readPack()
-            call.respondHtml {
-                packDetailsHtml(pack)
-            }
-        }
-        get("properties") {
-            val pack = call.readPack()
-            if (pack == null) {
-                call.respond(HttpStatusCode.NotFound)
-            } else call.respondHtml {
-                packPropertiesHtml(pack)
-            }
-        }
-    }
-    // project preview and download
-    route("/project") {
-        get("listing") {
-            val descriptor = call.readProjectDescriptor()
-            val selectedFile = call.readViewState().selectedFile
-            val files = generator.generate(descriptor)
-                .map { it.path }
+    route("/ugly") { // FIXME
+        // main page - plugins
+        get {
+            initClientIdCookie()
+            val project = call.tryReadProjectDescriptor()
+            val view = call.readViewState()
+            val packs = repository.readAll()
                 .toList()
+                .sortedBy { it.name }
+            // Currently showing file in the preview
+            val previewContents: FlowContent.() -> Unit = view.selectedFile?.let { filePath ->
+                generator.generate(project ?: DEFAULT_PLUGIN_PROJECT)
+                    .filter { it.path == filePath }
+                    .singleOrNull()
+            }?.htmlContent ?: {}
+
             call.respondHtml {
-                fileTreeHtml(basePath, files, selectedFile)
+                pluginsIndexHtml(basePath, packs, previewContents)
             }
         }
-        get("file/{path...}") {
-            val path = call.pathParameters.getAll("path").orEmpty().joinToString("/")
-            val descriptor = call.readProjectDescriptor()
-            val fileEntry = generator.generate(descriptor)
-                .filter { it.path == path }
-                .singleOrNull()
-            if (fileEntry == null) {
-                call.respond(HttpStatusCode.NotFound)
-            } else {
-                call.respondHtml {
-                    fileContentsHtml(fileEntry.path, fileEntry.content().readText())
+        get("/packs") {
+            val search = call.request.queryParameters["search"]
+            val packs = repository.readAll()
+                .filter {
+                    search == null || listOfNotNull(
+                        it.id.toString(),
+                        it.name,
+                        it.group?.name,
+                        it.description,
+                    ).any { part ->
+                        part.contains(search, ignoreCase = true)
+                    }
+                }
+                .toList()
+                .sortedBy { it.name }
+
+            call.respondHtml {
+                body {
+                    ul {
+                        for (pack in packs)
+                            packListItem(basePath, pack)
+                    }
                 }
             }
         }
-        get("download") {
-            val descriptor = call.readProjectDescriptor()
-            val result: Flow<SourceFileEntry> = generator.generate(descriptor)
-            call.respondProjectDownload(descriptor.name, result)
-            call.recordAnalyticsEvent(analyticsRepository, descriptor)
+        route("/packs/{group}/{id}") {
+            suspend fun RoutingCall.readPack(): PackDescriptor? =
+                repository.read(
+                    PackId(
+                        parameters["group"]!!,
+                        parameters["id"]!!
+                    )
+                )
+
+            get("docs") {
+                val pack = call.readPack()
+                call.respondHtml {
+                    packDetailsHtml(pack)
+                }
+            }
+            get("properties") {
+                val pack = call.readPack()
+                if (pack == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                } else call.respondHtml {
+                    packPropertiesHtml(pack)
+                }
+            }
+        }
+        // project preview and download
+        route("/project") {
+            get("listing") {
+                val descriptor = call.readProjectDescriptor()
+                val selectedFile = call.readViewState().selectedFile
+                val files = generator.generate(descriptor)
+                    .map { it.path }
+                    .toList()
+                call.respondHtml {
+                    fileTreeHtml(basePath, files, selectedFile)
+                }
+            }
+            get("file/{path...}") {
+                val path = call.pathParameters.getAll("path").orEmpty().joinToString("/")
+                val descriptor = call.readProjectDescriptor()
+                val fileEntry = generator.generate(descriptor)
+                    .filter { it.path == path }
+                    .singleOrNull()
+                if (fileEntry == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                } else {
+                    call.respondHtml {
+                        fileContentsHtml(fileEntry.path, fileEntry.content().readText())
+                    }
+                }
+            }
+            get("download") {
+                val descriptor = call.readProjectDescriptor()
+                val result: Flow<SourceFileEntry> = generator.generate(descriptor)
+                call.respondProjectDownload(descriptor.name, result)
+                call.recordAnalyticsEvent(analyticsRepository, descriptor)
+            }
         }
     }
 }

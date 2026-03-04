@@ -5,7 +5,7 @@ import kotlinx.html.*
 /**
  * Renders the wizard footer with links and copyright.
  */
-fun FlowContent.wizardFooter() {
+fun FlowContent.wizardFooter(basePath: String) {
     footer("wizard-footer") {
         div("wizard-footer-content") {
             div("wizard-footer-links") {

@@ -10,7 +10,7 @@ import org.jetbrains.kastle.PackDescriptor
  */
 @OptIn(ExperimentalKtorApi::class)
 fun HTML.wizardIndexHtml(
-    basePath: String = "/wizard",
+    basePath: String,
     view: WizardView = WizardView(),
     packs: List<PackDescriptor> = emptyList(),
 ) {
@@ -40,7 +40,7 @@ fun HTML.wizardIndexHtml(
 
     body {
         // Header
-        wizardHeader()
+        wizardHeader(basePath)
 
         // Main container
         div("wizard-container") {
@@ -115,11 +115,9 @@ fun HTML.wizardIndexHtml(
             }
         }
 
-        // Modal overlay
         wizardModalOverlay()
 
-        // Footer
-        wizardFooter()
+        wizardFooter(basePath)
     }
 }
 

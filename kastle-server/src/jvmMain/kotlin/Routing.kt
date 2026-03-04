@@ -27,7 +27,7 @@ fun Application.routing() {
         frontEnd(repository, generator, analytics, basePath)
         frontEndIntellijPlugins(repository, generator, analytics, basePath)
         backEnd(repository, generator, analytics, json)
-        wizardFrontEnd(repository, generator, analytics, "/wizard")
+        wizardFrontEnd(repository, generator, analytics, basePath)
 
         // health check needed for cloud deployment
         get("/healthz") {

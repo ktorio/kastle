@@ -85,7 +85,7 @@ fun initWizard() {
  * Get the wizard base path from window global.
  */
 internal fun getWizardBasePath(): String =
-    window["WIZARD_BASE_PATH"] ?: "/wizard"
+    window["BASE_PATH"] ?: ""
 
 /**
  * Change plugin type (Plugin vs Theme)
