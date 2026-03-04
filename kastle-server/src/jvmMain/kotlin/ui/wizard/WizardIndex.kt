@@ -84,7 +84,7 @@ fun HTML.wizardIndexHtml(
 
             div("wizard-content-row${if (!showPacks) " full-width" else ""}") {
                 // Preview panel
-                wizardPreviewPanel(basePath, isFullWidth = !showPacks)
+                wizardPreviewPanel(basePath, view, isFullWidth = !showPacks)
 
                 // Packs panel (only for Plugin type)
                 if (showPacks) {

@@ -67,6 +67,8 @@ fun initWizard() {
         setupWizardHtmxEvents()
         setupWizardKeyboard()
         syncSelectedPacks()  // Initialize selected packs from DOM
+        // Trigger initial preview load now that handlers are ready
+        refreshPreview()
     }
 
     // Check if DOM is already loaded

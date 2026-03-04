@@ -12,6 +12,7 @@ import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
 @OptIn(ExperimentalKtorApi::class)
 fun FlowContent.wizardPreviewPanel(
     basePath: String,
+    view: WizardView = WizardView(),
     isFullWidth: Boolean = false
 ) {
     div("wizard-preview-panel${if (isFullWidth) " full-width" else ""}") {
@@ -26,7 +27,8 @@ fun FlowContent.wizardPreviewPanel(
                 id = "wizard-file-tree"
                 attributes.hx {
                     get = "$basePath/project/listing"
-                    trigger = "load, wizardRefreshPreview from:body"
+                    // Note: "load" trigger removed - initial load is triggered from JS after handlers are set up
+                    trigger = "wizardRefreshPreview from:body"
                 }
                 // Loading state
                 div("wizard-loading") {

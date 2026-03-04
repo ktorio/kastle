@@ -164,7 +164,7 @@ private fun RoutingCall.readWizardViewState(): WizardView {
         .toSet()
     val groupId = request.queryParameters["group"] ?: "com.example"
     val artifactId = request.queryParameters["name"] ?: "my-plugin"
-    val addSampleCode = request.queryParameters["org.jetbrains.intellij.platform/plugin/addSampleCode"]?.toBoolean() ?: false
+    val addSampleCode = request.queryParameters["org.jetbrains.intellij.platform/plugin/addSampleCode"]?.toBoolean() ?: true
 
     return WizardView(
         pluginType = pluginType,
