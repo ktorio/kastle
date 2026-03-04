@@ -61,6 +61,13 @@ fun setupWizardHtmxEvents() {
                 }
             }
 
+            // Include currently selected file so it stays selected after refresh
+            val selectedFileInput = document.querySelector("input[name='wizard-preview-file']:checked")
+            val selectedFilePath = selectedFileInput?.asDynamic()?.dataset?.filePath as? String
+            if (selectedFilePath != null) {
+                params["selectedFile"] = selectedFilePath
+            }
+
             // Add plugin type
             val pluginTypeSelect = document.getElementById("wizard-plugin-type")
             val pluginType = (pluginTypeSelect?.asDynamic()?.value as? String)?.uppercase() ?: "PLUGIN"
