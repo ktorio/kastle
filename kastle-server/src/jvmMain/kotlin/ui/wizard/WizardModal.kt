@@ -56,23 +56,19 @@ fun FlowContent.wizardModalOverlay() {
  * Renders pack details content for the modal.
  */
 fun FlowContent.wizardPackModalContent(pack: PackDescriptor) {
-    // Pack name and icon
+    // Update modal title via OOB swap
+    h3("wizard-modal-title") {
+        id = "wizard-modal-title"
+        attributes["hx-swap-oob"] = "true"
+        +pack.name
+    }
+
+    // Pack description
     div("wizard-modal-pack-header") {
-        h4 { +pack.name }
         pack.description?.let { description ->
             p { +description }
         }
     }
-
-    // Documentation section
-    pack.documentation?.let { documentation ->
-        div("wizard-modal-docs") {
-            val document = Markdown.parser.parse(documentation)
-            unsafe {
-                +Markdown.renderer.render(document)
-            }
-        }
-    } ?: p { +"No documentation available for this pack." }
 
     // Links section
     pack.links?.let { links ->
@@ -118,6 +114,12 @@ fun HTML.wizardPackModalHtml(pack: PackDescriptor?) {
         if (pack != null) {
             wizardPackModalContent(pack)
         } else {
+            // Update title via OOB swap for not found case
+            h3("wizard-modal-title") {
+                id = "wizard-modal-title"
+                attributes["hx-swap-oob"] = "true"
+                +"Pack Not Found"
+            }
             p { +"Pack not found." }
         }
     }
