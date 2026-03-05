@@ -87,7 +87,11 @@ fun FlowContent.wizardPackCard(
 
             div("wizard-pack-card-header") {
                 div("wizard-pack-icon") {
-                    packIcon(pack)
+                    img {
+                        src = packIconSrc(pack)
+                        alt = pack.name
+                        style = "filter: grayscale(100%);"
+                    }
                 }
                 h3("wizard-pack-name") {
                     +pack.name
@@ -113,35 +117,21 @@ fun FlowContent.wizardPackCard(
     }
 }
 
-/**
- * Renders a pack icon (placeholder SVG).
- */
-private fun FlowContent.packIcon(pack: PackDescriptor) {
-    val iconType = when {
-        pack.id.id.contains("kotlin", ignoreCase = true) -> "kotlin"
-        pack.id.id.contains("java", ignoreCase = true) -> "java"
-        pack.id.id.contains("python", ignoreCase = true) -> "python"
-        pack.id.id.contains("javascript", ignoreCase = true) -> "javascript"
-        pack.id.id.contains("go", ignoreCase = true) -> "go"
-        pack.id.id.contains("rust", ignoreCase = true) -> "rust"
-        pack.id.id.contains("ruby", ignoreCase = true) -> "ruby"
-        pack.id.id.contains("php", ignoreCase = true) -> "php"
-        pack.id.id.contains("database", ignoreCase = true) -> "database"
-        pack.id.id.contains("compose", ignoreCase = true) -> "compose"
-        pack.id.id.contains("lsp", ignoreCase = true) -> "lsp"
-        else -> "plugin"
-    }
+const val DEFAULT_ICON_PATH = "https://intellij-icons.jetbrains.design/icons/AllIcons/expui/general/externalTools.svg"
 
-    span {
-        unsafe {
-            +when (iconType) {
-                "kotlin" -> """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 12l10 10L22 12 12 2z"/><path d="M12 2v10l10 10"/></svg>"""
-                "java" -> """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v18"/><path d="M16 3v18"/><path d="M3 8h18"/><path d="M3 16h18"/></svg>"""
-                "database" -> """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>"""
-                "compose" -> """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>"""
-                "lsp" -> """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 17l6-6-6-6"/><line x1="12" y1="19" x2="20" y2="19"/></svg>"""
-                else -> """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>"""
-            }
+private fun packIconSrc(pack: PackDescriptor): String {
+    // TODO: it turned out that some icons don't have ExpUI icons; think about a better solution for this
+    return when (pack.icon) {
+        "AllIcons.Language.GO" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/go.svg"
+        "AllIcons.Language.Kotlin" -> "https://intellij-icons.jetbrains.design/icons/KotlinBaseResourcesIcons/org/jetbrains/kotlin/idea/icons/expui/kotlin.svg"
+        "AllIcons.Language.Python" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/python.svg"
+        "AllIcons.Language.Ruby" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/ruby.svg"
+        "AllIcons.Language.Rust" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/rust.svg"
+        else -> {
+            val (containerClass, path) = pack.icon?.split(".", limit = 2) ?: return DEFAULT_ICON_PATH
+            val pathSegments = path.split(".")
+            val iconRelativePath = pathSegments.joinToString("/") { it.first().lowercase() + it.substring(1) }
+            "https://intellij-icons.jetbrains.design/icons/$containerClass/expui/$iconRelativePath.svg"
         }
     }
 }

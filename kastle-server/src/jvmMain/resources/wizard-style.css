@@ -510,20 +510,9 @@ body {
 }
 
 .wizard-pack-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    background-color: #f0f0f0;
+    width: 18px;
+    height: 18px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.wizard-pack-icon svg {
-    width: 20px;
-    height: 20px;
-    color: var(--wizard-text-secondary);
 }
 
 .wizard-pack-name {
