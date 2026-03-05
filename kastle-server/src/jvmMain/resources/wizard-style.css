@@ -481,6 +481,23 @@ body {
     align-content: start;
 }
 
+/* Pack group header */
+.wizard-pack-group-header {
+    grid-column: 1 / -1;
+    margin-top: 16px;
+}
+
+.wizard-pack-group-header:first-child {
+    margin-top: 0;
+}
+
+.wizard-pack-group-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--wizard-text-secondary);
+    margin: 0;
+}
+
 /* Pack card */
 .wizard-pack-card {
     background-color: var(--wizard-surface);

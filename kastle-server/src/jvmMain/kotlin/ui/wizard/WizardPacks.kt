@@ -3,6 +3,7 @@ package org.jetbrains.kastle.server.ui.wizard
 import io.ktor.htmx.html.*
 import io.ktor.utils.io.ExperimentalKtorApi
 import kotlinx.html.*
+import org.jetbrains.kastle.Group
 import org.jetbrains.kastle.PackDescriptor
 import org.jetbrains.kastle.PackId
 
@@ -43,7 +44,7 @@ fun FlowContent.wizardPacksPanel(
 }
 
 /**
- * Renders the grid of pack cards.
+ * Renders the grid of pack cards, grouped by their groups.
  */
 @OptIn(ExperimentalKtorApi::class)
 fun FlowContent.wizardPacksGrid(
@@ -51,8 +52,34 @@ fun FlowContent.wizardPacksGrid(
     packs: List<PackDescriptor>,
     selectedPacks: Set<PackId>
 ) {
-    for (pack in packs) {
-        wizardPackCard(basePath, pack, pack.id in selectedPacks)
+    // Group packs by their group
+    val groupedPacks = packs.groupBy { it.group }
+
+    // Sort groups: null (ungrouped) first, then by group name
+    val sortedGroups = groupedPacks.entries.sortedWith(
+        compareBy<Map.Entry<Group?, List<PackDescriptor>>> { it.key == null }
+            .thenBy { it.key?.name ?: it.key?.id ?: "" }
+    )
+
+    for ((group, groupPacks) in sortedGroups) {
+        // Render group header if group exists
+        if (group != null) {
+            div("wizard-pack-group-header") {
+                h3("wizard-pack-group-title") {
+                    // TODO group names are not parsed, see https://github.com/ktorio/kastle/issues/73
+                    +when (group.id) {
+                        "org.jetbrains.intellij.platform.dependencies" -> "Platform dependencies"
+                        "org.jetbrains.intellij.platform.plugins" -> "Plugin dependencies"
+                        else -> group.name ?: group.id
+                    }
+                }
+            }
+        }
+
+        // Render pack cards in this group
+        for (pack in groupPacks) {
+            wizardPackCard(basePath, pack, pack.id in selectedPacks)
+        }
     }
 }
 
