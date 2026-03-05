@@ -18,6 +18,7 @@ fun HTML.wizardIndexHtml(
         title { +"IntelliJ Platform Plugin Generator" }
         meta(charset = "UTF-8")
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
+        favicon()
         styleLink("$basePath/assets/wizard-style.css")
         styleLink("$basePath/assets/a11y-light.min.css")
         script(src = "$basePath/assets/htmx.min.js") {}
@@ -123,6 +124,89 @@ private fun FlowContent.wizardConsentPopup() {
                 }
             }
         }
+    }
+}
+
+private fun HEAD.favicon() {
+    link {
+        rel = "shortcut icon"
+        href = "https://resources.jetbrains.com/storage/ui/favicons/favicon.ico"
+        type = "image/x-icon"
+        attributes["sizes"] = "16x16 32x32"
+    }
+    link {
+        rel = "apple-touch-icon"
+        attributes["sizes"] = "57x57"
+        href = "https://resources.jetbrains.com/storage/ui/favicons/apple-touch-icon-57x57.png"
+    }
+    link {
+        rel = "apple-touch-icon"
+        attributes["sizes"] = "60x60"
+        href = "https://resources.jetbrains.com/storage/ui/favicons/apple-touch-icon-60x60.png"
+    }
+    link {
+        rel = "apple-touch-icon"
+        attributes["sizes"] = "72x72"
+        href = "https://resources.jetbrains.com/storage/ui/favicons/apple-touch-icon-72x72.png"
+    }
+    link {
+        rel = "apple-touch-icon"
+        attributes["sizes"] = "76x76"
+        href = "https://resources.jetbrains.com/storage/ui/favicons/apple-touch-icon-76x76.png"
+    }
+    link {
+        rel = "apple-touch-icon"
+        attributes["sizes"] = "114x114"
+        href = "https://resources.jetbrains.com/storage/ui/favicons/apple-touch-icon-114x114.png"
+    }
+    link {
+        rel = "apple-touch-icon"
+        attributes["sizes"] = "120x120"
+        href = "https://resources.jetbrains.com/storage/ui/favicons/apple-touch-icon-120x120.png"
+    }
+    link {
+        rel = "apple-touch-icon"
+        attributes["sizes"] = "144x144"
+        href = "https://resources.jetbrains.com/storage/ui/favicons/apple-touch-icon-144x144.png"
+    }
+    link {
+        rel = "apple-touch-icon"
+        attributes["sizes"] = "152x152"
+        href = "https://resources.jetbrains.com/storage/ui/favicons/apple-touch-icon-152x152.png"
+    }
+    link {
+        rel = "apple-touch-icon"
+        attributes["sizes"] = "180x180"
+        href = "https://resources.jetbrains.com/storage/ui/favicons/apple-touch-icon-180x180.png"
+    }
+    link {
+        rel = "mask-icon"
+        href = "https://resources.jetbrains.com/storage/ui/favicons/apple-mask-icon.svg"
+        attributes["color"] = "black"
+    }
+    meta {
+        name = "msapplication-TileColor"
+        content = "#000000"
+    }
+    meta {
+        name = "msapplication-TileImage"
+        content = "https://resources.jetbrains.com/storage/ui/favicons/mstile-144x144.png"
+    }
+    meta {
+        name = "msapplication-square70x70logo"
+        content = "https://resources.jetbrains.com/storage/ui/favicons/mstile-70x70.png"
+    }
+    meta {
+        name = "msapplication-square150x150logo"
+        content = "https://resources.jetbrains.com/storage/ui/favicons/mstile-150x150.png"
+    }
+    meta {
+        name = "msapplication-wide310x150logo"
+        content = "https://resources.jetbrains.com/storage/ui/favicons/mstile-310x150.png"
+    }
+    meta {
+        name = "msapplication-square310x310logo"
+        content = "https://resources.jetbrains.com/storage/ui/favicons/mstile-310x310.png"
     }
 }
 
