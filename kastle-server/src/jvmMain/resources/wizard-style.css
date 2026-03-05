@@ -1038,3 +1038,101 @@ body {
         font-style: normal
     }
 }
+
+/* Analytics Consent Popup */
+.wizard-consent-popup {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1001;
+    display: none;
+}
+
+.wizard-consent-popup.active {
+    display: block;
+    animation: wizard-consent-slide-in 0.3s ease-out;
+}
+
+@keyframes wizard-consent-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.wizard-consent-content {
+    background-color: var(--wizard-surface);
+    border: 1px solid var(--wizard-border);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 380px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.wizard-consent-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: var(--wizard-text);
+}
+
+.wizard-consent-text {
+    font-size: 14px;
+    color: var(--wizard-text-secondary);
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+
+.wizard-consent-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.wizard-consent-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.wizard-consent-btn-primary {
+    background-color: var(--wizard-primary);
+    color: white;
+    border: none;
+}
+
+.wizard-consent-btn-primary:hover {
+    background-color: var(--wizard-primary-hover);
+}
+
+.wizard-consent-btn-secondary {
+    background-color: transparent;
+    color: var(--wizard-text);
+    border: 1px solid var(--wizard-border);
+}
+
+.wizard-consent-btn-secondary:hover {
+    background-color: #f5f5f5;
+}
+
+/* Responsive consent popup */
+@media (max-width: 480px) {
+    .wizard-consent-popup {
+        bottom: 0;
+        right: 0;
+        left: 0;
+    }
+
+    .wizard-consent-content {
+        max-width: none;
+        border-radius: 12px 12px 0 0;
+        border-bottom: none;
+    }
+}

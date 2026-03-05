@@ -28,7 +28,7 @@ fun Routing.frontEnd(
     route("classic") {
         // main page
         get {
-            initClientIdCookie()
+            refreshClientIdCookie()
             val project = call.tryReadProjectDescriptor()
             val view = call.readViewState()
             val packs = repository.readAll()

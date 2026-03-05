@@ -2,7 +2,6 @@ package org.jetbrains.kastle.server.ui.wizard
 
 import io.ktor.http.*
 import io.ktor.server.html.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.utils.io.readText
@@ -10,7 +9,7 @@ import kotlinx.coroutines.flow.*
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.analytics.AnalyticsRepository
 import org.jetbrains.kastle.analytics.NoOpAnalyticsRepository
-import org.jetbrains.kastle.server.initClientIdCookie
+import org.jetbrains.kastle.server.refreshClientIdCookie
 import org.jetbrains.kastle.server.recordAnalyticsEvent
 import org.jetbrains.kastle.server.respondProjectDownload
 
@@ -38,7 +37,7 @@ fun Routing.wizardFrontEnd(
 ) {
     // Main wizard page
     get {
-        initClientIdCookie()
+        refreshClientIdCookie()
         val view = call.readWizardViewState()
         val packs = repository.readAll()
             .toList()

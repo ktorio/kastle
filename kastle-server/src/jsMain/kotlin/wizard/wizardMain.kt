@@ -31,6 +31,9 @@ private fun syncSelectedPacks() {
  * Initialize wizard functionality - called from main.kt
  */
 fun initWizard() {
+    // Initialize consent handlers first
+    initConsentHandlers()
+
     // Export functions to global scope
     window.asDynamic().getWizardSelectedPacks = {
         selectedPacks.toTypedArray()
@@ -69,6 +72,8 @@ fun initWizard() {
         syncSelectedPacks()  // Initialize selected packs from DOM
         // Trigger initial preview load now that handlers are ready
         refreshPreview()
+        // Show consent popup if needed
+        showConsentPopupIfNeeded()
     }
 
     // Check if DOM is already loaded

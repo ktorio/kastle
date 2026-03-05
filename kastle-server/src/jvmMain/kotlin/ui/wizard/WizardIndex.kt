@@ -88,7 +88,41 @@ fun HTML.wizardIndexHtml(
 
         wizardModalOverlay()
 
+        wizardConsentPopup()
+
         wizardFooter(basePath)
+    }
+}
+
+/**
+ * Renders the analytics consent popup (initially hidden).
+ */
+private fun FlowContent.wizardConsentPopup() {
+    div("wizard-consent-popup") {
+        id = "wizard-consent-popup"
+
+        div("wizard-consent-content") {
+            h3("wizard-consent-title") {
+                +"Help us improve"
+            }
+            p("wizard-consent-text") {
+                +"We’d like to use analytics to understand how you use this tool and improve it."
+                br
+                +"This stores a randomly generated, anonymous identifier in your browser to distinguish usage sessions without identifying you."
+            }
+            div("wizard-consent-buttons") {
+                button(classes = "wizard-consent-btn wizard-consent-btn-secondary") {
+                    type = ButtonType.button
+                    onClick = "wizardDeclineConsent()"
+                    +"No thanks"
+                }
+                button(classes = "wizard-consent-btn wizard-consent-btn-primary") {
+                    type = ButtonType.button
+                    onClick = "wizardAcceptConsent()"
+                    +"Allow analytics"
+                }
+            }
+        }
     }
 }
 

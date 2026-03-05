@@ -11,7 +11,6 @@ import org.jetbrains.kastle.analytics.AnalyticsRepository
 import org.jetbrains.kastle.analytics.GenerationEvent
 import org.jetbrains.kastle.analytics.NoOpAnalyticsRepository
 import org.jetbrains.kastle.analytics.RequestMappings
-import org.jetbrains.kastle.utils.generateRandomHash
 
 /**
  * Configures analytics tracking for project generation.
@@ -52,20 +51,25 @@ fun Application.configureAnalytics(
 const val CLIENT_ID_COOKIE_NAME = "kastle_client_id"
 
 /**
- * Sets or updates the [client ID cookie][CLIENT_ID_COOKIE_NAME] with 400-day expiration.
+ * Refreshes the [client ID cookie][CLIENT_ID_COOKIE_NAME] expiration if it already exists.
+ *
+ * This function does NOT create a new cookie if one doesn't exist. The cookie should only
+ * be created client-side when the user explicitly consents to analytics tracking.
  */
-fun RoutingContext.initClientIdCookie() {
+fun RoutingContext.refreshClientIdCookie() {
     val existingCookieValue = call.request.cookies[CLIENT_ID_COOKIE_NAME]
-    val cookieValue = existingCookieValue ?: generateRandomHash()
-    val maxAgeInSeconds = 400 * 24 * 60 * 60 // 400 days
-    call.response.cookies.append(
-        Cookie(
-            name = CLIENT_ID_COOKIE_NAME,
-            value = cookieValue,
-            maxAge = maxAgeInSeconds,
-            path = "/"
+    if (existingCookieValue != null) {
+        // Only refresh the cookie if user has previously consented
+        val maxAgeInSeconds = 400 * 24 * 60 * 60 // 400 days
+        call.response.cookies.append(
+            Cookie(
+                name = CLIENT_ID_COOKIE_NAME,
+                value = existingCookieValue,
+                maxAge = maxAgeInSeconds,
+                path = "/"
+            )
         )
-    )
+    }
 }
 
 suspend fun ApplicationCall.recordAnalyticsEvent(
