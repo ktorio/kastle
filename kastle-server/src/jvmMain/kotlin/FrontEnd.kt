@@ -25,7 +25,7 @@ fun Routing.frontEnd(
     analyticsRepository: AnalyticsRepository = NoOpAnalyticsRepository,
     basePath: String = "",
 ) {
-    route("classic") {
+    route("/classic") {
         // main page
         get {
             refreshClientIdCookie()
