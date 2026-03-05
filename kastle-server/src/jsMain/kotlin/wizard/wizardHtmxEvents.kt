@@ -17,10 +17,18 @@ fun setupWizardHtmxEvents() {
         val detail = event.asDynamic().detail
         val requestPath = detail.path as? String ?: return@addEventListener
 
-        console.log("[Wizard] htmx:configRequest - path: $requestPath, basePath: $basePath")
+        // Extract pathname from full URL if needed
+        val pathname = if (requestPath.startsWith("/")) {
+            requestPath
+        } else {
+            // full URL is passed if the page is at domain root, so extract the path
+            js("new URL(requestPath).pathname") as String
+        }
+
+        console.log("[Wizard] htmx:configRequest - pathname: $pathname, basePath: '$basePath'")
 
         // Add selected packs to pack search requests
-        if (requestPath.startsWith("$basePath/packs")) {
+        if (pathname.startsWith("$basePath/packs")) {
             val selectedPacks = js("window.getWizardSelectedPacks ? window.getWizardSelectedPacks() : []")
             val packParams = mutableListOf<String>()
             for (i in 0 until (selectedPacks.length as Int)) {
@@ -35,7 +43,7 @@ fun setupWizardHtmxEvents() {
         }
 
         // Populate preview params from wizard form
-        if (requestPath.startsWith("$basePath/project")) {
+        if (pathname.startsWith("$basePath/project")) {
             val params = detail.parameters
 
             // Add form values to HTMX parameters

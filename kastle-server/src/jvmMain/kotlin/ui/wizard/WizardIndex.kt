@@ -31,7 +31,7 @@ fun HTML.wizardIndexHtml(
         script {
             unsafe {
                 +"""
-                window.WIZARD_BASE_PATH = '$basePath';
+                window.BASE_PATH = '$basePath';
                 """
             }
         }
