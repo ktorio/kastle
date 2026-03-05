@@ -82,6 +82,19 @@ fun Routing.wizardFrontEnd(
         }
     }
 
+    // Plugin type change (HTMX partial update)
+    get("/type") {
+        val pluginType = PluginType.fromString(call.request.queryParameters["pluginType"])
+        val packs = repository.readAll()
+            .toList()
+            .sortedBy { it.name }
+        val view = WizardView(pluginType = pluginType)
+
+        call.respondHtml {
+            wizardTypeChangeHtml(basePath, view, packs)
+        }
+    }
+
     // Pack modal content
     route("/packs/{group}/{id}") {
         suspend fun RoutingCall.readPack(): PackDescriptor? =

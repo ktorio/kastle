@@ -8,45 +8,55 @@ import kotlinx.html.*
  * Renders the config box (right side of title row) with internal 50/50 split.
  */
 @OptIn(ExperimentalKtorApi::class)
-fun FlowContent.wizardConfigBox(view: WizardView) {
+fun FlowContent.wizardConfigBox(view: WizardView, oobSwap: Boolean = false) {
     div("wizard-config-box") {
         id = "wizard-config-box"
+        if (oobSwap) {
+            attributes["hx-swap-oob"] = "true"
+        }
+        wizardConfigBoxContent(view)
+    }
+}
 
-        // Left side - form fields
-        div("wizard-config-fields") {
-            form {
-                id = "wizard-form"
-                onSubmit = "event.preventDefault();"
+/**
+ * Inner content of the config box (form fields + download section).
+ */
+@OptIn(ExperimentalKtorApi::class)
+private fun FlowContent.wizardConfigBoxContent(view: WizardView) {
+    // Left side - form fields
+    div("wizard-config-fields") {
+        form {
+            id = "wizard-form"
+            onSubmit = "event.preventDefault();"
 
-                when (view.pluginType) {
-                    PluginType.PLUGIN -> pluginConfigFields(view)
-                    PluginType.THEME -> themeConfigFields(view)
-                }
+            when (view.pluginType) {
+                PluginType.PLUGIN -> pluginConfigFields(view)
+                PluginType.THEME -> themeConfigFields(view)
             }
         }
+    }
 
-        div("wizard-config-separator") {}
+    div("wizard-config-separator") {}
 
-        // Right side - download section
-        div("wizard-download-section") {
-            button(classes = "wizard-download-btn") {
-                id = "wizard-download-button"
-                type = ButtonType.button
-                onClick = "wizardDownloadProject()"
+    // Right side - download section
+    div("wizard-download-section") {
+        button(classes = "wizard-download-btn") {
+            id = "wizard-download-button"
+            type = ButtonType.button
+            onClick = "wizardDownloadProject()"
 
-                downloadIcon()
-                span { +"Download" }
-            }
+            downloadIcon()
+            span { +"Download" }
+        }
 
-            // Generated filename
-            div("wizard-download-filename") {
-                id = "wizard-download-filename"
-                +"${view.artifactId}.zip"
-            }
+        // Generated filename
+        div("wizard-download-filename") {
+            id = "wizard-download-filename"
+            +"${view.artifactId}.zip"
+        }
 
-            div("wizard-download-progress") {
-                id = "wizard-download-progress"
-            }
+        div("wizard-download-progress") {
+            id = "wizard-download-progress"
         }
     }
 }
@@ -142,3 +152,65 @@ fun HTML.wizardConfigBoxHtml(view: WizardView) {
         wizardConfigBox(view)
     }
 }
+
+/**
+ * Renders all elements that change when plugin type changes (for HTMX OOB swap).
+ */
+@OptIn(ExperimentalKtorApi::class)
+fun HTML.wizardTypeChangeHtml(
+    basePath: String,
+    view: WizardView,
+    packs: List<org.jetbrains.kastle.PackDescriptor>
+) {
+    body {
+        // Primary target: description
+        wizardDescriptionContent(view)
+
+        // OOB swap: config box
+        wizardConfigBox(view, oobSwap = true)
+
+        // OOB swap: content row
+        val filteredPacks = packs.filterForWizard(view.pluginType)
+        val showPacks = view.pluginType == PluginType.PLUGIN && filteredPacks.isNotEmpty()
+        div("wizard-content-row${if (!showPacks) " full-width" else ""}") {
+            id = "wizard-content-row"
+            attributes["hx-swap-oob"] = "true"
+            wizardPreviewPanel(basePath, view, isFullWidth = !showPacks)
+            if (showPacks) {
+                wizardPacksPanel(basePath, filteredPacks, view.selectedPacks)
+            }
+        }
+    }
+}
+
+/**
+ * Renders description content based on plugin type.
+ */
+@OptIn(ExperimentalKtorApi::class)
+fun FlowContent.wizardDescriptionContent(view: WizardView) {
+    when (view.pluginType) {
+        PluginType.PLUGIN -> {
+            p {
+                +"Create a new IntelliJ Platform plugin that adds a new functionality to the IDE. "
+                +"See the "
+                a(
+                    href = "https://plugins.jetbrains.com/docs/intellij/welcome.html",
+                    target = "_blank"
+                ) { +"Plugin SDK" }
+                +" documentation for details."
+            }
+        }
+        PluginType.THEME -> {
+            p {
+                +"Create a new IntelliJ Platform UI theme for customizing the IDE appearance. "
+                +"See the "
+                a(
+                    href = "https://plugins.jetbrains.com/docs/intellij/themes-getting-started.html",
+                    target = "_blank"
+                ) { +"Themes" }
+                +" documentation for details."
+            }
+        }
+    }
+}
+

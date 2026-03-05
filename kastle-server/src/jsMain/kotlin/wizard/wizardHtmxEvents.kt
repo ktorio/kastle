@@ -146,6 +146,19 @@ fun setupWizardHtmxEvents() {
         if (target.id == "wizard-packs-grid") {
             js("window.wizardSyncSelectedPacks && window.wizardSyncSelectedPacks()")
         }
+
+        // Re-setup handlers after plugin type change (OOB swaps description, config box, content row)
+        if (target.id == "wizard-config-box") {
+            console.log("[Wizard] Config box swapped, re-initializing form handlers")
+            setupFilenameUpdater()
+        }
+        if (target.id == "wizard-content-row") {
+            console.log("[Wizard] Content row swapped, syncing packs and refreshing preview")
+            js("window.wizardSyncSelectedPacks && window.wizardSyncSelectedPacks()")
+            // Use htmx.process to ensure new elements are initialized, then trigger refresh
+            js("htmx.process(document.getElementById('wizard-content-row'))")
+            js("htmx.trigger(document.body, 'wizardRefreshPreview')")
+        }
     })
 }
 

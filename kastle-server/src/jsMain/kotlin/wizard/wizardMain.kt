@@ -88,11 +88,13 @@ internal fun getWizardBasePath(): String =
     window["BASE_PATH"] ?: ""
 
 /**
- * Change plugin type (Plugin vs Theme)
+ * Change plugin type (Plugin vs Theme) using HTMX for partial update
  */
 private fun changePluginType(value: String) {
     val basePath = getWizardBasePath()
-    window.location.href = "$basePath?pluginType=$value"
+    val url = "$basePath/type?pluginType=$value"
+    val htmx = js("htmx")
+    htmx.ajax("GET", url, js("({target: '#wizard-description'})"))
 }
 
 /**
