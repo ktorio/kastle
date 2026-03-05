@@ -14,151 +14,140 @@ import org.jetbrains.kastle.server.recordAnalyticsEvent
 import org.jetbrains.kastle.server.respondProjectDownload
 
 /**
- * Default project descriptor for wizard when no parameters are provided.
- */
-private val WIZARD_DEFAULT_PROJECT = ProjectDescriptor(
-    name = "my-plugin",
-    group = "com.example",
-    packs = listOf(
-        PluginType.PLUGIN.basePack,
-        WizardDefaults.GIT_PACK
-    ),
-    packaging = PackagingStyle.FLAT
-)
-
-/**
  * Registers wizard routes.
  */
 fun Routing.wizardFrontEnd(
     repository: PackRepository,
     generator: ProjectGenerator,
     analyticsRepository: AnalyticsRepository = NoOpAnalyticsRepository,
-    basePath: String
+    basePath: String = ""
 ) {
     // Main wizard page
-    get {
-        refreshClientIdCookie()
-        val view = call.readWizardViewState()
-        val packs = repository.readAll()
-            .toList()
-            .sortedBy { it.name }
-
-        call.respondHtml {
-            wizardIndexHtml(basePath, view, packs)
-        }
-    }
-
-    // Pack search (reuses existing pack list but returns wizard-styled cards)
-    get("/packs") {
-        val search = call.request.queryParameters["search"]
-        val pluginType = PluginType.fromString(call.request.queryParameters["pluginType"])
-
-        val packs = repository.readAll()
-            .filter { pack ->
-                // Filter by search term
-                val matchesSearch = search.isNullOrBlank() || listOfNotNull(
-                    pack.id.toString(),
-                    pack.name,
-                    pack.group?.name,
-                    pack.description,
-                ).any { part ->
-                    part.contains(search, ignoreCase = true)
-                }
-
-                matchesSearch
-            }
-            .toList()
-            .filterForWizard(pluginType)
-            .sortedBy { it.name }
-
-        val selectedPacks = call.request.queryParameters.getAll("selectedPack")
-            .orEmpty()
-            .mapNotNull { runCatching { PackId.parse(it) }.getOrNull() }
-            .toSet()
-
-        call.respondHtml {
-            wizardPacksGridHtml(basePath, packs, selectedPacks)
-        }
-    }
-
-    // Plugin type change (HTMX partial update)
-    get("/type") {
-        val pluginType = PluginType.fromString(call.request.queryParameters["pluginType"])
-        val packs = repository.readAll()
-            .toList()
-            .sortedBy { it.name }
-        val view = WizardView(pluginType = pluginType)
-
-        call.respondHtml {
-            wizardTypeChangeHtml(basePath, view, packs)
-        }
-    }
-
-    // Pack modal content
-    route("/packs/{group}/{id}") {
-        suspend fun RoutingCall.readPack(): PackDescriptor? =
-            repository.read(
-                PackId(
-                    parameters["group"]!!,
-                    parameters["id"]!!
-                )
-            )
-
-        get("/modal") {
-            val pack = call.readPack()
-            call.respondHtml {
-                wizardPackModalHtml(pack)
-            }
-        }
-
-        // Reuse existing docs endpoint
-        get("/docs") {
-            val pack = call.readPack()
-            call.respondHtml {
-                wizardPackModalHtml(pack)
-            }
-        }
-    }
-
-    // Project preview and download
-    route("/project") {
-        get("/listing") {
-            val descriptor = call.readWizardProjectDescriptor()
-            val selectedFile = call.request.queryParameters["selectedFile"]
-            val files = generator.generate(descriptor)
-                .map { it.path }
+    route(basePath) {
+        get {
+            refreshClientIdCookie()
+            val view = call.readWizardViewState()
+            val packs = repository.readAll()
                 .toList()
+                .sortedBy { it.name }
+
             call.respondHtml {
-                wizardFileTreeHtml(basePath, files, selectedFile)
+                wizardIndexHtml(basePath, view, packs)
             }
         }
 
-        get("/file/{path...}") {
-            val path = call.pathParameters.getAll("path").orEmpty().joinToString("/")
-            val descriptor = call.readWizardProjectDescriptor()
-            val fileEntry = generator.generate(descriptor)
-                .filter { it.path == path }
-                .singleOrNull()
-            if (fileEntry == null) {
-                call.respond(HttpStatusCode.NotFound)
-            } else {
+        // Pack search (reuses existing pack list but returns wizard-styled cards)
+        get("/packs") {
+            val search = call.request.queryParameters["search"]
+            val pluginType = PluginType.fromString(call.request.queryParameters["pluginType"])
+
+            val packs = repository.readAll()
+                .filter { pack ->
+                    // Filter by search term
+                    val matchesSearch = search.isNullOrBlank() || listOfNotNull(
+                        pack.id.toString(),
+                        pack.name,
+                        pack.group?.name,
+                        pack.description,
+                    ).any { part ->
+                        part.contains(search, ignoreCase = true)
+                    }
+
+                    matchesSearch
+                }
+                .toList()
+                .filterForWizard(pluginType)
+                .sortedBy { it.name }
+
+            val selectedPacks = call.request.queryParameters.getAll("selectedPack")
+                .orEmpty()
+                .mapNotNull { runCatching { PackId.parse(it) }.getOrNull() }
+                .toSet()
+
+            call.respondHtml {
+                wizardPacksGridHtml(basePath, packs, selectedPacks)
+            }
+        }
+
+        // Plugin type change (HTMX partial update)
+        get("/type") {
+            val pluginType = PluginType.fromString(call.request.queryParameters["pluginType"])
+            val packs = repository.readAll()
+                .toList()
+                .sortedBy { it.name }
+            val view = WizardView(pluginType = pluginType)
+
+            call.respondHtml {
+                wizardTypeChangeHtml(basePath, view, packs)
+            }
+        }
+
+        // Pack modal content
+        route("/packs/{group}/{id}") {
+            suspend fun RoutingCall.readPack(): PackDescriptor? =
+                repository.read(
+                    PackId(
+                        parameters["group"]!!,
+                        parameters["id"]!!
+                    )
+                )
+
+            get("/modal") {
+                val pack = call.readPack()
                 call.respondHtml {
-                    wizardFileContentsHtml(fileEntry.path, fileEntry.content().readText())
+                    wizardPackModalHtml(pack)
+                }
+            }
+
+            // Reuse existing docs endpoint
+            get("/docs") {
+                val pack = call.readPack()
+                call.respondHtml {
+                    wizardPackModalHtml(pack)
                 }
             }
         }
 
-        get("/download") {
-            val descriptor = call.readWizardProjectDescriptor()
-            val result: Flow<SourceFileEntry> = generator.generate(descriptor)
-            call.respondProjectDownload(descriptor.name, result)
-            call.recordAnalyticsEvent(analyticsRepository, descriptor)
-        }
-    }
+        // Project preview and download
+        route("/project") {
+            get("/listing") {
+                val descriptor = call.readWizardProjectDescriptor()
+                val selectedFile = call.request.queryParameters["selectedFile"]
+                val files = generator.generate(descriptor)
+                    .map { it.path }
+                    .toList()
+                call.respondHtml {
+                    wizardFileTreeHtml(basePath, files, selectedFile)
+                }
+            }
 
-    // Serve wizard-specific CSS
-    get("/assets/wizard-style.css") {
-        call.respondText(WizardResources.stylesheet, ContentType.Text.CSS)
+            get("/file/{path...}") {
+                val path = call.pathParameters.getAll("path").orEmpty().joinToString("/")
+                val descriptor = call.readWizardProjectDescriptor()
+                val fileEntry = generator.generate(descriptor)
+                    .filter { it.path == path }
+                    .singleOrNull()
+                if (fileEntry == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                } else {
+                    call.respondHtml {
+                        wizardFileContentsHtml(fileEntry.path, fileEntry.content().readText())
+                    }
+                }
+            }
+
+            get("/download") {
+                val descriptor = call.readWizardProjectDescriptor()
+                val result: Flow<SourceFileEntry> = generator.generate(descriptor)
+                call.respondProjectDownload(descriptor.name, result)
+                call.recordAnalyticsEvent(analyticsRepository, descriptor)
+            }
+        }
+
+        // Serve wizard-specific CSS
+        get("/assets/wizard-style.css") {
+            call.respondText(WizardResources.stylesheet, ContentType.Text.CSS)
+        }
     }
 }
 

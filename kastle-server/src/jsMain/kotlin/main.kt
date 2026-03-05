@@ -26,7 +26,7 @@ fun main() {
                 }
             }
         }
-        "$basePath/" -> {
+        basePath -> {
             initWizard()
         }
     }
