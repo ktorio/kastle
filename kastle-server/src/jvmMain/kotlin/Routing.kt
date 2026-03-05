@@ -23,9 +23,8 @@ fun Application.routing() {
 
     routing {
         staticResources("/assets", "/assets")
-        staticResources("/assets/js", "/js")
+//        staticResources("/assets/js", "/js")
         frontEnd(repository, generator, analytics, basePath)
-        frontEndIntellijPlugins(repository, generator, analytics, basePath)
         backEnd(repository, generator, analytics, json)
         wizardFrontEnd(repository, generator, analytics, basePath)
 

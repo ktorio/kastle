@@ -1,9 +1,9 @@
 package org.jetbrains.kastle.server.ui.wizard
 
-import io.ktor.htmx.html.*
 import io.ktor.utils.io.ExperimentalKtorApi
 import kotlinx.html.*
 import org.jetbrains.kastle.PackDescriptor
+import org.jetbrains.kastle.server.ui.Resources
 
 /**
  * Renders the main wizard page.
@@ -18,24 +18,18 @@ fun HTML.wizardIndexHtml(
         title { +"IntelliJ Platform Plugin Generator" }
         meta(charset = "UTF-8")
         meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
-
-        // Wizard stylesheet - keep at wizard path
         styleLink("$basePath/assets/wizard-style.css")
-
-        // Common assets - use global /assets path
-        styleLink("/assets/a11y-light.min.css")
-        script(src = "/assets/htmx.min.js") {}
-        script(src = "/assets/highlight.min.js") {}
-
-        // Wizard JavaScript - use existing kastle-server.js bundle
+        styleLink("$basePath/assets/a11y-light.min.css")
+        script(src = "$basePath/assets/htmx.min.js") {}
+        script(src = "$basePath/assets/highlight.min.js") {}
         script {
             unsafe {
-                +"""
-                window.BASE_PATH = '$basePath';
-                """
+                if (basePath.isNotEmpty()) {
+                    +"window.BASE_PATH = '$basePath';\n"
+                }
+                +Resources.script
             }
         }
-        script(src = "/assets/js/kastle-server.js") {}
     }
 
     body {
