@@ -9,7 +9,7 @@ fun FlowContent.wizardHeader(basePath: String) {
     header("wizard-header") {
         div("wizard-header-content") {
             div("wizard-header-left") {
-                a(href = "$basePath/wizard", classes = "wizard-header-logo") {
+                a(href = basePath, classes = "wizard-header-logo") {
                     img(
                         src = "$basePath/assets/intellij-plugins/intellij-platform-icon.svg",
                         alt = "IntelliJ Platform"
