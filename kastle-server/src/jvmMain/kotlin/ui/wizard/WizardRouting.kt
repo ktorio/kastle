@@ -160,7 +160,7 @@ private fun RoutingCall.readWizardViewState(): WizardView {
         .map(PackId::parse)
         .toSet()
     val groupId = request.queryParameters["group"] ?: "com.example"
-    val artifactId = request.queryParameters["name"] ?: "my-plugin"
+    val artifactId = request.queryParameters["name"] ?: "awesome-plugin"
     val addSampleCode =
         request.queryParameters["org.jetbrains.intellij.platform/plugin/addSampleCode"]?.toBoolean() ?: true
 
@@ -178,7 +178,7 @@ private fun RoutingCall.readWizardViewState(): WizardView {
  * Reads project descriptor from wizard request parameters.
  */
 private fun RoutingCall.readWizardProjectDescriptor(): ProjectDescriptor {
-    val name = request.queryParameters["name"] ?: "my-plugin"
+    val name = request.queryParameters["name"] ?: "awesome-plugin"
     val group = request.queryParameters["group"] ?: "com.example"
 
     // Build pack list

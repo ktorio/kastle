@@ -216,7 +216,7 @@ private fun setupFilenameUpdater() {
     artifactIdInput?.addEventListener("input", { event ->
         val input = event.asDynamic().target
         val value = input.value as String
-        val filename = if (value.isNotBlank()) "$value.zip" else "my-plugin.zip"
+        val filename = if (value.isNotBlank()) "$value.zip" else "awesome-plugin.zip"
         filenameDiv?.textContent = filename
         js("window._wizardSchedulePreviewRefresh()")
     })

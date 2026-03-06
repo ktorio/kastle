@@ -24,7 +24,7 @@ data class WizardView(
     val selectedFile: String? = null,
     val selectedPacks: Set<PackId> = emptySet(),
     val groupId: String = "com.example",
-    val artifactId: String = "my-plugin",
+    val artifactId: String = "awesome-plugin",
     val addSampleCode: Boolean = true,
 )
 

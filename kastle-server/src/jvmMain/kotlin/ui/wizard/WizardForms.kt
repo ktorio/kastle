@@ -86,7 +86,7 @@ private fun FORM.pluginConfigFields(view: WizardView) {
         input(type = InputType.text, classes = "wizard-form-input") {
             id = "wizard-artifact-id"
             name = "name"
-            placeholder = "my-plugin"
+            placeholder = "awesome-plugin"
             value = view.artifactId
         }
     }
