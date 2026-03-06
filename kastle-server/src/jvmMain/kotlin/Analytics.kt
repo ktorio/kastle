@@ -79,7 +79,7 @@ suspend fun ApplicationCall.recordAnalyticsEvent(
     val additionalParameters = buildAdditionalParameters(analytics.requestMappings)
     val generationEvent = GenerationEvent.from(descriptor, additionalParameters)
     analytics.record(generationEvent)
-    application.log.info("Generated project: $descriptor")
+    application.log.info("Generated project: $generationEvent")
 }
 
 /**
