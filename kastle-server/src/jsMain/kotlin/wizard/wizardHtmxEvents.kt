@@ -69,16 +69,23 @@ fun setupWizardHtmxEvents() {
                 }
             }
 
+            // Add plugin type
+            val pluginTypeSelect = document.getElementById("wizard-plugin-type")
+            val pluginType = (pluginTypeSelect?.asDynamic()?.value as? String)?.uppercase() ?: "PLUGIN"
+
             // Include currently selected file so it stays selected after refresh
             val selectedFileInput = document.querySelector("input[name='wizard-preview-file']:checked")
             val selectedFilePath = selectedFileInput?.asDynamic()?.dataset?.filePath as? String
             if (selectedFilePath != null) {
                 params["selectedFile"] = selectedFilePath
+            } else {
+                // Default to plugin.xml on initial load
+                val defaultFile = when (pluginType) {
+                    "THEME" -> "resources/META-INF/plugin.xml"
+                    else -> "src/main/resources/META-INF/plugin.xml"
+                }
+                params["selectedFile"] = defaultFile
             }
-
-            // Add plugin type
-            val pluginTypeSelect = document.getElementById("wizard-plugin-type")
-            val pluginType = (pluginTypeSelect?.asDynamic()?.value as? String)?.uppercase() ?: "PLUGIN"
 
             // Add packaging style
             params["packaging"] = "FLAT"
