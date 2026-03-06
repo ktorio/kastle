@@ -431,10 +431,15 @@ body {
     min-height: 100%;
     width: max-content;
     min-width: 100%;
+    padding: 16px;
 }
 
 .wizard-file-contents code {
     background: transparent;
+}
+
+pre code.hljs {
+    padding: 0 !important; /* do not double padding from .wizard-file-contents pre */
 }
 
 /* Packs panel */

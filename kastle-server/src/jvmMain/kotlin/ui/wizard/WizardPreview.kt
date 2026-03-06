@@ -156,13 +156,23 @@ fun HTML.wizardFileContentsHtml(fileName: String, contents: String) {
 /**
  * Determines the language class for syntax highlighting.
  */
-private fun wizardLanguageClass(fileName: String): String? =
-    when (val extension = fileName.substringAfterLast('.')) {
+private fun wizardLanguageClass(fileName: String): String? {
+    if (!fileName.contains('.')) {
+        return when (fileName) {
+            "gradlew" -> "language-sh"
+            else -> "language-txt"
+        }
+    }
+    return when (val extension = fileName.substringAfterLast('.')) {
         KT_EXTENSION, KT_SCRIPT_EXTENSION -> "kotlin"
+        "properties" -> "ini"
+        "gitignore" -> "txt"
+        "bat" -> "cmd"
         else -> extension
     }.takeIf {
         it !in setOf("jar", "tar", "exe", "")
     }?.let { "language-$it" }
+}
 
 /**
  * Renders a simple folder icon.
