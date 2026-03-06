@@ -425,7 +425,6 @@ body {
 
 .wizard-file-contents pre {
     margin: 0;
-    padding: 16px;
     font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
     font-size: 13px;
     line-height: 1.6;
