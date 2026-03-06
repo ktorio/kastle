@@ -12,9 +12,9 @@ dependencies:
 
 gradle:
   plugins:
-    - $libs.androidMultiplatformLibrary
-    - $libs.composeMultiplatform
-    - $libs.composeCompiler
+    - androidMultiplatformLibrary
+    - composeMultiplatform
+    - composeCompiler
 
 amper:
   compose: enabled
