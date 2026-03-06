@@ -5,7 +5,6 @@ import org.w3c.dom.get
 import wizard.initWizard
 
 fun main() {
-
     val basePath = window["BASE_PATH"] ?: ""
     when (window.location.pathname) {
         "$basePath/classic" -> {
@@ -26,7 +25,7 @@ fun main() {
                 }
             }
         }
-        basePath -> {
+        basePath, "/" -> {
             initWizard()
         }
     }
