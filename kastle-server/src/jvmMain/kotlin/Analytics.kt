@@ -5,7 +5,6 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.plugins.di.annotations.*
 import io.ktor.server.routing.*
-import io.ktor.util.toMap
 import kotlinx.coroutines.CoroutineScope
 import org.jetbrains.kastle.ProjectDescriptor
 import org.jetbrains.kastle.analytics.AnalyticsRepository
@@ -80,8 +79,6 @@ suspend fun ApplicationCall.recordAnalyticsEvent(
     val additionalParameters = buildAdditionalParameters(analytics.requestMappings)
     val generationEvent = GenerationEvent.from(descriptor, additionalParameters)
     analytics.record(generationEvent)
-    application.log.info("Request: ${request.headers.toMap()}")
-    application.log.info("Cookies: ${request.cookies.rawCookies}")
     application.log.info("Generated project: $generationEvent")
 }
 
