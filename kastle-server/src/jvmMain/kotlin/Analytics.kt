@@ -1,10 +1,8 @@
 package org.jetbrains.kastle.server
 
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.plugins.di.annotations.*
-import io.ktor.server.routing.*
 import kotlinx.coroutines.CoroutineScope
 import org.jetbrains.kastle.ProjectDescriptor
 import org.jetbrains.kastle.analytics.AnalyticsRepository
@@ -48,30 +46,6 @@ fun Application.configureAnalytics(
     }
 }
 
-const val CLIENT_ID_COOKIE_NAME = "kastle_client_id"
-
-/**
- * Refreshes the [client ID cookie][CLIENT_ID_COOKIE_NAME] expiration if it already exists.
- *
- * This function does NOT create a new cookie if one doesn't exist. The cookie should only
- * be created client-side when the user explicitly consents to analytics tracking.
- */
-fun RoutingContext.refreshClientIdCookie() {
-    val existingCookieValue = call.request.cookies[CLIENT_ID_COOKIE_NAME]
-    if (existingCookieValue != null) {
-        // Only refresh the cookie if user has previously consented
-        val maxAgeInSeconds = 400 * 24 * 60 * 60 // 400 days
-        call.response.cookies.append(
-            Cookie(
-                name = CLIENT_ID_COOKIE_NAME,
-                value = existingCookieValue,
-                maxAge = maxAgeInSeconds,
-                path = "/"
-            )
-        )
-    }
-}
-
 suspend fun ApplicationCall.recordAnalyticsEvent(
     analytics: AnalyticsRepository,
     descriptor: ProjectDescriptor
@@ -83,11 +57,9 @@ suspend fun ApplicationCall.recordAnalyticsEvent(
 }
 
 /**
- * Builds an additional parameters map from an HTTP request based on analytics repository parameter requirements.
+ * Builds an additional parameters map from HTTP request headers based on analytics repository parameter requirements.
  *
- * Cookies may override headers if they map to the same parameter name.
- *
- * @param requestMappings Parameter mappings to extract information from headers and cookies
+ * @param requestMappings Parameter mappings to extract information from headers
  * @return Map of parameter names to their values
  */
 private fun ApplicationCall.buildAdditionalParameters(requestMappings: RequestMappings): Map<String, String> {
@@ -95,13 +67,6 @@ private fun ApplicationCall.buildAdditionalParameters(requestMappings: RequestMa
 
     requestMappings.headerMappings.forEach { (headerName, paramName) ->
         request.headers[headerName]?.let { value ->
-            parameters[paramName] = value
-        }
-    }
-
-    // cookies may override headers
-    requestMappings.cookieMappings.forEach { (cookieName, paramName) ->
-        request.cookies[cookieName]?.let { value ->
             parameters[paramName] = value
         }
     }

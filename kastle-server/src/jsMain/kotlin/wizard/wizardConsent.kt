@@ -5,62 +5,31 @@ import kotlinx.browser.window
 import org.jetbrains.kastle.utils.generateRandomHash
 
 /**
- * Cookie name for analytics client ID.
- */
-private const val CLIENT_ID_COOKIE_NAME = "kastle_client_id"
-
-/**
  * localStorage key for analytics client ID.
  */
 private const val CLIENT_ID_STORAGE_KEY = "kastle_client_id"
 
 /**
- * Checks if analytics consent has been given (client ID exists in localStorage or cookie).
+ * Checks if analytics consent has been given (client ID exists in localStorage).
  */
 fun hasAnalyticsConsent(): Boolean {
-    // Check localStorage first
-    val storedId = window.localStorage.getItem(CLIENT_ID_STORAGE_KEY)
-    if (storedId != null) return true
-
-    // Fall back to cookie check
-    val cookies = document.cookie
-    return cookies.split(";").any { cookie ->
-        cookie.trim().startsWith("$CLIENT_ID_COOKIE_NAME=")
-    }
+    return window.localStorage.getItem(CLIENT_ID_STORAGE_KEY) != null
 }
 
 /**
- * Gets the analytics client ID from localStorage or cookie.
+ * Gets the analytics client ID from localStorage.
  * Returns null if no client ID exists (user hasn't consented).
  */
 fun getAnalyticsClientId(): String? {
-    // Check localStorage first
-    val storedId = window.localStorage.getItem(CLIENT_ID_STORAGE_KEY)
-    if (storedId != null) return storedId
-
-    // Fall back to cookie
-    val cookies = document.cookie
-    return cookies.split(";")
-        .map { it.trim() }
-        .firstOrNull { it.startsWith("$CLIENT_ID_COOKIE_NAME=") }
-        ?.substringAfter("=")
+    return window.localStorage.getItem(CLIENT_ID_STORAGE_KEY)
 }
 
 /**
- * Sets the analytics client ID in both localStorage and cookie with 400-day expiration.
- * localStorage is used for sending headers (since AWS doesn't pass cookies),
- * while the cookie is kept for backward compatibility with local development.
+ * Sets the analytics client ID in localStorage.
  */
-fun setAnalyticsClientIdCookie() {
+fun setAnalyticsClientId() {
     val clientId = generateRandomHash()
-    val maxAgeSeconds = 400 * 24 * 60 * 60 // 400 days
-
-    // Store in localStorage for header-based tracking
     window.localStorage.setItem(CLIENT_ID_STORAGE_KEY, clientId)
-
-    // Also set cookie for backward compatibility
-    document.cookie = "$CLIENT_ID_COOKIE_NAME=$clientId; max-age=$maxAgeSeconds; path=/; SameSite=Lax"
-
     console.log("[Wizard] Analytics consent granted, client ID set")
 }
 
@@ -82,7 +51,7 @@ fun showConsentPopupIfNeeded() {
  * Handles user accepting analytics consent.
  */
 fun acceptAnalyticsConsent() {
-    setAnalyticsClientIdCookie()
+    setAnalyticsClientId()
     hideConsentPopup()
 }
 

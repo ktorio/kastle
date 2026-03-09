@@ -36,9 +36,6 @@ class FusAnalyticsRepository(
         headerMappings = mapOf(
             "User-Agent" to USER_AGENT_PARAMETER_NAME,
             "X-Machine-ID" to MACHINE_ID_PARAMETER_NAME
-        ),
-        cookieMappings = mapOf(
-            "kastle_client_id" to MACHINE_ID_PARAMETER_NAME
         )
     )
 

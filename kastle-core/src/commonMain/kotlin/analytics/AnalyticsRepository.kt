@@ -12,7 +12,7 @@ package org.jetbrains.kastle.analytics
  */
 interface AnalyticsRepository : AutoCloseable {
     /**
-     * Returns the header and cookie mappings used by this implementation.
+     * Returns the header mappings used by this implementation.
      */
     val requestMappings: RequestMappings
         get() = RequestMappings.EMPTY
@@ -25,14 +25,12 @@ interface AnalyticsRepository : AutoCloseable {
 }
 
 /**
- * Declares header and cookie mappings used to fetch required data by an analytics implementation from a request.
+ * Declares header mappings used to fetch required data by an analytics implementation from a request.
  *
  * @property headerMappings Map of HTTP header name to parameter name
- * @property cookieMappings Map of cookie name to parameter name
  */
 data class RequestMappings(
-    val headerMappings: Map<String, String> = emptyMap(),
-    val cookieMappings: Map<String, String> = emptyMap()
+    val headerMappings: Map<String, String> = emptyMap()
 ) {
     companion object {
         val EMPTY = RequestMappings()

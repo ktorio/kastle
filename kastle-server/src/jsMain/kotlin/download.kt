@@ -5,6 +5,7 @@ import org.w3c.dom.*
 import org.w3c.dom.url.URL
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
+import wizard.getAnalyticsClientId
 import kotlin.js.Promise
 
 /**

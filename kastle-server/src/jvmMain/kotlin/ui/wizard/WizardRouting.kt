@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.*
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.analytics.AnalyticsRepository
 import org.jetbrains.kastle.analytics.NoOpAnalyticsRepository
-import org.jetbrains.kastle.server.refreshClientIdCookie
 import org.jetbrains.kastle.server.recordAnalyticsEvent
 import org.jetbrains.kastle.server.respondProjectDownload
 
@@ -24,7 +23,6 @@ fun Routing.wizardFrontEnd(
 ) {
     // Main wizard page
     get {
-        refreshClientIdCookie()
         val view = call.readWizardViewState()
         val packs = repository.readAll()
             .toList()
