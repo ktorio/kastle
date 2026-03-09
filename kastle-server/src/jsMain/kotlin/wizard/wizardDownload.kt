@@ -25,7 +25,15 @@ suspend fun downloadWizardProject() {
         val basePath = getWizardBasePath()
         val url = buildWizardProjectUrl("$basePath/project/download")
 
-        val response = window.fetch(url).await()
+        // Build fetch options with X-Machine-ID header if analytics consent was given
+        val fetchOptions = js("{}")
+        val clientId = getAnalyticsClientId()
+        if (clientId != null) {
+            fetchOptions.headers = js("{}")
+            fetchOptions.headers["X-Machine-ID"] = clientId
+        }
+
+        val response = window.fetch(url, fetchOptions).await()
 
         // Check if the response is ok
         if (!response.ok) {
