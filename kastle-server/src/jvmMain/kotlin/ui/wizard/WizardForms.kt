@@ -1,7 +1,6 @@
 package org.jetbrains.kastle.server.ui.wizard
 
-import io.ktor.htmx.html.*
-import io.ktor.utils.io.ExperimentalKtorApi
+import io.ktor.utils.io.*
 import kotlinx.html.*
 
 /**
@@ -140,16 +139,6 @@ private fun FlowContent.downloadIcon() {
                 <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>"""
         }
-    }
-}
-
-/**
- * Renders a partial config box update (for HTMX).
- */
-@OptIn(ExperimentalKtorApi::class)
-fun HTML.wizardConfigBoxHtml(view: WizardView) {
-    body {
-        wizardConfigBox(view)
     }
 }
 
