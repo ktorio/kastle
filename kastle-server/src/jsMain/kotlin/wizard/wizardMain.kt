@@ -64,6 +64,9 @@ fun initWizard() {
     window.asDynamic().wizardRefreshPreview = {
         refreshPreview()
     }
+    window.asDynamic().wizardFilterPacks = { query: String ->
+        filterPacks(query)
+    }
 
     // Set up DOM-dependent handlers after DOM is ready
     fun setupDomHandlers() {
@@ -125,6 +128,52 @@ private fun togglePack(checkbox: dynamic) {
  */
 private fun refreshPreview() {
     js("htmx.trigger(document.body, 'wizardRefreshPreview')")
+}
+
+/**
+ * Filter packs client-side based on search query
+ */
+private fun filterPacks(query: String) {
+    val searchTerm = query.trim().lowercase()
+    val packCards = document.querySelectorAll(".wizard-pack-card")
+    val groupHeaders = document.querySelectorAll(".wizard-pack-group-header")
+
+    // Track which groups have visible packs
+    val visibleGroups = mutableSetOf<String>()
+
+    // Filter pack cards
+    for (i in 0 until packCards.length) {
+        val card = packCards[i].asDynamic()
+        val packId = (card.dataset?.packId as? String) ?: ""
+        val packName = (card.dataset?.packName as? String) ?: ""
+        val packDescription = (card.dataset?.packDescription as? String) ?: ""
+        val packGroup = (card.dataset?.packGroup as? String) ?: ""
+        val packGroupId = (card.dataset?.packGroupId as? String) ?: ""
+
+        val matches = searchTerm.isEmpty() ||
+            packId.lowercase().contains(searchTerm) ||
+            packName.lowercase().contains(searchTerm) ||
+            packDescription.lowercase().contains(searchTerm) ||
+            packGroup.lowercase().contains(searchTerm)
+
+        if (matches) {
+            card.style.display = ""
+            if (packGroupId.isNotEmpty()) {
+                visibleGroups.add(packGroupId)
+            }
+        } else {
+            card.style.display = "none"
+        }
+    }
+
+    // Show/hide group headers based on whether they have visible packs
+    for (i in 0 until groupHeaders.length) {
+        val header = groupHeaders[i].asDynamic()
+        val groupId = header.dataset?.groupId as? String
+        if (groupId != null) {
+            header.style.display = if (groupId in visibleGroups || searchTerm.isEmpty()) "" else "none"
+        }
+    }
 }
 
 /**

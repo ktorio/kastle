@@ -27,12 +27,7 @@ fun FlowContent.wizardPacksPanel(
                 id = "wizard-packs-search"
                 name = "search"
                 placeholder = "Search..."
-                attributes.hx {
-                    get = "$basePath/packs"
-                    trigger = "keyup changed delay:300ms"
-                    target = "#wizard-packs-grid"
-                    include = "#wizard-plugin-type"
-                }
+                onInput = "wizardFilterPacks(this.value)"
             }
         }
 
@@ -65,6 +60,7 @@ fun FlowContent.wizardPacksGrid(
         // Render group header if group exists
         if (group != null) {
             div("wizard-pack-group-header") {
+                attributes["data-group-id"] = group.id
                 h3("wizard-pack-group-title") {
                     // TODO group names are not parsed, see https://github.com/ktorio/kastle/issues/73
                     +when (group.id) {
@@ -98,6 +94,11 @@ fun FlowContent.wizardPackCard(
     div("wizard-pack-card${if (selected) " selected" else ""}") {
         id = cardId
         attributes["data-pack-id"] = pack.id.toString()
+        // Data attributes for client-side filtering
+        attributes["data-pack-name"] = pack.name
+        attributes["data-pack-description"] = pack.description ?: ""
+        attributes["data-pack-group"] = pack.group?.name ?: pack.group?.id ?: ""
+        attributes["data-pack-group-id"] = pack.group?.id ?: ""
 
         // Hidden checkbox for selection state
         input(type = InputType.checkBox, classes = "wizard-pack-checkbox") {
