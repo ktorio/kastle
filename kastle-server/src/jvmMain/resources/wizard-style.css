@@ -19,6 +19,7 @@
 
 html {
     height: 100%;
+    overflow-x: hidden;
 }
 
 body {
@@ -31,6 +32,7 @@ body {
     min-height: 100%;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
 }
 
 .wizard-header {
@@ -41,7 +43,8 @@ body {
 .wizard-header-content {
     padding: 0 24px;
     height: 70px;
-    width: 1400px;
+    max-width: 1400px;
+    width: 100%;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -93,6 +96,7 @@ body {
 /* Main container */
 .wizard-container {
     max-width: 1400px;
+    width: 100%;
     margin: 0 auto;
     padding: 60px 24px 48px;
     flex: 1 0 auto;
@@ -477,7 +481,7 @@ pre code.hljs {
 
 .wizard-packs-grid {
     display: grid;
-    /*grid-template-columns: repeat(2, 1fr);*/
+    grid-template-columns: 1fr;
     gap: 8px;
     height: clamp(500px, 50vh, 600px);
     overflow-y: auto;
@@ -700,6 +704,7 @@ pre code.hljs {
 
 .wizard-footer-content {
     max-width: 1400px;
+    width: 100%;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -855,20 +860,64 @@ pre code.hljs {
     .wizard-packs-panel {
         width: 100%;
     }
+}
 
-    .wizard-packs-grid {
-        grid-template-columns: repeat(3, 1fr);
+@media (max-width: 900px) {
+    .wizard-title-row {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .wizard-title-section {
+        width: 100%;
+    }
+
+    .wizard-config-box {
+        width: 100%;
     }
 }
 
 @media (max-width: 768px) {
+    .wizard-container {
+        padding: 32px 16px;
+    }
+
+    .wizard-header-content {
+        padding: 0 16px;
+        height: 56px;
+    }
+
+    .wizard-header-logo img {
+        height: 36px;
+        margin-right: 8px;
+    }
+
+    .wizard-header-title {
+        font-size: 16px;
+    }
+
+    .wizard-title {
+        font-size: 28px;
+    }
+
+    .wizard-description {
+        font-size: 16px;
+    }
+
     .wizard-title-row {
         flex-direction: column;
+        gap: 20px;
+    }
+
+    .wizard-title-section {
+        width: 100%;
     }
 
     .wizard-config-box {
-        min-width: 100%;
+        width: 100%;
         flex-direction: column;
+        padding: 16px;
+        gap: 16px;
     }
 
     .wizard-config-separator {
@@ -880,18 +929,114 @@ pre code.hljs {
         border-top: 1px solid var(--wizard-border);
     }
 
+    .wizard-content-row {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .wizard-packs-panel {
+        width: 100%;
+        order: 2;
+    }
+
+    .wizard-preview-panel {
+        order: 1;
+    }
+
+    .wizard-packs-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .wizard-packs-search {
+        width: 100%;
+    }
+
     .wizard-packs-grid {
-        grid-template-columns: repeat(2, 1fr);
+        height: auto;
+        max-height: 400px;
+    }
+
+    .wizard-preview-content {
+        flex-direction: column;
+        height: auto;
+    }
+
+    /* File tree stacked above content on narrow screens */
+    .wizard-file-tree {
+        width: 100%;
+        height: 180px;
+        border-right: none;
+        border-bottom: 1px solid var(--wizard-border);
+    }
+
+    .wizard-file-contents {
+        width: 100%;
+        height: 300px;
     }
 
     .wizard-header-nav {
         display: none;
     }
+
+    .wizard-footer {
+        padding: 32px 16px 24px;
+    }
 }
 
 @media (max-width: 480px) {
+    .wizard-container {
+        padding: 24px 12px;
+    }
+
+    .wizard-header-content {
+        padding: 0 12px;
+    }
+
+    .wizard-title {
+        font-size: 24px;
+    }
+
+    .wizard-description {
+        font-size: 14px;
+    }
+
+    .wizard-config-box {
+        padding: 12px;
+    }
+
+    .wizard-download-btn {
+        width: 100%;
+        min-width: unset;
+        padding: 12px 24px;
+        font-size: 14px;
+    }
+
     .wizard-packs-grid {
-        grid-template-columns: 1fr;
+        max-height: 350px;
+    }
+
+    .wizard-file-tree {
+        height: 150px;
+    }
+
+    .wizard-file-contents {
+        height: 250px;
+    }
+
+    .wizard-preview-title,
+    .wizard-packs-title {
+        font-size: 18px;
+    }
+
+    .wizard-footer {
+        padding: 24px 12px 20px;
+    }
+
+    .wizard-file-contents pre {
+        font-size: 11px;
+        padding: 12px;
     }
 }
 
