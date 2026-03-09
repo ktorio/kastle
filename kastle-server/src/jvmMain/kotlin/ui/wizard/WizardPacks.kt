@@ -99,6 +99,11 @@ fun FlowContent.wizardPackCard(
         attributes["data-pack-description"] = pack.description ?: ""
         attributes["data-pack-group"] = pack.group?.name ?: pack.group?.id ?: ""
         attributes["data-pack-group-id"] = pack.group?.id ?: ""
+        // Data attributes for client-side modal
+        pack.links?.home?.let { attributes["data-pack-link-home"] = it }
+        pack.links?.docs?.let { attributes["data-pack-link-docs"] = it }
+        pack.links?.vcs?.let { attributes["data-pack-link-vcs"] = it }
+        pack.links?.guide?.let { attributes["data-pack-link-guide"] = it }
 
         // Hidden checkbox for selection state
         input(type = InputType.checkBox, classes = "wizard-pack-checkbox") {

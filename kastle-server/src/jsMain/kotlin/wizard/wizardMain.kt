@@ -177,20 +177,68 @@ private fun filterPacks(query: String) {
 }
 
 /**
- * Show pack details modal
+ * Show pack details modal (client-side rendering)
  */
 private fun showPackModal(packId: String) {
-    val basePath = getWizardBasePath()
     val overlay = document.getElementById("wizard-modal-overlay")
     val modalBody = document.getElementById("wizard-modal-body")
+    val modalTitle = document.getElementById("wizard-modal-title")
 
-    if (overlay != null && modalBody != null) {
+    if (overlay == null || modalBody == null || modalTitle == null) return
+
+    // Find the pack card to read data attributes
+    val packCard = document.querySelector(".wizard-pack-card[data-pack-id='$packId']")?.asDynamic()
+    if (packCard == null) {
+        modalTitle.textContent = "Pack Not Found"
+        modalBody.innerHTML = "<p>Pack not found.</p>"
         overlay.classList.add("active")
-        // Load modal content via HTMX - use dynamic to call htmx
-        val url = "$basePath/packs/$packId/modal"
-        val htmx = js("htmx")
-        htmx.ajax("GET", url, js("({target: '#wizard-modal-body'})"))
+        return
     }
+
+    // Read pack data from attributes
+    val packName = (packCard.dataset?.packName as? String) ?: packId
+    val packDescription = packCard.dataset?.packDescription as? String
+    val linkHome = packCard.dataset?.packLinkHome as? String
+    val linkDocs = packCard.dataset?.packLinkDocs as? String
+    val linkVcs = packCard.dataset?.packLinkVcs as? String
+    val linkGuide = packCard.dataset?.packLinkGuide as? String
+
+    // Update modal title
+    modalTitle.textContent = packName
+
+    // Build modal body content
+    val contentParts = mutableListOf<String>()
+
+    // Pack description
+    contentParts.add("<div class=\"wizard-modal-pack-header\">")
+    if (!packDescription.isNullOrBlank()) {
+        contentParts.add("<p>$packDescription</p>")
+    }
+    contentParts.add("</div>")
+
+    // Links section
+    val links = mutableListOf<Pair<String, String>>()
+    if (!linkHome.isNullOrBlank()) links.add("Homepage" to linkHome)
+    if (!linkDocs.isNullOrBlank()) links.add("Documentation" to linkDocs)
+    if (!linkVcs.isNullOrBlank()) links.add("Source Code" to linkVcs)
+    if (!linkGuide.isNullOrBlank()) links.add("Guide" to linkGuide)
+
+    if (links.isNotEmpty()) {
+        contentParts.add("<div class=\"wizard-modal-links\">")
+        links.forEachIndexed { index, (label, url) ->
+            if (index > 0) {
+                contentParts.add("<span class=\"wizard-modal-link-separator\">·</span>")
+            }
+            contentParts.add("<a href=\"$url\" target=\"_blank\">$label</a>")
+        }
+        contentParts.add("</div>")
+    }
+
+    // Hidden pack ID input
+    contentParts.add("<input type=\"hidden\" id=\"wizard-modal-pack-id\" value=\"$packId\">")
+
+    modalBody.innerHTML = contentParts.joinToString("")
+    overlay.classList.add("active")
 }
 
 /**

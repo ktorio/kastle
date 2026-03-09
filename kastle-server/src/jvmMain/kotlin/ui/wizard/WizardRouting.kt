@@ -81,32 +81,6 @@ fun Routing.wizardFrontEnd(
         }
     }
 
-    // Pack modal content
-    route("/packs/{group}/{id}") {
-        suspend fun RoutingCall.readPack(): PackDescriptor? =
-            repository.read(
-                PackId(
-                    parameters["group"]!!,
-                    parameters["id"]!!
-                )
-            )
-
-        get("/modal") {
-            val pack = call.readPack()
-            call.respondHtml {
-                wizardPackModalHtml(pack)
-            }
-        }
-
-        // Reuse existing docs endpoint
-        get("/docs") {
-            val pack = call.readPack()
-            call.respondHtml {
-                wizardPackModalHtml(pack)
-            }
-        }
-    }
-
     // Project preview and download
     route("/project") {
         get("/listing") {
