@@ -24,7 +24,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json.io)
     implementation(libs.ktoml)
 
-    compileOnly(libs.kotlin.compiler)
+    implementation(libs.kotlin.compiler)
 
     testImplementation(libs.kotlin.compiler)
     testImplementation(project(":kastle-templates"))
