@@ -35,7 +35,8 @@ class FusAnalyticsRepository(
     override val requestMappings: RequestMappings = RequestMappings(
         headerMappings = mapOf(
             "User-Agent" to USER_AGENT_PARAMETER_NAME,
-            "X-Machine-ID" to MACHINE_ID_PARAMETER_NAME
+            "X-Machine-ID" to MACHINE_ID_PARAMETER_NAME,
+            "X-JetBrains-Internal-User" to INTERNAL_USER_PARAMETER_NAME,
         )
     )
 
@@ -45,7 +46,8 @@ class FusAnalyticsRepository(
         val fusLogger = logger(
             machineId = machineId,
             session = UUID.randomUUID().toString(), // we track one event per session
-            bucket = userIdToBucket(machineId)
+            bucket = userIdToBucket(machineId),
+            internal = event.additionalParameters[INTERNAL_USER_PARAMETER_NAME]?.toBoolean() ?: false
         )
         fusLogger.logBaseline(PLUGIN_GENERATOR_GROUP)
         fusLogger.logEvent(EventConverter.getConverter(event), event)
@@ -58,12 +60,12 @@ class FusAnalyticsRepository(
         logVararg(converter.getFusEventId(), converter.getDataFiller(event))
     }
 
-    private fun logger(machineId: String, session: String, bucket: Int): FeatureUsageLogger {
+    private fun logger(machineId: String, session: String, bucket: Int, internal: Boolean): FeatureUsageLogger {
         return FeatureUsageLogger(
             recorder = FusRecorder(libFusClient.config.recorderCode, config.recorderVersion),
             productCode = libFusClient.config.productCode,
             ids = mapOf("machine_id" to machineId),
-            internal = false,
+            internal = internal,
             build = libFusClient.config.productVersion,
             session = session,
             bucket = bucket,
@@ -150,5 +152,11 @@ class FusAnalyticsRepository(
     companion object {
         const val MACHINE_ID_PARAMETER_NAME = "machineId"
         const val USER_AGENT_PARAMETER_NAME = "userAgent"
+
+        /**
+         * Whether the generation request was triggered by a JetBrains employee.
+         * Note that it affects only IDE users.
+         */
+        const val INTERNAL_USER_PARAMETER_NAME = "internalUser"
     }
 }
