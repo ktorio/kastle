@@ -33,14 +33,6 @@ data class WizardView(
  */
 object WizardDefaults {
     val GIT_PACK = PackId("org.jetbrains.intellij.platform.vcs", "git")
-
-    /**
-     * Groups containing packs that should be shown for Plugin type.
-     */
-    val PLUGIN_PACK_GROUPS = setOf(
-        "org.jetbrains.intellij.platform.plugins",
-        "org.jetbrains.intellij.platform.dependencies"
-    )
 }
 
 /**
@@ -55,9 +47,7 @@ fun PackDescriptor.isHiddenInWizard(): Boolean {
  */
 fun List<PackDescriptor>.filterForWizard(pluginType: PluginType): List<PackDescriptor> {
     return when (pluginType) {
-        PluginType.PLUGIN -> filter { pack ->
-            pack.id.group in WizardDefaults.PLUGIN_PACK_GROUPS && !pack.isHiddenInWizard()
-        }
+        PluginType.PLUGIN -> filter { pack -> !pack.isHiddenInWizard() }
         PluginType.THEME -> emptyList() // No additional packs for themes
     }
 }
