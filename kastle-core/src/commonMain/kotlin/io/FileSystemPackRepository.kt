@@ -30,7 +30,7 @@ abstract class FileSystemPackRepository(
             logger: Logger = ConsoleLogger(),
         ): MutablePackRepository {
             if (clear) fs.deleteRecursively(path)
-            fs.createDirectories(path)
+            fs.mkdirs(path)
             val export = when(fileFormat) {
                 JSON -> JsonFilePackRepository(path, fs)
                 CBOR -> CborFilePackRepository(path, fs)
@@ -131,7 +131,7 @@ abstract class FileSystemPackRepository(
 
     override suspend fun file(path: String, bytes: Source) {
         val path = root.resolve(path.trimStart('/'))
-        path.parent?.let(fs::createDirectories)
+        path.parent?.let(fs::mkdirs)
         fs.sink(path).use { sink ->
             bytes.transferTo(sink)
         }

@@ -2,7 +2,6 @@ package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.ProjectModules.*
-import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.StringExpression
 import org.jetbrains.kastle.utils.TreeMap.Companion.toTreeMap
 import org.jetbrains.kastle.utils.protocol
@@ -204,7 +203,7 @@ data class SourceModuleManifest(
 val SourceModuleMetadata.allDependencies: Set<Dependency> get() =
     (dependencies.values.flatten() + testDependencies.values.flatten()).toSet()
 
-val SourceModuleMetadata.gradlePlugins: List<String> get() =
+val SourceModuleMetadata.gradlePlugins: List<CatalogReference> get() =
     gradle.plugins
 
 fun SourceModuleMetadata.fullPath(packId: PackId) =
@@ -267,7 +266,7 @@ data class AmperApplicationSettings(
 
 @Serializable
 data class GradleSettings(
-    val plugins: List<String> = emptyList(),
+    val plugins: List<CatalogReference> = emptyList(),
 )
 
 @Serializable
@@ -343,7 +342,7 @@ sealed interface Dependency {
                 return functionDependency
             }
             if (text.startsWith("$"))
-                return CatalogReference(text.substring(1), exported = exported)
+                return CatalogReference.parse(input)
             if (!text.contains(":"))
                 return ModuleDependency(text, exported = exported)
 
@@ -357,16 +356,23 @@ sealed interface Dependency {
     val exported: Boolean
 }
 
-@Serializable
+@Serializable(CatalogReferenceSerializer::class)
 data class CatalogReference(
     val key: String,
-    val group: String? = null,
     override val exported: Boolean = false,
 ): Dependency {
     companion object {
-        fun lookupFormat(key: String): String =
-            key.trimStart('$').removePrefix("libs.").replace('.', '-')
+        fun parse(key: String): CatalogReference {
+            return CatalogReference(
+                key = key.trimStart('$').trimEnd('!'),
+                exported = key.endsWith('!')
+            )
+        }
     }
+
+    val catalog get() = key.substringBefore('.')
+    val keyInCatalog get() = key.removePrefix("$catalog.").removePrefix("plugins.")
+    val tomlKey: String get() = keyInCatalog.replace('.', '-')
 
     override fun toString(): String = buildString {
         append('$')
@@ -374,11 +380,9 @@ data class CatalogReference(
         if (exported) append("!")
     }
 }
-val CatalogReference.lookupKey: String get() =
-    key.removePrefix("$").removePrefix("libs.").replace('.', '-')
 
 fun CatalogReference.gradleFormat(versionsCatalog: VersionsCatalog): String? {
-    val artifact = versionsCatalog.libraries[lookupKey] ?: return null
+    val artifact = versionsCatalog.libraries[tomlKey] ?: return null
     val versionNumber = when(artifact.version) {
         is CatalogVersion.Ref -> versionsCatalog.versions[artifact.version.ref] ?: return null
         is CatalogVersion.Number -> artifact.version.number

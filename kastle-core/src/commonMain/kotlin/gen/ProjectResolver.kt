@@ -45,20 +45,20 @@ fun interface ProjectResolver {
             val gradlePlugins = TreeMap<String, GradlePlugin>()
 
             for (module in moduleSources.modules) {
-                for (pluginKey in module.gradlePlugins) {
-                    val catalogKey = CatalogReference.lookupFormat(pluginKey)
+                for (catalogRef in module.gradlePlugins) {
+                    val catalogKey = catalogRef.tomlKey
                     val (id, version) = repositoryCatalog.plugins[catalogKey] ?: continue
                     if (version is CatalogVersion.Ref)
                         versions[version.ref] = repositoryCatalog.versions[version.ref] ?: missingVersion(version.ref)
-                    gradlePlugins[catalogKey] = GradlePlugin(id, pluginKey, catalogKey, version)
+                    gradlePlugins[catalogKey] = GradlePlugin(id, catalogRef.key, catalogKey, version)
                 }
 
                 for (dependency in module.allDependencies) {
                     if (dependency !is CatalogReference) continue
-                    val artifact = repositoryCatalog.libraries[dependency.lookupKey]
+                    val artifact = repositoryCatalog.libraries[dependency.tomlKey]
                     if (artifact == null) {
                         // skip libraries supplied from other catalogs
-                        if (!dependency.lookupKey.startsWith("lib"))
+                        if (!dependency.tomlKey.startsWith("lib"))
                             continue
                         missingDependency(dependency)
                     }
@@ -67,9 +67,9 @@ fun interface ProjectResolver {
                     val versionRef = (version as? CatalogVersion.Ref)?.ref ?: continue
                     val versionValue = repositoryCatalog.versions[versionRef]
                     versions[versionRef] = versionValue ?: missingVersion(versionRef)
-                    val library = repositoryCatalog.libraries[dependency.lookupKey]
+                    val library = repositoryCatalog.libraries[dependency.tomlKey]
                     if (library != null)
-                        libraries[dependency.lookupKey] = library
+                        libraries[dependency.tomlKey] = library
                 }
             }
 

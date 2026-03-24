@@ -130,7 +130,7 @@ private fun ModuleDependency.gradlePath(modulePath: String): String = buildStrin
 }
 
 fun GradleSettings.toVariableMap() = mapOf(
-    "plugins" to plugins
+    "plugins" to plugins.map { it.key }
 )
 
 fun GradleProjectSettings.toVariableMap() = mapOf(

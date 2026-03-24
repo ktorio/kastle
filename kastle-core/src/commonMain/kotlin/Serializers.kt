@@ -50,7 +50,7 @@ class SemanticVersionSerializer: CustomParserSerializer<SemanticVersion>(Semanti
 class BlockPositionSerializer: CustomParserSerializer<BlockPosition>(BlockPosition::class, BlockPosition::parse)
 class PropertyTypeSerializer: CustomParserSerializer<PropertyType>(PropertyType::class, PropertyType::parse)
 class SourceImportSerializer: CustomParserSerializer<SourceImport>(SourceImport::class, SourceImport::parse)
-
+class CatalogReferenceSerializer: CustomParserSerializer<CatalogReference>(CatalogReference::class, CatalogReference::parse)
 
 class CatalogVersionSerializer: KSerializer<CatalogVersion> {
     @OptIn(InternalSerializationApi::class)
