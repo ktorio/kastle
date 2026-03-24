@@ -9,9 +9,9 @@ amper:
 
 gradle:
   plugins:
-    - $libs.androidApplication
-    - $libs.composeMultiplatform
-    - $libs.composeCompiler
+    - $libs.plugins.androidApplication
+    - $libs.plugins.composeMultiplatform
+    - $libs.plugins.composeCompiler
 
 sources:
   - path: android.gradle.kts

@@ -13,7 +13,7 @@ private fun String.formatRefString(): String =
 
 val SourceModuleMetadata.buildStrategy: ModuleBuildStrategy get() =
     when {
-        "androidApplication" in gradlePlugins.map { it.removePrefix($$"$libs.") } -> ModuleBuildStrategy.ANDROID_APP
+        gradlePlugins.any { it.key.contains("androidApplication") } -> ModuleBuildStrategy.ANDROID_APP
         platforms.singleOrNull() == Platform.JVM -> ModuleBuildStrategy.JVM
         else -> ModuleBuildStrategy.KMP
     }

@@ -191,8 +191,9 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
 
             // Add gradle plugins to buildscript classpath
             // So that we can apply them later
-            for (pluginAlias in module.gradlePlugins) {
-                val (pluginId, version) = versionsCatalog.plugins[pluginAlias.removePrefix($$"$libs.")] ?: continue
+            for (catalogRef in module.gradlePlugins) {
+                val lookupKey = catalogRef.tomlKey
+                val (pluginId, version) = versionsCatalog.plugins[lookupKey] ?: continue
                 val versionNumber = when(version) {
                     is CatalogVersion.Ref -> versionsCatalog.versions[version.ref]
                     is CatalogVersion.Number -> version.number

@@ -118,7 +118,7 @@ internal class KotlinCompilerTemplateEngine(
             }
         val targetString = targetFromHeader ?: "file:${sourcePath.resolve(ktFile.name)}"
         val target = expressionParser.parseTemplate(targetString)
-        log.debug { "Compiling $target..." }
+        log.debug { "Compiling $targetString..." }
 
         return when (target.protocol) {
             "file" -> SourceTemplate(
