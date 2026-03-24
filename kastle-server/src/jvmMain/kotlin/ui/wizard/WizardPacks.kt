@@ -64,6 +64,7 @@ fun FlowContent.wizardPacksGrid(
                 h3("wizard-pack-group-title") {
                     // TODO group names are not parsed, see https://github.com/ktorio/kastle/issues/73
                     +when (group.id) {
+                        "org.jetbrains.intellij.platform.architecture" -> "Architecture"
                         "org.jetbrains.intellij.platform.dependencies" -> "Platform dependencies"
                         "org.jetbrains.intellij.platform.plugins" -> "Plugin dependencies"
                         else -> group.name ?: group.id
