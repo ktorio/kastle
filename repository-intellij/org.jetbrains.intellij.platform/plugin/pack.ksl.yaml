@@ -15,6 +15,9 @@ properties:
     default: false
     hidden: true
   # Values are managed in propertyValues below:
+  - key: gradlePluginVersion
+    type: string
+    hidden: true
   - key: platformVersion
     type: string
     hidden: true
@@ -30,6 +33,8 @@ properties:
 
 propertyValues:
   # Common versions management:
+  - key: org.jetbrains.intellij.platform/plugin/gradlePluginVersion
+    value: "2.13.1"
   - key: org.jetbrains.intellij.platform/plugin/platformVersion
     value: "2025.3.1"
   - key: org.jetbrains.intellij.platform/plugin/pluginSinceBuild
