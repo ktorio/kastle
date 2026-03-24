@@ -54,45 +54,53 @@ rootSources:
   - path: gradlew
   - path: gradlew.bat
 
+  # Gradle
+  - path: gradle/libs.versions.toml.hbs
+    target: file:gradle/libs.versions.toml
+  - path: gradle/wrapper/gradle-wrapper.jar
+  - path: gradle/wrapper/gradle-wrapper.properties.hbs
+    target: file:gradle/wrapper/gradle-wrapper.properties
+  - path: gradlew
+  - path: gradlew.bat
+
   # Gradle build script
-  - path: build.gradle-template.kts
+  - path: classic/build.gradle-template.kts
     target: file:build.gradle.kts
-  - path: gradle.properties.hbs
+  - path: classic/gradle.properties.hbs
     target: file:gradle.properties
-  - path: settings.gradle.kts
+  - path: classic/settings.gradle.kts
+    target: file:settings.gradle.kts
 
   # README and friends
-  - path: README.md.hbs
+  - path: classic/README.md.hbs
     target: file:README.md
 
   # Git
-  - path: gitignoreItems.hbs
+  - path: classic/gitignoreItems.hbs
     target: slot://org.jetbrains.intellij.platform.vcs/git/ignoredItems
-
-  # Sources are intentionally in the `sources` directory to avoid being processed by module.ksl.yaml handler
 
   # Production sources
 
   ## Plugin descriptor, etc.
-  - path: sources/main/resources/META-INF/plugin.xml.hbs
+  - path: classic/src/main/resources/META-INF/plugin.xml.hbs
     target: file:src/main/resources/META-INF/plugin.xml
-  - path: sources/main/resources/META-INF/pluginIcon.svg
+  - path: classic/src/main/resources/META-INF/pluginIcon.svg
     target: file:src/main/resources/META-INF/pluginIcon.svg
 
   ## Code samples
-  - path: sources/main/kotlin/MyMessageBundle.kt
+  - path: classic/src/main/kotlin/MyMessageBundle.kt
     target: file:src/main/kotlin/MyMessageBundle.kt
     if: addSampleCode
-  - path: sources/main/resources/messages/MyMessageBundle.properties
+  - path: classic/src/main/resources/messages/MyMessageBundle.properties
     target: file:src/main/resources/messages/MyMessageBundle.properties
     if: addSampleCode
 
   ### Swing UI
-  - path: sources/main/kotlin/MyToolWindowFactory.kt
+  - path: classic/src/main/kotlin/MyToolWindowFactory.kt
     target: file:src/main/kotlin/MyToolWindowFactory.kt
     if: addSampleCode && !isComposeEnabled
 
   ### Compose UI
-  - path: sources/main/kotlin/MyToolWindowFactory-compose.kt
+  - path: classic/src/main/kotlin/MyToolWindowFactory-compose.kt
     target: file:src/main/kotlin/MyToolWindowFactory.kt
     if: addSampleCode && isComposeEnabled
