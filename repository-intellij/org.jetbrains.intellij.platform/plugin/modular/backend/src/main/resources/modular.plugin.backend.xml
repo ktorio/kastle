@@ -1,0 +1,11 @@
+<idea-plugin>
+    <dependencies>
+        <module name="intellij.platform.backend"/>
+        <module name="intellij.platform.kernel.backend"/>
+        <module name="modular.plugin.shared"/>
+    </dependencies>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <platform.rpc.backend.remoteApiProvider implementation="org.jetbrains.plugins.template.BackendRpcApiProvider"/>
+    </extensions>
+</idea-plugin>

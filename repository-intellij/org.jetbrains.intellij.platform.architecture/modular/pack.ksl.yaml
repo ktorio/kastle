@@ -1,0 +1,13 @@
+# This pack is a modular plugin structure enabler.
+# All the sources are in the org.jetbrains.intellij.platform/plugin pack.
+
+name: Split Mode (Remote Dev)
+description: Generates a modular plugin compatible with remote development workflows.
+icon: AllIcons.RunConfigurations.ApplicationRemote
+links:
+  home: https://www.jetbrains.com/help/idea/remote-development-overview.html
+  docs: https://plugins.jetbrains.com/docs/intellij/modular-plugins.html
+
+propertyValues:
+  - key: org.jetbrains.intellij.platform/plugin/isModularEnabled
+    value: true

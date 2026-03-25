@@ -1,0 +1,13 @@
+<idea-plugin>
+    <dependencies>
+        <module name="intellij.platform.frontend"/>
+        <module name="intellij.platform.compose"/>
+        <module name="modular.plugin.shared"/>
+    </dependencies>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow factoryClass="org.jetbrains.plugins.template.toolWindow.ModularPluginToolWindowFactory"
+                    id="ModularPlugin"
+                    icon="org.jetbrains.plugins.template.ModularPluginIcons.ToolWindow"/>
+    </extensions>
+</idea-plugin>
