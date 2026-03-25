@@ -69,7 +69,7 @@ rootSources:
   - path: gradlew.bat
 
   # Gradle build script
-  - path: classic/build.gradle-template.kts
+  - path: classic/build.gradle.kts
     target: file:build.gradle.kts
   - path: classic/gradle.properties.hbs
     target: file:gradle.properties
