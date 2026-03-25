@@ -54,10 +54,12 @@ fun Project.getVariables(pack: PackDescriptor): Variables {
     )
 }
 
+context(project: Project)
 fun SourceModule.toVariableEntry(): Pair<String, Any?> =
     "_module" to toVariableMap()
 
-fun SourceModule.slotsVariableEntry(project: Project, packId: PackId): Pair<String, Any?> =
+context(project: Project)
+fun SourceModule.slotsVariableEntry(packId: PackId): Pair<String, Any?> =
     "_slots" to buildMap {
         for ((url, value) in project.slotSources + this@slotsVariableEntry.slotSources) {
             // insert relative value
@@ -74,6 +76,7 @@ val SourceModule.slotSources: SourcesByUrl get() =
         .filter { it.isSlot() }
         .groupBy { it.target.toString() }
 
+context(project: Project)
 private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "path" to path,
     "parent" to path.substringBeforeLast('/').takeIf { it.isNotEmpty() },
@@ -93,6 +96,7 @@ private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "amper" to amper.toVariableMap(),
 )
 
+context(project: Project)
 fun Dependency.toVariableMap(modulePath: String) =
     when(this) {
         is ArtifactDependency -> mapOf(
@@ -101,6 +105,7 @@ fun Dependency.toVariableMap(modulePath: String) =
             "artifact" to artifact,
             "version" to version,
             "exported" to exported,
+            "isJava" to isJavaLibrary(artifact),
         )
         is ModuleDependency -> mapOf(
             "type" to "project",
@@ -108,12 +113,13 @@ fun Dependency.toVariableMap(modulePath: String) =
             "gradlePath" to gradlePath(modulePath),
             "exported" to exported,
         )
-        // TODO find artifact from catalog?
         is CatalogReference -> mapOf(
             "type" to "catalog",
             "key" to key,
             "exported" to exported,
-        )
+            "isJava" to isJavaLibrary(key),
+        ) + (project.libraries[tomlKey]?.toVariableMap() ?: emptyMap())
+
         is FunctionDependency -> mapOf(
             "type" to "function",
             "functionName" to functionName,
@@ -133,8 +139,12 @@ fun GradleSettings.toVariableMap() = mapOf(
     "plugins" to plugins.map { it.key }
 )
 
+context(project: Project)
 fun GradleProjectSettings.toVariableMap() = mapOf(
     "repositories" to repositories.map {
+        it.toVariableMap()
+    },
+    "pluginRepositories" to pluginRepositories.map {
         it.toVariableMap()
     },
     "plugins" to plugins.map {
@@ -142,8 +152,7 @@ fun GradleProjectSettings.toVariableMap() = mapOf(
             "id" to it.id,
             "name" to it.name,
             "catalogKey" to it.catalogKey,
-            "version" to it.version.toVariableMap()
-        )
+        ) + it.version.toVariableMap()
     },
 )
 
@@ -159,14 +168,29 @@ fun AmperSettings.toVariableMap(): Map<String, String?> = mapOf(
     it != null
 }
 
+context(project: Project)
 fun CatalogArtifact.toVariableMap() = mapOf(
     "module" to module,
     "group" to group,
-    "artifact" to artifact,
-    "version" to version.toVariableMap(),
-)
+    "artifact" to name,
+) + version.toVariableMap()
 
-fun CatalogVersion.toVariableMap(): Map<String, String?> = when(this) {
-    is CatalogVersion.Ref -> mapOf("ref" to ref)
-    is CatalogVersion.Number -> mapOf("number" to number)
-}
+context(project: Project)
+fun CatalogVersion.toVariableMap(): Map<String, String?> =
+    when(this) {
+        is CatalogVersion.Ref -> mapOf(
+            "version" to project.versions[ref],
+            "versionRef" to ref
+        )
+        is CatalogVersion.Number -> mapOf("version" to number)
+    }
+
+// TODO small hack for working with maven
+private val javaLibraries = listOf(
+    "logback",
+    "prometheus",
+    "h2",
+    "mongodb",
+)
+private fun isJavaLibrary(library: String): Boolean =
+    javaLibraries.any { it in library }

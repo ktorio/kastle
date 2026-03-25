@@ -14,7 +14,6 @@ junit = "4.13.2"
 kotlin = "2.3.20-Beta2"
 kotlin-wrappers = "2026.2.9"
 kotlinx-coroutines = "1.10.2"
-ktor = "3.4.0"
 logback = "1.5.29"
 material3 = "1.11.0-alpha02"
 
@@ -47,4 +46,3 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMul
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-ktor = { id = "io.ktor.plugin", version.ref = "ktor" }

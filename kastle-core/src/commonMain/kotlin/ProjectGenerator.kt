@@ -2,9 +2,7 @@ package org.jetbrains.kastle
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.io.Buffer
 import kotlinx.io.files.Path
-import kotlinx.io.write
 import org.jetbrains.kastle.gen.*
 import org.jetbrains.kastle.structure.GradleSourceMapping
 import org.jetbrains.kastle.logging.ConsoleLogger
@@ -74,7 +72,7 @@ class ProjectGenerator(
                     log.warn { "Skipping ${source.target}; missing pack ID" }
                     continue
                 }
-                val variables = collectVariables(this, packId, module)
+                val variables = this.collectVariables(packId, module)
 
                 source.condition?.evaluate(variables)?.let { conditionResult ->
                     if (!conditionResult.isTruthy()) {
@@ -117,31 +115,31 @@ class ProjectGenerator(
         val sourcePackId = source.packId
         val variables = sourcePackId
             ?.takeIf { source.target is StringTemplate }
-            ?.let { collectVariables(project, sourcePackId, module) }
+            ?.let { project.collectVariables(sourcePackId, module) }
             ?: Variables()
         val evaluatedTarget = source.target.evaluate(variables)
         val relativePath = evaluatedTarget.toString().relativeFile
         return Path(module.path, relativePath).normalize().toString()
     }
 
-    private fun collectVariables(project: Project, packId: PackId, module: SourceModule): Stack<Map<String, Any?>> {
-        val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
-        val baseVariables = project.getVariables(pack) +
-                project.toVariableEntry() +
+    private fun Project.collectVariables(packId: PackId, module: SourceModule): Stack<Map<String, Any?>> {
+        val pack = packs.find { it.id == packId } ?: throw MissingPackException(packId)
+        val baseVariables = getVariables(pack) +
+                toVariableEntry() +
                 module.toVariableEntry() +
-                module.slotsVariableEntry(project, packId)
-        return baseVariables + loadDynamicProperties(project, baseVariables)
+                module.slotsVariableEntry(packId)
+        return baseVariables + loadDynamicProperties(baseVariables)
     }
 
-    private fun loadDynamicProperties(project: Project, variables: Variables): Map<String, Any?> {
-        require(project.properties.values.none { it is UnresolvedProperty }) {
-            "Undefined properties: ${project.properties.values.filterIsInstance<UnresolvedProperty>().map { it.descriptor.key }}"
+    private fun Project.loadDynamicProperties(variables: Variables): Map<String, Any?> {
+        require(properties.values.none { it is UnresolvedProperty }) {
+            "Undefined properties: ${properties.values.filterIsInstance<UnresolvedProperty>().map { it.descriptor.key }}"
         }
-        val resolved = project.properties.values
+        val resolved = properties.values
             .filterIsInstance<ResolvedProperty>()
             .associate { it.descriptor.key to it.value }
             .toMutableMap()
-        val dynamicProperties = project.properties.values
+        val dynamicProperties = properties.values
             .filterIsInstance<DynamicProperty>()
             .toMutableList()
         var evaluationFailed = false

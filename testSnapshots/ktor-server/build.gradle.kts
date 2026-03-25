@@ -2,7 +2,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
 
-    alias(libs.plugins.ktor)
+    alias(ktorLibs.plugins.ktor)
 }
 
 

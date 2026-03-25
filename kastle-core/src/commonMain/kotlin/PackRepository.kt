@@ -3,7 +3,6 @@ package org.jetbrains.kastle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.concatWith
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapConcat
@@ -26,6 +25,7 @@ interface PackRepository {
             override suspend fun readFile(path: String): Source? = null
             override suspend fun slot(slotId: SlotId): SlotDescriptor? = null
             override suspend fun versions(): VersionsCatalog = VersionsCatalog.Empty
+            override suspend fun catalogs(): List<VersionsCatalog> = emptyList()
         }
     }
 
@@ -66,9 +66,17 @@ interface PackRepository {
     }
 
     /**
-     * Get the version catalog for this repository.
+     * Get the default versions catalog ("libs") for this repository.
      */
-    suspend fun versions(): VersionsCatalog
+    @Deprecated("Use catalogs() instead", ReplaceWith("catalogs().firstOrNull { it.name == VersionsCatalog.DEFAULT_NAME } ?: VersionsCatalog.Empty"))
+    suspend fun versions(): VersionsCatalog =
+        catalogs().firstOrNull { it.name == VersionsCatalog.DEFAULT_NAME }
+            ?: VersionsCatalog.Empty
+
+    /**
+     * Get the version catalogs for this repository.
+     */
+    suspend fun catalogs(): List<VersionsCatalog>
 
     /**
      * Get a pack by its ID.  Includes sources.
@@ -128,6 +136,6 @@ suspend fun PackRepository.read(packId: String): PackDescriptor? =
 interface MutablePackRepository : PackRepository {
     suspend fun add(descriptor: PackDescriptor)
     suspend fun remove(id: PackId)
-    suspend fun versions(versions: VersionsCatalog)
+    suspend fun catalogs(catalogs: List<VersionsCatalog>)
     suspend fun file(path: String, bytes: Source)
 }

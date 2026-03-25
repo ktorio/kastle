@@ -272,6 +272,7 @@ data class GradleSettings(
 @Serializable
 data class GradleProjectSettings(
     val repositories: List<MavenRepository> = emptyList(),
+    val pluginRepositories: List<MavenRepository> = emptyList(),
     val plugins: List<GradlePlugin> = emptyList(),
 )
 
@@ -387,7 +388,7 @@ fun CatalogReference.gradleFormat(versionsCatalog: VersionsCatalog): String? {
         is CatalogVersion.Ref -> versionsCatalog.versions[artifact.version.ref] ?: return null
         is CatalogVersion.Number -> artifact.version.number
     }
-    return "${artifact.group}:${artifact.artifact}:$versionNumber"
+    return "${artifact.group}:${artifact.name}:$versionNumber"
 }
 
 
@@ -451,12 +452,21 @@ data class ModuleDependency(
 
 @Serializable
 data class VersionsCatalog(
+    val name: String = DEFAULT_NAME,
+    val source: VersionsCatalogSource = VersionsCatalogSource.FILE,
     val plugins: Map<String, PluginArtifact> = emptyMap(),
     val versions: Map<String, String> = emptyMap(),
     val libraries: Map<String, CatalogArtifact> = emptyMap(),
 ) {
     companion object {
+        const val DEFAULT_NAME = "libs"
         val Empty = VersionsCatalog()
+
+        fun VersionsCatalog?.orEmpty() = this ?: Empty
+    }
+    init {
+        require(name.isNotEmpty()) { "Versions catalog name cannot be empty" }
+        require(name.all { it.isLetter() }) { "Versions catalog name must contain only letters" }
     }
 
     fun isEmpty() = versions.isEmpty() && libraries.isEmpty()
@@ -465,6 +475,8 @@ data class VersionsCatalog(
         if (this.isEmpty()) other
         else if (other.isEmpty()) this
         else VersionsCatalog(
+            name = name,
+            source = source,
             plugins = (plugins + other.plugins).toTreeMap(),
             versions = (versions + other.versions).toTreeMap(),
             libraries = (libraries + other.libraries).toTreeMap(),
@@ -475,19 +487,31 @@ data class VersionsCatalog(
 }
 
 @Serializable
+enum class VersionsCatalogSource {
+    /**
+     * From a toml file in the repository.
+     */
+    FILE,
+    /**
+     * Imported from maven or some other source.
+     */
+    EXTERNAL
+}
+
+@Serializable
 data class PluginArtifact(
     val id: String,
     val version: CatalogVersion,
 )
 
-@Serializable
+@Serializable(with = CatalogArtifactSerializer::class)
 data class CatalogArtifact(
     val module: String,
     val version: CatalogVersion,
     val builtIn: Boolean = false,
 ) {
-    val group: String get() = module.substringBeforeLast(':')
-    val artifact: String get() = module.substringAfterLast(':')
+    val group: String get() = module.substringBefore(':')
+    val name: String get() = module.substringAfter(':')
 }
 
 @Serializable(CatalogVersionSerializer::class)

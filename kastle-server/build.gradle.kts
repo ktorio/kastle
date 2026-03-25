@@ -48,7 +48,7 @@ kotlin {
                 implementation(libs.commonmark)
                 implementation(libs.mcp.sdk)
                 implementation(libs.ktoml)
-                implementation(libs.kotlin.compiler)
+                runtimeOnly(libs.kotlin.compiler)
             }
         }
 

@@ -210,6 +210,23 @@ fun ProjectGeneratorTest(
         )
     }
 
+    "ktor server maven" {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-maven", randomString())
+        generateWithPacks(
+            outputDir,
+            "ktor-server-maven",
+            "org.apache/maven",
+            "io.ktor/server-core",
+            "io.ktor/server-netty",
+            "io.ktor/server-content-negotiation",
+            "io.ktor/server-kotlinx-serialization",
+        )
+        assertFilesAreEqualWithSnapshot(
+            "$snapshots/ktor-server-maven",
+            outputDir.toString(),
+        )
+    }
+
     "compose multiplatform gradle" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-gradle", randomString())
         generate(

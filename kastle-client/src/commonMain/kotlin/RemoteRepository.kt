@@ -71,8 +71,8 @@ class RemoteRepository(private val client: HttpClient): PackRepository {
         return response.body()
     }
 
-    override suspend fun versions(): VersionsCatalog {
-        val response = client.get("/api/versions")
+    override suspend fun catalogs(): List<VersionsCatalog> {
+        val response = client.get("/api/catalogs")
         if (!response.status.isSuccess())
             throw RuntimeException("${response.status}: ${response.bodyAsText()}")
         return response.body()
