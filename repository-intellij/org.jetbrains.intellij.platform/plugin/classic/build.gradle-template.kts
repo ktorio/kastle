@@ -1,3 +1,5 @@
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+
 plugins {
     id("java")
     alias(libs.plugins.kotlin)
@@ -26,7 +28,7 @@ repositories {
 dependencies {
     intellijPlatform {
         intellijIdea(providers.gradleProperty("platformVersion"))
-        testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
+        testFramework(TestFrameworkType.Platform)
 
         if (_slots.contains("buildScriptDependencies")) {
             // Add plugin dependencies for compilation here:
