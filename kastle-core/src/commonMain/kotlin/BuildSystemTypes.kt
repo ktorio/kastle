@@ -305,14 +305,7 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
     return manifest.tryMerge(other.manifest)?.let { manifest ->
         SourceModule(
             manifest = manifest,
-            sources = (sources + other.sources).also { mergedSources ->
-                val uniquePaths = mutableSetOf<StringExpression>()
-                mergedSources.forEach {
-                    require(it.target.protocol != "file" || uniquePaths.add(it.target)) {
-                        "Duplicate file: ${it.target}"
-                    }
-                }
-            }
+            sources = sources + other.sources
         )
     }
 }

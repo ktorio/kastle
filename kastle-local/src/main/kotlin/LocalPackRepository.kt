@@ -426,7 +426,8 @@ class LocalPackRepository(
     }
 
     /**
-     * Allows for overriding details for files under src dir.
+     * Allows for overriding details for files under src dir. Preference is given to
+     * entries with conditions.
      *
      * Slots are allowed to be duplicate, so they are ignored.
      */
@@ -434,8 +435,12 @@ class LocalPackRepository(
         groupBy { it.target }
             .flatMap { (target, files) ->
                 when(target.protocol) {
-                    // The last entry is always provided in the manifest
-                    "file" -> files.subList(files.size - 1, files.size)
+                    "file" -> when(files.size) {
+                        1 -> files
+                        else -> files.filter { it.condition != null }.ifEmpty {
+                            files.subList(files.size - 1, files.size)
+                        }
+                    }
                     "slot" -> files
                     else -> error("Unknown protocol: ${target.protocol}")
                 }

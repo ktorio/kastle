@@ -65,6 +65,7 @@ class ProjectGenerator(
             }
             val outputtedPaths = mutableSetOf<String>()
             val slotSources = slotSources + module.slotSources
+            val visitedPaths = mutableSetOf<String>()
 
             for (source in moduleSources) {
                 val path = getActualPath(source, module)
@@ -73,14 +74,14 @@ class ProjectGenerator(
                     continue
                 }
                 val variables = collectVariables(packId, module)
-
-                source.condition?.evaluate(variables)?.let { conditionResult ->
-                    if (!conditionResult.isTruthy()) {
-                        log.debug { "Skipping ${source.target}; ${source.condition} = $conditionResult" }
-                        continue
-                    } else {
-                        log.trace { "Include ${source.target}; ${source.condition} = $conditionResult" }
-                    }
+                if (source.condition != null && !source.condition?.evaluate(variables).isTruthy()) {
+                    log.debug { "Skipping ${source.target}; ${source.condition} = ${source.condition?.evaluate(variables)}" }
+                    continue
+                } else if (!visitedPaths.add(path)) {
+                    log.debug { "Skipping ${source.target}; duplicate path $path" }
+                    continue
+                } else {
+                    log.trace { "Include ${source.target}; ${source.condition} = ${source.condition?.evaluate(variables)}" }
                 }
 
                 if (source !is SourceTemplate) {
