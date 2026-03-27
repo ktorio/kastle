@@ -10,5 +10,8 @@ fun Application.configureRouting() {
             call.respondText("Hello, World!")
         }
     
+        get("/json/kotlinx-serialization") {
+            call.respond(mapOf("hello" to "world"))
+        }
     }
 }

@@ -118,7 +118,7 @@ fun Dependency.toVariableMap(modulePath: String) =
             "key" to key,
             "exported" to exported,
             "isJava" to isJavaLibrary(key),
-        ) + (project.libraries[tomlKey]?.toVariableMap() ?: emptyMap())
+        ) + project.libraries[tomlKey]?.toVariableMap().orEmpty()
 
         is FunctionDependency -> mapOf(
             "type" to "function",

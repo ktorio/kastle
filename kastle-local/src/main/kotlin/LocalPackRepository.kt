@@ -35,6 +35,7 @@ private const val GROUP_YAML = "group.ksl.yaml"
 private const val MODULE_YAML = "module.ksl.yaml"
 private const val REPOSITORY_VERSION_CATALOG = "repository.versions.toml"
 private const val DEFAULT_VERSION_CATALOG = "../gradle/libs.versions.toml"
+private const val VALUES = "propertyValues"
 
 class LocalPackRepository(
     private val root: Path,
@@ -109,7 +110,7 @@ class LocalPackRepository(
             val projectPath = root.resolve(packId.toString())
             val groupPath = projectPath.parent!!
             val manifestYaml = projectPath.resolve(PACK_YAML).readYamlNode()?.yamlMap ?: return null
-            val filteredYaml = YamlMap(manifestYaml.entries.filterNot { it.key.content == "propertyValues" }, manifestYaml.path)
+            val filteredYaml = YamlMap(manifestYaml.entries.filterNot { it.key.content == VALUES }, manifestYaml.path)
             val manifest: PackManifest = Yaml.default.decodeFromYamlNode(filteredYaml) ?: return null
             val properties = manifest.properties.toMutableList()
             val group = (manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml() ?: Group()).let { group ->
@@ -144,7 +145,7 @@ class LocalPackRepository(
             val groupPath = projectPath.parent!!
             val rawManifest: YamlMap = projectPath.resolve(PACK_YAML).readYamlNode(fs, yaml)?.yamlMap ?: return null
             val filteredManifest =
-                YamlMap(rawManifest.entries.filterNot { it.key.content == "propertyValues" }, rawManifest.path)
+                YamlMap(rawManifest.entries.filterNot { it.key.content == VALUES }, rawManifest.path)
             val manifest: PackManifest = yaml.decodeFromYamlNode(filteredManifest)
             val group = (manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml() ?: Group()).let { group ->
                 group.copy(
@@ -157,7 +158,7 @@ class LocalPackRepository(
             val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath)
             val expressionParser = KotlinExpressionParser(kotlinTemplateEngine.psiFileFactory)
             val propertyValues: List<PropertyAssignment> =
-                rawManifest.get<YamlList>("propertyValues")?.items?.map { node ->
+                rawManifest.get<YamlList>(VALUES)?.items?.map { node ->
                     val nodeMap = node.yamlMap
                     val key = nodeMap.getScalar("key")?.yamlScalar?.content
                     require(key != null) { "Property value key is required: $node" }

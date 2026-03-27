@@ -67,12 +67,12 @@ class ProjectGenerator(
             val slotSources = slotSources + module.slotSources
 
             for (source in moduleSources) {
-                val path = getActualPath(source, module, this)
+                val path = getActualPath(source, module)
                 val packId = source.packId ?: run {
                     log.warn { "Skipping ${source.target}; missing pack ID" }
                     continue
                 }
-                val variables = this.collectVariables(packId, module)
+                val variables = collectVariables(packId, module)
 
                 source.condition?.evaluate(variables)?.let { conditionResult ->
                     if (!conditionResult.isTruthy()) {
@@ -111,11 +111,11 @@ class ProjectGenerator(
         }
     }
 
-    private fun getActualPath(source: SourceFile, module: SourceModule, project: Project): String {
+    private fun Project.getActualPath(source: SourceFile, module: SourceModule): String {
         val sourcePackId = source.packId
         val variables = sourcePackId
             ?.takeIf { source.target is StringTemplate }
-            ?.let { project.collectVariables(sourcePackId, module) }
+            ?.let { collectVariables(sourcePackId, module) }
             ?: Variables()
         val evaluatedTarget = source.target.evaluate(variables)
         val relativePath = evaluatedTarget.toString().relativeFile

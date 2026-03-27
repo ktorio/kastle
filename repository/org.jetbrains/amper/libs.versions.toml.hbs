@@ -3,7 +3,9 @@
 {{ key }} = "{{ value }}"
 {{/each}}
 
+{{#if _project.libraries.size}}
 [libraries]
 {{#each _project.libraries.entries }}
-{{ key }} = { module = "{{ value.module }}", version.ref = "{{ value.versionRef }}" }
+{{ key }} = { module = "{{ value.module }}", {{#if value.versionRef}}version.ref = "{{value.versionRef}}"{{else}}version = "{{value.version}}"{{/if}} }
 {{/each}}
+{{/if}}

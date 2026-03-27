@@ -64,14 +64,18 @@ fun interface ProjectResolver {
                             continue
                         missingDependency(dependency)
                     }
-                    val version = artifact.version
-                    // TODO allow non-refs?
-                    val versionRef = (version as? CatalogVersion.Ref)?.ref ?: continue
-                    val versionValue = repositoryCatalog.versions[versionRef]
-                    versions[versionRef] = versionValue ?: missingVersion(versionRef)
-                    val library = repositoryCatalog.libraries[dependency.tomlKey]
-                    if (library != null)
-                        libraries[dependency.tomlKey] = library
+                    when(val version = artifact.version) {
+                        is CatalogVersion.Ref -> {
+                            val versionValue = repositoryCatalog.versions[version.ref]
+                            versions[version.ref] = versionValue ?: missingVersion(version.ref)
+                        }
+                        is CatalogVersion.Number -> {
+                            // nothing else required
+                        }
+                    }
+                    repositoryCatalog.libraries[dependency.tomlKey]?.let {
+                        libraries[dependency.tomlKey] = it
+                    }
                 }
             }
 
