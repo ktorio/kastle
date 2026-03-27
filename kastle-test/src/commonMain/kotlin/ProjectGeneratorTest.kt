@@ -52,6 +52,23 @@ fun ProjectGeneratorTest(
     suspend fun generateWithPacks(outputDir: Path, name: String, vararg packs: String) =
         generate(outputDir, name, packs = packs.toList())
 
+
+    suspend fun generateAndValidateSnapshot(
+        snapshotName: String,
+        packs: List<String>,
+    ) {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", snapshotName, randomString())
+        generate(
+            outputDir,
+            snapshotName,
+            packs = packs
+        )
+        assertFilesAreEqualWithSnapshot(
+            "$snapshots/$snapshotName",
+            outputDir.toString(),
+        )
+    }
+
     "empty project" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "empty", randomString())
         generateWithPacks(outputDir, "empty", "com.acme/empty")
@@ -156,57 +173,54 @@ fun ProjectGeneratorTest(
         )
     }
 
-    "ktor server gradle" {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server", randomString())
-        generateWithPacks(
-            outputDir,
+    "ktor server" {
+        generateAndValidateSnapshot(
             "ktor-server",
-            "org.gradle/gradle",
-            "io.ktor/server-core",
-            "io.ktor/server-netty",
-        )
-        assertFilesAreEqualWithSnapshot(
-            "$snapshots/ktor-server",
-            outputDir.toString(),
-        )
-    }
-
-    "ktor server gradle with catalog" {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-catalog", randomString())
-        generate(
-            outputDir,
-            "ktor-server-catalog",
-            packs = listOf(
+            listOf(
                 "org.gradle/gradle",
                 "io.ktor/server-core",
                 "io.ktor/server-netty",
                 "io.ktor/server-content-negotiation",
                 "io.ktor/server-kotlinx-serialization",
-            ),
-            properties = mapOf(
-                VariableId.parse("org.gradle/gradle/versionCatalogEnabled") to "true",
             )
-        )
-        assertFilesAreEqualWithSnapshot(
-            "$snapshots/ktor-server-catalog",
-            outputDir.toString(),
         )
     }
 
     "ktor server amper" {
-        val outputDir = Path(SystemTemporaryDirectory, "generated", "ktor-server-amper", randomString())
-        generateWithPacks(
-            outputDir,
+        generateAndValidateSnapshot(
             "ktor-server-amper",
-            "org.jetbrains/amper",
-            "io.ktor/server-core",
-            "io.ktor/server-netty",
-            "io.ktor/server-content-negotiation",
-            "io.ktor/server-kotlinx-serialization",
+            listOf(
+                "org.jetbrains/amper",
+                "io.ktor/server-core",
+                "io.ktor/server-netty",
+                "io.ktor/server-content-negotiation",
+                "io.ktor/server-kotlinx-serialization",
+            )
         )
-        assertFilesAreEqualWithSnapshot(
-            "$snapshots/ktor-server-amper",
-            outputDir.toString(),
+    }
+
+    "ktor server maven" {
+        generateAndValidateSnapshot(
+            "ktor-server-maven",
+            listOf(
+                "org.apache/maven",
+                "io.ktor/server-core",
+                "io.ktor/server-netty",
+                "io.ktor/server-content-negotiation",
+                "io.ktor/server-kotlinx-serialization",
+            )
+        )
+    }
+
+    "ktor server htmx" {
+        generateAndValidateSnapshot(
+            "ktor-server-htmx",
+            listOf(
+                "org.gradle/gradle",
+                "io.ktor/server-core",
+                "io.ktor/server-netty",
+                "io.ktor/server-htmx",
+            )
         )
     }
 

@@ -112,4 +112,10 @@ class HandlebarsTemplateEngineTest : StringSpec({
         """.trimIndent()
     }
 
+    "nested braces" {
+        template($$"${{{library}}Version}").toString(
+            variables = Variables("library" to "kotlin")
+        ) shouldBe $$"${kotlinVersion}"
+    }
+
 })

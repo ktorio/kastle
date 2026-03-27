@@ -1,26 +1,23 @@
 package org.jetbrains.kastle
 
 import com.charleskorn.kaml.Yaml
-import io.ktor.server.cio.CIO
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.plugins.di.dependencies
+import io.ktor.server.cio.*
+import io.ktor.server.engine.*
+import io.ktor.server.plugins.di.*
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.buffered
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readString
 import org.gradle.api.Plugin
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logging
 import org.jetbrains.kastle.io.FileFormat
 import org.jetbrains.kastle.io.FileSystemPackRepository.Companion.export
 import org.jetbrains.kastle.io.export
 import org.jetbrains.kastle.logging.LogLevel
-import org.jetbrains.kastle.server.errorHandling
-import org.jetbrains.kastle.server.json
-import org.jetbrains.kastle.server.monitoring
-import org.jetbrains.kastle.server.routing
-import org.jetbrains.kastle.server.serialization
+import org.jetbrains.kastle.server.*
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
 
@@ -64,39 +61,64 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
 
         // Register top-level tasks on the root project
         settings.gradle.rootProject { project ->
+            fun doExport(fileFormat: FileFormat) {
+                val exportPath = kotlinx.io.files.Path(
+                    project.findProperty("exportPath") as? String ?: "export"
+                )
+                logger.lifecycle("Exporting repository to $exportPath...")
+                runBlocking {
+                    val export = repository.export(
+                        path = exportPath,
+                        fileFormat = fileFormat,
+                    )
+                    val exportedCatalogs = export.catalogs()
+                    val alreadyExportedNames = exportedCatalogs.map { it.name }.toSet()
+                    val catalogsExtension = project.extensions.getByType(VersionCatalogsExtension::class.java)
+                    val catalogNames = catalogsExtension.catalogNames
+                    val externalCatalogs = (catalogNames - alreadyExportedNames).map { catalogName ->
+                        val gradleCatalog = catalogsExtension.named(catalogName)
+                        val pluginAliases = gradleCatalog.pluginAliases.associateWith { alias ->
+                            val plugin = gradleCatalog.findPlugin(alias).get().get()
+                            PluginArtifact(
+                                id = plugin.pluginId,
+                                version = CatalogVersion.Number(plugin.version.toString()),
+                            )
+                        }
+                        val versionAliases = gradleCatalog.versionAliases.associateWith { alias ->
+                            gradleCatalog.findVersion(alias).get().requiredVersion
+                        }
+                        val libraryAliases = gradleCatalog.libraryAliases.associateWith { alias ->
+                            val dependency = gradleCatalog.findLibrary(alias).get().get()
+                            CatalogArtifact(
+                                module = "${dependency.module.group}:${dependency.module.name}",
+                                version = dependency.versionConstraint.requiredVersion.let(CatalogVersion::Number),
+                            )
+                        }
+                        VersionsCatalog(
+                            name = catalogName,
+                            source = VersionsCatalogSource.EXTERNAL,
+                            plugins = pluginAliases,
+                            versions = versionAliases,
+                            libraries = libraryAliases,
+                        )
+                    }
+                    if (externalCatalogs.isNotEmpty()) {
+                        export.catalogs(exportedCatalogs + externalCatalogs)
+                    }
+                    logger.lifecycle("Exported to $exportPath")
+                }
+            }
+
             project.tasks.register("kslExportToJson") { task ->
                 task.group = "kastle"
                 task.description = "Export the repository to JSON format"
-                task.doLast {
-                    val exportPath = kotlinx.io.files.Path(
-                        project.findProperty("exportPath") as? String ?: "export"
-                    )
-                    runBlocking {
-                        repository.export(
-                            path = exportPath,
-                            fileFormat = FileFormat.JSON,
-                        )
-                        logger.lifecycle("Exported to $exportPath")
-                    }
-                }
+                task.doLast { doExport(FileFormat.JSON) }
             }
 
             project.tasks.register("kslExportToCbor") { task ->
                 task.group = "kastle"
                 task.description = "Export the repository to CBOR format"
-                task.doLast {
-                    val exportPath = kotlinx.io.files.Path(
-                        project.findProperty("exportPath") as? String ?: "export"
-                    )
-                    logger.lifecycle("Exporting repository to $exportPath...")
-                    runBlocking {
-                        repository.export(
-                            path = exportPath,
-                            fileFormat = FileFormat.CBOR,
-                        )
-                        logger.lifecycle("Export done.")
-                    }
-                }
+                task.doLast { doExport(FileFormat.CBOR) }
             }
 
             // TODO input / output args

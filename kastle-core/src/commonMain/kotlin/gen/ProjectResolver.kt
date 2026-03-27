@@ -37,7 +37,9 @@ fun interface ProjectResolver {
             val properties = propertyDescriptors.mapValues { (variableId, property) ->
                 resolveProperty(descriptor, propertyValues, variableId, property)
             }
-            val repositoryCatalog = repository.versions()
+            // Merge all catalogs for library lookups
+            // TODO handle collisions
+            val repositoryCatalog = repository.catalogs().reduce { acc, catalog -> acc + catalog }
             val versions = TreeMap<String, String>().also { versions ->
                 versions["kotlin"] = repositoryCatalog.versions["kotlin"] ?: missingVersion("kotlin")
             }
@@ -62,14 +64,18 @@ fun interface ProjectResolver {
                             continue
                         missingDependency(dependency)
                     }
-                    val version = artifact.version
-                    // TODO allow non-refs?
-                    val versionRef = (version as? CatalogVersion.Ref)?.ref ?: continue
-                    val versionValue = repositoryCatalog.versions[versionRef]
-                    versions[versionRef] = versionValue ?: missingVersion(versionRef)
-                    val library = repositoryCatalog.libraries[dependency.tomlKey]
-                    if (library != null)
-                        libraries[dependency.tomlKey] = library
+                    when(val version = artifact.version) {
+                        is CatalogVersion.Ref -> {
+                            val versionValue = repositoryCatalog.versions[version.ref]
+                            versions[version.ref] = versionValue ?: missingVersion(version.ref)
+                        }
+                        is CatalogVersion.Number -> {
+                            // nothing else required
+                        }
+                    }
+                    repositoryCatalog.libraries[dependency.tomlKey]?.let {
+                        libraries[dependency.tomlKey] = it
+                    }
                 }
             }
 
@@ -84,6 +90,7 @@ fun interface ProjectResolver {
 
             val gradleSettings = GradleProjectSettings(
                 repositories = packs.flatMap { it.repositories }.distinct(),
+                pluginRepositories = packs.flatMap { it.pluginRepositories }.distinct(),
                 plugins = gradlePlugins.values.toList(),
             )
 

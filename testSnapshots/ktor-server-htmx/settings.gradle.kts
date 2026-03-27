@@ -1,4 +1,4 @@
-rootProject.name = "ktor-server-catalog"
+rootProject.name = "ktor-server-htmx"
 
 pluginManagement {
     repositories {
@@ -19,3 +19,5 @@ dependencyResolutionManagement {
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
+include(":server")
+include(":web")

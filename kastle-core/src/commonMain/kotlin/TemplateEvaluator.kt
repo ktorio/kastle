@@ -91,9 +91,13 @@ class TemplateEvaluator(
 
         withSourceContext(template.text, appendable) {
             log.trace { template.target.toString() }
-            val slotImports = template.blocks?.asSequence().orEmpty()
-                .flatMap { block -> slots.lookup(packId, block) }
-                .filterIsInstance<SourceTemplate>()
+            fun SourceTemplate.traverseSlots(slots: SourcesByUrl, packId: PackId): Sequence<SourceTemplate> =
+                blocks?.asSequence().orEmpty()
+                    .flatMap { block -> slots.lookup(packId, block) }
+                    .filterIsInstance<SourceTemplate>()
+                    .flatMap { it.traverseSlots(slots, it.packId ?: packId) }
+                    .plus(this)
+            val slotImports = template.traverseSlots(slots, packId)
                 .flatMap { it.imports?.imports.orEmpty() }
                 .toList()
             val startPosition = when (template.target.extension) {
@@ -204,7 +208,6 @@ class TemplateEvaluator(
             }
         }
     }
-
 
     private fun withSourceContext(
         body: CharSequence,

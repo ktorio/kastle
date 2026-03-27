@@ -31,7 +31,7 @@ class HandlebarsTemplateEngine(
         private const val COND = "!cond"
 
         // Regex for normal (non-escaped) template blocks
-        private val bracesPattern = Regex("(?<!\\\\)\\{\\{(?:#?(?<helper>[\\w_]+)\\s+)?(?<content>.*?)}}")
+        private val bracesPattern = Regex("(?<!\\\\)\\{\\{(?:#?(?<helper>\\p{Alpha}[\\w_]+)\\s+)?(?<content>[^{].*?)}}")
         // Pattern to find escaped braces
         private val escapedBracesPattern = Regex("\\\\(\\{\\{.*?}})")
         private val variablePattern = Regex("[\\w_.]+")

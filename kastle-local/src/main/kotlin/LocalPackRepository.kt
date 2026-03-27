@@ -15,6 +15,7 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import org.jetbrains.kastle.StaticSource.Companion.sourceFile
+import org.jetbrains.kastle.VersionsCatalog.Companion.orEmpty
 import org.jetbrains.kastle.io.*
 import org.jetbrains.kastle.kotlin.KT_EXTENSION
 import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
@@ -34,6 +35,7 @@ private const val GROUP_YAML = "group.ksl.yaml"
 private const val MODULE_YAML = "module.ksl.yaml"
 private const val REPOSITORY_VERSION_CATALOG = "repository.versions.toml"
 private const val DEFAULT_VERSION_CATALOG = "../gradle/libs.versions.toml"
+private const val VALUES = "propertyValues"
 
 class LocalPackRepository(
     private val root: Path,
@@ -77,8 +79,9 @@ class LocalPackRepository(
                 fullCache[packId] = it
             }
 
-        override suspend fun versions(): VersionsCatalog =
-            remoteRepository.versions() + this@LocalPackRepository.versions()
+        // TODO merge
+        override suspend fun catalogs(): List<VersionsCatalog> =
+            remoteRepository.catalogs() + this@LocalPackRepository.catalogs()
     }
 
     override fun ids(): Flow<PackId> =
@@ -107,7 +110,7 @@ class LocalPackRepository(
             val projectPath = root.resolve(packId.toString())
             val groupPath = projectPath.parent!!
             val manifestYaml = projectPath.resolve(PACK_YAML).readYamlNode()?.yamlMap ?: return null
-            val filteredYaml = YamlMap(manifestYaml.entries.filterNot { it.key.content == "propertyValues" }, manifestYaml.path)
+            val filteredYaml = YamlMap(manifestYaml.entries.filterNot { it.key.content == VALUES }, manifestYaml.path)
             val manifest: PackManifest = Yaml.default.decodeFromYamlNode(filteredYaml) ?: return null
             val properties = manifest.properties.toMutableList()
             val group = (manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml() ?: Group()).let { group ->
@@ -142,7 +145,7 @@ class LocalPackRepository(
             val groupPath = projectPath.parent!!
             val rawManifest: YamlMap = projectPath.resolve(PACK_YAML).readYamlNode(fs, yaml)?.yamlMap ?: return null
             val filteredManifest =
-                YamlMap(rawManifest.entries.filterNot { it.key.content == "propertyValues" }, rawManifest.path)
+                YamlMap(rawManifest.entries.filterNot { it.key.content == VALUES }, rawManifest.path)
             val manifest: PackManifest = yaml.decodeFromYamlNode(filteredManifest)
             val group = (manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml() ?: Group()).let { group ->
                 group.copy(
@@ -155,7 +158,7 @@ class LocalPackRepository(
             val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath)
             val expressionParser = KotlinExpressionParser(kotlinTemplateEngine.psiFileFactory)
             val propertyValues: List<PropertyAssignment> =
-                rawManifest.get<YamlList>("propertyValues")?.items?.map { node ->
+                rawManifest.get<YamlList>(VALUES)?.items?.map { node ->
                     val nodeMap = node.yamlMap
                     val key = nodeMap.getScalar("key")?.yamlScalar?.content
                     require(key != null) { "Property value key is required: $node" }
@@ -462,31 +465,55 @@ class LocalPackRepository(
         }.map(modulePath::resolve)
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    override suspend fun versions(): VersionsCatalog {
-        // TODO we should try to drop this
-        val builtInArtifacts =
-            fs.list(root).filter {
-                it.name.endsWith(".versions.toml") && it.name != REPOSITORY_VERSION_CATALOG
-            }.mapNotNull { file ->
-                file.readToml<BuiltInToml>(fs)?.libraries
-            }.reduceOrNull { left, right -> left + right }.orEmpty()
+//    @Deprecated("Use catalogs() instead", replaceWith = ReplaceWith("catalogs().firstOrNull { it.name == VersionsCatalog.DEFAULT_NAME } ?: VersionsCatalog.Empty"))
+//    @OptIn(ExperimentalSerializationApi::class)
+//    override suspend fun versions(): VersionsCatalog {
+//        // TODO we should try to drop this
+//        val builtInArtifacts =
+//            fs.list(root).filter {
+//                it.name.endsWith(".versions.toml") && it.name != REPOSITORY_VERSION_CATALOG
+//            }.mapNotNull { file ->
+//                file.readToml<BuiltInToml>(fs)?.libraries
+//            }.reduceOrNull { left, right -> left + right }.orEmpty()
+//
+//        val builtInCatalog = VersionsCatalog(
+//            libraries = builtInArtifacts.mapValues { (_, artifact) ->
+//                val (group, artifact, version) = artifact
+//                CatalogArtifact(
+//                    "$group:$artifact",
+//                    CatalogVersion.Number(version),
+//                    builtIn = true
+//                )
+//            }
+//        )
+//
+//        val libraryCatalog = loadVersionCatalog(DEFAULT_VERSION_CATALOG) ?: VersionsCatalog()
+//        val repositoryVersionCatalog = loadVersionCatalog(REPOSITORY_VERSION_CATALOG) ?: VersionsCatalog.Empty
+//
+//        return builtInCatalog + libraryCatalog + repositoryVersionCatalog
+//    }
 
-        val builtInCatalog = VersionsCatalog(
-            libraries = builtInArtifacts.mapValues { (_, artifact) ->
-                val (group, artifact, version) = artifact
-                CatalogArtifact(
-                    "$group:$artifact",
-                    CatalogVersion.Number(version),
-                    builtIn = true
+    override suspend fun catalogs(): List<VersionsCatalog> {
+        val defaultLibs = loadVersionCatalog(DEFAULT_VERSION_CATALOG)
+        val repositoryLibs = loadVersionCatalog(REPOSITORY_VERSION_CATALOG)
+
+        val externalCatalogs = fs.list(root).filter {
+            it.name.endsWith(".versions.toml") && it.name != REPOSITORY_VERSION_CATALOG
+        }
+        return buildList {
+            add(defaultLibs.orEmpty() + repositoryLibs.orEmpty())
+
+            // We consider other catalog files as stand-ins for external files
+            for (catalogFile in externalCatalogs) {
+                val catalog = loadVersionCatalog(catalogFile.toString()) ?: continue
+                add(
+                    catalog.copy(
+                        name = catalogFile.name.substringBefore('.'),
+                        source = VersionsCatalogSource.EXTERNAL,
+                    )
                 )
             }
-        )
-
-        val libraryCatalog = loadVersionCatalog(DEFAULT_VERSION_CATALOG) ?: VersionsCatalog()
-        val repositoryVersionCatalog = loadVersionCatalog(REPOSITORY_VERSION_CATALOG) ?: VersionsCatalog.Empty
-
-        return builtInCatalog + libraryCatalog + repositoryVersionCatalog
+        }
     }
 
     private fun loadVersionCatalog(catalogPath: String): VersionsCatalog? {

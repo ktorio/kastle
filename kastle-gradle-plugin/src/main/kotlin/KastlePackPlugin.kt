@@ -139,23 +139,12 @@ abstract class KastlePackPlugin : Plugin<Project> {
                             // Inter-pack dependencies
                             // We guess the correct module to require here based on the platforms.
                             for (requiredPackId in pack.requires) {
-                                try {
-                                    val requiredPack = runBlocking { repository.read(requiredPackId) }
-                                    require(requiredPack != null) { "Pack $requiredPackId is missing; required by ${pack.id}" }
-                                    val requiredModule = when (val requiredPackModules = requiredPack.sources.modules) {
-                                        is ProjectModules.Single -> requiredPackModules.module.takeIf { it.platforms.containsAll(module.platforms) }
-                                        is ProjectModules.Multi -> requiredPackModules.modules.find { it.platforms.containsAll(module.platforms) }
-                                        is ProjectModules.Empty -> null
-                                    }
-                                    if (requiredModule == null) {
-                                        project.logger.lifecycle("Skipping $requiredPackId for ${pack.id}/${module.path}; no applicable module")
-                                        continue
-                                    }
-                                    val projectRef = requiredPackId.toProjectRef(requiredModule.path)
-                                    project.dependencies.add(apiConfigurationName, project.project(projectRef))
-                                } catch (e: Exception) {
-                                    project.logger.error("Cannot resolve {}", requiredPackId, e)
-                                }
+                                project.addPackDependency(
+                                    pack.id,
+                                    module,
+                                    apiConfigurationName,
+                                    repository.readPackBlocking(requiredPackId)
+                                )
                             }
 
                             // Explicit artifact/module dependencies
@@ -249,19 +238,13 @@ abstract class KastlePackPlugin : Plugin<Project> {
             )
 
             // Inter-pack dependencies
-            for (packId in pack.requires) {
-                try {
-                    val requiredModule =
-                        runBlocking { repository.read(packId) }?.sourceModules?.singleOrNull()
-                    if (requiredModule == null) {
-                        project.logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
-                        continue
-                    }
-                    val projectRef = packId.toProjectRef(requiredModule.path)
-                    project.dependencies.add("implementation", project.project(projectRef))
-                } catch (e: Exception) {
-                    project.logger.error("Cannot resolve {}", packId, e)
-                }
+            for (requiredPackId in pack.requires) {
+                project.addPackDependency(
+                    pack.id,
+                    module,
+                    "implementation",
+                    repository.readPackBlocking(requiredPackId)
+                )
             }
 
             // Explicit artifact/module dependencies
@@ -272,6 +255,34 @@ abstract class KastlePackPlugin : Plugin<Project> {
                     project.logger.error("Cannot resolve {}", dependency, e)
                 }
             }
+        }
+    }
+
+    private fun PackRepository.readPackBlocking(packId: PackId): PackDescriptor {
+        return runBlocking { read(packId) } ?: error("Pack $packId is missing")
+    }
+
+    private fun Project.addPackDependency(
+        currentPackId: PackId,
+        module: SourceModuleMetadata,
+        configurationName: String,
+        requiredPack: PackDescriptor
+    ) {
+        val requiredPackId = requiredPack.id
+        try {
+            val requiredModule = when (val requiredPackModules = requiredPack.sources.modules) {
+                is ProjectModules.Single -> requiredPackModules.module.takeIf { it.platforms.containsAll(module.platforms) }
+                is ProjectModules.Multi -> requiredPackModules.modules.find { it.platforms.containsAll(module.platforms) }
+                is ProjectModules.Empty -> null
+            }
+            if (requiredModule == null) {
+                logger.lifecycle("Skipping $requiredPackId for ${currentPackId}/${module.path}; no applicable module")
+            } else {
+                val projectRef = requiredPackId.toProjectRef(requiredModule.path)
+                dependencies.add(configurationName, project.project(projectRef))
+            }
+        } catch (e: Exception) {
+            logger.error("Cannot resolve {} for $currentPackId", requiredPackId, e)
         }
     }
 
@@ -320,19 +331,13 @@ abstract class KastlePackPlugin : Plugin<Project> {
                                 this
                             )
 
-                            for (packId in pack.requires) {
-                                try {
-                                    val requiredModule =
-                                        runBlocking { repository.read(packId) }?.sourceModules?.singleOrNull()
-                                    if (requiredModule == null) {
-                                        project.logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
-                                        continue
-                                    }
-                                    val projectRef = packId.toProjectRef(requiredModule.path)
-                                    project.dependencies.add(apiConfigurationName, project.project(projectRef))
-                                } catch (e: Exception) {
-                                    project.logger.error("Cannot resolve {}", packId, e)
-                                }
+                            for (requiredPackId in pack.requires) {
+                                project.addPackDependency(
+                                    pack.id,
+                                    module,
+                                    apiConfigurationName,
+                                    repository.readPackBlocking(requiredPackId)
+                                )
                             }
 
                             for (dependency in requiredDependencies) {
@@ -458,7 +463,8 @@ abstract class KastlePackPlugin : Plugin<Project> {
         when (dependency) {
             is CatalogReference -> {
                 val keys = dependency.key.removePrefix("$").split(".").toMutableList()
-                val catalog = extensions.getByType(VersionCatalogsExtension::class.java).named(keys.removeFirst())
+                val catalog = extensions.getByType(VersionCatalogsExtension::class.java)
+                    .named(keys.removeFirst())
                 val provider = catalog.findLibrary(keys.joinToString(".")).orElseThrow()
                 dependencies.add(sourceSet.apiConfigurationName, provider)
             }

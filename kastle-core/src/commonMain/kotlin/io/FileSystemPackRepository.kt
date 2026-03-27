@@ -37,7 +37,7 @@ abstract class FileSystemPackRepository(
             }
 
             // versions catalog
-            export.versions(versions())
+            export.catalogs(catalogs())
 
             // extra files
             files().collect { path ->
@@ -112,10 +112,19 @@ abstract class FileSystemPackRepository(
     }
 
     override suspend fun versions(): VersionsCatalog =
-        readVersions(root.resolve("libs.versions.$ext"))
+        readVersions(root.resolve("versions/${VersionsCatalog.DEFAULT_NAME}.versions.$ext"))
 
-    override suspend fun versions(versions: VersionsCatalog) {
-        writeVersions(root.resolve("libs.versions.$ext"), versions() + versions)
+    override suspend fun catalogs(): List<VersionsCatalog> {
+        val versionsDir = root.resolve("versions")
+        if (!fs.isDirectory(versionsDir)) return emptyList()
+        return fs.list(versionsDir).map { readVersions(it) }
+    }
+
+    override suspend fun catalogs(catalogs: List<VersionsCatalog>) {
+        fs.mkdirs(root.resolve("versions"))
+        for (catalog in catalogs) {
+            writeVersions(root.resolve("versions/${catalog.name}.versions.$ext"), catalog)
+        }
     }
 
     override fun files(): Flow<String> =

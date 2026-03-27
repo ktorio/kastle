@@ -9,8 +9,11 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.SerialKind
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.buildSerialDescriptor
+import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.decodeStructure
+import kotlinx.serialization.encoding.encodeStructure
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.reflect.KClass
@@ -52,6 +55,71 @@ class PropertyTypeSerializer: CustomParserSerializer<PropertyType>(PropertyType:
 class SourceImportSerializer: CustomParserSerializer<SourceImport>(SourceImport::class, SourceImport::parse)
 class CatalogReferenceSerializer: CustomParserSerializer<CatalogReference>(CatalogReference::class, CatalogReference::parse)
 
+/**
+ * Handles both { module } and { group, name }.
+ */
+class CatalogArtifactSerializer : KSerializer<CatalogArtifact> {
+    override val descriptor: SerialDescriptor =
+        buildClassSerialDescriptor("CatalogArtifact") {
+            element<String>("module", isOptional = true)
+            element<String>("group", isOptional = true)
+            element<String>("name", isOptional = true)
+            element<CatalogVersion>("version")
+        }
+
+    override fun serialize(encoder: Encoder, value: CatalogArtifact) {
+        encoder.encodeStructure(descriptor) {
+            encodeStringElement(descriptor, 0, value.module)
+            encodeSerializableElement(descriptor, 3, CatalogVersionSerializer(), value.version)
+            if (value.builtIn) {
+                encodeBooleanElement(descriptor, 4, value.builtIn)
+            }
+        }
+    }
+
+    override fun deserialize(decoder: Decoder): CatalogArtifact {
+        var module: String? = null
+        var group: String? = null
+        var name: String? = null
+        var version: CatalogVersion? = null
+        var builtIn = false
+
+        decoder.decodeStructure(descriptor) {
+            while (true) {
+                when (val index = decodeElementIndex(descriptor)) {
+                    0 -> module = decodeStringElement(descriptor, index)
+                    1 -> group = decodeStringElement(descriptor, index)
+                    2 -> name = decodeStringElement(descriptor, index)
+                    3 -> version = decodeSerializableElement(
+                        descriptor,
+                        index,
+                        CatalogVersionSerializer()
+                    )
+                    4 -> builtIn = decodeBooleanElement(descriptor, index)
+                    kotlinx.serialization.encoding.CompositeDecoder.DECODE_DONE -> break
+                    else -> error("Unexpected index: $index")
+                }
+            }
+        }
+
+        val finalModule = module ?: run {
+            require(group != null && name != null) {
+                "CatalogArtifact must contain either module or both group and name"
+            }
+            "$group:$name"
+        }
+
+        return CatalogArtifact(
+            module = finalModule,
+            version = requireNotNull(version) { "CatalogArtifact.version is required" },
+            builtIn = builtIn
+        )
+    }
+}
+
+/**
+ * Handles numbers and references for catalog versions.
+ */
 class CatalogVersionSerializer: KSerializer<CatalogVersion> {
     @OptIn(InternalSerializationApi::class)
     override val descriptor: SerialDescriptor = buildSerialDescriptor(

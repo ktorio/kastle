@@ -35,10 +35,10 @@ fun Routing.backEnd(
             }
         }
         /**
-         * Get the catalog of versions for all artifacts.
+         * Get the version catalogs present in the repository.
          */
-        get("/versions") {
-            call.respond(repository.versions())
+        get("/catalogs") {
+            call.respond(repository.catalogs())
         }
         /**
          * List all groups present in the repository.
