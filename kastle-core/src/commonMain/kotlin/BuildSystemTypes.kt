@@ -282,8 +282,12 @@ val Platform.resourcesDir get() = when(this) {
 @Serializable
 data class AmperSettings(
     val compose: String? = null,
+    val ktor: String? = null,
     val application: AmperApplicationSettings? = null,
-)
+) {
+    fun isEmpty() = compose == null && ktor == null && application == null
+    fun isNotEmpty() = !isEmpty()
+}
 
 @Serializable
 data class AmperApplicationSettings(
@@ -345,7 +349,11 @@ fun SourceModuleManifest.tryMerge(other: SourceModuleManifest): SourceModuleMani
         dependencies = dependencies.merge(other.dependencies),
         testDependencies = testDependencies.merge(other.testDependencies),
         gradle = GradleSettings((gradle.plugins + other.gradle.plugins).distinct()),
-        amper = AmperSettings(amper.compose ?: other.amper.compose, amper.application ?: other.amper.application),
+        amper = AmperSettings(
+            amper.compose ?: other.amper.compose,
+            amper.ktor ?: other.amper.ktor,
+            amper.application ?: other.amper.application
+        ),
     )
 }
 

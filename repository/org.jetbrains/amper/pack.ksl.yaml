@@ -7,7 +7,7 @@ tags:
 rootSources:
   - path: project.yaml.hbs
     target: file:project.yaml
-    if: _project.modules.size() > 1
+    if: _project.modules.size > 1
   - path: amper
   - path: amper.bat
   - path: libs.versions.toml.hbs
@@ -15,4 +15,4 @@ rootSources:
 commonSources:
   - path: module.yaml.hbs
     target: file:module.yaml
-    if: _module.platforms.size() > 0
+    if: _module.platforms.size > 0

@@ -5,6 +5,8 @@ dependencies:
 gradle:
   plugins:
     - $libs.plugins.ktor
+amper:
+  ktor: enabled
 sources:
   - path: application.conf.hbs
     target: file:resources/application.conf
