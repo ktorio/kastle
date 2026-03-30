@@ -54,6 +54,7 @@ class BlockPositionSerializer: CustomParserSerializer<BlockPosition>(BlockPositi
 class PropertyTypeSerializer: CustomParserSerializer<PropertyType>(PropertyType::class, PropertyType::parse)
 class SourceImportSerializer: CustomParserSerializer<SourceImport>(SourceImport::class, SourceImport::parse)
 class CatalogReferenceSerializer: CustomParserSerializer<CatalogReference>(CatalogReference::class, CatalogReference::parse)
+class PropertyScopeSerializer: CustomParserSerializer<PropertyScope>(PropertyScope::class, PropertyScope::parse)
 
 /**
  * Handles both { module } and { group, name }.

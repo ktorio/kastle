@@ -9,7 +9,6 @@ import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteString
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -27,7 +26,6 @@ import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
 import org.jetbrains.kotlin.psi.KtFile
 import kotlin.collections.filterNot
-import kotlin.io.path.isRegularFile
 import kotlin.random.Random
 
 private const val PACK_YAML = "pack.ksl.yaml"
@@ -35,7 +33,7 @@ private const val GROUP_YAML = "group.ksl.yaml"
 private const val MODULE_YAML = "module.ksl.yaml"
 private const val REPOSITORY_VERSION_CATALOG = "repository.versions.toml"
 private const val DEFAULT_VERSION_CATALOG = "../gradle/libs.versions.toml"
-private const val VALUES = "propertyValues"
+private const val PROPERTY_VALUES = "propertyValues"
 
 class LocalPackRepository(
     private val root: Path,
@@ -110,7 +108,7 @@ class LocalPackRepository(
             val projectPath = root.resolve(packId.toString())
             val groupPath = projectPath.parent!!
             val manifestYaml = projectPath.resolve(PACK_YAML).readYamlNode()?.yamlMap ?: return null
-            val filteredYaml = YamlMap(manifestYaml.entries.filterNot { it.key.content == VALUES }, manifestYaml.path)
+            val filteredYaml = YamlMap(manifestYaml.entries.filterNot { it.key.content == PROPERTY_VALUES }, manifestYaml.path)
             val manifest: PackManifest = Yaml.default.decodeFromYamlNode(filteredYaml) ?: return null
             val properties = manifest.properties.toMutableList()
             val group = (manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml() ?: Group()).let { group ->
@@ -145,7 +143,7 @@ class LocalPackRepository(
             val groupPath = projectPath.parent!!
             val rawManifest: YamlMap = projectPath.resolve(PACK_YAML).readYamlNode(fs, yaml)?.yamlMap ?: return null
             val filteredManifest =
-                YamlMap(rawManifest.entries.filterNot { it.key.content == VALUES }, rawManifest.path)
+                YamlMap(rawManifest.entries.filterNot { it.key.content == PROPERTY_VALUES }, rawManifest.path)
             val manifest: PackManifest = yaml.decodeFromYamlNode(filteredManifest)
             val group = (manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml() ?: Group()).let { group ->
                 group.copy(
@@ -157,22 +155,15 @@ class LocalPackRepository(
             val documentation = projectPath.resolve("README.md").readText()
             val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath)
             val expressionParser = KotlinExpressionParser(kotlinTemplateEngine.psiFileFactory)
-            val propertyValues: List<PropertyAssignment> =
-                rawManifest.get<YamlList>(VALUES)?.items?.map { node ->
-                    val nodeMap = node.yamlMap
-                    val key = nodeMap.getScalar("key")?.yamlScalar?.content
-                    require(key != null) { "Property value key is required: $node" }
-                    val variableId = VariableId.parse(key, relativePackId = packId)
-                    val value = nodeMap.getScalar("value")?.yamlScalar?.content
-                    val expression = nodeMap.getScalar("expression")?.yamlScalar?.content?.let(expressionParser::parse)
-                    if (value != null) {
-                        ValueAssignment(variableId, value)
-                    } else if (expression != null) {
-                        ExpressionAssignment(variableId, expression)
-                    } else {
-                        throw IllegalArgumentException("Property value must contain either value or expression: $node")
-                    }
-                }.orEmpty()
+            val propertyValues = mutableMapOf(
+                PropertyScope.Pack to readPropertyValues(rawManifest, packId, expressionParser)
+            ) + projectPath.moduleFolders().mapNotNull { modulePath ->
+                val relativePath = modulePath.relativeTo(projectPath).toString()
+                val moduleYaml = modulePath.resolve(MODULE_YAML)
+                    .readYamlNode(fs, yaml)?.yamlMap
+                    ?: return@mapNotNull null
+                PropertyScope.Module(relativePath) to readPropertyValues(moduleYaml, packId, expressionParser)
+            }
 
             val projectSources = projectPath.moduleFolders().asFlow()
                 .mapNotNull { modulePath ->
@@ -249,6 +240,26 @@ class LocalPackRepository(
             throw PackReadException(packId, e)
         }
     }
+
+    private fun readPropertyValues(
+        rawManifest: YamlMap,
+        packId: PackId,
+        expressionParser: KotlinExpressionParser
+    ): List<PropertyAssignment> = rawManifest.get<YamlList>(PROPERTY_VALUES)?.items?.map { node ->
+        val nodeMap = node.yamlMap
+        val key = nodeMap.getScalar("key")?.yamlScalar?.content
+        require(key != null) { "Property value key is required: $node" }
+        val variableId = VariableId.parse(key, relativePackId = packId)
+        val value = nodeMap.getScalar("value")?.yamlScalar?.content
+        val expression = nodeMap.getScalar("expression")?.yamlScalar?.content?.let(expressionParser::parse)
+        if (value != null) {
+            ValueAssignment(variableId, value)
+        } else if (expression != null) {
+            ExpressionAssignment(variableId, expression)
+        } else {
+            throw IllegalArgumentException("Property value must contain either value or expression: $node")
+        }
+    }.orEmpty()
 
     override suspend fun readFile(path: String): Source? {
         val file = root.resolve(path.trimStart('/'))

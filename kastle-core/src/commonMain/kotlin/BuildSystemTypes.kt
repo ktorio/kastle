@@ -2,13 +2,9 @@ package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.ProjectModules.*
-import org.jetbrains.kastle.utils.StringExpression
 import org.jetbrains.kastle.utils.TreeMap.Companion.toTreeMap
-import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.unwrapQuotes
 import org.jetbrains.kastle.utils.wrapQuotes
-import kotlin.collections.flatten
-import kotlin.collections.plus
 import kotlin.jvm.JvmInline
 
 @Serializable(RevisionSerializer::class)
@@ -144,7 +140,9 @@ fun ProjectModules.map(mapping: (SourceModule) -> SourceModule): ProjectModules 
 fun ProjectModules.flatten(): ProjectModules =
     when (this) {
         is Empty -> this
-        is Single -> Single(module.copy(manifest = module.manifest.copy(path = "")))
+        is Single -> Single(
+            module.copy(manifest = module.manifest.copy(path = ""))
+        )
         is Multi -> {
             val path = modules.first().path
             val slashIndex = path.indexOf('/', 1) // ignore starting slash
@@ -181,24 +179,52 @@ private fun merge(modules: List<SourceModule>, other: List<SourceModule>): Multi
 
 @Serializable
 sealed interface SourceModuleMetadata {
+    /**
+     * Path to the module in the resulting project.
+     */
     val path: String
+
+    /**
+     * Module path before structural changes (i.e., flattening).
+     */
+    val originalPath: String
+
+    /**
+     * Platforms that this module supports.
+     */
     val platforms: Set<Platform>
+
+    /**
+     * Gradle dependencies for the module; either imported or module references.
+     */
     val dependencies: DependenciesMap
+
+    /**
+     * Gradle dependencies for the module's tests; either imported or module references.
+     */
     val testDependencies: DependenciesMap
+
+    /**
+     * Gradle-specific settings, like plugins.
+     */
     val gradle: GradleSettings
+
+    /**
+     * Amper-specific settings.
+     */
     val amper: AmperSettings
 }
 
 @Serializable
 data class SourceModuleManifest(
     override val path: String = "",
+    override val originalPath: String = path,
     override val platforms: Set<Platform> = emptySet(),
     override val dependencies: DependenciesMap = emptyMap(),
     override val testDependencies: DependenciesMap = emptyMap(),
     override val gradle: GradleSettings = GradleSettings(),
     override val amper: AmperSettings = AmperSettings(),
 ): SourceModuleMetadata
-
 
 val SourceModuleMetadata.allDependencies: Set<Dependency> get() =
     (dependencies.values.flatten() + testDependencies.values.flatten()).toSet()
@@ -291,8 +317,6 @@ enum class SourceModuleType(val code: String) {
     IOS_APP("ios/app");
 
     companion object {
-        val DEFAULT = LIB
-
         fun parse(text: String) = entries
             .firstOrNull { it.code == text }
             ?: throw IllegalArgumentException("Invalid module type: $text")
@@ -317,7 +341,7 @@ fun SourceModuleManifest.tryMerge(other: SourceModuleManifest): SourceModuleMani
             path.isEmpty() -> other.path
             else -> return null
         },
-        platforms = platforms + other.platforms,
+        platforms = platforms.intersect(other.platforms),
         dependencies = dependencies.merge(other.dependencies),
         testDependencies = testDependencies.merge(other.testDependencies),
         gradle = GradleSettings((gradle.plugins + other.gradle.plugins).distinct()),
