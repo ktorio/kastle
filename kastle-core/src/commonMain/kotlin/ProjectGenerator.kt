@@ -120,67 +120,18 @@ class ProjectGenerator(
             ?: Variables()
         val evaluatedTarget = source.target.evaluate(variables)
         val relativePath = evaluatedTarget.toString().relativeFile
+
         return Path(module.path, relativePath).normalize().toString()
     }
 
     private fun Project.collectVariables(packId: PackId, module: SourceModule): Stack<Map<String, Any?>> {
         val pack = packs.find { it.id == packId } ?: throw MissingPackException(packId)
-        val baseVariables = getVariables(pack) +
-                toVariableEntry() +
-                module.toVariableEntry() +
-                module.slotsVariableEntry(packId)
-        return baseVariables + loadDynamicProperties(baseVariables)
-    }
-
-    private fun Project.loadDynamicProperties(variables: Variables): Map<String, Any?> {
-        require(properties.values.none { it is UnresolvedProperty }) {
-            "Undefined properties: ${properties.values.filterIsInstance<UnresolvedProperty>().map { it.descriptor.key }}"
-        }
-        val resolved = properties.values
-            .filterIsInstance<ResolvedProperty>()
-            .associate { it.descriptor.key to it.value }
-            .toMutableMap()
-        val dynamicProperties = properties.values
-            .filterIsInstance<DynamicProperty>()
-            .toMutableList()
-        var evaluationFailed = false
-
-        fun DynamicProperty.evaluate(assignment: PropertyAssignment, type: PropertyType = descriptor.type): Any? =
-            when(assignment) {
-                is ValueAssignment -> type.parse(assignment.value)
-                is ExpressionAssignment -> type.cast(assignment.expression.evaluate(variables + resolved))
-            }
-
-        // to allow resolution of other values in the current map,
-        // keep trying to resolve properties until no progress is made
-        while (dynamicProperties.isNotEmpty()) {
-            val initialSize = dynamicProperties.size
-            val iterator = dynamicProperties.listIterator()
-            while (iterator.hasNext()) {
-                val property = iterator.next()
-                val evalResult = try {
-                    if (property.descriptor.type.isList()) {
-                        property.assignments.map {
-                            property.evaluate(it, property.descriptor.type.elementType!!)
-                        }
-                    } else {
-                        property.evaluate(
-                            property.assignments.singleOrNull()
-                                ?: error("Multiple values supplied for property ${property.descriptor.key}")
-                        )
-                    }
-                } catch (e: Exception) {
-                    if (evaluationFailed) throw e
-                    log.debug { "Failed property value evaluation ${property.descriptor.key}: ${e.message}; will try again" }
-                    continue
-                }
-                resolved[property.descriptor.key] = evalResult
-                iterator.remove()
-            }
-            evaluationFailed = initialSize == dynamicProperties.size
-        }
-
-        return resolved
+        val modulePath = module.originalPath.takeIf { it.isNotEmpty() }
+        val baseVariables = resolvedVariables(pack, modulePath) +
+            toVariableEntry() +
+            module.toVariableEntry() +
+            module.slotsVariableEntry(packId)
+        return baseVariables + dynamicVariables(pack, modulePath, baseVariables)
     }
 
 }

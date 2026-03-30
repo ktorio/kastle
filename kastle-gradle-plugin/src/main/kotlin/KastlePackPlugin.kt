@@ -88,16 +88,12 @@ abstract class KastlePackPlugin : Plugin<Project> {
 
                     else -> {
                         if (!project.plugins.hasPlugin(pluginId)) {
-                            try {
-                                project.plugins.apply(pluginId)
-                            } catch (e: Exception) {
-                                project.logger.error("Cannot apply {} in {}", pluginAlias, project.path, e)
-                            }
+                            project.plugins.apply(pluginId)
                         }
                     }
                 }
             } catch (e: Exception) {
-                project.logger.error("Cannot apply {} in {}", pluginAlias, project.path, e)
+                project.logger.warn("Cannot apply {} in {}", pluginAlias, project.path, e)
             }
         }
     }

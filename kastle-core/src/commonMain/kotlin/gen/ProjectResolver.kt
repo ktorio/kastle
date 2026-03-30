@@ -5,6 +5,8 @@ import org.jetbrains.kastle.*
 import org.jetbrains.kastle.utils.TreeMap
 import org.jetbrains.kastle.utils.isFile
 import org.jetbrains.kastle.utils.isSlot
+import org.jetbrains.kastle.utils.merge
+import kotlin.collections.groupBy
 
 fun interface ProjectResolver {
     companion object {
@@ -26,17 +28,21 @@ fun interface ProjectResolver {
             val rootSources = packs
                 .flatMap { it.rootSources }
                 .filter { it.isFile() }
-            val propertyValues: Map<VariableId, List<PropertyAssignment>> = packs.flatMap { pack ->
-                pack.propertyValues
-            }.groupBy({ it.key })
+            val propertyValues = packs.asSequence()
+                .map { it.propertyValues }
+                .reduceOrNull { acc, map -> acc.merge(map) }.orEmpty()
+                .mapValues { (_, assignments) -> assignments.groupBy { it.key } }
             val propertyDescriptors = packs.flatMap { pack ->
                 pack.properties.map { property ->
                     VariableId(pack.id, property.key) to property
                 }
             }.toMap()
-            val properties = propertyDescriptors.mapValues { (variableId, property) ->
-                resolveProperty(descriptor, propertyValues, variableId, property)
-            }
+            val properties: Map<PropertyScope, Map<VariableId, PropertyInstance>> =
+                propertyValues.mapValues { (propertyScope, assignments) ->
+                    propertyDescriptors.mapValues { (variableId, property) ->
+                        resolveProperty(descriptor, assignments, variableId, property)
+                    }
+                }
             // Merge all catalogs for library lookups
             // TODO handle collisions
             val repositoryCatalog = repository.catalogs().reduce { acc, catalog -> acc + catalog }
@@ -122,9 +128,9 @@ fun interface ProjectResolver {
                     DynamicProperty(property, assignments)
                 } ?: property.default?.let {
                     ResolvedProperty(property, property.type.parse(it))
-                } ?: if (property.type.isNullable())
+                } ?: if (property.type.isNullable()) {
                     ResolvedProperty(property, null)
-                else UnresolvedProperty(property)
+                } else UnresolvedProperty(property)
             } catch (e: Exception) {
                 throw IllegalArgumentException("Failed to read property $variableId: ${e.message}", e)
             }

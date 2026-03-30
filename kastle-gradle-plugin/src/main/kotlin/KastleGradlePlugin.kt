@@ -4,6 +4,7 @@ import com.charleskorn.kaml.Yaml
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import io.ktor.server.plugins.di.*
+import io.ktor.server.util.url
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.buffered
@@ -20,6 +21,7 @@ import org.jetbrains.kastle.logging.LogLevel
 import org.jetbrains.kastle.server.*
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
+import java.net.URI
 
 abstract class KastleGradlePlugin : Plugin<Settings> {
     private val logger = Logging.getLogger(KastleGradlePlugin::class.java)
@@ -38,8 +40,9 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
         }
         val repository = LocalPackRepository(repositoryDir.absolutePath)
         val modules2packs = mutableMapOf<String, Pair<PackMetadata, SourceModuleMetadata>>()
+        val customPluginRepositories = mutableSetOf<MavenRepository>()
 
-        // associate modules and packs
+        // associate modules and packs, collect repositories
         runBlocking {
             val packs = repository.getAll().toList()
             for (pack in packs) {
@@ -52,11 +55,18 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
                         projectDir = repositoryDir.resolve(modulePath)
                     }
 
+                    customPluginRepositories += pack.pluginRepositories
                     modules2packs[projectRef] = pack to module
                 }
             }
-
         }
+        // include all plugin repositories
+        settings.pluginManagement.repositories { repositories ->
+            for (repository in customPluginRepositories) {
+                repositories.maven { it.url = URI(repository.url) }
+            }
+        }
+
         val versionsCatalog = runBlocking { repository.versions() }
 
         // Register top-level tasks on the root project
@@ -206,9 +216,9 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
                 gradlePluginPortal()
                 mavenCentral()
                 google()
-
-                // Needed for org.jetbrains.compose (Compose Multiplatform plugin artifacts)
-                maven { it.url = project.uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
+                // Include all custom repositories
+                for (mavenRepo in pack.repositories)
+                    maven { it.url = URI(mavenRepo.url) }
             }
 
             // Add gradle plugins to buildscript classpath

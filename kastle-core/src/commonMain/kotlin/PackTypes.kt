@@ -46,12 +46,35 @@ data class PackManifest(
 @Serializable
 data class PackDescriptor(
     val manifest: PackMetadata,
-    val propertyValues: List<PropertyAssignment>,
+    val propertyValues: PackPropertyAssignments,
     val sources: PackSources,
 ): PackMetadata by manifest {
     val commonSources: List<SourceFile> get() = sources.common
     val rootSources: List<SourceFile> get() = sources.root
     val sourceModules: List<SourceModule> get() = sources.modules.modules
+}
+
+typealias PackPropertyAssignments = Map<PropertyScope, List<PropertyAssignment>>
+
+@Serializable(PropertyScopeSerializer::class)
+sealed interface PropertyScope {
+    companion object {
+        fun parse(text: String): PropertyScope =
+            if (text == "(root)")
+                Pack
+            else if (text.startsWith("module:"))
+                Module(text.removePrefix("module:"))
+            else
+                throw IllegalArgumentException("Invalid property scope: $text")
+    }
+
+
+    data object Pack: PropertyScope {
+        override fun toString(): String = "(root)"
+    }
+    data class Module(val path: String): PropertyScope {
+        override fun toString(): String = "module:$path"
+    }
 }
 
 /**
@@ -135,6 +158,16 @@ data class VariableId(val packId: PackId, val name: String) {
             return VariableId(PackId(group, pack), variable)
         }
     }
+
+    /**
+     * For populating variable scopes, we remove the packId when working inside pack templates.
+     */
+    fun relativeString(currentPackId: PackId): String =
+        when(packId) {
+            currentPackId -> name
+            else -> toString()
+        }
+
     override fun toString(): String =
         "$packId/$name"
 }
