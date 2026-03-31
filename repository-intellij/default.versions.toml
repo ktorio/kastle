@@ -1,31 +1,35 @@
+[versions]
+kotlin = "2.2.20"
+compose = "1.9.0"
+
 [libraries]
-kotlin-test = "org.jetbrains.kotlin:kotlin-test:2.2.20"
-kotlin-test-junit = "org.jetbrains.kotlin:kotlin-test-junit:2.2.20"
-kotlin-test-junit5 = "org.jetbrains.kotlin:kotlin-test-junit5:2.2.20"
-kotlin-reflect = "org.jetbrains.kotlin:kotlin-reflect:2.2.20"
-compose-animation = "org.jetbrains.compose.animation:animation:1.9.0"
-compose-animationGraphics = "org.jetbrains.compose.animation:animation-graphics:1.9.0"
-compose-foundation = "org.jetbrains.compose.foundation:foundation:1.9.0"
-compose-material = "org.jetbrains.compose.material:material:1.9.0"
-compose-material3 = "org.jetbrains.compose.material3:material3:1.9.0"
-compose-runtime = "org.jetbrains.compose.runtime:runtime:1.9.0"
-compose-runtimeSaveable = "org.jetbrains.compose.runtime:runtime-saveable:1.9.0"
-compose-ui = "org.jetbrains.compose.ui:ui:1.9.0"
-compose-uiTest = "org.jetbrains.compose.ui:ui-test:1.9.0"
-compose-uiTooling = "org.jetbrains.compose.ui:ui-tooling:1.9.0"
-compose-uiToolingPreview = "org.jetbrains.compose.ui:ui-tooling-preview:1.9.0"
-compose-materialIconsExtended = "org.jetbrains.compose.material:material-icons-extended:1.9.0"
-compose-components-resources = "org.jetbrains.compose.components:components-resources:1.9.0"
-compose-html-svg = "org.jetbrains.compose.html:html-svg:1.9.0"
-compose-html-testUtils = "org.jetbrains.compose.html:html-test-utils:1.9.0"
-compose-html-core = "org.jetbrains.compose.html:html-core:1.9.0"
-compose-desktop-components-splitPane = "org.jetbrains.compose.components:components-splitpane:1.9.0"
-compose-desktop-components-animatedImage = "org.jetbrains.compose.components:components-animatedimage:1.9.0"
-compose-desktop-common = "org.jetbrains.compose.desktop:desktop:1.9.0"
-compose-desktop-linux_x64 = "org.jetbrains.compose.desktop:desktop-jvm-linux-x64:1.9.0"
-compose-desktop-linux_arm64 = "org.jetbrains.compose.desktop:desktop-jvm-linux-arm64:1.9.0"
-compose-desktop-windows_x64 = "org.jetbrains.compose.desktop:desktop-jvm-windows-x64:1.9.0"
-compose-desktop-macos_x64 = "org.jetbrains.compose.desktop:desktop-jvm-macos-x64:1.9.0"
-compose-desktop-macos_arm64 = "org.jetbrains.compose.desktop:desktop-jvm-macos-arm64:1.9.0"
-compose-desktop-uiTestJUnit4 = "org.jetbrains.compose.ui:ui-test-junit4:1.9.0"
-compose-desktop-currentOs = "org.jetbrains.compose.desktop:desktop-jvm-macos-arm64:1.9.0"
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+compose-animation = { module = "org.jetbrains.compose.animation:animation", version.ref = "compose" }
+compose-animationGraphics = { module = "org.jetbrains.compose.animation:animation-graphics", version.ref = "compose" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
+compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
+compose-runtimeSaveable = { module = "org.jetbrains.compose.runtime:runtime-saveable", version.ref = "compose" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
+compose-uiTest = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "compose" }
+compose-uiTooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose" }
+compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose" }
+compose-materialIconsExtended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
+compose-html-svg = { module = "org.jetbrains.compose.html:html-svg", version.ref = "compose" }
+compose-html-testUtils = { module = "org.jetbrains.compose.html:html-test-utils", version.ref = "compose" }
+compose-html-core = { module = "org.jetbrains.compose.html:html-core", version.ref = "compose" }
+compose-desktop-components-splitPane = { module = "org.jetbrains.compose.components:components-splitpane", version.ref = "compose" }
+compose-desktop-components-animatedImage = { module = "org.jetbrains.compose.components:components-animatedimage", version.ref = "compose" }
+compose-desktop-common = { module = "org.jetbrains.compose.desktop:desktop", version.ref = "compose" }
+compose-desktop-linux_x64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-linux-x64", version.ref = "compose" }
+compose-desktop-linux_arm64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-linux-arm64", version.ref = "compose" }
+compose-desktop-windows_x64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-windows-x64", version.ref = "compose" }
+compose-desktop-macos_x64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-macos-x64", version.ref = "compose" }
+compose-desktop-macos_arm64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-macos-arm64", version.ref = "compose" }
+compose-desktop-uiTestJUnit4 = { module = "org.jetbrains.compose.ui:ui-test-junit4", version.ref = "compose" }
+compose-desktop-currentOs = { module = "org.jetbrains.compose.desktop:desktop-jvm-macos-arm64", version.ref = "compose" }
