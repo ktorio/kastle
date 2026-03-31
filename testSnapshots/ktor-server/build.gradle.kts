@@ -6,6 +6,12 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+group = "com.acme"
+version = "1.0.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
 
 application {
     mainClass = "io.ktor.server.netty.EngineMain"

@@ -9,7 +9,9 @@ product: {{ _module.type }}
 {{/when}}
 {{!-- Dependencies --}}
 {{#each _module.dependencies.entries }}
-dependencies{{#when key}}{{"common"}}{{else}}@{{key}}{{/when}}:
+{{#if isSinglePlatform}}dependencies:
+{{else}}dependencies{{#when key}}{{"common"}}{{else}}@{{key}}{{/when}}:
+{{/if}}
 {{#each value}}
 {{#when type}}
 {{ "maven" }}

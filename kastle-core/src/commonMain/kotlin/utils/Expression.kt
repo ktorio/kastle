@@ -54,6 +54,11 @@ sealed interface Expression {
     }
 
     @Serializable
+    data class IntLiteral(override val value: Int) : Literal<Int> {
+        override fun toString(): String = value.toString()
+    }
+
+    @Serializable
     data class CharLiteral(override val value: Char) : Literal<Char> {
         override fun toString(): String = "'$value'"
     }

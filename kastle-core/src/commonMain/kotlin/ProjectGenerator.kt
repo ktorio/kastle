@@ -135,7 +135,7 @@ class ProjectGenerator(
             toVariableEntry() +
             module.toVariableEntry() +
             module.slotsVariableEntry(packId)
-        return baseVariables + dynamicVariables(pack, modulePath, baseVariables)
+        return baseVariables + dynamicVariables(modulePath, baseVariables)
     }
 
 }

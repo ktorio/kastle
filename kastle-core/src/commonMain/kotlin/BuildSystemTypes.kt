@@ -109,6 +109,13 @@ sealed interface ProjectModules {
 
     val modules: List<SourceModule>
 
+    fun map(mapping: (SourceModule) -> SourceModule): ProjectModules =
+        when (this) {
+            is Empty -> this
+            is Single -> Single(mapping(module))
+            is Multi -> Multi(modules.map { mapping(it) })
+        }
+
     @Serializable
     data object Empty: ProjectModules {
         override val modules: List<SourceModule> = emptyList()

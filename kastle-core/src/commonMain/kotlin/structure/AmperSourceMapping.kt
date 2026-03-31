@@ -1,7 +1,11 @@
 package org.jetbrains.kastle.structure
 
+import org.jetbrains.kastle.CatalogReference
+import org.jetbrains.kastle.Dependency
+import org.jetbrains.kastle.SourceModule
 import org.jetbrains.kastle.gen.ProjectMapping
 import org.jetbrains.kastle.gradlePlugins
+import kotlin.collections.mapValues
 
 val AmperSourceMapping = ProjectMapping { project ->
     if (project.packs.none { it.id == BuildToolModules.AMPER_PACK_ID })
@@ -15,5 +19,38 @@ val AmperSourceMapping = ProjectMapping { project ->
             "Project has plugins that require the Gradle build system"
         }
     }
-    project
+
+    // Amper has a built-in ktor catalog, so we replace "ktorLibs" with "ktor" in references
+    project.copy(
+        moduleSources = project.moduleSources.map { module ->
+            module.mapDependencies { dependency ->
+                when (dependency) {
+                    is CatalogReference -> dependency.copy(
+                        key = mapKtorLibraryReference(dependency.key)
+                    )
+                    else -> dependency
+                }
+            }
+        }
+    )
+}
+
+private fun SourceModule.mapDependencies(mapping: (Dependency) -> Dependency) =
+    copy(manifest = manifest.copy(
+        dependencies = dependencies.mapValues { (_, dependencies) ->
+            dependencies.map(mapping).toSet()
+        }
+    ))
+
+private fun mapKtorLibraryReference(key: String): String {
+    if (!key.startsWith("ktorLibs")) return key
+    val result = when(val library = key.removePrefix("ktorLibs.")) {
+        "server.config.yaml" -> "server.configYaml"
+        "websockets.serialization" -> "websocket.serialization"
+        "client.jetty" -> "client.jetty.jakarta"
+        "server.jetty" -> "server.jetty.jakarta"
+        "server.tomcat" -> "server.tomcat.jakarta"
+        else -> library
+    }
+    return "ktor.$result"
 }

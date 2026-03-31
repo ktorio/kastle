@@ -1,9 +1,7 @@
 
-product:
-  type: lib
-  platforms: [web]
+product: web/app
+dependencies:
 
-dependencies@web:
   - ../sharedUI
 
 settings:

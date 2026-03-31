@@ -3,6 +3,7 @@ package org.jetbrains.kastle.gen
 import kotlinx.io.files.Path
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.resolve
+import org.jetbrains.kastle.structure.BuildToolModules
 import org.jetbrains.kastle.utils.Stack.Companion.toStack
 import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.isSlot
@@ -66,7 +67,6 @@ fun Project.resolvedVariables(
 
 // TODO relativize dynamic variableIds
 fun Project.dynamicVariables(
-    pack: PackDescriptor,
     modulePath: String?,
     variables: Variables,
 ): Map<String, Any?> {
@@ -143,7 +143,9 @@ context(project: Project)
 private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "path" to path,
     "parent" to path.substringBeforeLast('/').takeIf { it.isNotEmpty() },
-    "type" to if (amper.application != null && platforms.size == 1) "${platforms.single()}/app" else "lib",
+    "type" to if (mainClass() != null && platforms.size == 1)
+        "${platforms.single()}/app"
+    else "lib",
     "platform" to platforms.singleOrNull()?.code,
     "platforms" to platforms.map { it.code },
     "dependencies" to dependencies.asSequence()
@@ -158,6 +160,28 @@ private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "gradle" to gradle.toVariableMap(),
     "amper" to amper.toVariableMap(),
 )
+
+/**
+ * Find the main class from either amper settings, gradle properties, or use the default main.kt file.
+ */
+context(project: Project)
+fun SourceModule.mainClass(): String? {
+    amper.application?.mainClass?.let { amperMain ->
+        return amperMain
+    }
+    val moduleProperties = project.properties[PropertyScope.Module(originalPath)]
+        ?: return null
+    val mainClassGradlePropertyKey = VariableId(BuildToolModules.GRADLE_PACK_ID, "mainClass")
+    val mainClassProperty = moduleProperties[mainClassGradlePropertyKey] as? ResolvedProperty
+    mainClassProperty?.let {
+        return it.value as? String
+    }
+    sources.asSequence()
+        .map { it.target.toString().removePrefix("file:") }
+        .firstOrNull { it.endsWith("main.kt") }
+        ?.let { return it.replace('/', '.').replace("main.kt", "MainKt") }
+    return null
+}
 
 context(project: Project)
 fun Dependency.toVariableMap(modulePath: String) =
@@ -226,7 +250,8 @@ fun MavenRepository.toVariableMap() = mapOf(
 )
 
 fun AmperSettings.toVariableMap(): Map<String, String?> = mapOf(
-    "compose" to compose
+    "compose" to compose,
+    "ktor" to ktor,
 ).filterValues {
     it != null
 }

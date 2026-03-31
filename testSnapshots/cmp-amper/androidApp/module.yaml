@@ -2,8 +2,8 @@
 product:
   type: lib
   platforms: [android]
+dependencies:
 
-dependencies@android:
   - ../sharedUI
   - $libs.androidx.activity.compose
 

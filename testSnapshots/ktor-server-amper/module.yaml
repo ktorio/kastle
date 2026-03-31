@@ -1,11 +1,12 @@
 
-product:
-  type: lib
-  platforms: [jvm]
+product: jvm/app
+dependencies:
 
-dependencies@jvm:
-  - $ktorLibs.server.core
+  - $ktor.server.core
   - $libs.logback.classic
-  - $ktorLibs.server.netty
-  - $ktorLibs.server.contentNegotiation
-  - $ktorLibs.serialization.kotlinx.json
+  - $ktor.server.netty
+  - $ktor.server.contentNegotiation
+  - $ktor.serialization.kotlinx.json
+
+settings:
+  ktor: enabled

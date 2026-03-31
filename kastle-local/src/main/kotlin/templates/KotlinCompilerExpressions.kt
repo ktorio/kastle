@@ -72,8 +72,10 @@ fun KtExpression?.toTemplateExpression(): Expression {
                             Expression.CharLiteral(text[1]) // TODO handle escape
                         else if (text.contains('.'))
                             Expression.DoubleLiteral(text.toDouble())
-                        else
+                        else if (text.contains('L') || text.toLong() > Int.MAX_VALUE)
                             Expression.LongLiteral(text.toLong())
+                        else
+                            Expression.IntLiteral(text.toInt())
                     } catch (e: NumberFormatException) {
                         // Fallback to string if not a valid number
                         StringLiteral(text)
