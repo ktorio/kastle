@@ -2,9 +2,7 @@ package org.jetbrains.kastle
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.io.Buffer
 import kotlinx.io.files.Path
-import kotlinx.io.write
 import org.jetbrains.kastle.gen.*
 import org.jetbrains.kastle.structure.GradleSourceMapping
 import org.jetbrains.kastle.logging.ConsoleLogger
@@ -67,22 +65,23 @@ class ProjectGenerator(
             }
             val outputtedPaths = mutableSetOf<String>()
             val slotSources = slotSources + module.slotSources
+            val visitedPaths = mutableSetOf<String>()
 
             for (source in moduleSources) {
-                val path = getActualPath(source, module, this)
+                val path = getActualPath(source, module)
                 val packId = source.packId ?: run {
                     log.warn { "Skipping ${source.target}; missing pack ID" }
                     continue
                 }
-                val variables = collectVariables(this, packId, module)
-
-                source.condition?.evaluate(variables)?.let { conditionResult ->
-                    if (!conditionResult.isTruthy()) {
-                        log.debug { "Skipping ${source.target}; ${source.condition} = $conditionResult" }
-                        continue
-                    } else {
-                        log.trace { "Include ${source.target}; ${source.condition} = $conditionResult" }
-                    }
+                val variables = collectVariables(packId, module)
+                if (source.condition != null && !source.condition?.evaluate(variables).isTruthy()) {
+                    log.debug { "Skipping ${source.target}; ${source.condition} = ${source.condition?.evaluate(variables)}" }
+                    continue
+                } else if (!visitedPaths.add(path)) {
+                    log.debug { "Skipping ${source.target}; duplicate path $path" }
+                    continue
+                } else {
+                    log.trace { "Include ${source.target}; ${source.condition} = ${source.condition?.evaluate(variables)}" }
                 }
 
                 if (source !is SourceTemplate) {
@@ -113,75 +112,26 @@ class ProjectGenerator(
         }
     }
 
-    private fun getActualPath(source: SourceFile, module: SourceModule, project: Project): String {
+    private fun Project.getActualPath(source: SourceFile, module: SourceModule): String {
         val sourcePackId = source.packId
         val variables = sourcePackId
             ?.takeIf { source.target is StringTemplate }
-            ?.let { collectVariables(project, sourcePackId, module) }
+            ?.let { collectVariables(sourcePackId, module) }
             ?: Variables()
         val evaluatedTarget = source.target.evaluate(variables)
         val relativePath = evaluatedTarget.toString().relativeFile
+
         return Path(module.path, relativePath).normalize().toString()
     }
 
-    private fun collectVariables(project: Project, packId: PackId, module: SourceModule): Stack<Map<String, Any?>> {
-        val pack = project.packs.find { it.id == packId } ?: throw MissingPackException(packId)
-        val baseVariables = project.getVariables(pack) +
-                project.toVariableEntry() +
-                module.toVariableEntry() +
-                module.slotsVariableEntry(project, packId)
-        return baseVariables + loadDynamicProperties(project, baseVariables)
-    }
-
-    private fun loadDynamicProperties(project: Project, variables: Variables): Map<String, Any?> {
-        require(project.properties.values.none { it is UnresolvedProperty }) {
-            "Undefined properties: ${project.properties.values.filterIsInstance<UnresolvedProperty>().map { it.descriptor.key }}"
-        }
-        val resolved = project.properties.values
-            .filterIsInstance<ResolvedProperty>()
-            .associate { it.descriptor.key to it.value }
-            .toMutableMap()
-        val dynamicProperties = project.properties.values
-            .filterIsInstance<DynamicProperty>()
-            .toMutableList()
-        var evaluationFailed = false
-
-        fun DynamicProperty.evaluate(assignment: PropertyAssignment, type: PropertyType = descriptor.type): Any? =
-            when(assignment) {
-                is ValueAssignment -> type.parse(assignment.value)
-                is ExpressionAssignment -> type.cast(assignment.expression.evaluate(variables + resolved))
-            }
-
-        // to allow resolution of other values in the current map,
-        // keep trying to resolve properties until no progress is made
-        while (dynamicProperties.isNotEmpty()) {
-            val initialSize = dynamicProperties.size
-            val iterator = dynamicProperties.listIterator()
-            while (iterator.hasNext()) {
-                val property = iterator.next()
-                val evalResult = try {
-                    if (property.descriptor.type.isList()) {
-                        property.assignments.map {
-                            property.evaluate(it, property.descriptor.type.elementType!!)
-                        }
-                    } else {
-                        property.evaluate(
-                            property.assignments.singleOrNull()
-                                ?: error("Multiple values supplied for property ${property.descriptor.key}")
-                        )
-                    }
-                } catch (e: Exception) {
-                    if (evaluationFailed) throw e
-                    log.debug { "Failed property value evaluation ${property.descriptor.key}: ${e.message}; will try again" }
-                    continue
-                }
-                resolved[property.descriptor.key] = evalResult
-                iterator.remove()
-            }
-            evaluationFailed = initialSize == dynamicProperties.size
-        }
-
-        return resolved
+    private fun Project.collectVariables(packId: PackId, module: SourceModule): Stack<Map<String, Any?>> {
+        val pack = packs.find { it.id == packId } ?: throw MissingPackException(packId)
+        val modulePath = module.originalPath.takeIf { it.isNotEmpty() }
+        val baseVariables = resolvedVariables(pack, modulePath) +
+            toVariableEntry() +
+            module.toVariableEntry() +
+            module.slotsVariableEntry(packId)
+        return baseVariables + dynamicVariables(pack, modulePath, baseVariables)
     }
 
 }

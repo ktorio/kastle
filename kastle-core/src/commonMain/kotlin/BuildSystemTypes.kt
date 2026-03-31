@@ -2,14 +2,9 @@ package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.ProjectModules.*
-import org.jetbrains.kastle.utils.Expression
-import org.jetbrains.kastle.utils.StringExpression
 import org.jetbrains.kastle.utils.TreeMap.Companion.toTreeMap
-import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.unwrapQuotes
 import org.jetbrains.kastle.utils.wrapQuotes
-import kotlin.collections.flatten
-import kotlin.collections.plus
 import kotlin.jvm.JvmInline
 
 @Serializable(RevisionSerializer::class)
@@ -145,7 +140,9 @@ fun ProjectModules.map(mapping: (SourceModule) -> SourceModule): ProjectModules 
 fun ProjectModules.flatten(): ProjectModules =
     when (this) {
         is Empty -> this
-        is Single -> Single(module.copy(manifest = module.manifest.copy(path = "")))
+        is Single -> Single(
+            module.copy(manifest = module.manifest.copy(path = ""))
+        )
         is Multi -> {
             val path = modules.first().path
             val slashIndex = path.indexOf('/', 1) // ignore starting slash
@@ -182,17 +179,46 @@ private fun merge(modules: List<SourceModule>, other: List<SourceModule>): Multi
 
 @Serializable
 sealed interface SourceModuleMetadata {
+    /**
+     * Path to the module in the resulting project.
+     */
     val path: String
+
+    /**
+     * Module path before structural changes (i.e., flattening).
+     */
+    val originalPath: String
+
+    /**
+     * Platforms that this module supports.
+     */
     val platforms: Set<Platform>
+
+    /**
+     * Gradle dependencies for the module; either imported or module references.
+     */
     val dependencies: DependenciesMap
+
+    /**
+     * Gradle dependencies for the module's tests; either imported or module references.
+     */
     val testDependencies: DependenciesMap
+
+    /**
+     * Gradle-specific settings, like plugins.
+     */
     val gradle: GradleSettings
+
+    /**
+     * Amper-specific settings.
+     */
     val amper: AmperSettings
 }
 
 @Serializable
 data class SourceModuleManifest(
     override val path: String = "",
+    override val originalPath: String = path,
     override val platforms: Set<Platform> = emptySet(),
     override val dependencies: DependenciesMap = emptyMap(),
     override val testDependencies: DependenciesMap = emptyMap(),
@@ -200,11 +226,10 @@ data class SourceModuleManifest(
     override val amper: AmperSettings = AmperSettings(),
 ): SourceModuleMetadata
 
-
 val SourceModuleMetadata.allDependencies: Set<Dependency> get() =
     (dependencies.values.flatten() + testDependencies.values.flatten()).toSet()
 
-val SourceModuleMetadata.gradlePlugins: List<String> get() =
+val SourceModuleMetadata.gradlePlugins: List<CatalogReference> get() =
     gradle.plugins
 
 fun SourceModuleMetadata.fullPath(packId: PackId) =
@@ -267,12 +292,13 @@ data class AmperApplicationSettings(
 
 @Serializable
 data class GradleSettings(
-    val plugins: List<String> = emptyList(),
+    val plugins: List<CatalogReference> = emptyList(),
 )
 
 @Serializable
 data class GradleProjectSettings(
     val repositories: List<MavenRepository> = emptyList(),
+    val pluginRepositories: List<MavenRepository> = emptyList(),
     val plugins: List<GradlePlugin> = emptyList(),
 )
 
@@ -291,8 +317,6 @@ enum class SourceModuleType(val code: String) {
     IOS_APP("ios/app");
 
     companion object {
-        val DEFAULT = LIB
-
         fun parse(text: String) = entries
             .firstOrNull { it.code == text }
             ?: throw IllegalArgumentException("Invalid module type: $text")
@@ -305,14 +329,7 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
     return manifest.tryMerge(other.manifest)?.let { manifest ->
         SourceModule(
             manifest = manifest,
-            sources = (sources + other.sources).also { mergedSources ->
-                val uniquePaths = mutableSetOf<StringExpression>()
-                mergedSources.forEach {
-                    require(it.target.protocol != "file" || uniquePaths.add(it.target)) {
-                        "Duplicate file: ${it.target}"
-                    }
-                }
-            }
+            sources = sources + other.sources
         )
     }
 }
@@ -324,7 +341,7 @@ fun SourceModuleManifest.tryMerge(other: SourceModuleManifest): SourceModuleMani
             path.isEmpty() -> other.path
             else -> return null
         },
-        platforms = platforms + other.platforms,
+        platforms = platforms.intersect(other.platforms),
         dependencies = dependencies.merge(other.dependencies),
         testDependencies = testDependencies.merge(other.testDependencies),
         gradle = GradleSettings((gradle.plugins + other.gradle.plugins).distinct()),
@@ -343,7 +360,7 @@ sealed interface Dependency {
                 return functionDependency
             }
             if (text.startsWith("$"))
-                return CatalogReference(text.substring(1), exported = exported)
+                return CatalogReference.parse(input)
             if (!text.contains(":"))
                 return ModuleDependency(text, exported = exported)
 
@@ -357,16 +374,23 @@ sealed interface Dependency {
     val exported: Boolean
 }
 
-@Serializable
+@Serializable(CatalogReferenceSerializer::class)
 data class CatalogReference(
     val key: String,
-    val group: String? = null,
     override val exported: Boolean = false,
 ): Dependency {
     companion object {
-        fun lookupFormat(key: String): String =
-            key.trimStart('$').removePrefix("libs.").replace('.', '-')
+        fun parse(key: String): CatalogReference {
+            return CatalogReference(
+                key = key.trimStart('$').trimEnd('!'),
+                exported = key.endsWith('!')
+            )
+        }
     }
+
+    val catalog get() = key.substringBefore('.')
+    val keyInCatalog get() = key.removePrefix("$catalog.").removePrefix("plugins.")
+    val tomlKey: String get() = keyInCatalog.replace('.', '-')
 
     override fun toString(): String = buildString {
         append('$')
@@ -374,16 +398,14 @@ data class CatalogReference(
         if (exported) append("!")
     }
 }
-val CatalogReference.lookupKey: String get() =
-    key.removePrefix("$").removePrefix("libs.").replace('.', '-')
 
 fun CatalogReference.gradleFormat(versionsCatalog: VersionsCatalog): String? {
-    val artifact = versionsCatalog.libraries[lookupKey] ?: return null
+    val artifact = versionsCatalog.libraries[tomlKey] ?: return null
     val versionNumber = when(artifact.version) {
         is CatalogVersion.Ref -> versionsCatalog.versions[artifact.version.ref] ?: return null
         is CatalogVersion.Number -> artifact.version.number
     }
-    return "${artifact.group}:${artifact.artifact}:$versionNumber"
+    return "${artifact.group}:${artifact.name}:$versionNumber"
 }
 
 
@@ -447,12 +469,21 @@ data class ModuleDependency(
 
 @Serializable
 data class VersionsCatalog(
+    val name: String = DEFAULT_NAME,
+    val source: VersionsCatalogSource = VersionsCatalogSource.FILE,
     val plugins: Map<String, PluginArtifact> = emptyMap(),
     val versions: Map<String, String> = emptyMap(),
     val libraries: Map<String, CatalogArtifact> = emptyMap(),
 ) {
     companion object {
+        const val DEFAULT_NAME = "libs"
         val Empty = VersionsCatalog()
+
+        fun VersionsCatalog?.orEmpty() = this ?: Empty
+    }
+    init {
+        require(name.isNotEmpty()) { "Versions catalog name cannot be empty" }
+        require(name.all { it.isLetter() }) { "Versions catalog name must contain only letters" }
     }
 
     fun isEmpty() = versions.isEmpty() && libraries.isEmpty()
@@ -461,6 +492,8 @@ data class VersionsCatalog(
         if (this.isEmpty()) other
         else if (other.isEmpty()) this
         else VersionsCatalog(
+            name = name,
+            source = source,
             plugins = (plugins + other.plugins).toTreeMap(),
             versions = (versions + other.versions).toTreeMap(),
             libraries = (libraries + other.libraries).toTreeMap(),
@@ -471,19 +504,31 @@ data class VersionsCatalog(
 }
 
 @Serializable
+enum class VersionsCatalogSource {
+    /**
+     * From a toml file in the repository.
+     */
+    FILE,
+    /**
+     * Imported from maven or some other source.
+     */
+    EXTERNAL
+}
+
+@Serializable
 data class PluginArtifact(
     val id: String,
     val version: CatalogVersion,
 )
 
-@Serializable
+@Serializable(with = CatalogArtifactSerializer::class)
 data class CatalogArtifact(
     val module: String,
     val version: CatalogVersion,
     val builtIn: Boolean = false,
 ) {
-    val group: String get() = module.substringBeforeLast(':')
-    val artifact: String get() = module.substringAfterLast(':')
+    val group: String get() = module.substringBefore(':')
+    val name: String get() = module.substringAfter(':')
 }
 
 @Serializable(CatalogVersionSerializer::class)

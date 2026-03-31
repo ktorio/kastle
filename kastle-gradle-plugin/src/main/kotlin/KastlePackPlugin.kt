@@ -26,8 +26,7 @@ private const val TEMPLATES_ARTIFACT = "org.jetbrains:kastle-templates:1.0.0-SNA
 
 abstract class KastlePackPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val repository: PackRepository =
-            project.extraProperties[REPOSITORY_PROPERTY] as? PackRepository ?: error("Repository property is not set")
+        val repository: PackRepository = project.extraProperties[REPOSITORY_PROPERTY] as? PackRepository ?: error("Repository property is not set")
         val pack: PackMetadata = project.extraProperties[PACK_PROPERTY] as? PackMetadata ?: error("Pack property is not set")
         val module: SourceModuleMetadata = project.extraProperties[SOURCE_MODULE_PROPERTY] as? SourceModuleMetadata ?: error("Module property is not set")
         val versions: VersionsCatalog = project.extraProperties[VERSIONS_PROPERTY] as? VersionsCatalog ?: error("Module property is not set")
@@ -60,7 +59,8 @@ abstract class KastlePackPlugin : Plugin<Project> {
     ) {
         for (pluginAlias in module.gradlePlugins) {
             try {
-                val (pluginId, _) = versionsCatalog.plugins[pluginAlias.removePrefix($$"$libs.")] ?: continue
+                val lookupKey = pluginAlias.tomlKey.removePrefix("plugins-")
+                val (pluginId, _) = versionsCatalog.plugins[lookupKey] ?: continue
                 when (pluginId) {
                     // TODO get sdk versions from catalog
                     "com.android.application" -> {
@@ -87,12 +87,13 @@ abstract class KastlePackPlugin : Plugin<Project> {
                     }
 
                     else -> {
-                        if (!project.plugins.hasPlugin(pluginId))
+                        if (!project.plugins.hasPlugin(pluginId)) {
                             project.plugins.apply(pluginId)
+                        }
                     }
                 }
             } catch (e: Exception) {
-                project.logger.error("Cannot apply {} in {}", pluginAlias, project.path, e)
+                project.logger.warn("Cannot apply {} in {}", pluginAlias, project.path, e)
             }
         }
     }
@@ -111,6 +112,7 @@ abstract class KastlePackPlugin : Plugin<Project> {
 
                 kotlinExt.sourceSets.apply {
                     val main = findByName("main") ?: error("Missing Kotlin JVM source set: main")
+                    val test = findByName("test") ?: error("Missing Kotlin JVM source set: test")
 
                     main.apply {
                         // Keep JVM layout consistent with the single-platform KMP layout
@@ -131,33 +133,51 @@ abstract class KastlePackPlugin : Plugin<Project> {
                             )
 
                             // Inter-pack dependencies
-                            for (packId in pack.requires) {
-                                try {
-                                    // TODO support direct module references for multi-module packs
-                                    val requiredModule =
-                                        runBlocking { repository.read(packId) }?.sourceModules?.singleOrNull()
-                                    if (requiredModule == null) {
-                                        project.logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
-                                        continue
-                                    }
-                                    val projectRef = packId.toProjectRef(requiredModule.path)
-
-                                    // For plain JVM modules we wire these as implementation deps (no 'api' unless we also apply java-library)
-                                    project.dependencies.add(
-                                        implementationConfigurationName,
-                                        project.project(projectRef)
-                                    )
-                                } catch (e: Exception) {
-                                    project.logger.error("Cannot resolve {}", packId, e)
-                                }
+                            // We guess the correct module to require here based on the platforms.
+                            for (requiredPackId in pack.requires) {
+                                project.addPackDependency(
+                                    pack.id,
+                                    module,
+                                    apiConfigurationName,
+                                    repository.readPackBlocking(requiredPackId)
+                                )
                             }
 
                             // Explicit artifact/module dependencies
                             for (dependency in requiredDependencies) {
                                 try {
-                                    project.dependency(implementationConfigurationName, dependency, fullModulePath)
+                                    project.dependency(apiConfigurationName, dependency, fullModulePath)
                                 } catch (e: Exception) {
                                     project.logger.error("Cannot resolve {}", dependency, e)
+                                }
+                            }
+                        }
+                    }
+
+                    test.apply {
+                        kotlin.srcDir("test")
+
+                        project.afterEvaluate {
+                            project.dependencies.add(
+                                implementationConfigurationName,
+                                "org.jetbrains.kotlin:kotlin-test"
+                            )
+
+                            val requiredTestDependencies = module.testDependencies[Platform.JVM] ?: emptyList()
+                            val fullModulePath = module.fullPath(pack.id)
+
+                            project.logger.lifecycle(
+                                "Add {} test dependencies to {}",
+                                requiredTestDependencies.size,
+                                test
+                            )
+
+                            for (dependency in requiredTestDependencies) {
+                                try {
+                                    project.dependency(implementationConfigurationName, dependency, fullModulePath)
+                                    } catch (e: Exception) {
+                                        project.logger.error("Cannot resolve test dependency {}", dependency, e)
+                                    }
                                 }
                             }
                         }
@@ -165,7 +185,6 @@ abstract class KastlePackPlugin : Plugin<Project> {
                 }
             }
         }
-    }
 
     private fun configureAndroidApp(
         project: Project,
@@ -215,19 +234,13 @@ abstract class KastlePackPlugin : Plugin<Project> {
             )
 
             // Inter-pack dependencies
-            for (packId in pack.requires) {
-                try {
-                    val requiredModule =
-                        runBlocking { repository.read(packId) }?.sourceModules?.singleOrNull()
-                    if (requiredModule == null) {
-                        project.logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
-                        continue
-                    }
-                    val projectRef = packId.toProjectRef(requiredModule.path)
-                    project.dependencies.add("implementation", project.project(projectRef))
-                } catch (e: Exception) {
-                    project.logger.error("Cannot resolve {}", packId, e)
-                }
+            for (requiredPackId in pack.requires) {
+                project.addPackDependency(
+                    pack.id,
+                    module,
+                    "implementation",
+                    repository.readPackBlocking(requiredPackId)
+                )
             }
 
             // Explicit artifact/module dependencies
@@ -238,6 +251,34 @@ abstract class KastlePackPlugin : Plugin<Project> {
                     project.logger.error("Cannot resolve {}", dependency, e)
                 }
             }
+        }
+    }
+
+    private fun PackRepository.readPackBlocking(packId: PackId): PackDescriptor {
+        return runBlocking { read(packId) } ?: error("Pack $packId is missing")
+    }
+
+    private fun Project.addPackDependency(
+        currentPackId: PackId,
+        module: SourceModuleMetadata,
+        configurationName: String,
+        requiredPack: PackDescriptor
+    ) {
+        val requiredPackId = requiredPack.id
+        try {
+            val requiredModule = when (val requiredPackModules = requiredPack.sources.modules) {
+                is ProjectModules.Single -> requiredPackModules.module.takeIf { it.platforms.containsAll(module.platforms) }
+                is ProjectModules.Multi -> requiredPackModules.modules.find { it.platforms.containsAll(module.platforms) }
+                is ProjectModules.Empty -> null
+            }
+            if (requiredModule == null) {
+                logger.lifecycle("Skipping $requiredPackId for ${currentPackId}/${module.path}; no applicable module")
+            } else {
+                val projectRef = requiredPackId.toProjectRef(requiredModule.path)
+                dependencies.add(configurationName, project.project(projectRef))
+            }
+        } catch (e: Exception) {
+            logger.error("Cannot resolve {} for $currentPackId", requiredPackId, e)
         }
     }
 
@@ -262,7 +303,10 @@ abstract class KastlePackPlugin : Plugin<Project> {
                 kotlinExt.configurePlatform(platform)
 
                 kotlinExt.sourceSets.apply {
-                    findByName(platform.kotlinSourceSetName)?.apply {
+                    val mainSourceSet = findByName(platform.kotlinSourceSetName)
+                    val testSourceSet = findByName(platform.kotlinTestSourceSetName)
+
+                    mainSourceSet?.apply {
                         if (isSinglePlatform || platform == Platform.COMMON) {
                             kotlin.srcDir("src")
                             resources.srcDir("resources")
@@ -283,19 +327,13 @@ abstract class KastlePackPlugin : Plugin<Project> {
                                 this
                             )
 
-                            for (packId in pack.requires) {
-                                try {
-                                    val requiredModule =
-                                        runBlocking { repository.read(packId) }?.sourceModules?.singleOrNull()
-                                    if (requiredModule == null) {
-                                        project.logger.error("Pack $packId could not be imported; it must be present and only have ONE module")
-                                        continue
-                                    }
-                                    val projectRef = packId.toProjectRef(requiredModule.path)
-                                    project.dependencies.add(apiConfigurationName, project.project(projectRef))
-                                } catch (e: Exception) {
-                                    project.logger.error("Cannot resolve {}", packId, e)
-                                }
+                            for (requiredPackId in pack.requires) {
+                                project.addPackDependency(
+                                    pack.id,
+                                    module,
+                                    apiConfigurationName,
+                                    repository.readPackBlocking(requiredPackId)
+                                )
                             }
 
                             for (dependency in requiredDependencies) {
@@ -307,6 +345,38 @@ abstract class KastlePackPlugin : Plugin<Project> {
                             }
                         }
                     } ?: project.logger.error("Missing source set ${platform.kotlinSourceSetName}")
+
+                    testSourceSet?.apply {
+                        if (isSinglePlatform || platform == Platform.COMMON) {
+                            kotlin.srcDir("test")
+                        } else {
+                            kotlin.srcDir("test@${platform.name.lowercase()}")
+                        }
+
+                        project.afterEvaluate {
+                            project.dependencies.add(
+                                implementationConfigurationName,
+                                "org.jetbrains.kotlin:kotlin-test"
+                            )
+
+                            val requiredTestDependencies = module.testDependencies[platform] ?: emptyList()
+                            val fullModulePath = module.fullPath(pack.id)
+
+                            project.logger.lifecycle(
+                                "Add {} test dependencies to {}",
+                                requiredTestDependencies.size,
+                                this
+                            )
+
+                            for (dependency in requiredTestDependencies) {
+                                try {
+                                    project.dependency(this, dependency, fullModulePath)
+                                } catch (e: Exception) {
+                                    project.logger.error("Cannot resolve test dependency {}", dependency, e)
+                                }
+                            }
+                        }
+                    } ?: project.logger.error("Missing source set ${platform.kotlinTestSourceSetName}")
                 }
             }
         }
@@ -340,6 +410,19 @@ abstract class KastlePackPlugin : Plugin<Project> {
                 Platform.WEB -> "wasmJsMain"
             }
 
+    private val Platform.kotlinTestSourceSetName
+        get() =
+            when (this) {
+                Platform.COMMON -> "commonTest"
+                Platform.JVM -> "jvmTest"
+                Platform.ANDROID -> "androidUnitTest"
+                Platform.WASM -> "wasmJsTest"
+                Platform.NATIVE -> "nativeTest"
+                Platform.IOS -> "iosArm64Test"
+                Platform.JS -> "jsTest"
+                Platform.WEB -> "wasmJsTest"
+            }
+
     private fun Project.dependency(
         configurationName: String,
         dependency: Dependency,
@@ -347,9 +430,8 @@ abstract class KastlePackPlugin : Plugin<Project> {
     ) {
         when (dependency) {
             is CatalogReference -> {
-                val keys = dependency.key.removePrefix("$").split(".").toMutableList()
-                val catalog = extensions.getByType(VersionCatalogsExtension::class.java).named(keys.removeFirst())
-                val provider = catalog.findLibrary(keys.joinToString(".")).orElseThrow()
+                val catalog = extensions.getByType(VersionCatalogsExtension::class.java).named(dependency.catalog)
+                val provider = catalog.findLibrary(dependency.keyInCatalog).orElseThrow()
                 dependencies.add(configurationName, provider)
             }
 
@@ -377,7 +459,8 @@ abstract class KastlePackPlugin : Plugin<Project> {
         when (dependency) {
             is CatalogReference -> {
                 val keys = dependency.key.removePrefix("$").split(".").toMutableList()
-                val catalog = extensions.getByType(VersionCatalogsExtension::class.java).named(keys.removeFirst())
+                val catalog = extensions.getByType(VersionCatalogsExtension::class.java)
+                    .named(keys.removeFirst())
                 val provider = catalog.findLibrary(keys.joinToString(".")).orElseThrow()
                 dependencies.add(sourceSet.apiConfigurationName, provider)
             }

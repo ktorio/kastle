@@ -1,5 +1,7 @@
 
-product: jvm/app
+product:
+  type: lib
+  platforms: [jvm]
 
 dependencies@jvm:
   - $ktorLibs.server.core

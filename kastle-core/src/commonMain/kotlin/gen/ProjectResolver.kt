@@ -5,6 +5,8 @@ import org.jetbrains.kastle.*
 import org.jetbrains.kastle.utils.TreeMap
 import org.jetbrains.kastle.utils.isFile
 import org.jetbrains.kastle.utils.isSlot
+import org.jetbrains.kastle.utils.merge
+import kotlin.collections.groupBy
 
 fun interface ProjectResolver {
     companion object {
@@ -26,18 +28,24 @@ fun interface ProjectResolver {
             val rootSources = packs
                 .flatMap { it.rootSources }
                 .filter { it.isFile() }
-            val propertyValues: Map<VariableId, List<PropertyAssignment>> = packs.flatMap { pack ->
-                pack.propertyValues
-            }.groupBy({ it.key })
+            val propertyValues = packs.asSequence()
+                .map { it.propertyValues }
+                .reduceOrNull { acc, map -> acc.merge(map) }.orEmpty()
+                .mapValues { (_, assignments) -> assignments.groupBy { it.key } }
             val propertyDescriptors = packs.flatMap { pack ->
                 pack.properties.map { property ->
                     VariableId(pack.id, property.key) to property
                 }
             }.toMap()
-            val properties = propertyDescriptors.mapValues { (variableId, property) ->
-                resolveProperty(descriptor, propertyValues, variableId, property)
-            }
-            val repositoryCatalog = repository.versions()
+            val properties: Map<PropertyScope, Map<VariableId, PropertyInstance>> =
+                propertyValues.mapValues { (propertyScope, assignments) ->
+                    propertyDescriptors.mapValues { (variableId, property) ->
+                        resolveProperty(descriptor, assignments, variableId, property)
+                    }
+                }
+            // Merge all catalogs for library lookups
+            // TODO handle collisions
+            val repositoryCatalog = repository.catalogs().reduce { acc, catalog -> acc + catalog }
             val versions = TreeMap<String, String>().also { versions ->
                 versions["kotlin"] = repositoryCatalog.versions["kotlin"] ?: missingVersion("kotlin")
             }
@@ -45,31 +53,35 @@ fun interface ProjectResolver {
             val gradlePlugins = TreeMap<String, GradlePlugin>()
 
             for (module in moduleSources.modules) {
-                for (pluginKey in module.gradlePlugins) {
-                    val catalogKey = CatalogReference.lookupFormat(pluginKey)
+                for (catalogRef in module.gradlePlugins) {
+                    val catalogKey = catalogRef.tomlKey
                     val (id, version) = repositoryCatalog.plugins[catalogKey] ?: continue
                     if (version is CatalogVersion.Ref)
                         versions[version.ref] = repositoryCatalog.versions[version.ref] ?: missingVersion(version.ref)
-                    gradlePlugins[catalogKey] = GradlePlugin(id, pluginKey, catalogKey, version)
+                    gradlePlugins[catalogKey] = GradlePlugin(id, catalogRef.key, catalogKey, version)
                 }
 
                 for (dependency in module.allDependencies) {
                     if (dependency !is CatalogReference) continue
-                    val artifact = repositoryCatalog.libraries[dependency.lookupKey]
+                    val artifact = repositoryCatalog.libraries[dependency.tomlKey]
                     if (artifact == null) {
                         // skip libraries supplied from other catalogs
-                        if (!dependency.lookupKey.startsWith("lib"))
+                        if (!dependency.tomlKey.startsWith("lib"))
                             continue
                         missingDependency(dependency)
                     }
-                    val version = artifact.version
-                    // TODO allow non-refs?
-                    val versionRef = (version as? CatalogVersion.Ref)?.ref ?: continue
-                    val versionValue = repositoryCatalog.versions[versionRef]
-                    versions[versionRef] = versionValue ?: missingVersion(versionRef)
-                    val library = repositoryCatalog.libraries[dependency.lookupKey]
-                    if (library != null)
-                        libraries[dependency.lookupKey] = library
+                    when(val version = artifact.version) {
+                        is CatalogVersion.Ref -> {
+                            val versionValue = repositoryCatalog.versions[version.ref]
+                            versions[version.ref] = versionValue ?: missingVersion(version.ref)
+                        }
+                        is CatalogVersion.Number -> {
+                            // nothing else required
+                        }
+                    }
+                    repositoryCatalog.libraries[dependency.tomlKey]?.let {
+                        libraries[dependency.tomlKey] = it
+                    }
                 }
             }
 
@@ -84,6 +96,7 @@ fun interface ProjectResolver {
 
             val gradleSettings = GradleProjectSettings(
                 repositories = packs.flatMap { it.repositories }.distinct(),
+                pluginRepositories = packs.flatMap { it.pluginRepositories }.distinct(),
                 plugins = gradlePlugins.values.toList(),
             )
 
@@ -115,9 +128,9 @@ fun interface ProjectResolver {
                     DynamicProperty(property, assignments)
                 } ?: property.default?.let {
                     ResolvedProperty(property, property.type.parse(it))
-                } ?: if (property.type.isNullable())
+                } ?: if (property.type.isNullable()) {
                     ResolvedProperty(property, null)
-                else UnresolvedProperty(property)
+                } else UnresolvedProperty(property)
             } catch (e: Exception) {
                 throw IllegalArgumentException("Failed to read property $variableId: ${e.message}", e)
             }

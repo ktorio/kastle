@@ -30,14 +30,14 @@ abstract class FileSystemPackRepository(
             logger: Logger = ConsoleLogger(),
         ): MutablePackRepository {
             if (clear) fs.deleteRecursively(path)
-            fs.createDirectories(path)
+            fs.mkdirs(path)
             val export = when(fileFormat) {
                 JSON -> JsonFilePackRepository(path, fs)
                 CBOR -> CborFilePackRepository(path, fs)
             }
 
             // versions catalog
-            export.versions(versions())
+            export.catalogs(catalogs())
 
             // extra files
             files().collect { path ->
@@ -87,11 +87,14 @@ abstract class FileSystemPackRepository(
             .mapNotNull(::readMetadata)
             .asFlow()
 
-    override fun readAll(): Flow<PackDescriptor> =
-        allPackFiles()
+    override fun readAll(): Flow<PackDescriptor> {
+        val versionsDir = getVersionsDir()
+        return allPackFiles()
             .filter { it.name.endsWith(".${ext}") && !it.name.endsWith(".meta.${ext}") }
+            .filterNot { it.parent == versionsDir }
             .mapNotNull(::readDescriptor)
             .asFlow()
+    }
 
     override suspend fun get(packId: PackId): PackMetadata? =
         readMetadata(root.resolve("$packId.$ext"))
@@ -112,11 +115,22 @@ abstract class FileSystemPackRepository(
     }
 
     override suspend fun versions(): VersionsCatalog =
-        readVersions(root.resolve("libs.versions.$ext"))
+        readVersions(root.resolve("versions/${VersionsCatalog.DEFAULT_NAME}.versions.$ext"))
 
-    override suspend fun versions(versions: VersionsCatalog) {
-        writeVersions(root.resolve("libs.versions.$ext"), versions() + versions)
+    override suspend fun catalogs(): List<VersionsCatalog> {
+        val versionsDir = getVersionsDir()
+        if (!fs.isDirectory(versionsDir)) return emptyList()
+        return fs.list(versionsDir).map { readVersions(it) }
     }
+
+    override suspend fun catalogs(catalogs: List<VersionsCatalog>) {
+        fs.mkdirs(getVersionsDir())
+        for (catalog in catalogs) {
+            writeVersions(root.resolve("versions/${catalog.name}.versions.$ext"), catalog)
+        }
+    }
+
+    private fun getVersionsDir(): Path = root.resolve("versions")
 
     override fun files(): Flow<String> =
         fs.walkFiles(root).filter {
@@ -131,7 +145,7 @@ abstract class FileSystemPackRepository(
 
     override suspend fun file(path: String, bytes: Source) {
         val path = root.resolve(path.trimStart('/'))
-        path.parent?.let(fs::createDirectories)
+        path.parent?.let(fs::mkdirs)
         fs.sink(path).use { sink ->
             bytes.transferTo(sink)
         }

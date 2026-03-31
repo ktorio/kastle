@@ -3,6 +3,7 @@ package org.jetbrains.kastle.gen
 import kotlinx.io.files.Path
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.resolve
+import org.jetbrains.kastle.utils.Stack.Companion.toStack
 import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.isSlot
 import org.jetbrains.kastle.utils.normalize
@@ -11,12 +12,15 @@ import org.jetbrains.kastle.utils.wrapQuotes
 import kotlin.collections.buildMap
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.collections.flatten
+import kotlin.collections.map
 import kotlin.collections.plus
+import kotlin.collections.set
 
 data class Project(
     val descriptor: ProjectDescriptor,
     val packs: List<PackDescriptor>,
-    val properties: Map<VariableId, PropertyInstance>,
+    val properties: Map<PropertyScope, Map<VariableId, PropertyInstance>>,
     val slotSources: SourcesByUrl,
     val moduleSources: ProjectModules,
     val commonSources: List<SourceFile>,
@@ -43,21 +47,82 @@ fun Project.toVariableEntry(): Pair<String, Any?> =
 /**
  * Replace full variable ID keys with local variable names for referencing from template.
  */
-fun Project.getVariables(pack: PackDescriptor): Variables {
-    return Variables.of(
-        properties.mapKeys { (variableId) ->
-            when(variableId.packId) {
-                pack.id -> variableId.name
-                else -> variableId.toString()
-            }
-        }
-    )
+fun Project.resolvedVariables(
+    pack: PackDescriptor,
+    modulePath: String?,
+): Variables {
+    fun Map<VariableId, PropertyInstance>.toMap(): Map<String, Any?> =
+        entries.mapNotNull { (variableId, propertyInstance) ->
+            if (propertyInstance !is ResolvedProperty) return@mapNotNull null
+            variableId.relativeString(pack.id) to propertyInstance.value
+        }.toMap()
+
+    val rootScope = properties[PropertyScope.Pack]?.toMap()
+    val moduleScope = modulePath?.let {
+        properties[PropertyScope.Module(modulePath)]?.toMap()
+    }
+    return listOfNotNull(rootScope, moduleScope).toStack()
 }
 
+// TODO relativize dynamic variableIds
+fun Project.dynamicVariables(
+    pack: PackDescriptor,
+    modulePath: String?,
+    variables: Variables,
+): Map<String, Any?> {
+    val resolved = mutableMapOf<String, Any?>()
+    val dynamicProperties = listOfNotNull(
+        properties[PropertyScope.Pack]?.entries,
+        modulePath?.let { properties[PropertyScope.Module(modulePath)] }?.entries,
+    ).flatten().mapNotNull { (_, propertyInstance) ->
+        if (propertyInstance !is DynamicProperty) return@mapNotNull null
+        propertyInstance
+    }.toMutableList()
+    var evaluationFailed = false
+
+    fun DynamicProperty.evaluate(assignment: PropertyAssignment, type: PropertyType = descriptor.type): Any? =
+        when(assignment) {
+            is ValueAssignment -> type.parse(assignment.value)
+            is ExpressionAssignment -> type.cast(assignment.expression.evaluate(variables + resolved))
+        }
+
+    // to allow resolution of other values in the current map,
+    // keep trying to resolve properties until no progress is made
+    while (dynamicProperties.isNotEmpty()) {
+        val initialSize = dynamicProperties.size
+        val iterator = dynamicProperties.listIterator()
+        while (iterator.hasNext()) {
+            val property = iterator.next()
+            val evalResult = try {
+                if (property.descriptor.type.isList()) {
+                    property.assignments.map {
+                        property.evaluate(it, property.descriptor.type.elementType!!)
+                    }
+                } else {
+                    property.evaluate(
+                        property.assignments.singleOrNull()
+                            ?: error("Multiple values supplied for property ${property.descriptor.key}")
+                    )
+                }
+            } catch (e: Exception) {
+                if (evaluationFailed) throw e
+                continue
+            }
+            resolved[property.descriptor.key] = evalResult
+            iterator.remove()
+        }
+        evaluationFailed = initialSize == dynamicProperties.size
+    }
+
+    return resolved
+}
+
+context(project: Project)
 fun SourceModule.toVariableEntry(): Pair<String, Any?> =
     "_module" to toVariableMap()
 
-fun SourceModule.slotsVariableEntry(project: Project, packId: PackId): Pair<String, Any?> =
+context(project: Project)
+fun SourceModule.slotsVariableEntry(packId: PackId): Pair<String, Any?> =
     "_slots" to buildMap {
         for ((url, value) in project.slotSources + this@slotsVariableEntry.slotSources) {
             // insert relative value
@@ -74,6 +139,7 @@ val SourceModule.slotSources: SourcesByUrl get() =
         .filter { it.isSlot() }
         .groupBy { it.target.toString() }
 
+context(project: Project)
 private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "path" to path,
     "parent" to path.substringBeforeLast('/').takeIf { it.isNotEmpty() },
@@ -93,6 +159,7 @@ private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "amper" to amper.toVariableMap(),
 )
 
+context(project: Project)
 fun Dependency.toVariableMap(modulePath: String) =
     when(this) {
         is ArtifactDependency -> mapOf(
@@ -101,6 +168,7 @@ fun Dependency.toVariableMap(modulePath: String) =
             "artifact" to artifact,
             "version" to version,
             "exported" to exported,
+            "isJava" to isJavaLibrary(artifact),
         )
         is ModuleDependency -> mapOf(
             "type" to "project",
@@ -108,12 +176,13 @@ fun Dependency.toVariableMap(modulePath: String) =
             "gradlePath" to gradlePath(modulePath),
             "exported" to exported,
         )
-        // TODO find artifact from catalog?
         is CatalogReference -> mapOf(
             "type" to "catalog",
             "key" to key,
             "exported" to exported,
-        )
+            "isJava" to isJavaLibrary(key),
+        ) + project.libraries[tomlKey]?.toVariableMap().orEmpty()
+
         is FunctionDependency -> mapOf(
             "type" to "function",
             "functionName" to functionName,
@@ -130,11 +199,15 @@ private fun ModuleDependency.gradlePath(modulePath: String): String = buildStrin
 }
 
 fun GradleSettings.toVariableMap() = mapOf(
-    "plugins" to plugins
+    "plugins" to plugins.map { it.key }
 )
 
+context(project: Project)
 fun GradleProjectSettings.toVariableMap() = mapOf(
     "repositories" to repositories.map {
+        it.toVariableMap()
+    },
+    "pluginRepositories" to pluginRepositories.map {
         it.toVariableMap()
     },
     "plugins" to plugins.map {
@@ -142,8 +215,7 @@ fun GradleProjectSettings.toVariableMap() = mapOf(
             "id" to it.id,
             "name" to it.name,
             "catalogKey" to it.catalogKey,
-            "version" to it.version.toVariableMap()
-        )
+        ) + it.version.toVariableMap()
     },
 )
 
@@ -159,14 +231,29 @@ fun AmperSettings.toVariableMap(): Map<String, String?> = mapOf(
     it != null
 }
 
+context(project: Project)
 fun CatalogArtifact.toVariableMap() = mapOf(
     "module" to module,
     "group" to group,
-    "artifact" to artifact,
-    "version" to version.toVariableMap(),
-)
+    "artifact" to name,
+) + version.toVariableMap()
 
-fun CatalogVersion.toVariableMap(): Map<String, String?> = when(this) {
-    is CatalogVersion.Ref -> mapOf("ref" to ref)
-    is CatalogVersion.Number -> mapOf("number" to number)
-}
+context(project: Project)
+fun CatalogVersion.toVariableMap(): Map<String, String?> =
+    when(this) {
+        is CatalogVersion.Ref -> mapOf(
+            "version" to project.versions[ref],
+            "versionRef" to ref
+        )
+        is CatalogVersion.Number -> mapOf("version" to number)
+    }
+
+// TODO small hack for working with maven
+private val javaLibraries = listOf(
+    "logback",
+    "prometheus",
+    "h2",
+    "mongodb",
+)
+private fun isJavaLibrary(library: String): Boolean =
+    javaLibraries.any { it in library }

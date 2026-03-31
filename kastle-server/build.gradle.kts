@@ -1,3 +1,5 @@
+@file:OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.ktor)
@@ -8,7 +10,11 @@ plugins {
 }
 
 kotlin {
-    jvm()
+    jvm {
+        mainRun {
+            mainClass = "org.jetbrains.kastle.server.ApplicationKt"
+        }
+    }
     js {
         browser()
         binaries.executable()
@@ -49,7 +55,7 @@ kotlin {
                 implementation(libs.commonmark)
                 implementation(libs.mcp.sdk)
                 implementation(libs.ktoml)
-                implementation(libs.kotlin.compiler)
+                runtimeOnly(libs.kotlin.compiler)
             }
         }
 

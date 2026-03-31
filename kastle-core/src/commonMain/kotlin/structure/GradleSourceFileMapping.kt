@@ -12,16 +12,16 @@ import org.jetbrains.kastle.utils.capitalizeFirst
 import org.jetbrains.kastle.utils.fileName
 
 internal val GRADLE_PACK_ID = PackId("org.gradle", "gradle")
+internal val MAVEN_PACK_ID = PackId("org.apache", "maven") // follows the same structure
 internal val SOURCE_OR_RESOURCE_FOLDER_REGEX = Regex("(src|test|resources|testResources|res|composeResources)(?:@(\\w+))?/")
 internal val SOURCE_FOLDER_REGEX = Regex("(src|test)(?:@(\\w+))?/")
-internal val RESOURCE_FOLDER_REGEX = Regex("(resources|testResources|res|composeResources)(?:@(\\w+))?/")
 internal val UNCATEGORIZED_FILES = setOf("AndroidManifest.xml")
 
 /**
  * Transforms Amper source structure with Gradle.
  */
 val GradleSourceMapping = ProjectMapping { project ->
-    if (project.packs.none { it.id == GRADLE_PACK_ID })
+    if (project.packs.none { it.id == GRADLE_PACK_ID || it.id == MAVEN_PACK_ID })
         return@ProjectMapping project
 
     project.copy(
@@ -37,6 +37,7 @@ val GradleSourceMapping = ProjectMapping { project ->
                                 source.target.fileName in UNCATEGORIZED_FILES -> ""
                                 sourceRoot in setOf("res", "composeResources") -> "$sourceRoot/"
                                 sourceRoot in setOf("resources", "testResources") -> "resources/"
+                                source.target.fileName.endsWith(".proto") -> "proto/"
                                 else -> "kotlin/"
                             }
                             when (val target = match.groups[2]?.value) {

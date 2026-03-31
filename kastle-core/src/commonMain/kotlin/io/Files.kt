@@ -155,3 +155,14 @@ fun FileSystem.walkFiles(root: Path): Sequence<Path> = sequence {
         }
     }
 }
+
+/**
+ * There is a bizarre issue where `FileSystem.createDirectories()` does not work
+ * in the context of Gradle.  We implement a custom function here to get around this.
+ */
+fun FileSystem.mkdirs(path: Path) {
+    val ancestry = generateSequence(path) { it.parent }.toList().asReversed()
+    for (path in ancestry) mkdir(path)
+}
+
+expect fun FileSystem.mkdir(path: Path)

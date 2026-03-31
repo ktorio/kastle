@@ -1,28 +1,27 @@
 package org.jetbrains.kastle
 
 import com.charleskorn.kaml.Yaml
-import io.ktor.server.cio.CIO
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.plugins.di.dependencies
+import io.ktor.server.cio.*
+import io.ktor.server.engine.*
+import io.ktor.server.plugins.di.*
+import io.ktor.server.util.url
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.buffered
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readString
 import org.gradle.api.Plugin
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logging
 import org.jetbrains.kastle.io.FileFormat
 import org.jetbrains.kastle.io.FileSystemPackRepository.Companion.export
 import org.jetbrains.kastle.io.export
 import org.jetbrains.kastle.logging.LogLevel
-import org.jetbrains.kastle.server.errorHandling
-import org.jetbrains.kastle.server.json
-import org.jetbrains.kastle.server.monitoring
-import org.jetbrains.kastle.server.routing
-import org.jetbrains.kastle.server.serialization
+import org.jetbrains.kastle.server.*
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
+import java.net.URI
 
 abstract class KastleGradlePlugin : Plugin<Settings> {
     private val logger = Logging.getLogger(KastleGradlePlugin::class.java)
@@ -41,8 +40,9 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
         }
         val repository = LocalPackRepository(repositoryDir.absolutePath)
         val modules2packs = mutableMapOf<String, Pair<PackMetadata, SourceModuleMetadata>>()
+        val customPluginRepositories = mutableSetOf<MavenRepository>()
 
-        // associate modules and packs
+        // associate modules and packs, collect repositories
         runBlocking {
             val packs = repository.getAll().toList()
             for (pack in packs) {
@@ -55,48 +55,80 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
                         projectDir = repositoryDir.resolve(modulePath)
                     }
 
+                    customPluginRepositories += pack.pluginRepositories
                     modules2packs[projectRef] = pack to module
                 }
             }
-
         }
+        // include all plugin repositories
+        settings.pluginManagement.repositories { repositories ->
+            for (repository in customPluginRepositories) {
+                repositories.maven { it.url = URI(repository.url) }
+            }
+        }
+
         val versionsCatalog = runBlocking { repository.versions() }
 
         // Register top-level tasks on the root project
         settings.gradle.rootProject { project ->
+            fun doExport(fileFormat: FileFormat) {
+                val exportPath = kotlinx.io.files.Path(
+                    project.findProperty("exportPath") as? String ?: "export"
+                )
+                logger.lifecycle("Exporting repository to $exportPath...")
+                runBlocking {
+                    val export = repository.export(
+                        path = exportPath,
+                        fileFormat = fileFormat,
+                    )
+                    val exportedCatalogs = export.catalogs()
+                    val alreadyExportedNames = exportedCatalogs.map { it.name }.toSet()
+                    val catalogsExtension = project.extensions.getByType(VersionCatalogsExtension::class.java)
+                    val catalogNames = catalogsExtension.catalogNames
+                    val externalCatalogs = (catalogNames - alreadyExportedNames).map { catalogName ->
+                        val gradleCatalog = catalogsExtension.named(catalogName)
+                        val pluginAliases = gradleCatalog.pluginAliases.associateWith { alias ->
+                            val plugin = gradleCatalog.findPlugin(alias).get().get()
+                            PluginArtifact(
+                                id = plugin.pluginId,
+                                version = CatalogVersion.Number(plugin.version.toString()),
+                            )
+                        }
+                        val versionAliases = gradleCatalog.versionAliases.associateWith { alias ->
+                            gradleCatalog.findVersion(alias).get().requiredVersion
+                        }
+                        val libraryAliases = gradleCatalog.libraryAliases.associateWith { alias ->
+                            val dependency = gradleCatalog.findLibrary(alias).get().get()
+                            CatalogArtifact(
+                                module = "${dependency.module.group}:${dependency.module.name}",
+                                version = dependency.versionConstraint.requiredVersion.let(CatalogVersion::Number),
+                            )
+                        }
+                        VersionsCatalog(
+                            name = catalogName,
+                            source = VersionsCatalogSource.EXTERNAL,
+                            plugins = pluginAliases,
+                            versions = versionAliases,
+                            libraries = libraryAliases,
+                        )
+                    }
+                    if (externalCatalogs.isNotEmpty()) {
+                        export.catalogs(exportedCatalogs + externalCatalogs)
+                    }
+                    logger.lifecycle("Exported to $exportPath")
+                }
+            }
+
             project.tasks.register("kslExportToJson") { task ->
                 task.group = "kastle"
                 task.description = "Export the repository to JSON format"
-                task.doLast {
-                    val exportPath = kotlinx.io.files.Path(
-                        project.findProperty("exportPath") as? String ?: "export"
-                    )
-                    runBlocking {
-                        repository.export(
-                            path = exportPath,
-                            fileFormat = FileFormat.JSON,
-                        )
-                        logger.lifecycle("Exported to $exportPath")
-                    }
-                }
+                task.doLast { doExport(FileFormat.JSON) }
             }
 
             project.tasks.register("kslExportToCbor") { task ->
                 task.group = "kastle"
                 task.description = "Export the repository to CBOR format"
-                task.doLast {
-                    val exportPath = kotlinx.io.files.Path(
-                        project.findProperty("exportPath") as? String ?: "export"
-                    )
-                    logger.lifecycle("Exporting repository to $exportPath...")
-                    runBlocking {
-                        repository.export(
-                            path = exportPath,
-                            fileFormat = FileFormat.CBOR,
-                        )
-                        logger.lifecycle("Export done.")
-                    }
-                }
+                task.doLast { doExport(FileFormat.CBOR) }
             }
 
             // TODO input / output args
@@ -184,15 +216,16 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
                 gradlePluginPortal()
                 mavenCentral()
                 google()
-
-                // Needed for org.jetbrains.compose (Compose Multiplatform plugin artifacts)
-                maven { it.url = project.uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
+                // Include all custom repositories
+                for (mavenRepo in pack.repositories)
+                    maven { it.url = URI(mavenRepo.url) }
             }
 
             // Add gradle plugins to buildscript classpath
             // So that we can apply them later
-            for (pluginAlias in module.gradlePlugins) {
-                val (pluginId, version) = versionsCatalog.plugins[pluginAlias.removePrefix($$"$libs.")] ?: continue
+            for (catalogRef in module.gradlePlugins) {
+                val lookupKey = catalogRef.tomlKey
+                val (pluginId, version) = versionsCatalog.plugins[lookupKey] ?: continue
                 val versionNumber = when(version) {
                     is CatalogVersion.Ref -> versionsCatalog.versions[version.ref]
                     is CatalogVersion.Number -> version.number
