@@ -13,4 +13,4 @@ class MissingPackException(pack: PackId) : Exception("Missing pack: $pack")
 /**
  * General failure when attempting to read a pack.
  */
-class PackReadException(pack: PackId, cause: Throwable) : Exception("Failed to read pack: $pack", cause)
+class PackReadException(pack: PackId?, cause: Throwable) : Exception("Failed to read pack: ${pack ?: "unknown"}", cause)

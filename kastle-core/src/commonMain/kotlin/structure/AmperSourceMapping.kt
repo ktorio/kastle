@@ -39,7 +39,10 @@ private fun SourceModule.mapDependencies(mapping: (Dependency) -> Dependency) =
     copy(manifest = manifest.copy(
         dependencies = dependencies.mapValues { (_, dependencies) ->
             dependencies.map(mapping).toSet()
-        }
+        },
+        testDependencies = testDependencies.mapValues { (_, dependencies) ->
+            dependencies.map(mapping).toSet()
+        },
     ))
 
 private fun mapKtorLibraryReference(key: String): String {

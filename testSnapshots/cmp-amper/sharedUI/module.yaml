@@ -2,6 +2,7 @@
 product:
   type: lib
   platforms: [jvm, android, ios, js, wasmJs]
+
 dependencies:
   - $libs.compose.runtime: exported
   - $libs.compose.foundation: exported
@@ -11,6 +12,8 @@ dependencies:
   - $libs.compose.components.resources: exported
   - $libs.androidx.lifecycle.viewmodelCompose: exported
   - $libs.androidx.lifecycle.runtimeCompose: exported
+
+test-dependencies@jvm:test-dependencies@android:test-dependencies@ios:test-dependencies@js:test-dependencies@wasmJs:test-dependencies:
 
 settings:
   compose: enabled

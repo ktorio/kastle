@@ -1,12 +1,15 @@
 
 product: jvm/app
-dependencies:
 
+dependencies:
   - $ktor.server.core
   - $libs.logback.classic
   - $ktor.server.netty
   - $ktor.server.contentNegotiation
   - $ktor.serialization.kotlinx.json
+
+test-dependencies:
+- $ktor.server.testHost
 
 settings:
   ktor: enabled

@@ -23,4 +23,5 @@ dependencies {
     implementation(project(":sharedUI"))
     implementation(composeLibs.desktop.currentOs)
     implementation(libs.kotlinx.coroutinesSwing)
+    testImplementation(kotlin("test"))
 }

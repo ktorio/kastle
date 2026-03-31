@@ -279,6 +279,7 @@ private val javaLibraries = listOf(
     "prometheus",
     "h2",
     "mongodb",
+    "postgresql",
 )
 private fun isJavaLibrary(library: String): Boolean =
     javaLibraries.any { it in library }

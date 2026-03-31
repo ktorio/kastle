@@ -1,8 +1,10 @@
 
 product: web/app
-dependencies:
 
+dependencies:
   - ../sharedUI
+
+test-dependencies:
 
 settings:
   compose: enabled

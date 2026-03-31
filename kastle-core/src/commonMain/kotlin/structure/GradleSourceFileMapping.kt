@@ -31,7 +31,7 @@ val GradleSourceMapping = ProjectMapping { project ->
                     if (source.target.protocol == "file" && source.target.toString().contains(SOURCE_OR_RESOURCE_FOLDER_REGEX)) {
                         val newTarget = source.target.toString().replace(SOURCE_OR_RESOURCE_FOLDER_REGEX) { match ->
                             val sourceRoot = match.groups[1]!!.value
-                            val mainOrTest = (if (sourceRoot in setOf("test", "testResources")) "test" else "main").capitalizeFirst()
+                            val mainOrTest = if (sourceRoot in setOf("test", "testResources")) "test" else "main"
                             val fileCategory = when {
                                 source.target.fileName in UNCATEGORIZED_FILES -> ""
                                 sourceRoot in setOf("res", "composeResources") -> "$sourceRoot/"
@@ -41,12 +41,12 @@ val GradleSourceMapping = ProjectMapping { project ->
                             }
                             when (val target = match.groups[2]?.value) {
                                 null -> when(val platform = module.platforms.singleOrNull()) {
-                                    null -> "src/common$mainOrTest/$fileCategory"
+                                    null -> "src/common${mainOrTest.capitalizeFirst()}/$fileCategory"
                                     // only when using the kotlin jvm plugin
-                                    Platform.JVM -> "src/main/$fileCategory"
+                                    Platform.JVM -> "src/$mainOrTest/$fileCategory"
                                     else -> "src/${platform.code}$mainOrTest/$fileCategory"
                                 }
-                                else -> "src/$target$mainOrTest/$fileCategory"
+                                else -> "src/$target${mainOrTest.capitalizeFirst()}/$fileCategory"
                             }
                         }
                         when(source) {

@@ -63,28 +63,38 @@ abstract class FileSystemPackRepository(
     abstract fun readVersions(path: Path): VersionsCatalog
     abstract fun writeVersions(path: Path, versions: VersionsCatalog)
 
+    protected fun <T> tryRead(readOp: (Path) -> T): (Path) -> T = { path ->
+        try {
+            readOp(path)
+        } catch (e: Exception) {
+            throw PackReadException(idFromPath(path), e)
+        }
+    }
+
     override fun ids(): Flow<PackId> =
         fs.list(root).flatMap { groupPath ->
             if (fs.isDirectory(groupPath)) {
                 fs.list(groupPath)
             } else emptyList()
-        }.asFlow().mapNotNull { path ->
-            if (!path.toString().endsWith(ext)) return@mapNotNull null
-            PackId.parse("${path.parent!!.name}/${path.name.removeSuffix(".${ext}")}")
-        }
+        }.asFlow().mapNotNull(::idFromPath)
+
+    protected fun idFromPath(path: Path): PackId? {
+        return if (!path.toString().endsWith(ext)) null
+        else PackId.parse("${path.parent!!.name}/${path.name.removeSuffix(".${ext}")}")
+    }
 
     override fun groups(): Flow<Group> =
         fs.list(root).asFlow().mapNotNull { groupPath ->
             fs.list(groupPath).firstOrNull()?.let { path ->
                 if (!path.toString().endsWith(ext)) return@mapNotNull null
-                readDescriptor(path)?.group
+                tryRead(::readDescriptor)(path)?.group
             }
         }
 
     override fun getAll(): Flow<PackMetadata> =
         allPackFiles()
             .filter { it.name.endsWith(".meta.${ext}") }
-            .mapNotNull(::readMetadata)
+            .mapNotNull(tryRead(::readMetadata))
             .asFlow()
 
     override fun readAll(): Flow<PackDescriptor> {
@@ -92,7 +102,7 @@ abstract class FileSystemPackRepository(
         return allPackFiles()
             .filter { it.name.endsWith(".${ext}") && !it.name.endsWith(".meta.${ext}") }
             .filterNot { it.parent == versionsDir }
-            .mapNotNull(::readDescriptor)
+            .mapNotNull(tryRead(::readDescriptor))
             .asFlow()
     }
 
