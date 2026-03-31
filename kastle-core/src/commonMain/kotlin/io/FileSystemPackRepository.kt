@@ -87,11 +87,14 @@ abstract class FileSystemPackRepository(
             .mapNotNull(::readMetadata)
             .asFlow()
 
-    override fun readAll(): Flow<PackDescriptor> =
-        allPackFiles()
+    override fun readAll(): Flow<PackDescriptor> {
+        val versionsDir = getVersionsDir()
+        return allPackFiles()
             .filter { it.name.endsWith(".${ext}") && !it.name.endsWith(".meta.${ext}") }
+            .filterNot { it.parent == versionsDir }
             .mapNotNull(::readDescriptor)
             .asFlow()
+    }
 
     override suspend fun get(packId: PackId): PackMetadata? =
         readMetadata(root.resolve("$packId.$ext"))
@@ -115,17 +118,19 @@ abstract class FileSystemPackRepository(
         readVersions(root.resolve("versions/${VersionsCatalog.DEFAULT_NAME}.versions.$ext"))
 
     override suspend fun catalogs(): List<VersionsCatalog> {
-        val versionsDir = root.resolve("versions")
+        val versionsDir = getVersionsDir()
         if (!fs.isDirectory(versionsDir)) return emptyList()
         return fs.list(versionsDir).map { readVersions(it) }
     }
 
     override suspend fun catalogs(catalogs: List<VersionsCatalog>) {
-        fs.mkdirs(root.resolve("versions"))
+        fs.mkdirs(getVersionsDir())
         for (catalog in catalogs) {
             writeVersions(root.resolve("versions/${catalog.name}.versions.$ext"), catalog)
         }
     }
+
+    private fun getVersionsDir(): Path = root.resolve("versions")
 
     override fun files(): Flow<String> =
         fs.walkFiles(root).filter {
