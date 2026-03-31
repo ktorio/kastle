@@ -68,7 +68,7 @@
           "path": { "type": "string" },
           "text": { "type": "string" },
           "target": { "type": "string" },
-          "condition": {
+          "if": {
             "type": "string",
             "x-intellij-language-injection": "kotlin"
           },
