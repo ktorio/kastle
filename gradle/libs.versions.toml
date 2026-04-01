@@ -1,7 +1,7 @@
 [versions]
 kaml = "0.79.0"
 ktor = "3.4.0"
-kotlin = "2.3.20-Beta2"
+kotlin = "2.3.20"
 ksp-version = "2.3.4"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-serialization = "1.9.0"
