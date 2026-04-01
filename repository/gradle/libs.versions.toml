@@ -15,7 +15,7 @@ kotlin = "2.3.20-Beta2"
 kotlin-wrappers = "2026.2.9"
 kotlinx-coroutines = "1.10.2"
 logback = "1.5.29"
-material3 = "1.11.0-alpha02"
+material3 = "1.11.0-alpha05"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
