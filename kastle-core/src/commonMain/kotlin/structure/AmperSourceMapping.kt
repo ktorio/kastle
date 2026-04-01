@@ -2,6 +2,7 @@ package org.jetbrains.kastle.structure
 
 import org.jetbrains.kastle.CatalogReference
 import org.jetbrains.kastle.Dependency
+import org.jetbrains.kastle.FunctionDependency
 import org.jetbrains.kastle.SourceModule
 import org.jetbrains.kastle.gen.ProjectMapping
 import org.jetbrains.kastle.gradlePlugins
@@ -17,6 +18,9 @@ val AmperSourceMapping = ProjectMapping { project ->
             continue
         require(module.gradlePlugins.isEmpty()) {
             "Project has plugins that require the Gradle build system"
+        }
+        require(module.dependencies.values.flatten().none { it is FunctionDependency }) {
+            "Project has dependencies not supported by Amper"
         }
     }
 

@@ -291,14 +291,20 @@ data class AmperSettings(
     val compose: String? = null,
     val ktor: String? = null,
     val application: AmperApplicationSettings? = null,
+    val kotlin: AmperKotlinSettings? = null,
 ) {
-    fun isEmpty() = compose == null && ktor == null && application == null
+    fun isEmpty() = compose == null && ktor == null && application == null && kotlin == null
     fun isNotEmpty() = !isEmpty()
 }
 
 @Serializable
 data class AmperApplicationSettings(
     val mainClass: String? = null,
+)
+
+@Serializable
+data class AmperKotlinSettings(
+    val serialization: String? = null,
 )
 
 @Serializable
@@ -359,7 +365,8 @@ fun SourceModuleManifest.tryMerge(other: SourceModuleManifest): SourceModuleMani
         amper = AmperSettings(
             amper.compose ?: other.amper.compose,
             amper.ktor ?: other.amper.ktor,
-            amper.application ?: other.amper.application
+            amper.application ?: other.amper.application,
+            amper.kotlin ?: other.amper.kotlin,
         ),
     )
 }

@@ -17,3 +17,4 @@ test-dependencies@jvm:test-dependencies@android:test-dependencies@ios:test-depen
 
 settings:
   compose: enabled
+

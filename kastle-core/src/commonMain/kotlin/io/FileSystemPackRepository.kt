@@ -55,6 +55,7 @@ abstract class FileSystemPackRepository(
             return export
         }
     }
+    private val versionsDir = root.resolve("versions")
 
     abstract fun readDescriptor(path: Path): PackDescriptor?
     abstract fun writeDescriptor(path: Path, descriptor: PackDescriptor)
@@ -98,10 +99,8 @@ abstract class FileSystemPackRepository(
             .asFlow()
 
     override fun readAll(): Flow<PackDescriptor> {
-        val versionsDir = getVersionsDir()
         return allPackFiles()
             .filter { it.name.endsWith(".${ext}") && !it.name.endsWith(".meta.${ext}") }
-            .filterNot { it.parent == versionsDir }
             .mapNotNull(tryRead(::readDescriptor))
             .asFlow()
     }
@@ -125,22 +124,19 @@ abstract class FileSystemPackRepository(
     }
 
     override suspend fun versions(): VersionsCatalog =
-        readVersions(root.resolve("versions/${VersionsCatalog.DEFAULT_NAME}.versions.$ext"))
+        readVersions(versionsDir.resolve("${VersionsCatalog.DEFAULT_NAME}.versions.$ext"))
 
     override suspend fun catalogs(): List<VersionsCatalog> {
-        val versionsDir = getVersionsDir()
         if (!fs.isDirectory(versionsDir)) return emptyList()
         return fs.list(versionsDir).map { readVersions(it) }
     }
 
     override suspend fun catalogs(catalogs: List<VersionsCatalog>) {
-        fs.mkdirs(getVersionsDir())
+        fs.mkdirs(versionsDir)
         for (catalog in catalogs) {
             writeVersions(root.resolve("versions/${catalog.name}.versions.$ext"), catalog)
         }
     }
-
-    private fun getVersionsDir(): Path = root.resolve("versions")
 
     override fun files(): Flow<String> =
         fs.walkFiles(root).filter {
@@ -161,8 +157,10 @@ abstract class FileSystemPackRepository(
         }
     }
 
-    private fun allPackFiles(): Sequence<Path> = fs.list(root).asSequence().flatMap { groupDir ->
-        if (!fs.isDirectory(groupDir)) return@flatMap emptySequence()
-        fs.list(groupDir).asSequence()
-    }
+    private fun allPackFiles(): Sequence<Path> = fs.list(root).asSequence()
+        .filterNot { it == versionsDir }
+        .flatMap { groupDir ->
+            if (!fs.isDirectory(groupDir)) return@flatMap emptySequence()
+            fs.list(groupDir).asSequence()
+        }
 }

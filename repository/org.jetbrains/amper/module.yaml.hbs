@@ -41,6 +41,24 @@ product: {{ _module.type }}
 {{#if _module.amper}}
 settings:
   {{#each _module.amper.entries}}
-  {{ key }}: {{ value }}
+  {{#when key}}
+  {{"kotlin"}}
+  kotlin:
+  {{#each value.entries}}
+    {{ key }}: {{ value }}
   {{/each}}
+  {{else}}
+  {{ key }}: {{ value }}
+  {{/when}}
+  {{/each}}
+{{/if}}
+{{!-- Repositories --}}
+{{#if isSingleModule}}
+{{#if _project.gradle.repositories.size}}
+repositories:
+{{#each _project.gradle.repositories}}
+  - id: {{id}}
+    url: {{url}}
+{{/each}}
+{{/if}}
 {{/if}}

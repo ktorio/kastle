@@ -13,8 +13,6 @@
         <logback_version>1.5.21</logback_version>
         
     </properties>
-    <repositories>
-    </repositories>
     <dependencies>
         <dependency>
             <groupId>io.ktor</groupId>

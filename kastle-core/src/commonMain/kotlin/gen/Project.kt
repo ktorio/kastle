@@ -192,7 +192,6 @@ fun Dependency.toVariableMap(modulePath: String) =
             "artifact" to artifact,
             "version" to version,
             "exported" to exported,
-            "isJava" to isJavaLibrary(artifact),
         )
         is ModuleDependency -> mapOf(
             "type" to "project",
@@ -204,7 +203,6 @@ fun Dependency.toVariableMap(modulePath: String) =
             "type" to "catalog",
             "key" to key,
             "exported" to exported,
-            "isJava" to isJavaLibrary(key),
         ) + project.libraries[tomlKey]?.toVariableMap().orEmpty()
 
         is FunctionDependency -> mapOf(
@@ -249,18 +247,22 @@ fun MavenRepository.toVariableMap() = mapOf(
     "gradleFunction" to gradleFunction,
 )
 
-fun AmperSettings.toVariableMap(): Map<String, String?> = mapOf(
+fun AmperSettings.toVariableMap(): Map<String, Any?> = mapOf(
     "compose" to compose,
     "ktor" to ktor,
-).filterValues {
-    it != null
-}
+    "kotlin" to kotlin?.toVariableMap(),
+).filterValues { it != null }
+
+fun AmperKotlinSettings.toVariableMap(): Map<String, String?> = mapOf(
+    "serialization" to serialization,
+).filterValues { it != null }
 
 context(project: Project)
 fun CatalogArtifact.toVariableMap() = mapOf(
     "module" to module,
     "group" to group,
     "artifact" to name,
+    "kmp" to isKmp(group, name),
 ) + version.toVariableMap()
 
 context(project: Project)
@@ -274,12 +276,9 @@ fun CatalogVersion.toVariableMap(): Map<String, String?> =
     }
 
 // TODO small hack for working with maven
-private val javaLibraries = listOf(
-    "logback",
-    "prometheus",
-    "h2",
-    "mongodb",
-    "postgresql",
-)
-private fun isJavaLibrary(library: String): Boolean =
-    javaLibraries.any { it in library }
+private fun isKmp(group: String, artifact: String): Boolean =
+    group in setOf(
+        "org.jetbrains",
+        "org.jetbrains.kotlinx",
+        "io.ktor",
+    )

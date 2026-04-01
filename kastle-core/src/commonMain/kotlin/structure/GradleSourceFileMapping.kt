@@ -44,7 +44,7 @@ val GradleSourceMapping = ProjectMapping { project ->
                                     null -> "src/common${mainOrTest.capitalizeFirst()}/$fileCategory"
                                     // only when using the kotlin jvm plugin
                                     Platform.JVM -> "src/$mainOrTest/$fileCategory"
-                                    else -> "src/${platform.code}$mainOrTest/$fileCategory"
+                                    else -> "src/${platform.code}${mainOrTest.capitalizeFirst()}/$fileCategory"
                                 }
                                 else -> "src/$target${mainOrTest.capitalizeFirst()}/$fileCategory"
                             }
