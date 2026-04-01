@@ -3,18 +3,18 @@ platform: jvm
 sources:
   # Gradle build script
   - path: build.gradle.kts
-    target: file:build.gradle.kts
+    target: file:../build.gradle.kts
     if: "!isModularEnabled"
   - path: gradle.properties.hbs
-    target: file:gradle.properties
+    target: file:../gradle.properties
     if: "!isModularEnabled"
   - path: settings.gradle.kts
-    target: file:settings.gradle.kts
+    target: file:../settings.gradle.kts
     if: "!isModularEnabled"
 
   # README and friends
   - path: README.md.hbs
-    target: file:README.md
+    target: file:../README.md
     if: "!isModularEnabled"
 
   # Git
@@ -26,26 +26,26 @@ sources:
 
   ## Plugin descriptor, etc.
   - path: sources/main/resources/META-INF/plugin.xml.hbs
-    target: file:src/main/resources/META-INF/plugin.xml
+    target: file:../src/main/resources/META-INF/plugin.xml
     if: "!isModularEnabled"
   - path: sources/main/resources/META-INF/pluginIcon.svg
-    target: file:src/main/resources/META-INF/pluginIcon.svg
+    target: file:../src/main/resources/META-INF/pluginIcon.svg
     if: "!isModularEnabled"
 
   ## Code samples
   - path: sources/main/kotlin/MyMessageBundle.kt
-    target: file:src/main/kotlin/MyMessageBundle.kt
+    target: file:../src/main/kotlin/MyMessageBundle.kt
     if: "!isModularEnabled && addSampleCode"
   - path: sources/main/resources/messages/MyMessageBundle.properties
-    target: file:src/main/resources/messages/MyMessageBundle.properties
+    target: file:../src/main/resources/messages/MyMessageBundle.properties
     if: "!isModularEnabled && addSampleCode"
 
   ### Swing UI
   - path: sources/main/kotlin/MyToolWindowFactory.kt
-    target: file:src/main/kotlin/MyToolWindowFactory.kt
+    target: file:../src/main/kotlin/MyToolWindowFactory.kt
     if: "!isModularEnabled && addSampleCode && !isComposeEnabled"
 
   ### Compose UI
   - path: sources/main/kotlin/MyToolWindowFactory-compose.kt
-    target: file:src/main/kotlin/MyToolWindowFactory.kt
+    target: file:../src/main/kotlin/MyToolWindowFactory.kt
     if: "!isModularEnabled && addSampleCode && isComposeEnabled"

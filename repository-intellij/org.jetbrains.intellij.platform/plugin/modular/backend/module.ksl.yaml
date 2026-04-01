@@ -2,31 +2,32 @@ platform: jvm
 
 sources:
   - path: build.gradle.kts
+    target: file:../../backend/build.gradle.kts
     if: isModularEnabled
 
   - path: sources/main/resources/modular.plugin.backend.xml
-    target: file:src/main/resources/modular.plugin.backend.xml
+    target: file:../../backend/src/main/resources/modular.plugin.backend.xml
     if: isModularEnabled
-    
+
   ### Code samples
   - path: sources/main/kotlin/BackendChatRepositoryModel.kt
-    target: file:src/main/kotlin/BackendChatRepositoryModel.kt
+    target: file:../../backend/src/main/kotlin/BackendChatRepositoryModel.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/BackendChatRepositoryRpcApi.kt
-    target: file:src/main/kotlin/BackendChatRepositoryRpcApi.kt
+    target: file:../../backend/src/main/kotlin/BackendChatRepositoryRpcApi.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/BackendRpcApiProvider.kt
-    target: file:src/main/kotlin/BackendRpcApiProvider.kt
+    target: file:../../backend/src/main/kotlin/BackendRpcApiProvider.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/ModularPluginBackendBundle.kt
-    target: file:src/main/kotlin/ModularPluginBackendBundle.kt
+    target: file:../../backend/src/main/kotlin/ModularPluginBackendBundle.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/repository/AIResponseGenerator.kt
-    target: file:src/main/kotlin/repository/AIResponseGenerator.kt
+    target: file:../../backend/src/main/kotlin/repository/AIResponseGenerator.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/repository/ChatMessageFactory.kt
-    target: file:src/main/kotlin/repository/ChatMessageFactory.kt
+    target: file:../../backend/src/main/kotlin/repository/ChatMessageFactory.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/resources/messages/ModularPluginBackendBundle.properties
-    target: file:src/main/resources/messages/ModularPluginBackendBundle.properties
+    target: file:../../backend/src/main/resources/messages/ModularPluginBackendBundle.properties
     if: isModularEnabled && addSampleCode

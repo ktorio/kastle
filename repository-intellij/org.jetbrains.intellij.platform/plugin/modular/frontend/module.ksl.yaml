@@ -2,76 +2,77 @@ platform: jvm
 
 sources:
   - path: build.gradle.kts
+    target: file:../../frontend/build.gradle.kts
     if: isModularEnabled
 
   - path: sources/main/resources/modular.plugin.frontend.xml
-    target: file:src/main/resources/modular.plugin.frontend.xml
+    target: file:../../frontend/src/main/resources/modular.plugin.frontend.xml
     if: isModularEnabled
 
   ### Code samples
   - path: sources/main/kotlin/CoroutineScopeHolder.kt
-    target: file:src/main/kotlin/CoroutineScopeHolder.kt
+    target: file:../../frontend/src/main/kotlin/CoroutineScopeHolder.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/ModularPluginFrontendBundle.kt
-    target: file:src/main/kotlin/ModularPluginFrontendBundle.kt
+    target: file:../../frontend/src/main/kotlin/ModularPluginFrontendBundle.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/ModularPluginIcons.kt
-    target: file:src/main/kotlin/ModularPluginIcons.kt
+    target: file:../../frontend/src/main/kotlin/ModularPluginIcons.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/ChatAppColors.kt
-    target: file:src/main/kotlin/chatApp/ChatAppColors.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/ChatAppColors.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/ChatAppIcons.kt
-    target: file:src/main/kotlin/chatApp/ChatAppIcons.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/ChatAppIcons.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/ChatAppSample.kt
-    target: file:src/main/kotlin/chatApp/ChatAppSample.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/ChatAppSample.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/ui/MessageItem.kt
-    target: file:src/main/kotlin/chatApp/ui/MessageItem.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/ui/MessageItem.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/ui/PromptInput.kt
-    target: file:src/main/kotlin/chatApp/ui/PromptInput.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/ui/PromptInput.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/ui/SearchState.kt
-    target: file:src/main/kotlin/chatApp/ui/SearchState.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/ui/SearchState.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/viewmodel/ChatRepositoryApi.kt
-    target: file:src/main/kotlin/chatApp/viewmodel/ChatRepositoryApi.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/viewmodel/ChatRepositoryApi.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/viewmodel/ChatViewModel.kt
-    target: file:src/main/kotlin/chatApp/viewmodel/ChatViewModel.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/viewmodel/ChatViewModel.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/viewmodel/FrontendChatRepositoryModel.kt
-    target: file:src/main/kotlin/chatApp/viewmodel/FrontendChatRepositoryModel.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/viewmodel/FrontendChatRepositoryModel.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/viewmodel/MessageInputState.kt
-    target: file:src/main/kotlin/chatApp/viewmodel/MessageInputState.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/viewmodel/MessageInputState.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/viewmodel/SearchChatMessagesHandler.kt
-    target: file:src/main/kotlin/chatApp/viewmodel/SearchChatMessagesHandler.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/viewmodel/SearchChatMessagesHandler.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/chatApp/viewmodel/SearchChatMessagesHandlerImpl.kt
-    target: file:src/main/kotlin/chatApp/viewmodel/SearchChatMessagesHandlerImpl.kt
+    target: file:../../frontend/src/main/kotlin/chatApp/viewmodel/SearchChatMessagesHandlerImpl.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/components/PulsingText.kt
-    target: file:src/main/kotlin/components/PulsingText.kt
+    target: file:../../frontend/src/main/kotlin/components/PulsingText.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/kotlin/toolWindow/ModularPluginToolWindowFactory.kt
-    target: file:src/main/kotlin/toolWindow/ModularPluginToolWindowFactory.kt
+    target: file:../../frontend/src/main/kotlin/toolWindow/ModularPluginToolWindowFactory.kt
     if: isModularEnabled && addSampleCode
   - path: sources/main/resources/icons/toolWindow.svg
-    target: file:src/main/resources/icons/toolWindow.svg
+    target: file:../../frontend/src/main/resources/icons/toolWindow.svg
     if: isModularEnabled && addSampleCode
   - path: sources/main/resources/icons/toolWindow@20x20.svg
-    target: file:src/main/resources/icons/toolWindow@20x20.svg
+    target: file:../../frontend/src/main/resources/icons/toolWindow@20x20.svg
     if: isModularEnabled && addSampleCode
   - path: sources/main/resources/icons/toolWindow@20x20_dark.svg
-    target: file:src/main/resources/icons/toolWindow@20x20_dark.svg
+    target: file:../../frontend/src/main/resources/icons/toolWindow@20x20_dark.svg
     if: isModularEnabled && addSampleCode
   - path: sources/main/resources/icons/toolWindow_dark.svg
-    target: file:src/main/resources/icons/toolWindow_dark.svg
+    target: file:../../frontend/src/main/resources/icons/toolWindow_dark.svg
     if: isModularEnabled && addSampleCode
   - path: sources/main/resources/messages/ModularPluginFrontendBundle.properties
-    target: file:src/main/resources/messages/ModularPluginFrontendBundle.properties
+    target: file:../../frontend/src/main/resources/messages/ModularPluginFrontendBundle.properties
     if: isModularEnabled && addSampleCode
