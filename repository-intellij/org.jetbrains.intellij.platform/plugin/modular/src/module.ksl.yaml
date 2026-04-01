@@ -1,0 +1,7 @@
+platform: jvm
+
+sources:
+  - path: main/resources/META-INF/plugin.xml
+    if: isModularEnabled
+  - path: main/resources/META-INF/pluginIcon.svg
+    if: isModularEnabled
