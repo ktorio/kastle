@@ -14,7 +14,7 @@ junit = "4.13.2"
 kotlin = "2.3.20-Beta2"
 kotlin-wrappers = "2026.2.9"
 kotlinx-coroutines = "1.10.2"
-logback = "1.5.29"
+logback = "1.5.32"
 material3 = "1.11.0-alpha02"
 
 [libraries]
