@@ -14,7 +14,7 @@ kotest = "6.0.5"
 pluginPublish = "2.0.0"
 kastle = "1.0.0-SNAPSHOT"
 agp = "9.0.0"
-composeMultiplatform = "1.11.0-alpha02"
+composeMultiplatform = "1.11.0-beta01"
 commonmark = "0.27.0"
 
 [libraries]
