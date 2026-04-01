@@ -184,6 +184,14 @@ fun KtExpression?.toTemplateExpression(): Expression {
                 ?: throw IllegalArgumentException("Missing base expression"))
         }
 
+        is KtIfExpression -> {
+            Expression.IfElse(
+                condition.toTemplateExpression(),
+                then.toTemplateExpression(),
+                `else`.toTemplateExpression()
+            )
+        }
+
         // For if expressions and other complex constructs, you might want to add more cases
         else -> throw IllegalArgumentException("Unsupported expression type: ${this::class.simpleName}")
     }

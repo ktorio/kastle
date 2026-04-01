@@ -2,25 +2,30 @@
 
 This project was created using the [Ktor Project Generator](https://start.ktor.io).
 
+Here are some useful links to get you started:
+ * [Ktor Documentation](https://ktor.io/docs/home.html)
+ * [Ktor GitHub page](https://github.com/ktorio/ktor)
+ * [Ktor Slack chat](https://app.slack.com/client/T09229ZC6/C0A974TJ9). [Request an invite](https://surveys.jetbrains.com/s3/kotlin-slack-sign-up).
+
 
 ## Features
 Here's a list of features included in this project:
 
-| Name                                                                                  | Description                                                                        |
-|---------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
-| [Content Negotiation](https://start.ktor.io/p/io.ktor/server-content-negotiation)     | Provides automatic content conversion according to Content-Type and Accept headers |
-| [kotlinx.serialization](https://start.ktor.io/p/io.ktor/server-kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library                     |
+| Name | Description |
+|------|-------------|
+| [Content Negotiation](https://start.ktor.io/p/io.ktor/server-content-negotiation) | Provides automatic content conversion according to Content-Type and Accept headers |
+| [kotlinx.serialization](https://start.ktor.io/p/io.ktor/server-kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library |
 
 
 ## Building & Running
 To build or run the project, use one of the following tasks:
 
 
-| Task            | Description       |
-|-----------------|-------------------|
-| `./amper test`  | Run the tests     |
-| `./amper build` | Build the project |
-| `./amper run`   | Run the server    |
+| Task | Description |
+|------|-------------|
+| `./amper test`    | Run the tests     |
+| `./amper build`   | Build the project |
+| `./amper run`     | Run the server    |
 
 
 If the server starts successfully, you'll see the following output:

@@ -136,6 +136,17 @@ sealed interface Expression {
     }
 
     @Serializable
+    data class IfElse(val condition: Expression, val thenBranch: Expression, val elseBranch: Expression) : Expression {
+        override fun evaluate(variables: Variables): Any? =
+            if (condition.evaluate(variables).isTruthy()) {
+                thenBranch.evaluate(variables)
+            } else {
+                elseBranch.evaluate(variables)
+            }
+        override fun toString(): String = "if ($condition) $thenBranch else $elseBranch"
+    }
+
+    @Serializable
     data class MethodCall(val receiver: Expression?, val methodName: String, val args: List<Expression>) : Expression {
         override fun evaluate(variables: Variables): Any? {
             val evaluatedArgs = args.map { it.evaluate(variables) }
