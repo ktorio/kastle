@@ -39,10 +39,13 @@ fun Project.toVariableEntry(): Pair<String, Any?> =
     "_project" to mapOf(
         "name" to name,
         "group" to group,
+        "module" to moduleSources.modules.singleOrNull(),
         "modules" to moduleSources.modules.sortedBy { it.path }.map { it.toVariableMap() },
         "versions" to versions,
+        "buildSystem" to packs.firstOrNull { it.tags.contains("build-system") }?.id?.toString(),
         "libraries" to libraries.mapValues { (_, value) -> value.toVariableMap() },
         "gradle" to gradle.toVariableMap(),
+        "packs" to packs.map { it.toVariableMap() },
     )
 
 /**
@@ -94,9 +97,18 @@ fun Project.dynamicVariables(
         while (iterator.hasNext()) {
             val property = iterator.next()
             val evalResult = try {
+                // lists should accept multiple element assignments or a single list assignment
+                // TODO leverage the type system better here, this is messy
                 if (property.descriptor.type.isList()) {
                     property.assignments.map {
                         property.evaluate(it, property.descriptor.type.elementType!!)
+                    }.let { result ->
+                        result.flatMap { elem ->
+                            when(elem) {
+                                is List<*> -> elem
+                                else -> listOf(elem)
+                            }
+                        }
                     }
                 } else {
                     property.evaluate(
@@ -282,3 +294,10 @@ private fun isKmp(group: String, artifact: String): Boolean =
         "org.jetbrains.kotlinx",
         "io.ktor",
     )
+
+private fun PackDescriptor.toVariableMap() = mapOf(
+    "id" to id,
+    "name" to name,
+    "tags" to tags,
+    "description" to description,
+)

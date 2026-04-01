@@ -4,7 +4,6 @@ import org.jetbrains.kastle.Platform
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.StaticSource
 import org.jetbrains.kastle.gen.ProjectMapping
-import org.jetbrains.kastle.map
 import org.jetbrains.kastle.structure.BuildToolModules.GRADLE_PACK_ID
 import org.jetbrains.kastle.structure.BuildToolModules.MAVEN_PACK_ID
 import org.jetbrains.kastle.utils.StringLiteral
