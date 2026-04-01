@@ -10,4 +10,4 @@ links:
 
 propertyValues:
   - key: org.jetbrains.intellij.platform/plugin/isModularEnabled
-    value: true
+    value: "true"

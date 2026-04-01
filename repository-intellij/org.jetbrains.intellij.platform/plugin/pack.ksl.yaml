@@ -131,7 +131,7 @@ rootSources:
     target: file:backend/src/main/resources/modular.plugin.backend.xml
     if: isModularEnabled
     
-  ### Backedn code samples
+  ### Backend code samples
   - path: modular/backend/src/main/kotlin/BackendChatRepositoryModel.kt
     target: file:backend/src/main/kotlin/BackendChatRepositoryModel.kt
     if: isModularEnabled && addSampleCode
