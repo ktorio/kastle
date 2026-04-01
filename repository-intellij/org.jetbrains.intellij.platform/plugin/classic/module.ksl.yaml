@@ -25,27 +25,27 @@ sources:
   # Production sources
 
   ## Plugin descriptor, etc.
-  - path: src/main/resources/META-INF/plugin.xml.hbs
+  - path: sources/main/resources/META-INF/plugin.xml.hbs
     target: file:src/main/resources/META-INF/plugin.xml
     if: "!isModularEnabled"
-  - path: src/main/resources/META-INF/pluginIcon.svg
+  - path: sources/main/resources/META-INF/pluginIcon.svg
     target: file:src/main/resources/META-INF/pluginIcon.svg
     if: "!isModularEnabled"
 
   ## Code samples
-  - path: src/main/kotlin/MyMessageBundle.kt
+  - path: sources/main/kotlin/MyMessageBundle.kt
     target: file:src/main/kotlin/MyMessageBundle.kt
     if: "!isModularEnabled && addSampleCode"
-  - path: src/main/resources/messages/MyMessageBundle.properties
+  - path: sources/main/resources/messages/MyMessageBundle.properties
     target: file:src/main/resources/messages/MyMessageBundle.properties
     if: "!isModularEnabled && addSampleCode"
 
   ### Swing UI
-  - path: src/main/kotlin/MyToolWindowFactory.kt
+  - path: sources/main/kotlin/MyToolWindowFactory.kt
     target: file:src/main/kotlin/MyToolWindowFactory.kt
     if: "!isModularEnabled && addSampleCode && !isComposeEnabled"
 
   ### Compose UI
-  - path: src/main/kotlin/MyToolWindowFactory-compose.kt
+  - path: sources/main/kotlin/MyToolWindowFactory-compose.kt
     target: file:src/main/kotlin/MyToolWindowFactory.kt
     if: "!isModularEnabled && addSampleCode && isComposeEnabled"
