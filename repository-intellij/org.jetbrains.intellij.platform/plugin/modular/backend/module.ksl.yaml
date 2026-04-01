@@ -10,24 +10,10 @@ sources:
     if: isModularEnabled
 
   ### Code samples
-  - path: sources/main/kotlin/BackendChatRepositoryModel.kt
-    target: file:../../backend/src/main/kotlin/BackendChatRepositoryModel.kt
+  - path: sources/main/kotlin/*
+    target: file:../../backend/src/main/kotlin
     if: isModularEnabled && addSampleCode
-  - path: sources/main/kotlin/BackendChatRepositoryRpcApi.kt
-    target: file:../../backend/src/main/kotlin/BackendChatRepositoryRpcApi.kt
-    if: isModularEnabled && addSampleCode
-  - path: sources/main/kotlin/BackendRpcApiProvider.kt
-    target: file:../../backend/src/main/kotlin/BackendRpcApiProvider.kt
-    if: isModularEnabled && addSampleCode
-  - path: sources/main/kotlin/ModularPluginBackendBundle.kt
-    target: file:../../backend/src/main/kotlin/ModularPluginBackendBundle.kt
-    if: isModularEnabled && addSampleCode
-  - path: sources/main/kotlin/repository/AIResponseGenerator.kt
-    target: file:../../backend/src/main/kotlin/repository/AIResponseGenerator.kt
-    if: isModularEnabled && addSampleCode
-  - path: sources/main/kotlin/repository/ChatMessageFactory.kt
-    target: file:../../backend/src/main/kotlin/repository/ChatMessageFactory.kt
-    if: isModularEnabled && addSampleCode
+
   - path: sources/main/resources/messages/ModularPluginBackendBundle.properties
     target: file:../../backend/src/main/resources/messages/ModularPluginBackendBundle.properties
     if: isModularEnabled && addSampleCode

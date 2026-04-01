@@ -10,24 +10,10 @@ sources:
     if: isModularEnabled
 
   ### Code samples
-  - path: sources/main/kotlin/ChatMessage.kt
-    target: file:../../shared/src/main/kotlin/ChatMessage.kt
+  - path: sources/main/kotlin/*
+    target: file:../../shared/src/main/kotlin
     if: isModularEnabled && addSampleCode
-  - path: sources/main/kotlin/ChatRepositoryRpcApi.kt
-    target: file:../../shared/src/main/kotlin/ChatRepositoryRpcApi.kt
-    if: isModularEnabled && addSampleCode
-  - path: sources/main/kotlin/ModularPluginSharedBundle.kt
-    target: file:../../shared/src/main/kotlin/ModularPluginSharedBundle.kt
-    if: isModularEnabled && addSampleCode
-  - path: sources/main/kotlin/Searchable.kt
-    target: file:../../shared/src/main/kotlin/Searchable.kt
-    if: isModularEnabled && addSampleCode
-  - path: sources/main/kotlin/dtos.kt
-    target: file:../../shared/src/main/kotlin/dtos.kt
-    if: isModularEnabled && addSampleCode
-  - path: sources/main/kotlin/serializers.kt
-    target: file:../../shared/src/main/kotlin/serializers.kt
-    if: isModularEnabled && addSampleCode
+
   - path: sources/main/resources/messages/ModularPluginSharedBundle.properties
     target: file:../../shared/src/main/resources/messages/ModularPluginSharedBundle.properties
     if: isModularEnabled && addSampleCode
