@@ -13,7 +13,7 @@ mcp-sdk = "0.8.0"
 kotest = "6.0.5"
 pluginPublish = "2.0.0"
 kastle = "1.0.0-SNAPSHOT"
-agp = "9.0.0"
+agp = "9.1.0"
 composeMultiplatform = "1.11.0-alpha02"
 commonmark = "0.27.0"
 
