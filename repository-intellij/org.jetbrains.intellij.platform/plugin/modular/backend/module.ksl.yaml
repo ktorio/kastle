@@ -5,7 +5,7 @@ sources:
     target: file:../../backend/build.gradle.kts
     if: isModularEnabled
 
-  - path: sources/main/resources/modular.plugin.backend.xml
+  - path: sources/main/resources/modular.plugin.backend.xml.hbs
     target: file:../../backend/src/main/resources/modular.plugin.backend.xml
     if: isModularEnabled
 

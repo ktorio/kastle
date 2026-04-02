@@ -6,6 +6,7 @@
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">
-        <platform.rpc.backend.remoteApiProvider implementation="org.jetbrains.plugins.template.BackendRpcApiProvider"/>
+        {{#if addSampleCode}}
+        <platform.rpc.backend.remoteApiProvider implementation="{{_project.group}}.BackendRpcApiProvider"/>{{/if}}
     </extensions>
 </idea-plugin>

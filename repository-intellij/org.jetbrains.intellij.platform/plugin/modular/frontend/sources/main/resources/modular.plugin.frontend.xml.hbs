@@ -6,8 +6,10 @@
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="org.jetbrains.plugins.template.toolWindow.ModularPluginToolWindowFactory"
-                    id="ModularPlugin"
-                    icon="org.jetbrains.plugins.template.ModularPluginIcons.ToolWindow"/>
+        {{#if addSampleCode}}
+        <toolWindow
+                id="ModularPlugin"
+                factoryClass="{{_project.group}}.toolWindow.ModularPluginToolWindowFactory"
+                icon="{{_project.group}}.ModularPluginIcons.ToolWindow"/>{{/if}}
     </extensions>
 </idea-plugin>
