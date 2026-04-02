@@ -55,6 +55,7 @@ abstract class FileSystemPackRepository(
             return export
         }
     }
+    private val versionsDir = root.resolve("versions")
 
     abstract fun readDescriptor(path: Path): PackDescriptor?
     abstract fun writeDescriptor(path: Path, descriptor: PackDescriptor)
@@ -63,36 +64,44 @@ abstract class FileSystemPackRepository(
     abstract fun readVersions(path: Path): VersionsCatalog
     abstract fun writeVersions(path: Path, versions: VersionsCatalog)
 
+    protected fun <T> tryRead(readOp: (Path) -> T): (Path) -> T = { path ->
+        try {
+            readOp(path)
+        } catch (e: Exception) {
+            throw PackReadException(idFromPath(path), e)
+        }
+    }
+
     override fun ids(): Flow<PackId> =
         fs.list(root).flatMap { groupPath ->
             if (fs.isDirectory(groupPath)) {
                 fs.list(groupPath)
             } else emptyList()
-        }.asFlow().mapNotNull { path ->
-            if (!path.toString().endsWith(ext)) return@mapNotNull null
-            PackId.parse("${path.parent!!.name}/${path.name.removeSuffix(".${ext}")}")
-        }
+        }.asFlow().mapNotNull(::idFromPath)
+
+    protected fun idFromPath(path: Path): PackId? {
+        return if (!path.toString().endsWith(ext)) null
+        else PackId.parse("${path.parent!!.name}/${path.name.removeSuffix(".${ext}")}")
+    }
 
     override fun groups(): Flow<Group> =
         fs.list(root).asFlow().mapNotNull { groupPath ->
             fs.list(groupPath).firstOrNull()?.let { path ->
                 if (!path.toString().endsWith(ext)) return@mapNotNull null
-                readDescriptor(path)?.group
+                tryRead(::readDescriptor)(path)?.group
             }
         }
 
     override fun getAll(): Flow<PackMetadata> =
         allPackFiles()
             .filter { it.name.endsWith(".meta.${ext}") }
-            .mapNotNull(::readMetadata)
+            .mapNotNull(tryRead(::readMetadata))
             .asFlow()
 
     override fun readAll(): Flow<PackDescriptor> {
-        val versionsDir = getVersionsDir()
         return allPackFiles()
             .filter { it.name.endsWith(".${ext}") && !it.name.endsWith(".meta.${ext}") }
-            .filterNot { it.parent == versionsDir }
-            .mapNotNull(::readDescriptor)
+            .mapNotNull(tryRead(::readDescriptor))
             .asFlow()
     }
 
@@ -115,22 +124,19 @@ abstract class FileSystemPackRepository(
     }
 
     override suspend fun versions(): VersionsCatalog =
-        readVersions(root.resolve("versions/${VersionsCatalog.DEFAULT_NAME}.versions.$ext"))
+        readVersions(versionsDir.resolve("${VersionsCatalog.DEFAULT_NAME}.versions.$ext"))
 
     override suspend fun catalogs(): List<VersionsCatalog> {
-        val versionsDir = getVersionsDir()
         if (!fs.isDirectory(versionsDir)) return emptyList()
         return fs.list(versionsDir).map { readVersions(it) }
     }
 
     override suspend fun catalogs(catalogs: List<VersionsCatalog>) {
-        fs.mkdirs(getVersionsDir())
+        fs.mkdirs(versionsDir)
         for (catalog in catalogs) {
             writeVersions(root.resolve("versions/${catalog.name}.versions.$ext"), catalog)
         }
     }
-
-    private fun getVersionsDir(): Path = root.resolve("versions")
 
     override fun files(): Flow<String> =
         fs.walkFiles(root).filter {
@@ -151,8 +157,10 @@ abstract class FileSystemPackRepository(
         }
     }
 
-    private fun allPackFiles(): Sequence<Path> = fs.list(root).asSequence().flatMap { groupDir ->
-        if (!fs.isDirectory(groupDir)) return@flatMap emptySequence()
-        fs.list(groupDir).asSequence()
-    }
+    private fun allPackFiles(): Sequence<Path> = fs.list(root).asSequence()
+        .filterNot { it == versionsDir }
+        .flatMap { groupDir ->
+            if (!fs.isDirectory(groupDir)) return@flatMap emptySequence()
+            fs.list(groupDir).asSequence()
+        }
 }

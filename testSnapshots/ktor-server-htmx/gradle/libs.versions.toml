@@ -10,6 +10,7 @@ server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 server-htmlBuilder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor" }
 server-htmx = { module = "io.ktor:ktor-server-htmx", version.ref = "ktor" }
 server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+server-testHost = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

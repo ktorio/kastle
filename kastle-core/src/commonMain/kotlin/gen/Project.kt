@@ -3,6 +3,7 @@ package org.jetbrains.kastle.gen
 import kotlinx.io.files.Path
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.resolve
+import org.jetbrains.kastle.structure.BuildToolModules
 import org.jetbrains.kastle.utils.Stack.Companion.toStack
 import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.isSlot
@@ -38,10 +39,13 @@ fun Project.toVariableEntry(): Pair<String, Any?> =
     "_project" to mapOf(
         "name" to name,
         "group" to group,
+        "module" to moduleSources.modules.singleOrNull(),
         "modules" to moduleSources.modules.sortedBy { it.path }.map { it.toVariableMap() },
         "versions" to versions,
+        "buildSystem" to packs.firstOrNull { it.tags.contains("build-system") }?.id?.toString(),
         "libraries" to libraries.mapValues { (_, value) -> value.toVariableMap() },
         "gradle" to gradle.toVariableMap(),
+        "packs" to packs.map { it.toVariableMap() },
     )
 
 /**
@@ -66,7 +70,6 @@ fun Project.resolvedVariables(
 
 // TODO relativize dynamic variableIds
 fun Project.dynamicVariables(
-    pack: PackDescriptor,
     modulePath: String?,
     variables: Variables,
 ): Map<String, Any?> {
@@ -94,9 +97,18 @@ fun Project.dynamicVariables(
         while (iterator.hasNext()) {
             val property = iterator.next()
             val evalResult = try {
+                // lists should accept multiple element assignments or a single list assignment
+                // TODO leverage the type system better here, this is messy
                 if (property.descriptor.type.isList()) {
                     property.assignments.map {
                         property.evaluate(it, property.descriptor.type.elementType!!)
+                    }.let { result ->
+                        result.flatMap { elem ->
+                            when(elem) {
+                                is List<*> -> elem
+                                else -> listOf(elem)
+                            }
+                        }
                     }
                 } else {
                     property.evaluate(
@@ -143,7 +155,9 @@ context(project: Project)
 private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "path" to path,
     "parent" to path.substringBeforeLast('/').takeIf { it.isNotEmpty() },
-    "type" to if (amper.application != null && platforms.size == 1) "${platforms.single()}/app" else "lib",
+    "type" to if (mainClass() != null && platforms.size == 1)
+        "${platforms.single()}/app"
+    else "lib",
     "platform" to platforms.singleOrNull()?.code,
     "platforms" to platforms.map { it.code },
     "dependencies" to dependencies.asSequence()
@@ -159,6 +173,28 @@ private fun SourceModule.toVariableMap(): Map<String, Any?> = mapOf(
     "amper" to amper.toVariableMap(),
 )
 
+/**
+ * Find the main class from either amper settings, gradle properties, or use the default main.kt file.
+ */
+context(project: Project)
+fun SourceModule.mainClass(): String? {
+    amper.application?.mainClass?.let { amperMain ->
+        return amperMain
+    }
+    val moduleProperties = project.properties[PropertyScope.Module(originalPath)]
+        ?: return null
+    val mainClassGradlePropertyKey = VariableId(BuildToolModules.GRADLE_PACK_ID, "mainClass")
+    val mainClassProperty = moduleProperties[mainClassGradlePropertyKey] as? ResolvedProperty
+    mainClassProperty?.let {
+        return it.value as? String
+    }
+    sources.asSequence()
+        .map { it.target.toString().removePrefix("file:") }
+        .firstOrNull { it.endsWith("main.kt") }
+        ?.let { return it.replace('/', '.').replace("main.kt", "MainKt") }
+    return null
+}
+
 context(project: Project)
 fun Dependency.toVariableMap(modulePath: String) =
     when(this) {
@@ -168,7 +204,6 @@ fun Dependency.toVariableMap(modulePath: String) =
             "artifact" to artifact,
             "version" to version,
             "exported" to exported,
-            "isJava" to isJavaLibrary(artifact),
         )
         is ModuleDependency -> mapOf(
             "type" to "project",
@@ -180,7 +215,6 @@ fun Dependency.toVariableMap(modulePath: String) =
             "type" to "catalog",
             "key" to key,
             "exported" to exported,
-            "isJava" to isJavaLibrary(key),
         ) + project.libraries[tomlKey]?.toVariableMap().orEmpty()
 
         is FunctionDependency -> mapOf(
@@ -225,17 +259,22 @@ fun MavenRepository.toVariableMap() = mapOf(
     "gradleFunction" to gradleFunction,
 )
 
-fun AmperSettings.toVariableMap(): Map<String, String?> = mapOf(
-    "compose" to compose
-).filterValues {
-    it != null
-}
+fun AmperSettings.toVariableMap(): Map<String, Any?> = mapOf(
+    "compose" to compose,
+    "ktor" to ktor,
+    "kotlin" to kotlin?.toVariableMap(),
+).filterValues { it != null }
+
+fun AmperKotlinSettings.toVariableMap(): Map<String, String?> = mapOf(
+    "serialization" to serialization,
+).filterValues { it != null }
 
 context(project: Project)
 fun CatalogArtifact.toVariableMap() = mapOf(
     "module" to module,
     "group" to group,
     "artifact" to name,
+    "kmp" to isKmp(group, name),
 ) + version.toVariableMap()
 
 context(project: Project)
@@ -249,11 +288,16 @@ fun CatalogVersion.toVariableMap(): Map<String, String?> =
     }
 
 // TODO small hack for working with maven
-private val javaLibraries = listOf(
-    "logback",
-    "prometheus",
-    "h2",
-    "mongodb",
+private fun isKmp(group: String, artifact: String): Boolean =
+    group in setOf(
+        "org.jetbrains",
+        "org.jetbrains.kotlinx",
+        "io.ktor",
+    )
+
+private fun PackDescriptor.toVariableMap() = mapOf(
+    "id" to id,
+    "name" to name,
+    "tags" to tags,
+    "description" to description,
 )
-private fun isJavaLibrary(library: String): Boolean =
-    javaLibraries.any { it in library }

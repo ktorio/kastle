@@ -54,6 +54,11 @@ sealed interface Expression {
     }
 
     @Serializable
+    data class IntLiteral(override val value: Int) : Literal<Int> {
+        override fun toString(): String = value.toString()
+    }
+
+    @Serializable
     data class CharLiteral(override val value: Char) : Literal<Char> {
         override fun toString(): String = "'$value'"
     }
@@ -128,6 +133,17 @@ sealed interface Expression {
         }
 
         override fun toString(): String = "{ ${paramNames.joinToString()} -> $body }"
+    }
+
+    @Serializable
+    data class IfElse(val condition: Expression, val thenBranch: Expression, val elseBranch: Expression) : Expression {
+        override fun evaluate(variables: Variables): Any? =
+            if (condition.evaluate(variables).isTruthy()) {
+                thenBranch.evaluate(variables)
+            } else {
+                elseBranch.evaluate(variables)
+            }
+        override fun toString(): String = "if ($condition) $thenBranch else $elseBranch"
     }
 
     @Serializable

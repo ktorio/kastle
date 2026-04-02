@@ -34,6 +34,18 @@ class HandlebarsTemplateEngineTest : StringSpec({
         ) shouldBe "Goodbye!"
     }
 
+    "unless" {
+        val template = template("{{#unless someProperty}}Hello!{{else}}Goodbye!{{/unless}}")
+
+        template.toString(
+            variables = Variables("someProperty" to true)
+        ) shouldBe "Goodbye!"
+
+        template.toString(
+            variables = Variables("someProperty" to false)
+        ) shouldBe "Hello!"
+    }
+
     "when" {
         val template = template("{{#when name}}{{\"Bob\"}}Hi{{\"Joe\"}}Hello{{else}}Up yours{{/when}}, {{name}}!")
 
