@@ -7,3 +7,8 @@ sources:
   - path: main/resources/META-INF/pluginIcon.svg
     target: file:../../src/main/resources/META-INF/pluginIcon.svg
     if: isModularEnabled
+
+  # Git
+  - path: ../gitignoreItems.hbs
+    target: slot://org.jetbrains.intellij.platform.vcs/git/ignoredItems
+    if: "isModularEnabled"
