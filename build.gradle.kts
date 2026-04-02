@@ -4,10 +4,19 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
 }
 
+val refType: String? = System.getenv("GITHUB_REF_TYPE")
+val refName: String? = System.getenv("GITHUB_REF_NAME")
 
 subprojects {
     group = "org.jetbrains"
-    version = "1.0.0-SNAPSHOT"
+    version = when {
+        refType == "tag" && refName?.startsWith("release-") == true -> {
+            refName.removePrefix("release-").also {
+                println("Building release $it")
+            }
+        }
+        else -> "1.0.0-SNAPSHOT"
+    }
 
     // kotest problems
     tasks.withType<Test> {
