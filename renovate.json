@@ -5,6 +5,15 @@
   ],
   "ignorePaths": [
     "testSnapshots/**",
-    "repository/packs/**"
+    "repository/**"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "com.charleskorn.kaml:kaml",
+        "org.jetbrains.kotlinx:kotlinx-datetime"
+      ],
+      "enabled": false
+    }
   ]
 }
