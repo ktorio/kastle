@@ -6,10 +6,10 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import org.jetbrains.jewel.bridge.addComposeTab
-import org.jetbrains.plugins.template.CoroutineScopeHolder
-import org.jetbrains.plugins.template.chatApp.ChatAppSample
-import org.jetbrains.plugins.template.chatApp.viewmodel.ChatViewModel
-import org.jetbrains.plugins.template.chatApp.viewmodel.FrontendChatRepositoryModel
+import kastle.CoroutineScopeHolder
+import kastle.chatApp.ChatAppSample
+import kastle.chatApp.viewmodel.ChatViewModel
+import kastle.chatApp.viewmodel.FrontendChatRepositoryModel
 
 class ModularPluginToolWindowFactory : ToolWindowFactory, DumbAware {
     override fun shouldBeAvailable(project: Project) = true

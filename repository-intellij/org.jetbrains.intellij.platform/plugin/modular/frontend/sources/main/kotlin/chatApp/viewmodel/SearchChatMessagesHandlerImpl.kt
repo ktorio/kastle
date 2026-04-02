@@ -2,12 +2,12 @@ package kastle.chatApp.viewmodel
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
-import org.jetbrains.plugins.template.ChatMessage
+import kastle.ChatMessage
 
-import org.jetbrains.plugins.template.chatApp.ui.SearchState
-import org.jetbrains.plugins.template.chatApp.ui.hasResults
-import org.jetbrains.plugins.template.chatApp.ui.isSearching
-import org.jetbrains.plugins.template.chatApp.ui.searchQuery
+import kastle.chatApp.ui.SearchState
+import kastle.chatApp.ui.hasResults
+import kastle.chatApp.ui.isSearching
+import kastle.chatApp.ui.searchQuery
 
 /**
  * Implementation of the SearchChatMessagesHandler interface for handling

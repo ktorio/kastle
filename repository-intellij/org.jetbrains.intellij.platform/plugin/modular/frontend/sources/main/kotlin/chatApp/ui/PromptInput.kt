@@ -16,10 +16,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.jewel.foundation.theme.JewelTheme
 import org.jetbrains.jewel.ui.component.*
 import org.jetbrains.jewel.ui.theme.iconButtonStyle
-import org.jetbrains.plugins.template.chatApp.ChatAppColors
-import org.jetbrains.plugins.template.chatApp.ChatAppIcons
-import org.jetbrains.plugins.template.chatApp.viewmodel.MessageInputState
-import org.jetbrains.plugins.template.chatApp.viewmodel.isSending
+import kastle.chatApp.ChatAppColors
+import kastle.chatApp.ChatAppIcons
+import kastle.chatApp.viewmodel.MessageInputState
+import kastle.chatApp.viewmodel.isSending
 
 @Composable
 fun PromptInput(

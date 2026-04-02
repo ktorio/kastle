@@ -1,7 +1,7 @@
 package kastle
 
-import org.jetbrains.plugins.template.ChatMessage.ChatMessageType.AI_THINKING
-import org.jetbrains.plugins.template.ChatMessage.ChatMessageType.TEXT
+import kastle.ChatMessage.ChatMessageType.AI_THINKING
+import kastle.ChatMessage.ChatMessageType.TEXT
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*

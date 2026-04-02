@@ -1,7 +1,7 @@
 package kastle.chatApp.viewmodel
 
 import kotlinx.coroutines.flow.StateFlow
-import org.jetbrains.plugins.template.chatApp.ui.SearchState
+import kastle.chatApp.ui.SearchState
 
 /**
  * Interface that handles the process of searching for chat messages.

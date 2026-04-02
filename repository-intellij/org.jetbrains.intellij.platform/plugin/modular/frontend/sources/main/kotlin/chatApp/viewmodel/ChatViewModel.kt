@@ -3,7 +3,7 @@ package kastle.chatApp.viewmodel
 import com.intellij.openapi.Disposable
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.jetbrains.plugins.template.ChatMessage
+import kastle.ChatMessage
 
 interface ChatViewModelApi : Disposable {
     val chatMessagesFlow: StateFlow<List<ChatMessage>>

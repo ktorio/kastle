@@ -1,7 +1,7 @@
 package kastle.chatApp.viewmodel
 
 import kotlinx.coroutines.flow.StateFlow
-import org.jetbrains.plugins.template.ChatMessage
+import kastle.ChatMessage
 
 /**
  * Interface defining the contract for managing chat messages and interactions within a chat system.

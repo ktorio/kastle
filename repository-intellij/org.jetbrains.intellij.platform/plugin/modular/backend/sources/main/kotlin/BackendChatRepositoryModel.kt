@@ -2,8 +2,8 @@
 
 package kastle
 
-import org.jetbrains.plugins.template.repository.AIResponseGenerator
-import org.jetbrains.plugins.template.repository.ChatMessageFactory
+import kastle.repository.AIResponseGenerator
+import kastle.repository.ChatMessageFactory
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.CancellationException

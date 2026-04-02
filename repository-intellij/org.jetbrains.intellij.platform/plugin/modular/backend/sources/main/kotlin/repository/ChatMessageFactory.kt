@@ -1,6 +1,6 @@
 package kastle.repository
 
-import org.jetbrains.plugins.template.ChatMessage
+import kastle.ChatMessage
 
 import java.time.LocalDateTime
 

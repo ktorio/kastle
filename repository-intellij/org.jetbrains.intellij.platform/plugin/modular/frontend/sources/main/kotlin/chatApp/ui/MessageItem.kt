@@ -13,9 +13,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.jewel.foundation.theme.JewelTheme
 import org.jetbrains.jewel.ui.component.Text
-import org.jetbrains.plugins.template.ChatMessage
-import org.jetbrains.plugins.template.chatApp.ChatAppColors
-import org.jetbrains.plugins.template.components.PulsingText
+import kastle.ChatMessage
+import kastle.chatApp.ChatAppColors
+import kastle.components.PulsingText
 
 @Composable
 fun MessageBubble(

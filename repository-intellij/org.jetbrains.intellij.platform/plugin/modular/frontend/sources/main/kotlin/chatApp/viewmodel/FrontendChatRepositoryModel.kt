@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
-import org.jetbrains.plugins.template.ChatMessage
-import org.jetbrains.plugins.template.ChatRepositoryRpcApi
-import org.jetbrains.plugins.template.toChatMessage
+import kastle.ChatMessage
+import kastle.ChatRepositoryRpcApi
+import kastle.toChatMessage
 
 @Service(Level.PROJECT)
 class FrontendChatRepositoryModel(
