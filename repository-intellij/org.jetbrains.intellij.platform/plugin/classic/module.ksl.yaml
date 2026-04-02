@@ -25,11 +25,8 @@ sources:
   # Production sources
 
   ## Plugin descriptor, etc.
-  - path: sources/main/resources/META-INF/plugin.xml.hbs
-    target: file:../src/main/resources/META-INF/plugin.xml
-    if: "!isModularEnabled"
-  - path: sources/main/resources/META-INF/pluginIcon.svg
-    target: file:../src/main/resources/META-INF/pluginIcon.svg
+  - path: sources/main/resources/META-INF/*
+    target: file:../src/main/resources/META-INF
     if: "!isModularEnabled"
 
   ## Code samples
