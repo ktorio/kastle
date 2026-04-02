@@ -1,0 +1,22 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <org.jetbrains:kastle-client>
+final class org.jetbrains.kastle.client/RemoteRepository : org.jetbrains.kastle/PackRepository { // org.jetbrains.kastle.client/RemoteRepository|null[0]
+    constructor <init>(io.ktor.client/HttpClient) // org.jetbrains.kastle.client/RemoteRepository.<init>|<init>(io.ktor.client.HttpClient){}[0]
+    constructor <init>(kotlin/String) // org.jetbrains.kastle.client/RemoteRepository.<init>|<init>(kotlin.String){}[0]
+
+    final fun files(): kotlinx.coroutines.flow/Flow<kotlin/String> // org.jetbrains.kastle.client/RemoteRepository.files|files(){}[0]
+    final fun groups(): kotlinx.coroutines.flow/Flow<org.jetbrains.kastle/Group> // org.jetbrains.kastle.client/RemoteRepository.groups|groups(){}[0]
+    final fun ids(): kotlinx.coroutines.flow/Flow<org.jetbrains.kastle/PackId> // org.jetbrains.kastle.client/RemoteRepository.ids|ids(){}[0]
+    final suspend fun catalogs(): kotlin.collections/List<org.jetbrains.kastle/VersionsCatalog> // org.jetbrains.kastle.client/RemoteRepository.catalogs|catalogs(){}[0]
+    final suspend fun get(org.jetbrains.kastle/PackId): org.jetbrains.kastle/PackMetadata? // org.jetbrains.kastle.client/RemoteRepository.get|get(org.jetbrains.kastle.PackId){}[0]
+    final suspend fun read(org.jetbrains.kastle/PackId): org.jetbrains.kastle/PackDescriptor? // org.jetbrains.kastle.client/RemoteRepository.read|read(org.jetbrains.kastle.PackId){}[0]
+    final suspend fun readFile(kotlin/String): kotlinx.io/Source? // org.jetbrains.kastle.client/RemoteRepository.readFile|readFile(kotlin.String){}[0]
+}
+
+final fun (io.ktor.client/HttpClient).org.jetbrains.kastle.client/asRepository(kotlin/String? = ...): org.jetbrains.kastle.client/RemoteRepository // org.jetbrains.kastle.client/asRepository|asRepository@io.ktor.client.HttpClient(kotlin.String?){}[0]

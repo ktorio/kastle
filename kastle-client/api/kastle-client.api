@@ -1,0 +1,23 @@
+public final class org/jetbrains/kastle/client/RemoteRepository : org/jetbrains/kastle/PackRepository {
+	public fun <init> (Lio/ktor/client/HttpClient;)V
+	public fun <init> (Ljava/lang/String;)V
+	public fun catalogs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun files ()Lkotlinx/coroutines/flow/Flow;
+	public fun get (Lorg/jetbrains/kastle/PackId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getAll ()Lkotlinx/coroutines/flow/Flow;
+	public fun getAllWithRequirements (Ljava/util/Collection;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun groups ()Lkotlinx/coroutines/flow/Flow;
+	public fun ids ()Lkotlinx/coroutines/flow/Flow;
+	public fun read (Lorg/jetbrains/kastle/PackId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun readAll ()Lkotlinx/coroutines/flow/Flow;
+	public fun readAll (Ljava/util/Collection;)Lkotlinx/coroutines/flow/Flow;
+	public fun readFile (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun slot (Lorg/jetbrains/kastle/SlotId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun versions (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class org/jetbrains/kastle/client/RemoteRepositoryKt {
+	public static final fun asRepository (Lio/ktor/client/HttpClient;Ljava/lang/String;)Lorg/jetbrains/kastle/client/RemoteRepository;
+	public static synthetic fun asRepository$default (Lio/ktor/client/HttpClient;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kastle/client/RemoteRepository;
+}
+

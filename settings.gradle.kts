@@ -14,6 +14,11 @@ dependencyResolutionManagement {
         mavenCentral()
         google()
     }
+    versionCatalogs {
+        create("ktorLibs") {
+            from("io.ktor:ktor-version-catalog:3.4.2")
+        }
+    }
 }
 
 plugins {

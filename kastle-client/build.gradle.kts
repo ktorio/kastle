@@ -10,6 +10,11 @@ plugins {
 }
 
 kotlin {
+    @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+    abiValidation {
+        enabled = true
+    }
+
     jvm()
     iosArm64()
     iosSimulatorArm64()
@@ -25,16 +30,16 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":kastle-core"))
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.cio)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.json)
+            implementation(ktorLibs.client.core)
+            implementation(ktorLibs.client.cio)
+            implementation(ktorLibs.client.contentNegotiation)
+            implementation(ktorLibs.serialization.kotlinx.json)
             implementation(libs.ktoml)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-            implementation(libs.ktor.server.test.host)
-            implementation(libs.ktor.server.di)
+            implementation(ktorLibs.server.testHost)
+            implementation(ktorLibs.server.di)
         }
         jvmTest.dependencies {
             implementation(project(":kastle-test"))
