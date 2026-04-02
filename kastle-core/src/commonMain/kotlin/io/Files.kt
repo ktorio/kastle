@@ -37,7 +37,6 @@ fun Path.readText(fs: FileSystem = SystemFileSystem): String? {
     }
 }
 
-// TODO
 fun Path.relativeTo(base: Path): Path =
     Path(toString().removePrefix(base.toString()).removePrefix("/"))
 

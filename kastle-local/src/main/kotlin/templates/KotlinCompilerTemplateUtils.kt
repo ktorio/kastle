@@ -17,9 +17,6 @@ import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.kotlin.utils.addToStdlib.indexOfOrNull
 import org.jetbrains.kotlin.utils.addToStdlib.lastIndexOfOrNull
 
-fun KtFile.endOfImports(): Int? =
-    importDirectives.maxOfOrNull { it.textRange.endOffset }
-
 // TODO outer
 fun PsiElement.blockPosition(
     body: PsiElement = this,

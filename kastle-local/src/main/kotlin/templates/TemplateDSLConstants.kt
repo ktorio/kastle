@@ -10,6 +10,3 @@ const val UNSAFE = "_unsafe"
 // module properties
 const val PROJECT = "_project"
 const val MODULE = "_module"
-// TODO module name, targets, etc.
-const val DEPENDENCIES = "dependencies"
-const val TEST_DEPENDENCIES = "testDependencies"

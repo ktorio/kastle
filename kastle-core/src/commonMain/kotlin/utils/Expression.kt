@@ -78,8 +78,6 @@ sealed interface Expression {
     @Serializable
     data class VariableRef(val name: String) : Expression {
         override fun evaluate(variables: Variables): Any? = variables[name]
-             // TODO fix nullability vs missing
-             // ?: throw UndefinedVariableException(name)
         override fun toString(): String = name
     }
 

@@ -49,7 +49,7 @@ data class SemanticVersion(
     val qualifier: String? = null,
 ): Revision, Comparable<SemanticVersion> {
     companion object {
-        private val semanticVersionRegex = Regex("""^(\d+)\.(\d+)\.(\d+)(-([\w.]+))?${'$'}""")
+        private val semanticVersionRegex = Regex("""^(\d+)\.(\d+)\.(\d+)(-([\w.]+))?$""")
 
         fun parse(text: String): SemanticVersion =
             semanticVersionRegex.matchEntire(text)?.destructured?.let { (major, minor, patch, qualifier) ->

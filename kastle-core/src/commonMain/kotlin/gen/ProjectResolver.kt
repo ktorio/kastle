@@ -136,7 +136,6 @@ fun interface ProjectResolver {
             }
         }
 
-        // Add root sources
         private operator fun ProjectModules.plus(rootSources: List<SourceFile>): ProjectModules =
             when (this) {
                 is ProjectModules.Empty ->
@@ -144,7 +143,6 @@ fun interface ProjectResolver {
                 is ProjectModules.Single ->
                     copy(module = module.copy(sources = module.sources + rootSources))
                 is ProjectModules.Multi ->
-                    // TODO check for root
                     copy(modules = modules + SourceModule(sources = rootSources))
             }
 
