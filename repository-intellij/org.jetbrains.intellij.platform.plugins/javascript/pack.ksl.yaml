@@ -26,3 +26,13 @@ commonSources:
     #language=xml
     text: <module name="intellij.javascript.common"/>
     priority: 50
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: bundledPlugin("JavaScript")
+    priority: 50
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: <plugin id="JavaScript"/>
+    priority: 50

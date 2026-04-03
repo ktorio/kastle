@@ -26,3 +26,19 @@ commonSources:
     #language=xml
     text: <module name="intellij.yaml"/>
     priority: 70
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: |
+      bundledModule("intellij.yaml")
+      bundledModule("intellij.yaml.backend")
+      bundledModule("intellij.yaml.helm")
+    priority: 70
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: |
+      <module name="intellij.yaml"/>
+      <module name="intellij.yaml.backend"/>
+      <module name="intellij.yaml.helm"/>
+    priority: 70

@@ -22,3 +22,15 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
     #language=xml
     text: <module name="intellij.php.frontback.impl"/>
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: compatiblePlugin("com.jetbrains.php")
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: |
+      <module name="intellij.symfony"/>
+      <module name="intellij.php.frontback.impl"/>
+      <module name="intellij.php.completionMLRanking"/>
+      <module name="intellij.php.mcp"/>

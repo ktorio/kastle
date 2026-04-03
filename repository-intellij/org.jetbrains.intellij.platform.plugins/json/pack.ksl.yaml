@@ -26,3 +26,21 @@ commonSources:
     #language=xml
     text: <module name="intellij.json"/>
     priority: 60
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: |
+      bundledModule("intellij.json")
+      bundledModule("intellij.json.backend")
+      bundledModule("intellij.json.backend.regexp")
+      bundledModule("intellij.json.syntax")
+    priority: 60
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: |
+      <module name="intellij.json"/>
+      <module name="intellij.json.backend"/>
+      <module name="intellij.json.backend.regexp"/>
+      <module name="intellij.json.syntax"/>
+    priority: 60

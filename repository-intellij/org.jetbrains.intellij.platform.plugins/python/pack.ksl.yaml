@@ -22,3 +22,11 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
     #language=xml
     text: <module name="intellij.python.common"/>
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: compatiblePlugin("PythonCore")
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: <plugin id="PythonCore"/>

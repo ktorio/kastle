@@ -26,3 +26,35 @@ commonSources:
     #language=xml
     text: <module name="intellij.markdown"/>
     priority: 100
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: |
+      bundledModule("intellij.markdown")
+      bundledModule("intellij.markdown.fenceInjection")
+      bundledModule("intellij.markdown.frontmatter")
+      bundledModule("intellij.markdown.frontmatter.yaml")
+      bundledModule("intellij.markdown.frontmatter.toml")
+      bundledModule("intellij.markdown.images")
+      bundledModule("intellij.markdown.xml")
+      bundledModule("intellij.markdown.model")
+      bundledModule("intellij.markdown.spellchecker")
+      bundledModule("intellij.markdown.compose.preview")
+      bundledModule("intellij.markdown.backend")
+    priority: 100
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: |
+      <module name="intellij.markdown"/>
+      <module name="intellij.markdown.fenceInjection"/>
+      <module name="intellij.markdown.frontmatter"/>
+      <module name="intellij.markdown.frontmatter.yaml"/>
+      <module name="intellij.markdown.frontmatter.toml"/>
+      <module name="intellij.markdown.images"/>
+      <module name="intellij.markdown.xml"/>
+      <module name="intellij.markdown.model"/>
+      <module name="intellij.markdown.spellchecker"/>
+      <module name="intellij.markdown.compose.preview"/>
+      <module name="intellij.markdown.backend"/>
+    priority: 100

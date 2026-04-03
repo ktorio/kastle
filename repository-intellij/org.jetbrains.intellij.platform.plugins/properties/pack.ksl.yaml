@@ -30,3 +30,23 @@ commonSources:
       <module name="intellij.properties"/>
       <module name="intellij.properties.psi"/>
     priority: 90
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: |
+      bundledModule("intellij.properties.copyright")
+      bundledModule("intellij.properties.backend.psi")
+      bundledModule("intellij.properties.backend")
+      bundledModule("intellij.properties")
+      bundledModule("intellij.properties.psi")
+    priority: 90
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: |
+      <module name="intellij.properties.copyright"/>
+      <module name="intellij.properties.backend.psi"/>
+      <module name="intellij.properties.backend"/>
+      <module name="intellij.properties"/>
+      <module name="intellij.properties.psi"/>
+    priority: 90
