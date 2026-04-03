@@ -1,0 +1,13 @@
+# Foreign references
+numberProperty:
+    # Should be 43
+    fullPath: 43
+    # Should be null
+    relativePath: null
+
+# Local references
+integerProperty:
+    # Should be 40
+    fullPath: 40
+    # Should be 42
+    relativePath: 42

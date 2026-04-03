@@ -18,6 +18,7 @@ fun interface ProjectResolver {
                 .map { it.sources.modules }
                 .reduceOrNull(ProjectModules::plus)
                 ?.flatten() ?: ProjectModules.Empty
+            // TODO need to resolve target expression before grouping here
             val slotSources: SourcesByUrl = packs.asSequence()
                 .flatMap { it.commonAndRootSources }
                 .filter { it.isSlot() }
@@ -37,10 +38,17 @@ fun interface ProjectResolver {
                     VariableId(pack.id, property.key) to property
                 }
             }.toMap()
+            val packAssignments = propertyValues[PropertyScope.Root].orEmpty()
             val properties: Map<PropertyScope, Map<VariableId, PropertyInstance>> =
                 propertyValues.mapValues { (propertyScope, assignments) ->
                     propertyDescriptors.mapValues { (variableId, property) ->
-                        resolveProperty(descriptor, assignments, variableId, property)
+                        resolveProperty(
+                            descriptor,
+                            packAssignments,
+                            assignments,
+                            variableId,
+                            property
+                        )
                     }
                 }
             // Merge all catalogs for library lookups
@@ -115,16 +123,28 @@ fun interface ProjectResolver {
             )
         }
 
+        /**
+         * Preference order of property resolution:
+         * 1. User-supplied properties.
+         * 2. Module manifest assignments.
+         * 3. Root manifest assignments.
+         * 3. Default values.
+         * 4. Null (if nullable)
+         * Otherwise, the property is marked as unresolved.
+         */
         private fun resolveProperty(
             projectDescriptor: ProjectDescriptor,
-            packPropertyValues: Map<VariableId, List<PropertyAssignment>>,
+            packAssignments: Map<VariableId, List<PropertyAssignment>>,
+            moduleAssignments: Map<VariableId, List<PropertyAssignment>>,
             variableId: VariableId,
             property: PropertyDescriptor
         ): PropertyInstance {
             try {
                 return projectDescriptor.properties[variableId]?.let {
                     ResolvedProperty(property, property.type.parse(it))
-                } ?: packPropertyValues[variableId]?.let { assignments ->
+                } ?: moduleAssignments[variableId]?.let { assignments ->
+                    DynamicProperty(property, assignments)
+                } ?: packAssignments[variableId]?.let { assignments ->
                     DynamicProperty(property, assignments)
                 } ?: property.default?.let {
                     ResolvedProperty(property, property.type.parse(it))

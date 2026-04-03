@@ -1,60 +1,52 @@
 package org.jetbrains.kastle.gen
 
-import org.jetbrains.kastle.DynamicProperty
-import org.jetbrains.kastle.ExpressionAssignment
-import org.jetbrains.kastle.PackDescriptor
-import org.jetbrains.kastle.PropertyAssignment
-import org.jetbrains.kastle.PropertyInstance
-import org.jetbrains.kastle.PropertyScope
-import org.jetbrains.kastle.PropertyType
-import org.jetbrains.kastle.ResolvedProperty
-import org.jetbrains.kastle.ValueAssignment
-import org.jetbrains.kastle.VariableId
-import org.jetbrains.kastle.utils.Stack.Companion.toStack
+import org.jetbrains.kastle.*
+import org.jetbrains.kastle.utils.LocalVariables
 import org.jetbrains.kastle.utils.Variables
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 /**
  * Replace full variable ID keys with local variable names for referencing from template.
  */
-internal fun Project.resolvedVariables(
-    pack: PackDescriptor,
-    modulePath: String?,
-): Variables {
-    fun Map<VariableId, PropertyInstance>.toMap(): Map<String, Any?> =
+internal fun Project.resolvedVariables(modulePath: String?): Variables {
+    fun Map<VariableId, PropertyInstance>.toMap(): Map<VariableId, Any?> =
         entries.mapNotNull { (variableId, propertyInstance) ->
             if (propertyInstance !is ResolvedProperty) return@mapNotNull null
-            variableId.relativeString(pack.id) to propertyInstance.value
+            variableId to propertyInstance.value
         }.toMap()
 
-    val rootScope = properties[PropertyScope.Pack]?.toMap()
+    val rootScope = properties[PropertyScope.Root]?.toMap()
     val moduleScope = modulePath?.let {
         properties[PropertyScope.Module(modulePath)]?.toMap()
     }
-    return listOfNotNull(rootScope, moduleScope).toStack()
+    return Variables(listOfNotNull(rootScope, moduleScope))
 }
 
 // TODO relativize dynamic variableIds
 internal fun Project.dynamicVariables(
     modulePath: String?,
-    variables: Variables,
-): Map<String, Any?> {
-    val resolved = mutableMapOf<String, Any?>()
+    variables: LocalVariables,
+): Variables {
+    val resolved = LocalVariables(variables.packIds, Variables())
     val dynamicProperties = listOfNotNull(
-        properties[PropertyScope.Pack]?.entries,
+        properties[PropertyScope.Root]?.entries,
         modulePath?.let { properties[PropertyScope.Module(modulePath)] }?.entries,
-    ).flatten().mapNotNull { (_, propertyInstance) ->
+    ).flatten().mapNotNull { (variableId, propertyInstance) ->
         if (propertyInstance !is DynamicProperty) return@mapNotNull null
-        propertyInstance
+        variableId to propertyInstance
     }.toMutableList()
     var evaluationFailed = false
 
-    fun DynamicProperty.evaluate(assignment: PropertyAssignment, type: PropertyType = descriptor.type): Any? =
-        when(assignment) {
+    fun DynamicProperty.evaluate(
+        assignment: PropertyAssignment,
+        type: PropertyType = descriptor.type
+    ): Any? {
+        return when(assignment) {
             is ValueAssignment -> type.parse(assignment.value)
-            is ExpressionAssignment -> type.cast(assignment.expression.evaluate(variables + resolved))
+            is ExpressionAssignment -> type.cast(assignment.expression.evaluate(
+                (variables + resolved).relativeTo(assignment.packId)
+            ))
         }
+    }
 
     // to allow resolution of other values in the current map,
     // keep trying to resolve properties until no progress is made
@@ -62,13 +54,13 @@ internal fun Project.dynamicVariables(
         val initialSize = dynamicProperties.size
         val iterator = dynamicProperties.listIterator()
         while (iterator.hasNext()) {
-            val property = iterator.next()
+            val (variableId, property) = iterator.next()
             val evalResult = try {
                 // lists should accept multiple element assignments or a single list assignment
                 // TODO leverage the type system better here, this is messy
                 if (property.descriptor.type.isList()) {
-                    property.assignments.map {
-                        property.evaluate(it, property.descriptor.type.elementType!!)
+                    property.assignments.map { assignment ->
+                        property.evaluate(assignment, property.descriptor.type.elementType!!)
                     }.let { result ->
                         result.flatMap { elem ->
                             when(elem) {
@@ -87,7 +79,7 @@ internal fun Project.dynamicVariables(
                 if (evaluationFailed) throw e
                 continue
             }
-            resolved[property.descriptor.key] = evalResult
+            resolved[variableId] = evalResult
             iterator.remove()
         }
         evaluationFailed = initialSize == dynamicProperties.size

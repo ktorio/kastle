@@ -1,11 +1,13 @@
 package org.jetbrains.kastle.utils
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.kastle.VariableId
 import org.jetbrains.kastle.utils.Expression.Literal
 
 @Serializable
 sealed interface StringExpression: Expression {
     fun removeExtension(ext: String): StringExpression
+    override fun evaluate(variables: LocalVariables): String
 }
 
 @Serializable
@@ -22,7 +24,7 @@ data class StringTemplate(val entries: List<Expression>): StringExpression {
             is StringExpression -> StringTemplate(entries.dropLast(1) + last.removeExtension(ext))
             else -> this
         }
-    override fun evaluate(variables: Variables): String =
+    override fun evaluate(variables: LocalVariables): String =
         entries.joinToString("") { it.evaluate(variables).toString() }
     override fun toString(): String =
         entries.joinToString("") {
@@ -36,11 +38,11 @@ data class StringTemplate(val entries: List<Expression>): StringExpression {
 
 @Serializable
 sealed interface Expression {
-    fun evaluate(variables: Variables): Any?
+    fun evaluate(variables: LocalVariables): Any?
 
     sealed interface Literal<E> : Expression {
         val value: E
-        override fun evaluate(variables: Variables): Any? = value
+        override fun evaluate(variables: LocalVariables): E = value
     }
 
     @Serializable
@@ -72,36 +74,41 @@ sealed interface Expression {
     data object NullLiteral : Literal<Any?> {
         override val value: Any? = null
         override fun toString(): String = "null"
+    }
 
+    @Serializable
+    data class QualifiedVariableRef(val variableId: VariableId) : Expression {
+        override fun evaluate(variables: LocalVariables): Any? = variables[variableId]
+        override fun toString(): String = variableId.toString()
     }
 
     @Serializable
     data class VariableRef(val name: String) : Expression {
-        override fun evaluate(variables: Variables): Any? = variables[name]
+        override fun evaluate(variables: LocalVariables): Any? = variables[name]
         override fun toString(): String = name
     }
 
     @Serializable
     data class BinaryOp(val op: BinaryOperator, val left: Expression, val right: Expression) : Expression {
-        override fun evaluate(variables: Variables): Any? = op.evaluate(left.evaluate(variables), right.evaluate(variables))
+        override fun evaluate(variables: LocalVariables): Any? = op.evaluate(left.evaluate(variables), right.evaluate(variables))
         override fun toString(): String = "$left $op $right"
     }
 
     @Serializable
     data class PrefixOp(val op: PrefixOperator, val target: Expression) : Expression {
-        override fun evaluate(variables: Variables): Any? = op.evaluate(target.evaluate(variables))
+        override fun evaluate(variables: LocalVariables): Any? = op.evaluate(target.evaluate(variables))
         override fun toString(): String = "$op$target"
     }
 
     @Serializable
     data class PostfixOp(val op: PostfixOperator, val target: Expression) : Expression {
-        override fun evaluate(variables: Variables): Any? = op.evaluate(target.evaluate(variables))
+        override fun evaluate(variables: LocalVariables): Any? = op.evaluate(target.evaluate(variables))
         override fun toString(): String = "$target$op"
     }
 
     @Serializable
     data class Lambda(val paramNames: List<String>, val body: Expression) : Expression {
-        override fun evaluate(variables: Variables): Function1<List<Any?>, Any?> {
+        override fun evaluate(variables: LocalVariables): Function1<List<Any?>, Any?> {
             // Return a function that can be called later with arguments
             return { args: Any? ->
                 // Push arguments to the scope
@@ -135,7 +142,7 @@ sealed interface Expression {
 
     @Serializable
     data class IfElse(val condition: Expression, val thenBranch: Expression, val elseBranch: Expression) : Expression {
-        override fun evaluate(variables: Variables): Any? =
+        override fun evaluate(variables: LocalVariables): Any? =
             if (condition.evaluate(variables).isTruthy()) {
                 thenBranch.evaluate(variables)
             } else {
@@ -146,7 +153,7 @@ sealed interface Expression {
 
     @Serializable
     data class MethodCall(val receiver: Expression?, val methodName: String, val args: List<Expression>) : Expression {
-        override fun evaluate(variables: Variables): Any? {
+        override fun evaluate(variables: LocalVariables): Any? {
             val evaluatedArgs = args.map { it.evaluate(variables) }
 
             // Handle static-like utility functions if no receiver

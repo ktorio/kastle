@@ -32,6 +32,7 @@ class ListStack<E>(private val list: MutableList<E> = mutableListOf()) : Stack<E
     }
     override fun plus(element: E): Stack<E> =
         ListStack((list + element).toMutableList())
+
     override fun plusAssign(elements: Iterable<E>) {
         list.addAll(elements)
     }
