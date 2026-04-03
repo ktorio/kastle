@@ -1,9 +1,9 @@
 [versions]
-intellijPlatform = "2.10.5"
+intellij-platform-gradle-plugin = "2.10.5"
 kotlin = "2.2.20"
 
 [libraries]
 [plugins]
-intellijPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intellijPlatform" }
+intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform-gradle-plugin" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "null" }

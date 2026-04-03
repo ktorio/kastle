@@ -1,7 +1,9 @@
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+
 plugins {
     id("java")
     alias(libs.plugins.kotlin)
-    alias(libs.plugins.intellijPlatform)
+    alias(libs.plugins.intellij.platform)
     alias(libs.plugins.compose)
 }
 
@@ -24,7 +26,7 @@ repositories {
 dependencies {
     intellijPlatform {
         intellijIdea(providers.gradleProperty("platformVersion"))
-        testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
+        testFramework(TestFrameworkType.Platform)
 
         // Add plugin dependencies for compilation here:
         composeUI()
