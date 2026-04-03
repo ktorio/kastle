@@ -304,7 +304,7 @@ sealed interface org.jetbrains.kastle.utils/Expression { // org.jetbrains.kastle
         abstract val value // org.jetbrains.kastle.utils/Expression.Literal.value|{}value[0]
             abstract fun <get-value>(): #A1 // org.jetbrains.kastle.utils/Expression.Literal.value.<get-value>|<get-value>(){}[0]
 
-        open fun evaluate(org.jetbrains.kastle.utils/LocalVariables): kotlin/Any? // org.jetbrains.kastle.utils/Expression.Literal.evaluate|evaluate(org.jetbrains.kastle.utils.LocalVariables){}[0]
+        open fun evaluate(org.jetbrains.kastle.utils/LocalVariables): #A1 // org.jetbrains.kastle.utils/Expression.Literal.evaluate|evaluate(org.jetbrains.kastle.utils.LocalVariables){}[0]
     }
 
     final class BinaryOp : org.jetbrains.kastle.utils/Expression { // org.jetbrains.kastle.utils/Expression.BinaryOp|null[0]
@@ -712,6 +712,7 @@ sealed interface org.jetbrains.kastle.utils/Expression { // org.jetbrains.kastle
 }
 
 sealed interface org.jetbrains.kastle.utils/StringExpression : org.jetbrains.kastle.utils/Expression { // org.jetbrains.kastle.utils/StringExpression|null[0]
+    abstract fun evaluate(org.jetbrains.kastle.utils/LocalVariables): kotlin/String // org.jetbrains.kastle.utils/StringExpression.evaluate|evaluate(org.jetbrains.kastle.utils.LocalVariables){}[0]
     abstract fun removeExtension(kotlin/String): org.jetbrains.kastle.utils/StringExpression // org.jetbrains.kastle.utils/StringExpression.removeExtension|removeExtension(kotlin.String){}[0]
 
     final object Companion : kotlinx.serialization.internal/SerializerFactory { // org.jetbrains.kastle.utils/StringExpression.Companion|null[0]
@@ -3606,7 +3607,6 @@ final fun (kotlin/String).org.jetbrains.kastle.utils/capitalizeFirst(): kotlin/S
 final fun (kotlin/String).org.jetbrains.kastle.utils/endOfLine(kotlin/Int, kotlin/Boolean = ...): kotlin/Int? // org.jetbrains.kastle.utils/endOfLine|endOfLine@kotlin.String(kotlin.Int;kotlin.Boolean){}[0]
 final fun (kotlin/String).org.jetbrains.kastle.utils/getIndentAt(kotlin/Int): kotlin/String // org.jetbrains.kastle.utils/getIndentAt|getIndentAt@kotlin.String(kotlin.Int){}[0]
 final fun (kotlin/String).org.jetbrains.kastle.utils/previousLine(kotlin/Int): kotlin/String? // org.jetbrains.kastle.utils/previousLine|previousLine@kotlin.String(kotlin.Int){}[0]
-final fun (kotlin/String).org.jetbrains.kastle.utils/splitAfterIndex(kotlin/Int, kotlin/Char): kotlin.collections/List<kotlin/String> // org.jetbrains.kastle.utils/splitAfterIndex|splitAfterIndex@kotlin.String(kotlin.Int;kotlin.Char){}[0]
 final fun (kotlin/String).org.jetbrains.kastle.utils/trimAngleBrackets(): kotlin/String // org.jetbrains.kastle.utils/trimAngleBrackets|trimAngleBrackets@kotlin.String(){}[0]
 final fun (kotlin/String).org.jetbrains.kastle.utils/trimBraces(): kotlin/String // org.jetbrains.kastle.utils/trimBraces|trimBraces@kotlin.String(){}[0]
 final fun (kotlin/String).org.jetbrains.kastle.utils/trimEnclosingCharacters(kotlin/Char, kotlin/Char): kotlin/String // org.jetbrains.kastle.utils/trimEnclosingCharacters|trimEnclosingCharacters@kotlin.String(kotlin.Char;kotlin.Char){}[0]
