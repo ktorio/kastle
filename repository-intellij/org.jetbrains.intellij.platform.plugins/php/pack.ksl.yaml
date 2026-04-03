@@ -5,9 +5,20 @@ links:
   home: https://plugins.jetbrains.com/plugin/6610-php
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     #language=kotlin
     text: compatiblePlugin("com.jetbrains.php")
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     #language=xml
     text: <depends>com.jetbrains.php</depends>
+
+  # Modular plugin
+
+  ## Shared
+  - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
+    #language=kotlin
+    text: compatiblePlugin("com.jetbrains.php")
+  - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
+    #language=xml
+    text: <module name="intellij.php.frontback.impl"/>

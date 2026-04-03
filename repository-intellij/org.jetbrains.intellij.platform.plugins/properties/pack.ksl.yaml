@@ -5,6 +5,7 @@ links:
   home: https://plugins.jetbrains.com/plugin/11594-properties
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     #language=kotlin
     text: bundledPlugin("com.intellij.properties")
@@ -12,4 +13,20 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     #language=xml
     text: <depends>com.intellij.properties</depends>
+    priority: 90
+
+  # Modular plugin
+
+  ## Shared
+  - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
+    #language=kotlin
+    text: |
+      bundledModule("intellij.properties")
+      bundledModule("intellij.properties.psi")
+    priority: 90
+  - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
+    #language=xml
+    text: |
+      <module name="intellij.properties"/>
+      <module name="intellij.properties.psi"/>
     priority: 90

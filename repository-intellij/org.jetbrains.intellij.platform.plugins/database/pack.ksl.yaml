@@ -5,6 +5,7 @@ links:
   home: https://plugins.jetbrains.com/plugin/10925-database-tools-and-sql-for-webstorm
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     #language=kotlin
     text: bundledPlugin("com.intellij.database")
@@ -12,4 +13,16 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     #language=xml
     text: <depends>com.intellij.database</depends>
+    priority: 110
+
+  # Modular plugin
+
+  ## Shared
+  - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
+    #language=kotlin
+    text: bundledModule("intellij.database")
+    priority: 110
+  - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
+    #language=xml
+    text: <module name="intellij.database"/>
     priority: 110

@@ -3,7 +3,24 @@ description: XML language and DOM API
 icon: AllIcons.FileTypes.Xml
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     #language=xml
     text: <depends>com.intellij.modules.xml</depends>
+    priority: 80
+
+  # Modular plugin
+
+  ## Shared
+  - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
+    #language=kotlin
+    text: |
+      bundledModule("intellij.xml.psi")
+      bundledModule("intellij.xml.dom")
+    priority: 80
+  - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
+    #language=xml
+    text: |
+      <module name="intellij.xml.psi"/>
+      <module name="intellij.xml.dom"/>
     priority: 80

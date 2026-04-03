@@ -7,6 +7,7 @@ plugins {
 dependencies {
     intellijPlatform {
         intellijIdea(libs.versions.intellij.platform)
+        _slots("sharedBuildScriptDependencies")
     }
 }
 
