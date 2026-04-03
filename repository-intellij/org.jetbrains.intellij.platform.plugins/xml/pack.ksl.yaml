@@ -1,3 +1,9 @@
 name: XML
 description: XML language and DOM API
 icon: AllIcons.FileTypes.Xml
+
+commonSources:
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    #language=xml
+    text: <depends>com.intellij.modules.xml</depends>
+    priority: 80

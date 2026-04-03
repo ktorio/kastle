@@ -1,9 +1,0 @@
-sources:
-  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
-    #language=kotlin
-    text: bundledPlugin("com.intellij.java")
-    priority: 30
-  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
-    #language=xml
-    text: <depends>com.intellij.java</depends>
-    priority: 30

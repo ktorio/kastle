@@ -3,3 +3,19 @@ description: Kotlin plugin
 icon: AllIcons.Language.Kotlin
 links:
   home: https://plugins.jetbrains.com/plugin/6954-kotlin
+
+commonSources:
+  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
+    #language=kotlin
+    text: bundledPlugin("org.jetbrains.kotlin")
+    priority: 40
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    #language=xml
+    text: <depends>org.jetbrains.kotlin</depends>
+    priority: 40
+  - target: slot://org.jetbrains.intellij.platform/plugin/customPluginDescriptorExtensions
+    #language=xml
+    text: |-
+      <extensions defaultExtensionNs="org.jetbrains.kotlin">
+          <supportsKotlinPluginMode supportsK2="true" />
+      </extensions>

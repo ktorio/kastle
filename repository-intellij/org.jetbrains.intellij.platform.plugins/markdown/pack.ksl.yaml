@@ -3,3 +3,13 @@ description: Markdown language and preview UI
 icon: AllIcons.FileTypes.Text
 links:
   home: https://plugins.jetbrains.com/plugin/7793-markdown
+
+commonSources:
+  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
+    #language=kotlin
+    text: bundledPlugin("org.intellij.plugins.markdown")
+    priority: 100
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    #language=xml
+    text: <depends>org.intellij.plugins.markdown</depends>
+    priority: 100

@@ -3,3 +3,13 @@ description: JVM Platform APIs for Java, Kotlin, Groovy and Scala
 icon: AllIcons.FileTypes.Java
 links:
   home: https://plugins.jetbrains.com/plugin/27368-java
+
+commonSources:
+  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
+    #language=kotlin
+    text: bundledPlugin("com.intellij.java")
+    priority: 30
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    #language=xml
+    text: <depends>com.intellij.java</depends>
+    priority: 30

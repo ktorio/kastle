@@ -1,9 +1,0 @@
-sources:
-  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
-    #language=kotlin
-    text: bundledPlugin("com.intellij.database")
-    priority: 110
-  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
-    #language=xml
-    text: <depends>com.intellij.database</depends>
-    priority: 110

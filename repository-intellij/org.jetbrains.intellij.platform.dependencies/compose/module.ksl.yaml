@@ -1,13 +1,3 @@
-sources:
-  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
-    #language=kotlin
-    text: composeUI()
-    priority: 10
-  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
-    #language=xml
-    text: <depends>com.intellij.modules.compose</depends>
-    priority: 10
-
 gradle:
   plugins:
     - compose

@@ -3,3 +3,13 @@ description: Dependency on the JSON (com.intellij.modules.json) plugin
 icon: AllIcons.FileTypes.Json
 links:
   home: https://plugins.jetbrains.com/plugin/25364-json
+
+commonSources:
+  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
+    #language=kotlin
+    text: bundledPlugin("com.intellij.modules.json")
+    priority: 60
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    #language=xml
+    text: <depends>com.intellij.modules.json</depends>
+    priority: 60

@@ -3,3 +3,13 @@ description: Database tool window, Consoles and SQL
 icon: AllIcons.Nodes.DataTables
 links:
   home: https://plugins.jetbrains.com/plugin/10925-database-tools-and-sql-for-webstorm
+
+commonSources:
+  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
+    #language=kotlin
+    text: bundledPlugin("com.intellij.database")
+    priority: 110
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    #language=xml
+    text: <depends>com.intellij.database</depends>
+    priority: 110

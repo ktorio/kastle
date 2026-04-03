@@ -3,3 +3,11 @@ description: Rust language
 icon: AllIcons.Language.Rust
 links:
   home: https://plugins.jetbrains.com/plugin/22407-rust
+
+commonSources:
+  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
+    #language=kotlin
+    text: compatiblePlugin("com.jetbrains.rust")
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    #language=xml
+    text: <depends>com.jetbrains.rust</depends>

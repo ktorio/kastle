@@ -3,3 +3,13 @@ description: Properties files
 icon: AllIcons.FileTypes.Properties
 links:
   home: https://plugins.jetbrains.com/plugin/11594-properties
+
+commonSources:
+  - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
+    #language=kotlin
+    text: bundledPlugin("com.intellij.properties")
+    priority: 90
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    #language=xml
+    text: <depends>com.intellij.properties</depends>
+    priority: 90

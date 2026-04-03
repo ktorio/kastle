@@ -3,3 +3,9 @@ description: Enables communication between IDE and Language Servers
 icon: AllIcons.Nodes.Library
 links:
   docs: https://plugins.jetbrains.com/docs/intellij/language-server-protocol.html
+
+commonSources:
+  - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
+    #language=xml
+    text: <depends>com.intellij.modules.lsp</depends>
+    priority: 20
