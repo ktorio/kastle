@@ -36,3 +36,13 @@ commonSources:
     #language=xml
     text: <plugin id="JavaScript"/>
     priority: 50
+
+  ## Frontend
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
+    #language=kotlin
+    text: bundledModule("intellij.javascript.frontend")
+    priority: 50
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
+    #language=xml
+    text: <module name="intellij.javascript.frontend"/>
+    priority: 50

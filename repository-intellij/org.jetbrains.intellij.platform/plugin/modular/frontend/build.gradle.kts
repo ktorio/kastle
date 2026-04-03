@@ -14,6 +14,8 @@ dependencies {
         compileOnly(libs.kotlin.serialization.json.jvm)
 
         composeUI()
+
+        _slots("frontendBuildScriptDependencies")
     }
 
     implementation(project(":shared"))

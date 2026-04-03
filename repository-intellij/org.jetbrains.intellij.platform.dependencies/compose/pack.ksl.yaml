@@ -10,6 +10,7 @@ propertyValues:
     value: true
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     #language=kotlin
     text: composeUI()

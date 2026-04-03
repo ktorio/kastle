@@ -5,6 +5,7 @@ links:
   home: https://plugins.jetbrains.com/plugin/22407-rust
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     #language=kotlin
     text: compatiblePlugin("com.jetbrains.rust")
@@ -21,3 +22,11 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
     text: <plugin id="com.jetbrains.rust"/>
+
+  ## Frontend
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
+    #language=kotlin
+    text: compatiblePlugin("com.jetbrains.rust")
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
+    #language=xml
+    text: <plugin id="com.jetbrains.rust.frontend"/>

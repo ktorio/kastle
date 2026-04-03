@@ -30,3 +30,11 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
     text: <plugin id="org.jetbrains.plugins.go"/>
+
+  ## Frontend
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
+    #language=kotlin
+    text: compatiblePlugin("org.jetbrains.plugins.go")
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
+    #language=xml
+    text: <module name="intellij.go.common.frontend"/>

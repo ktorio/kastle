@@ -58,3 +58,13 @@ commonSources:
       <module name="intellij.markdown.compose.preview"/>
       <module name="intellij.markdown.backend"/>
     priority: 100
+
+  ## Frontend
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
+    #language=kotlin
+    text: bundledModule("intellij.markdown.frontend")
+    priority: 100
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
+    #language=xml
+    text: <module name="intellij.markdown.frontend"/>
+    priority: 100

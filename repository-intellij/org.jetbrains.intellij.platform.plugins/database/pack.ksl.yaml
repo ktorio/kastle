@@ -68,3 +68,19 @@ commonSources:
       <module name="intellij.database.impl.common"/>
       <module name="intellij.database.plugin.frameworks"/>
     priority: 110
+
+  ## Frontend
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
+    #language=kotlin
+    text: |
+      bundledModule("intellij.database.impl.frontend")
+      bundledModule("intellij.database.sql.frontend.core")
+      bundledModule("intellij.database.sql.frontend.impl")
+    priority: 110
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
+    #language=xml
+    text: |
+      <module name="intellij.database.impl.frontend"/>
+      <module name="intellij.database.sql.frontend.core"/>
+      <module name="intellij.database.sql.frontend.impl"/>
+    priority: 110

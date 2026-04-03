@@ -5,6 +5,7 @@ links:
   docs: https://plugins.jetbrains.com/docs/intellij/language-server-protocol.html
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     #language=xml
     text: <depends>com.intellij.modules.lsp</depends>

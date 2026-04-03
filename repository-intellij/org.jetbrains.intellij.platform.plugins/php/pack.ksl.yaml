@@ -34,3 +34,11 @@ commonSources:
       <module name="intellij.php.frontback.impl"/>
       <module name="intellij.php.completionMLRanking"/>
       <module name="intellij.php.mcp"/>
+
+  ## Frontend
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
+    #language=kotlin
+    text: compatiblePlugin("com.jetbrains.php")
+  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
+    #language=xml
+    text: <plugin id="com.intellij.php.frontend"/>
