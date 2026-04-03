@@ -7,6 +7,8 @@ import org.jetbrains.kastle.gen.*
 import org.jetbrains.kastle.structure.GradleSourceMapping
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.Logger
+import org.jetbrains.kastle.structure.AmperSourceMapping
+import org.jetbrains.kastle.structure.MavenSourceMapping
 import org.jetbrains.kastle.structure.NestedPackagingMapping
 import org.jetbrains.kastle.utils.*
 import kotlin.text.ifEmpty
@@ -19,7 +21,9 @@ class ProjectGenerator(
     companion object {
         val DefaultResolver = ProjectResolver.BaseImpl +
                 NestedPackagingMapping +
-                GradleSourceMapping
+                GradleSourceMapping +
+                AmperSourceMapping +
+                MavenSourceMapping
     }
 
     private val templateEvaluator = TemplateEvaluator(log)
@@ -131,7 +135,7 @@ class ProjectGenerator(
             toVariableEntry() +
             module.toVariableEntry() +
             module.slotsVariableEntry(packId)
-        return baseVariables + dynamicVariables(pack, modulePath, baseVariables)
+        return baseVariables + dynamicVariables(modulePath, baseVariables)
     }
 
 }

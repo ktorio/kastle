@@ -1,0 +1,497 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <org.jetbrains:kastle-templates>
+open annotation class kastle/TemplateDsl : kotlin/Annotation { // kastle/TemplateDsl|null[0]
+    constructor <init>() // kastle/TemplateDsl.<init>|<init>(){}[0]
+}
+
+abstract interface kastle/TemplateProperties { // kastle/TemplateProperties|null[0]
+    open fun <#A1: kotlin/Any?> get(kotlin/String): #A1 // kastle/TemplateProperties.get|get(kotlin.String){0§<kotlin.Any?>}[0]
+    open fun <#A1: kotlin/Any?> getValue(kotlin/Any?, kotlin.reflect/KProperty<*>): #A1 // kastle/TemplateProperties.getValue|getValue(kotlin.Any?;kotlin.reflect.KProperty<*>){0§<kotlin.Any?>}[0]
+}
+
+abstract interface kastle/TemplateSlot { // kastle/TemplateSlot|null[0]
+    abstract fun <#A1: kotlin/Any?> get(): #A1 // kastle/TemplateSlot.get|get(){0§<kotlin.Any?>}[0]
+}
+
+final class kastle/TemplateAmperApplicationSettings { // kastle/TemplateAmperApplicationSettings|null[0]
+    constructor <init>(kotlin/String? = ...) // kastle/TemplateAmperApplicationSettings.<init>|<init>(kotlin.String?){}[0]
+
+    final val mainClass // kastle/TemplateAmperApplicationSettings.mainClass|{}mainClass[0]
+        final fun <get-mainClass>(): kotlin/String? // kastle/TemplateAmperApplicationSettings.mainClass.<get-mainClass>|<get-mainClass>(){}[0]
+
+    final fun component1(): kotlin/String? // kastle/TemplateAmperApplicationSettings.component1|component1(){}[0]
+    final fun copy(kotlin/String? = ...): kastle/TemplateAmperApplicationSettings // kastle/TemplateAmperApplicationSettings.copy|copy(kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplateAmperApplicationSettings.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplateAmperApplicationSettings.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplateAmperApplicationSettings.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplateAmperApplicationSettings> { // kastle/TemplateAmperApplicationSettings.$serializer|null[0]
+        final val descriptor // kastle/TemplateAmperApplicationSettings.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplateAmperApplicationSettings.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplateAmperApplicationSettings.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplateAmperApplicationSettings // kastle/TemplateAmperApplicationSettings.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplateAmperApplicationSettings) // kastle/TemplateAmperApplicationSettings.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplateAmperApplicationSettings){}[0]
+    }
+
+    final object Companion { // kastle/TemplateAmperApplicationSettings.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplateAmperApplicationSettings> // kastle/TemplateAmperApplicationSettings.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class kastle/TemplateAmperKotlinSettings { // kastle/TemplateAmperKotlinSettings|null[0]
+    constructor <init>(kotlin/String? = ...) // kastle/TemplateAmperKotlinSettings.<init>|<init>(kotlin.String?){}[0]
+
+    final val serialization // kastle/TemplateAmperKotlinSettings.serialization|{}serialization[0]
+        final fun <get-serialization>(): kotlin/String? // kastle/TemplateAmperKotlinSettings.serialization.<get-serialization>|<get-serialization>(){}[0]
+
+    final fun component1(): kotlin/String? // kastle/TemplateAmperKotlinSettings.component1|component1(){}[0]
+    final fun copy(kotlin/String? = ...): kastle/TemplateAmperKotlinSettings // kastle/TemplateAmperKotlinSettings.copy|copy(kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplateAmperKotlinSettings.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplateAmperKotlinSettings.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplateAmperKotlinSettings.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplateAmperKotlinSettings> { // kastle/TemplateAmperKotlinSettings.$serializer|null[0]
+        final val descriptor // kastle/TemplateAmperKotlinSettings.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplateAmperKotlinSettings.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplateAmperKotlinSettings.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplateAmperKotlinSettings // kastle/TemplateAmperKotlinSettings.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplateAmperKotlinSettings) // kastle/TemplateAmperKotlinSettings.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplateAmperKotlinSettings){}[0]
+    }
+
+    final object Companion { // kastle/TemplateAmperKotlinSettings.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplateAmperKotlinSettings> // kastle/TemplateAmperKotlinSettings.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class kastle/TemplateAmperModuleSettings { // kastle/TemplateAmperModuleSettings|null[0]
+    constructor <init>(kotlin/String? = ..., kotlin/String? = ..., kastle/TemplateAmperApplicationSettings? = ..., kastle/TemplateAmperKotlinSettings? = ...) // kastle/TemplateAmperModuleSettings.<init>|<init>(kotlin.String?;kotlin.String?;kastle.TemplateAmperApplicationSettings?;kastle.TemplateAmperKotlinSettings?){}[0]
+
+    final val application // kastle/TemplateAmperModuleSettings.application|{}application[0]
+        final fun <get-application>(): kastle/TemplateAmperApplicationSettings? // kastle/TemplateAmperModuleSettings.application.<get-application>|<get-application>(){}[0]
+    final val compose // kastle/TemplateAmperModuleSettings.compose|{}compose[0]
+        final fun <get-compose>(): kotlin/String? // kastle/TemplateAmperModuleSettings.compose.<get-compose>|<get-compose>(){}[0]
+    final val kotlin // kastle/TemplateAmperModuleSettings.kotlin|{}kotlin[0]
+        final fun <get-kotlin>(): kastle/TemplateAmperKotlinSettings? // kastle/TemplateAmperModuleSettings.kotlin.<get-kotlin>|<get-kotlin>(){}[0]
+    final val ktor // kastle/TemplateAmperModuleSettings.ktor|{}ktor[0]
+        final fun <get-ktor>(): kotlin/String? // kastle/TemplateAmperModuleSettings.ktor.<get-ktor>|<get-ktor>(){}[0]
+
+    final fun component1(): kotlin/String? // kastle/TemplateAmperModuleSettings.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // kastle/TemplateAmperModuleSettings.component2|component2(){}[0]
+    final fun component3(): kastle/TemplateAmperApplicationSettings? // kastle/TemplateAmperModuleSettings.component3|component3(){}[0]
+    final fun component4(): kastle/TemplateAmperKotlinSettings? // kastle/TemplateAmperModuleSettings.component4|component4(){}[0]
+    final fun copy(kotlin/String? = ..., kotlin/String? = ..., kastle/TemplateAmperApplicationSettings? = ..., kastle/TemplateAmperKotlinSettings? = ...): kastle/TemplateAmperModuleSettings // kastle/TemplateAmperModuleSettings.copy|copy(kotlin.String?;kotlin.String?;kastle.TemplateAmperApplicationSettings?;kastle.TemplateAmperKotlinSettings?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplateAmperModuleSettings.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplateAmperModuleSettings.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplateAmperModuleSettings.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplateAmperModuleSettings> { // kastle/TemplateAmperModuleSettings.$serializer|null[0]
+        final val descriptor // kastle/TemplateAmperModuleSettings.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplateAmperModuleSettings.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplateAmperModuleSettings.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplateAmperModuleSettings // kastle/TemplateAmperModuleSettings.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplateAmperModuleSettings) // kastle/TemplateAmperModuleSettings.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplateAmperModuleSettings){}[0]
+    }
+
+    final object Companion { // kastle/TemplateAmperModuleSettings.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplateAmperModuleSettings> // kastle/TemplateAmperModuleSettings.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class kastle/TemplateBuildDependency { // kastle/TemplateBuildDependency|null[0]
+    constructor <init>(kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin.collections/List<kotlin/String>? = ..., kotlin/Boolean = ...) // kastle/TemplateBuildDependency.<init>|<init>(kotlin.String;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.collections.List<kotlin.String>?;kotlin.Boolean){}[0]
+
+    final val args // kastle/TemplateBuildDependency.args|{}args[0]
+        final fun <get-args>(): kotlin.collections/List<kotlin/String>? // kastle/TemplateBuildDependency.args.<get-args>|<get-args>(){}[0]
+    final val artifact // kastle/TemplateBuildDependency.artifact|{}artifact[0]
+        final fun <get-artifact>(): kotlin/String? // kastle/TemplateBuildDependency.artifact.<get-artifact>|<get-artifact>(){}[0]
+    final val exported // kastle/TemplateBuildDependency.exported|{}exported[0]
+        final fun <get-exported>(): kotlin/Boolean // kastle/TemplateBuildDependency.exported.<get-exported>|<get-exported>(){}[0]
+    final val functionName // kastle/TemplateBuildDependency.functionName|{}functionName[0]
+        final fun <get-functionName>(): kotlin/String? // kastle/TemplateBuildDependency.functionName.<get-functionName>|<get-functionName>(){}[0]
+    final val gradlePath // kastle/TemplateBuildDependency.gradlePath|{}gradlePath[0]
+        final fun <get-gradlePath>(): kotlin/String? // kastle/TemplateBuildDependency.gradlePath.<get-gradlePath>|<get-gradlePath>(){}[0]
+    final val group // kastle/TemplateBuildDependency.group|{}group[0]
+        final fun <get-group>(): kotlin/String? // kastle/TemplateBuildDependency.group.<get-group>|<get-group>(){}[0]
+    final val key // kastle/TemplateBuildDependency.key|{}key[0]
+        final fun <get-key>(): kotlin/String? // kastle/TemplateBuildDependency.key.<get-key>|<get-key>(){}[0]
+    final val path // kastle/TemplateBuildDependency.path|{}path[0]
+        final fun <get-path>(): kotlin/String? // kastle/TemplateBuildDependency.path.<get-path>|<get-path>(){}[0]
+    final val type // kastle/TemplateBuildDependency.type|{}type[0]
+        final fun <get-type>(): kotlin/String // kastle/TemplateBuildDependency.type.<get-type>|<get-type>(){}[0]
+    final val version // kastle/TemplateBuildDependency.version|{}version[0]
+        final fun <get-version>(): kotlin/String? // kastle/TemplateBuildDependency.version.<get-version>|<get-version>(){}[0]
+    final val versionRef // kastle/TemplateBuildDependency.versionRef|{}versionRef[0]
+        final fun <get-versionRef>(): kotlin/String? // kastle/TemplateBuildDependency.versionRef.<get-versionRef>|<get-versionRef>(){}[0]
+
+    final fun component1(): kotlin/String // kastle/TemplateBuildDependency.component1|component1(){}[0]
+    final fun component10(): kotlin.collections/List<kotlin/String>? // kastle/TemplateBuildDependency.component10|component10(){}[0]
+    final fun component11(): kotlin/Boolean // kastle/TemplateBuildDependency.component11|component11(){}[0]
+    final fun component2(): kotlin/String? // kastle/TemplateBuildDependency.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // kastle/TemplateBuildDependency.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // kastle/TemplateBuildDependency.component4|component4(){}[0]
+    final fun component5(): kotlin/String? // kastle/TemplateBuildDependency.component5|component5(){}[0]
+    final fun component6(): kotlin/String? // kastle/TemplateBuildDependency.component6|component6(){}[0]
+    final fun component7(): kotlin/String? // kastle/TemplateBuildDependency.component7|component7(){}[0]
+    final fun component8(): kotlin/String? // kastle/TemplateBuildDependency.component8|component8(){}[0]
+    final fun component9(): kotlin/String? // kastle/TemplateBuildDependency.component9|component9(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin.collections/List<kotlin/String>? = ..., kotlin/Boolean = ...): kastle/TemplateBuildDependency // kastle/TemplateBuildDependency.copy|copy(kotlin.String;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.collections.List<kotlin.String>?;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplateBuildDependency.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplateBuildDependency.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplateBuildDependency.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplateBuildDependency> { // kastle/TemplateBuildDependency.$serializer|null[0]
+        final val descriptor // kastle/TemplateBuildDependency.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplateBuildDependency.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplateBuildDependency.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplateBuildDependency // kastle/TemplateBuildDependency.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplateBuildDependency) // kastle/TemplateBuildDependency.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplateBuildDependency){}[0]
+    }
+
+    final object Companion { // kastle/TemplateBuildDependency.Companion|null[0]
+        final val $childSerializers // kastle/TemplateBuildDependency.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplateBuildDependency> // kastle/TemplateBuildDependency.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class kastle/TemplateCatalogArtifact { // kastle/TemplateCatalogArtifact|null[0]
+    constructor <init>(kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Boolean = ...) // kastle/TemplateCatalogArtifact.<init>|<init>(kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Boolean){}[0]
+
+    final val artifact // kastle/TemplateCatalogArtifact.artifact|{}artifact[0]
+        final fun <get-artifact>(): kotlin/String? // kastle/TemplateCatalogArtifact.artifact.<get-artifact>|<get-artifact>(){}[0]
+    final val group // kastle/TemplateCatalogArtifact.group|{}group[0]
+        final fun <get-group>(): kotlin/String? // kastle/TemplateCatalogArtifact.group.<get-group>|<get-group>(){}[0]
+    final val kmp // kastle/TemplateCatalogArtifact.kmp|{}kmp[0]
+        final fun <get-kmp>(): kotlin/Boolean // kastle/TemplateCatalogArtifact.kmp.<get-kmp>|<get-kmp>(){}[0]
+    final val module // kastle/TemplateCatalogArtifact.module|{}module[0]
+        final fun <get-module>(): kotlin/String? // kastle/TemplateCatalogArtifact.module.<get-module>|<get-module>(){}[0]
+    final val version // kastle/TemplateCatalogArtifact.version|{}version[0]
+        final fun <get-version>(): kotlin/String? // kastle/TemplateCatalogArtifact.version.<get-version>|<get-version>(){}[0]
+    final val versionRef // kastle/TemplateCatalogArtifact.versionRef|{}versionRef[0]
+        final fun <get-versionRef>(): kotlin/String? // kastle/TemplateCatalogArtifact.versionRef.<get-versionRef>|<get-versionRef>(){}[0]
+
+    final fun component1(): kotlin/String? // kastle/TemplateCatalogArtifact.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // kastle/TemplateCatalogArtifact.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // kastle/TemplateCatalogArtifact.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // kastle/TemplateCatalogArtifact.component4|component4(){}[0]
+    final fun component5(): kotlin/String? // kastle/TemplateCatalogArtifact.component5|component5(){}[0]
+    final fun component6(): kotlin/Boolean // kastle/TemplateCatalogArtifact.component6|component6(){}[0]
+    final fun copy(kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Boolean = ...): kastle/TemplateCatalogArtifact // kastle/TemplateCatalogArtifact.copy|copy(kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplateCatalogArtifact.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplateCatalogArtifact.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplateCatalogArtifact.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplateCatalogArtifact> { // kastle/TemplateCatalogArtifact.$serializer|null[0]
+        final val descriptor // kastle/TemplateCatalogArtifact.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplateCatalogArtifact.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplateCatalogArtifact.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplateCatalogArtifact // kastle/TemplateCatalogArtifact.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplateCatalogArtifact) // kastle/TemplateCatalogArtifact.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplateCatalogArtifact){}[0]
+    }
+
+    final object Companion { // kastle/TemplateCatalogArtifact.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplateCatalogArtifact> // kastle/TemplateCatalogArtifact.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class kastle/TemplateGradleModuleSettings { // kastle/TemplateGradleModuleSettings|null[0]
+    constructor <init>(kotlin.collections/List<kotlin/String> = ...) // kastle/TemplateGradleModuleSettings.<init>|<init>(kotlin.collections.List<kotlin.String>){}[0]
+
+    final val plugins // kastle/TemplateGradleModuleSettings.plugins|{}plugins[0]
+        final fun <get-plugins>(): kotlin.collections/List<kotlin/String> // kastle/TemplateGradleModuleSettings.plugins.<get-plugins>|<get-plugins>(){}[0]
+
+    final fun component1(): kotlin.collections/List<kotlin/String> // kastle/TemplateGradleModuleSettings.component1|component1(){}[0]
+    final fun copy(kotlin.collections/List<kotlin/String> = ...): kastle/TemplateGradleModuleSettings // kastle/TemplateGradleModuleSettings.copy|copy(kotlin.collections.List<kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplateGradleModuleSettings.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplateGradleModuleSettings.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplateGradleModuleSettings.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplateGradleModuleSettings> { // kastle/TemplateGradleModuleSettings.$serializer|null[0]
+        final val descriptor // kastle/TemplateGradleModuleSettings.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplateGradleModuleSettings.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplateGradleModuleSettings.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplateGradleModuleSettings // kastle/TemplateGradleModuleSettings.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplateGradleModuleSettings) // kastle/TemplateGradleModuleSettings.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplateGradleModuleSettings){}[0]
+    }
+
+    final object Companion { // kastle/TemplateGradleModuleSettings.Companion|null[0]
+        final val $childSerializers // kastle/TemplateGradleModuleSettings.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplateGradleModuleSettings> // kastle/TemplateGradleModuleSettings.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class kastle/TemplateGradlePlugin { // kastle/TemplateGradlePlugin|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String, kotlin/String? = ..., kotlin/String? = ...) // kastle/TemplateGradlePlugin.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.String?;kotlin.String?){}[0]
+
+    final val catalogKey // kastle/TemplateGradlePlugin.catalogKey|{}catalogKey[0]
+        final fun <get-catalogKey>(): kotlin/String // kastle/TemplateGradlePlugin.catalogKey.<get-catalogKey>|<get-catalogKey>(){}[0]
+    final val id // kastle/TemplateGradlePlugin.id|{}id[0]
+        final fun <get-id>(): kotlin/String // kastle/TemplateGradlePlugin.id.<get-id>|<get-id>(){}[0]
+    final val name // kastle/TemplateGradlePlugin.name|{}name[0]
+        final fun <get-name>(): kotlin/String // kastle/TemplateGradlePlugin.name.<get-name>|<get-name>(){}[0]
+    final val version // kastle/TemplateGradlePlugin.version|{}version[0]
+        final fun <get-version>(): kotlin/String? // kastle/TemplateGradlePlugin.version.<get-version>|<get-version>(){}[0]
+    final val versionRef // kastle/TemplateGradlePlugin.versionRef|{}versionRef[0]
+        final fun <get-versionRef>(): kotlin/String? // kastle/TemplateGradlePlugin.versionRef.<get-versionRef>|<get-versionRef>(){}[0]
+
+    final fun component1(): kotlin/String // kastle/TemplateGradlePlugin.component1|component1(){}[0]
+    final fun component2(): kotlin/String // kastle/TemplateGradlePlugin.component2|component2(){}[0]
+    final fun component3(): kotlin/String // kastle/TemplateGradlePlugin.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // kastle/TemplateGradlePlugin.component4|component4(){}[0]
+    final fun component5(): kotlin/String? // kastle/TemplateGradlePlugin.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String? = ..., kotlin/String? = ...): kastle/TemplateGradlePlugin // kastle/TemplateGradlePlugin.copy|copy(kotlin.String;kotlin.String;kotlin.String;kotlin.String?;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplateGradlePlugin.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplateGradlePlugin.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplateGradlePlugin.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplateGradlePlugin> { // kastle/TemplateGradlePlugin.$serializer|null[0]
+        final val descriptor // kastle/TemplateGradlePlugin.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplateGradlePlugin.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplateGradlePlugin.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplateGradlePlugin // kastle/TemplateGradlePlugin.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplateGradlePlugin) // kastle/TemplateGradlePlugin.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplateGradlePlugin){}[0]
+    }
+
+    final object Companion { // kastle/TemplateGradlePlugin.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplateGradlePlugin> // kastle/TemplateGradlePlugin.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class kastle/TemplateGradleProjectSettings { // kastle/TemplateGradleProjectSettings|null[0]
+    constructor <init>(kotlin.collections/List<kastle/TemplateMavenRepository> = ..., kotlin.collections/List<kastle/TemplateMavenRepository> = ..., kotlin.collections/List<kastle/TemplateGradlePlugin> = ...) // kastle/TemplateGradleProjectSettings.<init>|<init>(kotlin.collections.List<kastle.TemplateMavenRepository>;kotlin.collections.List<kastle.TemplateMavenRepository>;kotlin.collections.List<kastle.TemplateGradlePlugin>){}[0]
+
+    final val pluginRepositories // kastle/TemplateGradleProjectSettings.pluginRepositories|{}pluginRepositories[0]
+        final fun <get-pluginRepositories>(): kotlin.collections/List<kastle/TemplateMavenRepository> // kastle/TemplateGradleProjectSettings.pluginRepositories.<get-pluginRepositories>|<get-pluginRepositories>(){}[0]
+    final val plugins // kastle/TemplateGradleProjectSettings.plugins|{}plugins[0]
+        final fun <get-plugins>(): kotlin.collections/List<kastle/TemplateGradlePlugin> // kastle/TemplateGradleProjectSettings.plugins.<get-plugins>|<get-plugins>(){}[0]
+    final val repositories // kastle/TemplateGradleProjectSettings.repositories|{}repositories[0]
+        final fun <get-repositories>(): kotlin.collections/List<kastle/TemplateMavenRepository> // kastle/TemplateGradleProjectSettings.repositories.<get-repositories>|<get-repositories>(){}[0]
+
+    final fun component1(): kotlin.collections/List<kastle/TemplateMavenRepository> // kastle/TemplateGradleProjectSettings.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<kastle/TemplateMavenRepository> // kastle/TemplateGradleProjectSettings.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/List<kastle/TemplateGradlePlugin> // kastle/TemplateGradleProjectSettings.component3|component3(){}[0]
+    final fun copy(kotlin.collections/List<kastle/TemplateMavenRepository> = ..., kotlin.collections/List<kastle/TemplateMavenRepository> = ..., kotlin.collections/List<kastle/TemplateGradlePlugin> = ...): kastle/TemplateGradleProjectSettings // kastle/TemplateGradleProjectSettings.copy|copy(kotlin.collections.List<kastle.TemplateMavenRepository>;kotlin.collections.List<kastle.TemplateMavenRepository>;kotlin.collections.List<kastle.TemplateGradlePlugin>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplateGradleProjectSettings.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplateGradleProjectSettings.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplateGradleProjectSettings.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplateGradleProjectSettings> { // kastle/TemplateGradleProjectSettings.$serializer|null[0]
+        final val descriptor // kastle/TemplateGradleProjectSettings.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplateGradleProjectSettings.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplateGradleProjectSettings.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplateGradleProjectSettings // kastle/TemplateGradleProjectSettings.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplateGradleProjectSettings) // kastle/TemplateGradleProjectSettings.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplateGradleProjectSettings){}[0]
+    }
+
+    final object Companion { // kastle/TemplateGradleProjectSettings.Companion|null[0]
+        final val $childSerializers // kastle/TemplateGradleProjectSettings.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplateGradleProjectSettings> // kastle/TemplateGradleProjectSettings.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class kastle/TemplateMavenRepository { // kastle/TemplateMavenRepository|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String?) // kastle/TemplateMavenRepository.<init>|<init>(kotlin.String;kotlin.String;kotlin.String?){}[0]
+
+    final val gradleFunction // kastle/TemplateMavenRepository.gradleFunction|{}gradleFunction[0]
+        final fun <get-gradleFunction>(): kotlin/String? // kastle/TemplateMavenRepository.gradleFunction.<get-gradleFunction>|<get-gradleFunction>(){}[0]
+    final val id // kastle/TemplateMavenRepository.id|{}id[0]
+        final fun <get-id>(): kotlin/String // kastle/TemplateMavenRepository.id.<get-id>|<get-id>(){}[0]
+    final val url // kastle/TemplateMavenRepository.url|{}url[0]
+        final fun <get-url>(): kotlin/String // kastle/TemplateMavenRepository.url.<get-url>|<get-url>(){}[0]
+
+    final fun component1(): kotlin/String // kastle/TemplateMavenRepository.component1|component1(){}[0]
+    final fun component2(): kotlin/String // kastle/TemplateMavenRepository.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // kastle/TemplateMavenRepository.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String? = ...): kastle/TemplateMavenRepository // kastle/TemplateMavenRepository.copy|copy(kotlin.String;kotlin.String;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplateMavenRepository.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplateMavenRepository.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplateMavenRepository.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplateMavenRepository> { // kastle/TemplateMavenRepository.$serializer|null[0]
+        final val descriptor // kastle/TemplateMavenRepository.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplateMavenRepository.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplateMavenRepository.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplateMavenRepository // kastle/TemplateMavenRepository.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplateMavenRepository) // kastle/TemplateMavenRepository.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplateMavenRepository){}[0]
+    }
+
+    final object Companion { // kastle/TemplateMavenRepository.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplateMavenRepository> // kastle/TemplateMavenRepository.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class kastle/TemplatePack { // kastle/TemplatePack|null[0]
+    constructor <init>(kotlin/String = ..., kotlin/String = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin.collections/List<kotlin/String> = ...) // kastle/TemplatePack.<init>|<init>(kotlin.String;kotlin.String;kotlin.String?;kotlin.String?;kotlin.collections.List<kotlin.String>){}[0]
+
+    final val description // kastle/TemplatePack.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // kastle/TemplatePack.description.<get-description>|<get-description>(){}[0]
+    final val group // kastle/TemplatePack.group|{}group[0]
+        final fun <get-group>(): kotlin/String? // kastle/TemplatePack.group.<get-group>|<get-group>(){}[0]
+    final val id // kastle/TemplatePack.id|{}id[0]
+        final fun <get-id>(): kotlin/String // kastle/TemplatePack.id.<get-id>|<get-id>(){}[0]
+    final val name // kastle/TemplatePack.name|{}name[0]
+        final fun <get-name>(): kotlin/String // kastle/TemplatePack.name.<get-name>|<get-name>(){}[0]
+    final val tags // kastle/TemplatePack.tags|{}tags[0]
+        final fun <get-tags>(): kotlin.collections/List<kotlin/String> // kastle/TemplatePack.tags.<get-tags>|<get-tags>(){}[0]
+
+    final fun component1(): kotlin/String // kastle/TemplatePack.component1|component1(){}[0]
+    final fun component2(): kotlin/String // kastle/TemplatePack.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // kastle/TemplatePack.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // kastle/TemplatePack.component4|component4(){}[0]
+    final fun component5(): kotlin.collections/List<kotlin/String> // kastle/TemplatePack.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin.collections/List<kotlin/String> = ...): kastle/TemplatePack // kastle/TemplatePack.copy|copy(kotlin.String;kotlin.String;kotlin.String?;kotlin.String?;kotlin.collections.List<kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplatePack.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplatePack.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplatePack.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplatePack> { // kastle/TemplatePack.$serializer|null[0]
+        final val descriptor // kastle/TemplatePack.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplatePack.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplatePack.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplatePack // kastle/TemplatePack.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplatePack) // kastle/TemplatePack.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplatePack){}[0]
+    }
+
+    final object Companion { // kastle/TemplatePack.Companion|null[0]
+        final val $childSerializers // kastle/TemplatePack.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplatePack> // kastle/TemplatePack.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class kastle/TemplateProject { // kastle/TemplateProject|null[0]
+    constructor <init>(kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin.collections/List<kastle/TemplateSourceModule> = ..., kotlin.collections/List<kastle/TemplatePack> = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin.collections/Map<kotlin/String, kastle/TemplateCatalogArtifact> = ..., kotlin/String? = ..., kastle/TemplateGradleProjectSettings = ...) // kastle/TemplateProject.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.collections.List<kastle.TemplateSourceModule>;kotlin.collections.List<kastle.TemplatePack>;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.collections.Map<kotlin.String,kastle.TemplateCatalogArtifact>;kotlin.String?;kastle.TemplateGradleProjectSettings){}[0]
+
+    final val buildSystem // kastle/TemplateProject.buildSystem|{}buildSystem[0]
+        final fun <get-buildSystem>(): kotlin/String? // kastle/TemplateProject.buildSystem.<get-buildSystem>|<get-buildSystem>(){}[0]
+    final val gradle // kastle/TemplateProject.gradle|{}gradle[0]
+        final fun <get-gradle>(): kastle/TemplateGradleProjectSettings // kastle/TemplateProject.gradle.<get-gradle>|<get-gradle>(){}[0]
+    final val group // kastle/TemplateProject.group|{}group[0]
+        final fun <get-group>(): kotlin/String // kastle/TemplateProject.group.<get-group>|<get-group>(){}[0]
+    final val libraries // kastle/TemplateProject.libraries|{}libraries[0]
+        final fun <get-libraries>(): kotlin.collections/Map<kotlin/String, kastle/TemplateCatalogArtifact> // kastle/TemplateProject.libraries.<get-libraries>|<get-libraries>(){}[0]
+    final val module // kastle/TemplateProject.module|{}module[0]
+        final fun <get-module>(): kastle/TemplateSourceModule? // kastle/TemplateProject.module.<get-module>|<get-module>(){}[0]
+    final val modules // kastle/TemplateProject.modules|{}modules[0]
+        final fun <get-modules>(): kotlin.collections/List<kastle/TemplateSourceModule> // kastle/TemplateProject.modules.<get-modules>|<get-modules>(){}[0]
+    final val name // kastle/TemplateProject.name|{}name[0]
+        final fun <get-name>(): kotlin/String // kastle/TemplateProject.name.<get-name>|<get-name>(){}[0]
+    final val namespace // kastle/TemplateProject.namespace|{}namespace[0]
+        final fun <get-namespace>(): kotlin/String // kastle/TemplateProject.namespace.<get-namespace>|<get-namespace>(){}[0]
+    final val packs // kastle/TemplateProject.packs|{}packs[0]
+        final fun <get-packs>(): kotlin.collections/List<kastle/TemplatePack> // kastle/TemplateProject.packs.<get-packs>|<get-packs>(){}[0]
+    final val versions // kastle/TemplateProject.versions|{}versions[0]
+        final fun <get-versions>(): kotlin.collections/Map<kotlin/String, kotlin/String> // kastle/TemplateProject.versions.<get-versions>|<get-versions>(){}[0]
+
+    final fun component1(): kotlin/String // kastle/TemplateProject.component1|component1(){}[0]
+    final fun component2(): kotlin/String // kastle/TemplateProject.component2|component2(){}[0]
+    final fun component3(): kotlin/String // kastle/TemplateProject.component3|component3(){}[0]
+    final fun component4(): kotlin.collections/List<kastle/TemplateSourceModule> // kastle/TemplateProject.component4|component4(){}[0]
+    final fun component5(): kotlin.collections/List<kastle/TemplatePack> // kastle/TemplateProject.component5|component5(){}[0]
+    final fun component6(): kotlin.collections/Map<kotlin/String, kotlin/String> // kastle/TemplateProject.component6|component6(){}[0]
+    final fun component7(): kotlin.collections/Map<kotlin/String, kastle/TemplateCatalogArtifact> // kastle/TemplateProject.component7|component7(){}[0]
+    final fun component8(): kotlin/String? // kastle/TemplateProject.component8|component8(){}[0]
+    final fun component9(): kastle/TemplateGradleProjectSettings // kastle/TemplateProject.component9|component9(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin.collections/List<kastle/TemplateSourceModule> = ..., kotlin.collections/List<kastle/TemplatePack> = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin.collections/Map<kotlin/String, kastle/TemplateCatalogArtifact> = ..., kotlin/String? = ..., kastle/TemplateGradleProjectSettings = ...): kastle/TemplateProject // kastle/TemplateProject.copy|copy(kotlin.String;kotlin.String;kotlin.String;kotlin.collections.List<kastle.TemplateSourceModule>;kotlin.collections.List<kastle.TemplatePack>;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.collections.Map<kotlin.String,kastle.TemplateCatalogArtifact>;kotlin.String?;kastle.TemplateGradleProjectSettings){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplateProject.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplateProject.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplateProject.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplateProject> { // kastle/TemplateProject.$serializer|null[0]
+        final val descriptor // kastle/TemplateProject.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplateProject.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplateProject.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplateProject // kastle/TemplateProject.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplateProject) // kastle/TemplateProject.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplateProject){}[0]
+    }
+
+    final object Companion { // kastle/TemplateProject.Companion|null[0]
+        final val $childSerializers // kastle/TemplateProject.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplateProject> // kastle/TemplateProject.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class kastle/TemplateSourceModule { // kastle/TemplateSourceModule|null[0]
+    constructor <init>(kotlin/String = ..., kotlin/String = ..., kotlin.collections/List<kotlin/String> = ..., kastle/TemplateGradleModuleSettings = ..., kastle/TemplateAmperModuleSettings = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/List<kastle/TemplateBuildDependency>> = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/List<kastle/TemplateBuildDependency>> = ...) // kastle/TemplateSourceModule.<init>|<init>(kotlin.String;kotlin.String;kotlin.collections.List<kotlin.String>;kastle.TemplateGradleModuleSettings;kastle.TemplateAmperModuleSettings;kotlin.collections.Map<kotlin.String,kotlin.collections.List<kastle.TemplateBuildDependency>>;kotlin.collections.Map<kotlin.String,kotlin.collections.List<kastle.TemplateBuildDependency>>){}[0]
+
+    final val amper // kastle/TemplateSourceModule.amper|{}amper[0]
+        final fun <get-amper>(): kastle/TemplateAmperModuleSettings // kastle/TemplateSourceModule.amper.<get-amper>|<get-amper>(){}[0]
+    final val dependencies // kastle/TemplateSourceModule.dependencies|{}dependencies[0]
+        final fun <get-dependencies>(): kotlin.collections/Map<kotlin/String, kotlin.collections/List<kastle/TemplateBuildDependency>> // kastle/TemplateSourceModule.dependencies.<get-dependencies>|<get-dependencies>(){}[0]
+    final val gradle // kastle/TemplateSourceModule.gradle|{}gradle[0]
+        final fun <get-gradle>(): kastle/TemplateGradleModuleSettings // kastle/TemplateSourceModule.gradle.<get-gradle>|<get-gradle>(){}[0]
+    final val parent // kastle/TemplateSourceModule.parent|{}parent[0]
+        final fun <get-parent>(): kotlin/String? // kastle/TemplateSourceModule.parent.<get-parent>|<get-parent>(){}[0]
+    final val path // kastle/TemplateSourceModule.path|{}path[0]
+        final fun <get-path>(): kotlin/String // kastle/TemplateSourceModule.path.<get-path>|<get-path>(){}[0]
+    final val platform // kastle/TemplateSourceModule.platform|{}platform[0]
+        final fun <get-platform>(): kotlin/String? // kastle/TemplateSourceModule.platform.<get-platform>|<get-platform>(){}[0]
+    final val platforms // kastle/TemplateSourceModule.platforms|{}platforms[0]
+        final fun <get-platforms>(): kotlin.collections/List<kotlin/String> // kastle/TemplateSourceModule.platforms.<get-platforms>|<get-platforms>(){}[0]
+    final val testDependencies // kastle/TemplateSourceModule.testDependencies|{}testDependencies[0]
+        final fun <get-testDependencies>(): kotlin.collections/Map<kotlin/String, kotlin.collections/List<kastle/TemplateBuildDependency>> // kastle/TemplateSourceModule.testDependencies.<get-testDependencies>|<get-testDependencies>(){}[0]
+    final val type // kastle/TemplateSourceModule.type|{}type[0]
+        final fun <get-type>(): kotlin/String // kastle/TemplateSourceModule.type.<get-type>|<get-type>(){}[0]
+
+    final fun component1(): kotlin/String // kastle/TemplateSourceModule.component1|component1(){}[0]
+    final fun component2(): kotlin/String // kastle/TemplateSourceModule.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/List<kotlin/String> // kastle/TemplateSourceModule.component3|component3(){}[0]
+    final fun component4(): kastle/TemplateGradleModuleSettings // kastle/TemplateSourceModule.component4|component4(){}[0]
+    final fun component5(): kastle/TemplateAmperModuleSettings // kastle/TemplateSourceModule.component5|component5(){}[0]
+    final fun component6(): kotlin.collections/Map<kotlin/String, kotlin.collections/List<kastle/TemplateBuildDependency>> // kastle/TemplateSourceModule.component6|component6(){}[0]
+    final fun component7(): kotlin.collections/Map<kotlin/String, kotlin.collections/List<kastle/TemplateBuildDependency>> // kastle/TemplateSourceModule.component7|component7(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin.collections/List<kotlin/String> = ..., kastle/TemplateGradleModuleSettings = ..., kastle/TemplateAmperModuleSettings = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/List<kastle/TemplateBuildDependency>> = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/List<kastle/TemplateBuildDependency>> = ...): kastle/TemplateSourceModule // kastle/TemplateSourceModule.copy|copy(kotlin.String;kotlin.String;kotlin.collections.List<kotlin.String>;kastle.TemplateGradleModuleSettings;kastle.TemplateAmperModuleSettings;kotlin.collections.Map<kotlin.String,kotlin.collections.List<kastle.TemplateBuildDependency>>;kotlin.collections.Map<kotlin.String,kotlin.collections.List<kastle.TemplateBuildDependency>>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // kastle/TemplateSourceModule.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // kastle/TemplateSourceModule.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // kastle/TemplateSourceModule.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<kastle/TemplateSourceModule> { // kastle/TemplateSourceModule.$serializer|null[0]
+        final val descriptor // kastle/TemplateSourceModule.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // kastle/TemplateSourceModule.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // kastle/TemplateSourceModule.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): kastle/TemplateSourceModule // kastle/TemplateSourceModule.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, kastle/TemplateSourceModule) // kastle/TemplateSourceModule.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;kastle.TemplateSourceModule){}[0]
+    }
+
+    final object Companion { // kastle/TemplateSourceModule.Companion|null[0]
+        final val $childSerializers // kastle/TemplateSourceModule.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<kastle/TemplateSourceModule> // kastle/TemplateSourceModule.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final val kastle/_attributes // kastle/_attributes|{}_attributes[0]
+    final fun <get-_attributes>(): kastle/TemplateProperties // kastle/_attributes.<get-_attributes>|<get-_attributes>(){}[0]
+final val kastle/_module // kastle/_module|{}_module[0]
+    final fun <get-_module>(): kastle/TemplateSourceModule // kastle/_module.<get-_module>|<get-_module>(){}[0]
+final val kastle/_project // kastle/_project|{}_project[0]
+    final fun <get-_project>(): kastle/TemplateProject // kastle/_project.<get-_project>|<get-_project>(){}[0]
+final val kastle/_properties // kastle/_properties|{}_properties[0]
+    final fun <get-_properties>(): kastle/TemplateProperties // kastle/_properties.<get-_properties>|<get-_properties>(){}[0]
+final val kastle/_slot // kastle/_slot|{}_slot[0]
+    final fun <get-_slot>(): kotlin/Function1<kotlin/String, kastle/TemplateSlot?> // kastle/_slot.<get-_slot>|<get-_slot>(){}[0]
+final val kastle/_slots // kastle/_slots|{}_slots[0]
+    final fun <get-_slots>(): kotlin.collections/Map<kotlin/String, kotlin.collections/List<kastle/TemplateSlot>> // kastle/_slots.<get-_slots>|<get-_slots>(){}[0]
+
+final fun <#A: kotlin/Any?> kastle/_unsafe(kotlin/String): #A // kastle/_unsafe|_unsafe(kotlin.String){0§<kotlin.Any?>}[0]

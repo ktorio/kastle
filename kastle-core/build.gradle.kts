@@ -11,6 +11,11 @@ plugins {
 }
 
 kotlin {
+    @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+    abiValidation {
+        enabled = true
+    }
+
     jvm()
     iosArm64()
     iosSimulatorArm64()
@@ -25,6 +30,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(project(":kastle-templates"))
             api(libs.kotlinx.coroutines)
             api(libs.kotlinx.datetime)
             api(libs.kotlinx.io.core)

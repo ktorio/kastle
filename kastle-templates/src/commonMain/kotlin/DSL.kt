@@ -1,6 +1,9 @@
 package kastle
 
+import kotlinx.serialization.Serializable
 import kotlin.reflect.KProperty
+
+private const val RUNTIME_ERROR = "This function is a placeholder for the compiler and cannot be invoked"
 
 @DslMarker
 annotation class TemplateDsl
@@ -15,27 +18,15 @@ val _properties: TemplateProperties = object : TemplateProperties {}
  */
 val _attributes: TemplateProperties = object : TemplateProperties {}
 
-@Suppress("Unused", "ClassName")
-object _project {
-    val name: String = ""
-    val group: String = ""
-    val namespace: String = ""
-    val modules: List<TemplateSourceModule> = emptyList()
-    val gradle = TemplateGradleProjectSettings()
-}
+/**
+ * References the current project.
+ */
+val _project = TemplateProject()
 
 /**
  * References the current module in the templated project.
  */
-val _module: TemplateSourceModule = object: TemplateSourceModule {
-    override val path: String = ""
-    override val type: String = "lib"
-    override val platform: String? = null
-    override val platforms: List<String> = emptyList()
-    override val dependencies: Map<String, List<TemplateBuildDependency>> = emptyMap()
-    override val testDependencies: Map<String, List<TemplateBuildDependency>> = emptyMap()
-    override val gradle = TemplateGradleModuleSettings()
-}
+val _module: TemplateSourceModule = TemplateSourceModule()
 
 /**
  * Injects the slot with the given name.
@@ -45,74 +36,128 @@ val _slot: (String) -> TemplateSlot? = { null }
 /**
  * Injects all slots targeting the given slot name.
  */
-val _slots: TemplateSlots = object: TemplateSlots {}
+val _slots: Map<String, List<TemplateSlot>> = emptyMap()
 
 /**
  * Inlines the string as raw code.
  */
-fun <E> _unsafe(code: String): E = TODO()
+fun <E> _unsafe(code: String): E = TODO(RUNTIME_ERROR)
 
 interface TemplateProperties {
-    operator fun <T> getValue(thisRef: Any?, property: KProperty<*>): T = TODO()
-    operator fun <T> get(key: String): T = TODO()
+    operator fun <T> getValue(thisRef: Any?, property: KProperty<*>): T = TODO(RUNTIME_ERROR)
+    operator fun <T> get(key: String): T = TODO(RUNTIME_ERROR)
 }
 
-interface TemplateSourceModule {
-    val path: String
-    val type: String
-    val platform: String?
-    val platforms: List<String>
-    val gradle: TemplateGradleModuleSettings
-    val dependencies: Map<String, List<TemplateBuildDependency>>
-    val testDependencies: Map<String, List<TemplateBuildDependency>>
+@Serializable
+data class TemplateProject(
+    val name: String = "",
+    val group: String = "",
+    val namespace: String = "",
+    val modules: List<TemplateSourceModule> = emptyList(),
+    val packs: List<TemplatePack> = emptyList(),
+    val versions: Map<String, String> = emptyMap(),
+    val libraries: Map<String, TemplateCatalogArtifact> = emptyMap(),
+    val buildSystem: String? = null,
+    val gradle: TemplateGradleProjectSettings = TemplateGradleProjectSettings()
+) {
+    val module: TemplateSourceModule? get() = modules.singleOrNull()
 }
 
+@Serializable
+data class TemplatePack(
+    val id: String = "",
+    val name: String = "",
+    val description: String? = null,
+    val group: String? = null,
+    val tags: List<String> = emptyList(),
+)
+
+@Serializable
+data class TemplateSourceModule(
+    val path: String = "",
+    val type: String = "lib", // amper-style module type (lib, app/jvm, etc.)
+    val platforms: List<String> = emptyList(), // jvm, android, wasm, etc.
+    val gradle: TemplateGradleModuleSettings = TemplateGradleModuleSettings(),
+    val amper: TemplateAmperModuleSettings = TemplateAmperModuleSettings(),
+    val dependencies: Map<String, List<TemplateBuildDependency>> = emptyMap(),
+    val testDependencies: Map<String, List<TemplateBuildDependency>> = emptyMap(),
+) {
+    val parent: String? get() = path.substringBeforeLast('/').takeIf { it.isNotEmpty() }
+    val platform: String? = platforms.singleOrNull()
+}
+
+@Serializable
 data class TemplateGradleProjectSettings(
     val repositories: List<TemplateMavenRepository> = emptyList(),
+    val pluginRepositories: List<TemplateMavenRepository> = emptyList(),
     val plugins: List<TemplateGradlePlugin> = emptyList(),
 )
 
+@Serializable
 data class TemplateGradleModuleSettings(
     val plugins: List<String> = emptyList(),
 )
 
+@Serializable
+data class TemplateAmperModuleSettings(
+    val compose: String? = null,
+    val ktor: String? = null,
+    val application: TemplateAmperApplicationSettings? = null,
+    val kotlin: TemplateAmperKotlinSettings? = null,
+)
+
+@Serializable
+data class TemplateAmperApplicationSettings(
+    val mainClass: String? = null,
+)
+
+@Serializable
+data class TemplateAmperKotlinSettings(
+    val serialization: String? = null,
+)
+
+@Serializable
 data class TemplateMavenRepository(
-    val name: String,
+    val id: String,
     val url: String,
     val gradleFunction: String?
 )
-
-@TemplateDsl
-interface TemplateSlots: Map<String, List<TemplateSlot>> {
-    operator fun contains(name: String): Boolean = false
-    operator fun invoke(name: String): Sequence<TemplateSlot>? = null
-    override fun containsKey(key: String): Boolean = false
-    override fun containsValue(value: List<TemplateSlot>): Boolean = false
-    override fun get(key: String): List<TemplateSlot>? = null
-    override fun isEmpty(): Boolean = true
-    override val entries: Set<Map.Entry<String, List<TemplateSlot>>> get() = emptySet()
-    override val keys: Set<String> get() = emptySet()
-    override val size: Int get() = 0
-    override val values: Collection<List<TemplateSlot>> get() = emptyList()
-}
 
 @TemplateDsl
 interface TemplateSlot {
     fun <T> get(): T
 }
 
+@Serializable
 data class TemplateBuildDependency(
     val type: String, // maven, project, catalog
     val group: String? = null,
     val artifact: String? = null,
     val version: String? = null,
+    val versionRef: String? = null,
     val path: String? = null,
+    val gradlePath: String? = null,
     val key: String? = null,
+    val functionName: String? = null,
+    val args: List<String>? = null,
     val exported: Boolean = false,
 )
 
+@Serializable
 data class TemplateGradlePlugin(
     val id: String,
     val name: String,
-    val version: String
+    val catalogKey: String,
+    val version: String? = null,
+    val versionRef: String? = null,
+)
+
+@Serializable
+data class TemplateCatalogArtifact(
+    val module: String? = null,
+    val group: String? = null,
+    val artifact: String? = null,
+    val version: String? = null,
+    val versionRef: String? = null,
+    val kmp: Boolean = false,
 )

@@ -72,8 +72,10 @@ fun KtExpression?.toTemplateExpression(): Expression {
                             Expression.CharLiteral(text[1]) // TODO handle escape
                         else if (text.contains('.'))
                             Expression.DoubleLiteral(text.toDouble())
-                        else
+                        else if (text.contains('L') || text.toLong() > Int.MAX_VALUE)
                             Expression.LongLiteral(text.toLong())
+                        else
+                            Expression.IntLiteral(text.toInt())
                     } catch (e: NumberFormatException) {
                         // Fallback to string if not a valid number
                         StringLiteral(text)
@@ -180,6 +182,14 @@ fun KtExpression?.toTemplateExpression(): Expression {
             }
             Expression.PostfixOp(operator, baseExpression?.toTemplateExpression()
                 ?: throw IllegalArgumentException("Missing base expression"))
+        }
+
+        is KtIfExpression -> {
+            Expression.IfElse(
+                condition.toTemplateExpression(),
+                then.toTemplateExpression(),
+                `else`.toTemplateExpression()
+            )
         }
 
         // For if expressions and other complex constructs, you might want to add more cases

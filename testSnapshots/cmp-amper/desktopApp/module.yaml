@@ -1,12 +1,13 @@
 
-product:
-  type: lib
-  platforms: [jvm]
+product: jvm/app
 
-dependencies@jvm:
+dependencies:
   - ../sharedUI
   - $composeLibs.desktop.currentOs
   - $libs.kotlinx.coroutinesSwing
 
+test-dependencies:
+
 settings:
   compose: enabled
+

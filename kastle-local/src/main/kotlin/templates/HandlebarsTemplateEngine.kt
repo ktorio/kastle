@@ -114,7 +114,7 @@ class HandlebarsTemplateEngine(
                         ELSE -> {
                             val parent = stack.pop() ?: error("Bad else placement: missing parent")
                             when(parent.helper) {
-                                IF -> {
+                                IF, UNLESS -> {
                                     val ifBlock = parent.toBlock(match, inclusive = false)
                                     yield(ifBlock)
                                     stack += BlockMatch(line, match, startOfLine, helper = ELSE)
@@ -138,8 +138,8 @@ class HandlebarsTemplateEngine(
                     val parent = stack.pop() ?: error("Unexpected close term: $text")
                     val block = parent.toBlock(match, parent.helper !in setOf(null, WHEN))
                     when(text.drop(1)) {
-                        IF -> {
-                            require(parent.helper in setOf(IF, ELSE)) { "Unexpected close term: $text" }
+                        IF, UNLESS -> {
+                            require(parent.helper in setOf(IF, UNLESS, ELSE)) { "Unexpected close term: $text" }
                             val conditionalBlock = stack.pop()?.toBlock(match) as? ConditionalBlock
                                 ?: error("Expected conditional wrapper")
                             yield(conditionalBlock)
@@ -181,7 +181,7 @@ class HandlebarsTemplateEngine(
                             )
 
                             // add conditional wrapper and if at the same time
-                            IF -> stack += listOf(
+                            IF, UNLESS -> stack += listOf(
                                 blockMatch.copy(helper = COND),
                                 blockMatch,
                             )
@@ -243,6 +243,12 @@ class HandlebarsTemplateEngine(
                 )
                 IF -> IfBlock(
                     expression = expression?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
+                    position = position(endMatch, inclusive),
+                )
+                UNLESS -> IfBlock(
+                    expression = expression?.let {
+                        Expression.PrefixOp(PrefixOperator.NOT, VariableRef(it))
+                    } ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
                     position = position(endMatch, inclusive),
                 )
                 ELSE -> ElseBlock(

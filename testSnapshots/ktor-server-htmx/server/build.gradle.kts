@@ -2,7 +2,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
 
-    alias(libs.plugins.ktor)
+    alias(ktorLibs.plugins.ktor)
 }
 
 
@@ -26,4 +26,6 @@ dependencies {
     implementation(ktorLibs.server.htmx)
     implementation(ktorLibs.server.htmlBuilder)
     implementation(ktorLibs.htmx.html)
+    testImplementation(kotlin("test"))
+    testImplementation(ktorLibs.server.testHost)
 }

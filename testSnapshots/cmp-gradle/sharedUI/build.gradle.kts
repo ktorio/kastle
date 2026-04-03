@@ -59,5 +59,9 @@ kotlin {
             api(libs.androidx.lifecycle.runtimeCompose)
         }
 
+        commonTest.dependencies {
+            kotlin("test")
+        
+        }
     }
 }

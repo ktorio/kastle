@@ -289,13 +289,10 @@ class LocalPackRepository(
             yaml.decodeFromYamlNode<GradleSettings>(node)
         }
 
-        // TODO verify this is correct
         fun readDependencies(dependencies: String): DependenciesMap =
-            platforms.singleOrNull()?.let {
-                mapOf(it to moduleYaml.readDependencies(dependencies))
-            } ?: (platforms.associateWith { platform ->
-                moduleYaml.readDependencies("$dependencies@$platform")
-            } + (Platform.COMMON to moduleYaml.readDependencies(dependencies)))
+            platforms.singleOrNull()?.let { mapOf(it to moduleYaml.readDependencies(dependencies)) }
+                ?: (platforms.associateWith { platform -> moduleYaml.readDependencies("$dependencies@$platform") }
+                        + (Platform.COMMON to moduleYaml.readDependencies(dependencies)))
 
         val dependencies = readDependencies("dependencies")
         val testDependencies = readDependencies("testDependencies")
@@ -462,9 +459,17 @@ class LocalPackRepository(
         modulePath: Path,
     ): Pair<List<Path>, List<Path>> {
         val (sources, resources) = when {
-            platforms.size == 1 -> listOf(listOf("src"), listOf("resources"))
+            platforms.size == 1 -> listOf(
+                listOf("src", "test"),
+                listOf("resources", "testResources")
+            )
             else -> {
-                listOf("src", "resources").map { folder ->
+                listOf(
+                    "src",
+                    "resources",
+                    "test",
+                    "testResources"
+                ).map { folder ->
                     buildList {
                         add(folder)
                         platforms.forEach { platform ->
@@ -480,34 +485,6 @@ class LocalPackRepository(
             else it
         }.map(modulePath::resolve)
     }
-
-//    @Deprecated("Use catalogs() instead", replaceWith = ReplaceWith("catalogs().firstOrNull { it.name == VersionsCatalog.DEFAULT_NAME } ?: VersionsCatalog.Empty"))
-//    @OptIn(ExperimentalSerializationApi::class)
-//    override suspend fun versions(): VersionsCatalog {
-//        // TODO we should try to drop this
-//        val builtInArtifacts =
-//            fs.list(root).filter {
-//                it.name.endsWith(".versions.toml") && it.name != REPOSITORY_VERSION_CATALOG
-//            }.mapNotNull { file ->
-//                file.readToml<BuiltInToml>(fs)?.libraries
-//            }.reduceOrNull { left, right -> left + right }.orEmpty()
-//
-//        val builtInCatalog = VersionsCatalog(
-//            libraries = builtInArtifacts.mapValues { (_, artifact) ->
-//                val (group, artifact, version) = artifact
-//                CatalogArtifact(
-//                    "$group:$artifact",
-//                    CatalogVersion.Number(version),
-//                    builtIn = true
-//                )
-//            }
-//        )
-//
-//        val libraryCatalog = loadVersionCatalog(DEFAULT_VERSION_CATALOG) ?: VersionsCatalog()
-//        val repositoryVersionCatalog = loadVersionCatalog(REPOSITORY_VERSION_CATALOG) ?: VersionsCatalog.Empty
-//
-//        return builtInCatalog + libraryCatalog + repositoryVersionCatalog
-//    }
 
     override suspend fun catalogs(): List<VersionsCatalog> {
         val defaultLibs = loadVersionCatalog(DEFAULT_VERSION_CATALOG)

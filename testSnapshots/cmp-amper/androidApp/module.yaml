@@ -3,9 +3,12 @@ product:
   type: lib
   platforms: [android]
 
-dependencies@android:
+dependencies:
   - ../sharedUI
   - $libs.androidx.activity.compose
 
+test-dependencies:
+
 settings:
   compose: enabled
+

@@ -19,7 +19,7 @@ dependencies {
     implementation(project(":kastle-core"))
     implementation(project(":kastle-local"))
     implementation(project(":kastle-server"))
-    implementation(libs.ktor.server.cio)
+    implementation(ktorLibs.server.cio)
     implementation(libs.kaml)
 
     testImplementation(libs.gradlePlugin.kotlin)

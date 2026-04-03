@@ -49,7 +49,7 @@ data class SemanticVersion(
     val qualifier: String? = null,
 ): Revision, Comparable<SemanticVersion> {
     companion object {
-        private val semanticVersionRegex = Regex("""^(\d+)\.(\d+)\.(\d+)(-([\w.]+))?${'$'}""")
+        private val semanticVersionRegex = Regex("""^(\d+)\.(\d+)\.(\d+)(-([\w.]+))?$""")
 
         fun parse(text: String): SemanticVersion =
             semanticVersionRegex.matchEntire(text)?.destructured?.let { (major, minor, patch, qualifier) ->
@@ -108,6 +108,13 @@ sealed interface ProjectModules {
     }
 
     val modules: List<SourceModule>
+
+    fun map(mapping: (SourceModule) -> SourceModule): ProjectModules =
+        when (this) {
+            is Empty -> this
+            is Single -> Single(mapping(module))
+            is Multi -> Multi(modules.map { mapping(it) })
+        }
 
     @Serializable
     data object Empty: ProjectModules {
@@ -282,12 +289,22 @@ val Platform.resourcesDir get() = when(this) {
 @Serializable
 data class AmperSettings(
     val compose: String? = null,
+    val ktor: String? = null,
     val application: AmperApplicationSettings? = null,
-)
+    val kotlin: AmperKotlinSettings? = null,
+) {
+    fun isEmpty() = compose == null && ktor == null && application == null && kotlin == null
+    fun isNotEmpty() = !isEmpty()
+}
 
 @Serializable
 data class AmperApplicationSettings(
     val mainClass: String? = null,
+)
+
+@Serializable
+data class AmperKotlinSettings(
+    val serialization: String? = null,
 )
 
 @Serializable
@@ -345,7 +362,12 @@ fun SourceModuleManifest.tryMerge(other: SourceModuleManifest): SourceModuleMani
         dependencies = dependencies.merge(other.dependencies),
         testDependencies = testDependencies.merge(other.testDependencies),
         gradle = GradleSettings((gradle.plugins + other.gradle.plugins).distinct()),
-        amper = AmperSettings(amper.compose ?: other.amper.compose, amper.application ?: other.amper.application),
+        amper = AmperSettings(
+            amper.compose ?: other.amper.compose,
+            amper.ktor ?: other.amper.ktor,
+            amper.application ?: other.amper.application,
+            amper.kotlin ?: other.amper.kotlin,
+        ),
     )
 }
 

@@ -12,7 +12,8 @@ import org.jetbrains.kastle.io.resolve
 
 private val DEFAULT_IGNORE_FILES = setOf(
     ".gitkeep",
-    "gradle-wrapper.jar"
+    "gradle-wrapper.jar",
+    "README.md" // TODO something going on with git on the md spacing
 )
 
 expect fun shouldReplaceSnapshots(): Boolean

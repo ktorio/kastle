@@ -15,6 +15,11 @@ dependencyResolutionManagement {
         google()
         maven("https://packages.jetbrains.team/maven/p/apl/product-analytics-platform-public")
     }
+    versionCatalogs {
+        create("ktorLibs") {
+            from("io.ktor:ktor-version-catalog:3.4.2")
+        }
+    }
 }
 
 plugins {

@@ -3,3 +3,7 @@ modules:
   - desktopApp
   - sharedUI
   - webApp
+
+repositories:
+  - id: google
+    url: https://maven.google.com/

@@ -6,6 +6,8 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.files.SystemTemporaryDirectory
 import org.jetbrains.kastle.io.export
+import org.jetbrains.kastle.logging.ConsoleLogger
+import org.jetbrains.kastle.logging.LogLevel
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -39,6 +41,7 @@ fun ProjectGeneratorTest(
 
         ProjectGenerator(
             repository = repository.await(),
+            log = ConsoleLogger(level = LogLevel.TRACE),
         ).generate(
             ProjectDescriptor(
                 name = name,

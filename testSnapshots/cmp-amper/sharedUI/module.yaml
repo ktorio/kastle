@@ -13,5 +13,8 @@ dependencies:
   - $libs.androidx.lifecycle.viewmodelCompose: exported
   - $libs.androidx.lifecycle.runtimeCompose: exported
 
+test-dependencies@jvm:test-dependencies@android:test-dependencies@ios:test-dependencies@js:test-dependencies@wasmJs:test-dependencies:
+
 settings:
   compose: enabled
+

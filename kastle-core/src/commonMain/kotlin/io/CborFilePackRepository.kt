@@ -7,6 +7,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.cbor.Cbor
 import org.jetbrains.kastle.PackDescriptor
 import org.jetbrains.kastle.PackMetadata
+import org.jetbrains.kastle.PackReadException
 import org.jetbrains.kastle.VersionsCatalog
 
 @OptIn(ExperimentalSerializationApi::class)

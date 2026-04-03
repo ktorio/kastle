@@ -2,6 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    {{#if _module.path}}
+    <parent>
+        <groupId>{{ _project.group }}</groupId>
+        <artifactId>{{ _project.name }}</artifactId>
+        <version>0.0.1</version>
+    </parent>
+    <artifactId>{{ _module.path }}</artifactId>
+    {{else}}
     <groupId>{{ _project.group }}</groupId>
     <artifactId>{{ _project.name }}</artifactId>
     <version>0.0.1</version>
@@ -13,24 +21,33 @@
         {{/each}}
         {{slots mavenProperties}}
     </properties>
+    {{#if _project.gradle.repositories.size}}
     <repositories>
+        {{#each _project.gradle.repositories}}
+        <repository>
+            <id>{{id}}</id>
+            <url>{{url}}</url>
+        </repository>
+        {{/each}}
     </repositories>
+    {{/if}}
+    {{/if}}
     <dependencies>
         {{#each _module.dependencies.entries}}
         {{#each value}}
         <dependency>
             <groupId>{{ group }}</groupId>
-            <artifactId>{{ artifact }}{{#if isJava}}{{else}}-jvm{{/if}}</artifactId>
-            <version>${{{ versionRef }}_version}</version>
+            <artifactId>{{ artifact }}{{#if kmp}}-jvm{{/if}}</artifactId>
+            <version>{{#if versionRef}}${{{ versionRef }}_version}{{else}}{{version}}{{/if}}</version>
         </dependency>
         {{/each}}
         {{/each}}
-        {{#each _module.testDependencies.entries }}
-        {{#each value }}
+        {{#each _module.testDependencies.entries}}
+        {{#each value}}
         <dependency>
             <groupId>{{ group }}</groupId>
-            <artifactId>{{ artifact }}{{#if isJava}}{{else}}-jvm{{/if}}</artifactId>
-            <version>${{{ versionRef }}_version}</version>
+            <artifactId>{{ artifact }}{{#if kmp}}-jvm{{/if}}</artifactId>
+            <version>{{#if versionRef}}${{{ versionRef }}_version}{{else}}{{version}}{{/if}}</version>
             <scope>test</scope>
         </dependency>
         {{/each}}
@@ -48,6 +65,7 @@
             <plugin>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <groupId>org.jetbrains.kotlin</groupId>
+                {{#unless _module.path}}
                 <version>${kotlin_version}</version>
                 <configuration>
                     <jvmTarget>1.8</jvmTarget>
@@ -68,7 +86,9 @@
                         </goals>
                     </execution>
                 </executions>
+                {{/unless}}
             </plugin>
+            {{#unless _module.path}}
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -109,6 +129,7 @@
                     </execution>
                 </executions>
             </plugin>
+            {{/unless}}
         </plugins>
     </build>
 </project>

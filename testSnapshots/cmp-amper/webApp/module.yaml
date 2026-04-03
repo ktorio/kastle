@@ -1,10 +1,11 @@
 
-product:
-  type: lib
-  platforms: [web]
+product: web/app
 
-dependencies@web:
+dependencies:
   - ../sharedUI
+
+test-dependencies:
 
 settings:
   compose: enabled
+
