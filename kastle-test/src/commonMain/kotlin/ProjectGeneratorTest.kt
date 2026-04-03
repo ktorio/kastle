@@ -41,7 +41,7 @@ fun ProjectGeneratorTest(
 
         ProjectGenerator(
             repository = repository.await(),
-            log = ConsoleLogger(level = LogLevel.TRACE),
+            log = ConsoleLogger(LogLevel.TRACE),
         ).generate(
             ProjectDescriptor(
                 name = name,
@@ -142,12 +142,26 @@ fun ProjectGeneratorTest(
 
     "value expressions" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "value-expressions", randomString())
-        generate(outputDir, "value-expressions", packs = listOf("com.acme/value-expressions"), properties = mapOf(
+        val expressionPackProperties = mapOf(
             "booleanProperty" to "true",
             "integerProperty" to "40",
             "stringProperty" to "test",
             "listProperty" to "item1,item2,item3",
-        ).mapKeys { (key) -> VariableId.parse("com.acme/value-expressions/$key") })
+        ).mapKeys { (key) ->
+            VariableId.parse("com.acme/value-expressions/$key")
+        }
+        val basicPackProperties = mapOf(
+            "booleanProperty" to "false",
+        ).mapKeys { (key) ->
+            VariableId.parse("com.acme/properties/$key")
+        }
+        generate(outputDir, "value-expressions",
+            packs = listOf(
+                "com.acme/value-expressions",
+                "com.acme/properties",
+            ),
+            properties = expressionPackProperties + basicPackProperties
+        )
         assertFilesAreEqualWithSnapshot(
             "$snapshots/value-expressions",
             outputDir.toString(),

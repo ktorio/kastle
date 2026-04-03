@@ -40,8 +40,8 @@ data class Project(
     val group: String get() = descriptor.group
 }
 
-internal fun Project.toVariableEntry(): Pair<String, Any?> =
-    "_project" to TemplateProject(
+internal fun Project.asTemplateMap(): Map<String, Any?> =
+    TemplateProject(
         name = name,
         group = group,
         modules = moduleSources.modules.sortedBy { it.path }.map { it.toTemplateType() },
@@ -61,8 +61,8 @@ internal fun Project.toVariableEntry(): Pair<String, Any?> =
     ).encodeToMap()
 
 context(project: Project)
-internal fun SourceModule.toVariableEntry(): Pair<String, Any?> =
-    "_module" to toTemplateType().encodeToMap()
+internal fun SourceModule.asTemplateMap(): Map<String, Any?> =
+    toTemplateType().encodeToMap()
 
 context(project: Project)
 private fun SourceModule.toTemplateType(): TemplateSourceModule =
@@ -190,9 +190,9 @@ private operator fun TemplateBuildDependency.plus(artifact: TemplateCatalogArtif
     )
 
 context(project: Project)
-internal fun SourceModule.slotsVariableEntry(packId: PackId): Pair<String, Map<String, Any?>> =
-    "_slots" to buildMap {
-        for ((url, value) in project.slotSources + this@slotsVariableEntry.slotSources) {
+internal fun SourceModule.slotsTemplateMap(packId: PackId): Map<String, Any?> =
+    buildMap {
+        for ((url, value) in project.slotSources + this@slotsTemplateMap.slotSources) {
             // insert relative value
             if (packId.toString() in url)
                 put(url.relativeFile.removePrefix(packId.toString()).trimStart('/'), value)

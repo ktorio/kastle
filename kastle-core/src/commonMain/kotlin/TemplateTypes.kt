@@ -9,6 +9,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.io.relativeTo
 import org.jetbrains.kastle.utils.Expression
+import org.jetbrains.kastle.utils.LocalVariables
 import org.jetbrains.kastle.utils.StringExpression
 import org.jetbrains.kastle.utils.StringLiteral
 import org.jetbrains.kastle.utils.Variables
@@ -305,7 +306,7 @@ sealed interface SourceTemplateIR {
         val template: SourceTemplate,
         val groupId: String,
         val packId: PackId,
-        val variables: Variables,
+        val variables: LocalVariables,
         val slots: SourcesByUrl,
     ): SourceTemplateIR
 

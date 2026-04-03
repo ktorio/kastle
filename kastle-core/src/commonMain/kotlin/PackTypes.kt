@@ -61,7 +61,7 @@ sealed interface PropertyScope {
     companion object {
         fun parse(text: String): PropertyScope =
             if (text == "(root)")
-                Pack
+                Root
             else if (text.startsWith("module:"))
                 Module(text.removePrefix("module:"))
             else
@@ -69,7 +69,7 @@ sealed interface PropertyScope {
     }
 
 
-    data object Pack: PropertyScope {
+    data object Root: PropertyScope {
         override fun toString(): String = "(root)"
     }
     data class Module(val path: String): PropertyScope {

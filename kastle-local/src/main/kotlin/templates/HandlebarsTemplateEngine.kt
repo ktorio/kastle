@@ -34,7 +34,7 @@ class HandlebarsTemplateEngine(
         private val bracesPattern = Regex("(?<!\\\\)\\{\\{(?:#?(?<helper>\\p{Alpha}[\\w_]+)\\s+)?(?<content>[^{].*?)}}")
         // Pattern to find escaped braces
         private val escapedBracesPattern = Regex("\\\\(\\{\\{.*?}})")
-        private val variablePattern = Regex("[\\w_.]+")
+        private val variablePattern = Regex("[\\p{Alpha}_]+(?:[_/.-]\\w+)*")
     }
 
     private val randomIds = mutableMapOf<Int, String>()
@@ -127,7 +127,10 @@ class HandlebarsTemplateEngine(
                             }
                         }
                         else -> yield(InlineValue(
-                            expression = VariableRef(text),
+                            expression = when {
+                                '/' in text -> Expression.QualifiedVariableRef(VariableId.parse(text))
+                                else -> VariableRef(text)
+                            },
                             position = BlockPosition(
                                 line = line,
                                 range = match.rangeAdjusted,

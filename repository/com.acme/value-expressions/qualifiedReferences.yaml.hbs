@@ -1,0 +1,13 @@
+# Foreign references
+numberProperty:
+    # Should be 43
+    fullPath: {{ com.acme/properties/numberProperty }}
+    # Should be null
+    relativePath: {{ numberProperty }}
+
+# Local references
+integerProperty:
+    # Should be 40
+    fullPath: {{ com.acme/value-expressions/integerProperty }}
+    # Should be 42
+    relativePath: {{ integerValue }}

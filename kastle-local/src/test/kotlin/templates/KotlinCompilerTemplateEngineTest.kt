@@ -2,13 +2,19 @@ package org.jetbrains.kastle.templates
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import org.jetbrains.kastle.PackId
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.TemplateEvaluator.Companion.toString
+import org.jetbrains.kastle.utils.LocalVariables
 import org.jetbrains.kastle.utils.Variables
 
 class KotlinCompilerTemplateEngineTest : StringSpec({
 
     val engine = KotlinCompilerTemplateEngine()
+    val packId = PackId("com.acme", "test")
+
+    fun localVars(vararg pairs: Pair<String, Any?>) =
+        LocalVariables(packId, pairs.toMap())
 
     suspend fun template(text: String): SourceTemplate =
         engine.read(text = text)
@@ -24,7 +30,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         """.trimIndent())
 
         template.toString(
-            variables = Variables("title" to "Hello, World!")
+            variables = localVars("title" to "Hello, World!")
         ) shouldBe "\nval html = html {\n    h1 {\n        +\"Hello, World!\"\n    }\n}"
     }
 
@@ -37,7 +43,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         """.trimIndent())
 
         template.toString(
-            variables = Variables("someProperty" to "World")
+            variables = localVars("someProperty" to "World")
         ) shouldBe "\nfun main() {\n    println(\"Hello, World!\")\n}"
     }
 
@@ -48,11 +54,11 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         """.trimIndent())
 
         template.toString(
-            variables = Variables("condition" to true)
+            variables = localVars("condition" to true)
         ) shouldBe "\nval result = \"on\""
 
         template.toString(
-            variables = Variables("condition" to false)
+            variables = localVars("condition" to false)
         ) shouldBe "\nval result = \"off\""
     }
 
@@ -67,7 +73,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         """.trimIndent())
 
         template.toString(
-            variables = Variables("names" to listOf("John", "Jane", "Jill"))
+            variables = localVars("names" to listOf("John", "Jane", "Jill"))
         ) shouldBe """
             
             fun readNames(callback: (String) -> Unit) {
@@ -91,7 +97,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         """.trimIndent())
 
         template.toString(
-            variables = Variables("number" to 60)
+            variables = localVars("number" to 60)
         ) shouldBe """
             
             fun main() {
@@ -101,7 +107,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         """.trimIndent()
 
         template.toString(
-            variables = Variables("number" to 37)
+            variables = localVars("number" to 37)
         ) shouldBe """
             
             fun main() {

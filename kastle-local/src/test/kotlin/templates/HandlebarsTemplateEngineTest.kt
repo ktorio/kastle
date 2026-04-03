@@ -2,8 +2,10 @@ package org.jetbrains.kastle.templates
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import org.jetbrains.kastle.PackId
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.TemplateEvaluator.Companion.toString
+import org.jetbrains.kastle.utils.LocalVariables
 import org.jetbrains.kastle.utils.StringLiteral
 import org.jetbrains.kastle.utils.Variables
 
@@ -11,13 +13,17 @@ class HandlebarsTemplateEngineTest : StringSpec({
 
     val engine = HandlebarsTemplateEngine()
     val target = StringLiteral("file://templates/test.txt")
+    val packId = PackId("com.acme", "test")
+
+    fun localVars(vararg pairs: Pair<String, Any?>) =
+        LocalVariables(packId, pairs.toMap())
 
     fun template(text: String): SourceTemplate =
         engine.read(target, text)
 
     "literals" {
         val actual = template("Hello, {{ someProperty }}!").toString(
-            variables = Variables("someProperty" to "World")
+            variables = localVars("someProperty" to "World")
         )
         actual shouldBe "Hello, World!"
     }
@@ -26,11 +32,11 @@ class HandlebarsTemplateEngineTest : StringSpec({
         val template = template("{{#if someProperty}}Hello!{{else}}Goodbye!{{/if}}")
 
         template.toString(
-            variables = Variables("someProperty" to true)
+            variables = localVars("someProperty" to true)
         ) shouldBe "Hello!"
 
         template.toString(
-            variables = Variables("someProperty" to false)
+            variables = localVars("someProperty" to false)
         ) shouldBe "Goodbye!"
     }
 
@@ -38,11 +44,11 @@ class HandlebarsTemplateEngineTest : StringSpec({
         val template = template("{{#unless someProperty}}Hello!{{else}}Goodbye!{{/unless}}")
 
         template.toString(
-            variables = Variables("someProperty" to true)
+            variables = localVars("someProperty" to true)
         ) shouldBe "Goodbye!"
 
         template.toString(
-            variables = Variables("someProperty" to false)
+            variables = localVars("someProperty" to false)
         ) shouldBe "Hello!"
     }
 
@@ -50,15 +56,15 @@ class HandlebarsTemplateEngineTest : StringSpec({
         val template = template("{{#when name}}{{\"Bob\"}}Hi{{\"Joe\"}}Hello{{else}}Up yours{{/when}}, {{name}}!")
 
         template.toString(
-            variables = Variables("name" to "Bob")
+            variables = localVars("name" to "Bob")
         ) shouldBe "Hi, Bob!"
 
         template.toString(
-            variables = Variables("name" to "Joe")
+            variables = localVars("name" to "Joe")
         ) shouldBe "Hello, Joe!"
 
         template.toString(
-            variables = Variables("name" to "Steve")
+            variables = localVars("name" to "Steve")
         ) shouldBe "Up yours, Steve!"
     }
 
@@ -69,7 +75,7 @@ class HandlebarsTemplateEngineTest : StringSpec({
             - {{this}}
             {{/each}}
         """.trimIndent()).toString(
-            variables = Variables("names" to listOf("Bob", "Alice", "Joe"))
+            variables = localVars("names" to listOf("Bob", "Alice", "Joe"))
         ) shouldBe """
             
             - Bob
@@ -112,7 +118,7 @@ class HandlebarsTemplateEngineTest : StringSpec({
             These are escaped: \{{notAProperty}}\{{notAProperty}} \{{notAProperty}}
             This has both: {{ realProperty }} and \{{notAProperty}}
         """.trimIndent()).toString(
-            variables = Variables(
+            variables = localVars(
                 "someProperty" to "some value",
                 "notAProperty" to "shouldn't appear",
                 "realProperty" to "another value",
@@ -126,7 +132,7 @@ class HandlebarsTemplateEngineTest : StringSpec({
 
     "nested braces" {
         template($$"${{{library}}Version}").toString(
-            variables = Variables("library" to "kotlin")
+            variables = localVars("library" to "kotlin")
         ) shouldBe $$"${kotlinVersion}"
     }
 

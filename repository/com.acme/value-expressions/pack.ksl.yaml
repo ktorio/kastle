@@ -18,3 +18,7 @@ propertyValues:
     expression: stringProperty.uppercase()
   - key: listValue
     expression: listProperty?.map { it.uppercase() }.joinToString(", ")
+  - key: com.acme/properties/numberProperty
+    expression: integerProperty + 3
+rootSources:
+  - path: qualifiedReferences.yaml.hbs
