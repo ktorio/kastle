@@ -18,11 +18,12 @@ application {
 }
 
 dependencies {
-    implementation(ktorLibs.server.core)
-    implementation(libs.logback.classic)
-    implementation(ktorLibs.server.netty)
-    implementation(ktorLibs.server.contentNegotiation)
     implementation(ktorLibs.serialization.kotlinx.json)
+    implementation(ktorLibs.server.contentNegotiation)
+    implementation(ktorLibs.server.core)
+    implementation(ktorLibs.server.netty)
+    implementation(libs.logback.classic)
+
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
 }
