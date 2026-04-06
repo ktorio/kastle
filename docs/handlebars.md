@@ -29,7 +29,7 @@ For example:
 ```
 #### Unless
 
-For the negation of an `if` statement, use `unless`. `TODO: implement`
+For the negation of an `if` statement, use `unless`.
 
 ## When
 
@@ -55,6 +55,8 @@ For example:
 - {{this}}
 {{/each}}
 ```
+
+When inside an `each` block, the fields of the element are included in the variable scope.  To reference the element itself, use `this`.
 
 ## Slots
 

@@ -67,12 +67,9 @@ dependencyResolutionManagement {
         // Also include it here to reference the template DSL
         maven("https://packages.jetbrains.team/maven/p/kastle/maven")
     }
-
-    // Reference your version catalogs here
+    
     versionCatalogs {
-        create("libs").apply {
-            from(files("../gradle/libs.versions.toml"))
-        }
+        // Include version catalogs here
     }
 }
 ```
@@ -84,7 +81,7 @@ With Gradle support, you can:
  - Validate that your templates compile
  - Export the repository using the `kslExportToJson` or `kslExportToCbor` targets
  - Build a test project using `kslRunProject` task. The options for this will be read from a project descriptor file (default, `test.yaml`)
- - Start up a test server with an interactive UI, using `kslServer` task.
+ - Start up a test server with an interactive UI, using `kslRunServer` task.
 
 ## 3. Calling it from Kotlin
 

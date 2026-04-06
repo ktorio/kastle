@@ -1,0 +1,200 @@
+openapi: 3.1.1
+info:
+  title: Kastle API
+  version: 1.0.0
+  description: A back-end for generating Kotlin projects
+paths:
+  /api/packIds:
+    get:
+      summary: Get a list of all pack ids.
+      responses:
+        "200":
+          description: A list of all pack IDs.
+          content:
+            application/json: {}
+  /api/catalogs:
+    get:
+      summary: Get the version catalogs present in the repository.
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VersionsCatalog"
+  /api/groups:
+    get:
+      summary: List all groups present in the repository.
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json: {}
+  /api/packs:
+    get:
+      summary: List all packs in the repository.
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json: {}
+  /api/packs/{group}/{id}:
+    get:
+      summary: Get details for the provided pack ID.
+      parameters:
+      - name: group
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: ""
+        "404":
+          description: ""
+        "200":
+          description: ""
+          content:
+            application/json: {}
+  /api/files:
+    get:
+      summary: List all supplementary files in the repository.
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json: {}
+  /api/files/{**}:
+    get:
+      summary: Get the contents of a file.
+      parameters:
+      - name: path
+        in: query
+        schema:
+          type: string
+      responses:
+        "400":
+          description: ""
+          content:
+            text/plain: {}
+        "404":
+          description: ""
+        "200":
+          description: ""
+          content:
+            application/octet-stream: {}
+  /api/generate/preview:
+    post:
+      summary: Generate a JSON preview of the project using a map of path-content
+        pairs.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectDescriptor"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json: {}
+  /api/generate/download:
+    post:
+      summary: Generate a ZIP file containing the project files.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectDescriptor"
+      responses:
+        "200":
+          description: ""
+          headers:
+            Content-Disposition:
+              required: false
+              deprecated: false
+              content:
+                text/plain: {}
+          content:
+            application/zip: {}
+webhooks: {}
+components:
+  schemas:
+    PluginArtifact:
+      type: object
+      title: org.jetbrains.kastle.PluginArtifact
+      required:
+      - id
+      - version
+      properties:
+        id:
+          type: string
+        version:
+          type: object
+    CatalogArtifact:
+      type: object
+      title: CatalogArtifact
+      required:
+      - version
+      properties:
+        module:
+          type: string
+        group:
+          type: string
+        name:
+          type: string
+        version:
+          type: object
+    VersionsCatalog:
+      type: object
+      title: org.jetbrains.kastle.VersionsCatalog
+      properties:
+        name:
+          type: string
+        source:
+          type: string
+          enum:
+          - FILE
+          - EXTERNAL
+        plugins:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/PluginArtifact"
+        versions:
+          type: object
+          additionalProperties:
+            type: string
+        libraries:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/CatalogArtifact"
+    ProjectDescriptor:
+      type: object
+      title: org.jetbrains.kastle.ProjectDescriptor
+      required:
+      - name
+      - group
+      properties:
+        name:
+          type: string
+        group:
+          type: string
+        packaging:
+          type: string
+          enum:
+          - FLAT
+          - NESTED
+        properties:
+          type: object
+          additionalProperties:
+            type: string
+        packs:
+          type: array
+          items:
+            type: string

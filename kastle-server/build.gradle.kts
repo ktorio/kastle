@@ -9,6 +9,12 @@ plugins {
     `maven-publish`
 }
 
+ktor {
+    openApi {
+        enabled = true
+    }
+}
+
 kotlin {
     jvm {
         mainRun {
@@ -50,6 +56,8 @@ kotlin {
                 implementation(ktorLibs.htmx.html)
                 implementation(ktorLibs.server.htmlBuilder)
                 implementation(ktorLibs.serialization.kotlinx.json)
+                implementation(ktorLibs.server.swagger)
+
                 implementation(libs.logback.classic)
                 implementation(libs.commonmark)
                 implementation(libs.mcp.sdk)
@@ -65,6 +73,10 @@ kotlin {
                 implementation(ktorLibs.server.testHost)
                 implementation(ktorLibs.client.contentNegotiation)
             }
+        }
+
+        all {
+            languageSettings.enableLanguageFeature("ContextParameters")
         }
     }
 }
