@@ -2,11 +2,11 @@
 product: jvm/app
 
 dependencies:
-  - $ktor.server.core
-  - $libs.logback.classic
-  - $ktor.server.netty
-  - $ktor.server.contentNegotiation
   - $ktor.serialization.kotlinx.json
+  - $ktor.server.contentNegotiation
+  - $ktor.server.core
+  - $ktor.server.netty
+  - $libs.logback.classic
 
 test-dependencies:
 - $ktor.server.testHost

@@ -49,14 +49,14 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(libs.compose.runtime)
+            api(libs.androidx.lifecycle.runtimeCompose)
+            api(libs.androidx.lifecycle.viewmodelCompose)
+            api(libs.compose.components.resources)
             api(libs.compose.foundation)
             api(libs.compose.material3)
+            api(libs.compose.runtime)
             api(libs.compose.ui)
             api(libs.compose.uiToolingPreview)
-            api(libs.compose.components.resources)
-            api(libs.androidx.lifecycle.viewmodelCompose)
-            api(libs.androidx.lifecycle.runtimeCompose)
         }
 
         commonTest.dependencies {
