@@ -7,13 +7,11 @@ In this document, you'll find a high-level overview of the KASTLE system and how
 The goal of the KASTLE project is to provide a general means for algorithmic project generation for Kotlin programs. 
 This is achieved with a custom file templating engine and an extensible module system.
 
-## Architecture
-
 There are three main elements of the Kastle system:
 
-1. The pack repository
-2. The project generator
-3. The server
+1. **The pack repository:** for organizing templates
+2. **The project generator:** for evaluating templates and generating projects
+3. **The server:** serves as a remote source and interactive web interface
 
 ## The Pack Repository
 
@@ -23,9 +21,9 @@ The interface allows for pack ID listing, lookup, and artifact versions:
 
 ```kotlin
 interface PackRepository {
-    fun ids(): Flow<PackId>
-    suspend fun get(packId: PackId): PackDescriptor?
-    suspend fun versions(): VersionsCatalog
+    suspend fun ids(): Flow<PackId>
+    suspend fun read(packId: PackId): PackDescriptor?
+    suspend fun catalogs(): List<VersionsCatalog>
 }
 ```
 
@@ -33,14 +31,14 @@ Note that we use asynchronous functions and types for seamless integration with 
 
 We currently have a few implementations depending on your requirements:
 
-1. [**Local:**](/local/src/LocalPackRepository.kt)
+1. [**Local:**](/kastle-local/src/main/kotlin/LocalPackRepository.kt)
    This implementation resolves manually authored files, including unprocessed metadata and templates.
    Directly reading this type of repository requires access to the Kotlin compiler, so it is only available for the JVM.
    You can, however, use compiled templates across all platforms for project generation.
-2. [**Remote:**](/client/src/RemoteRepository.kt)
+2. [**Remote:**](/kastle-client/src/commonMain/kotlin/RemoteRepository.kt)
    The client implementation for generating projects from a remote server.
    This assumes a schema consistent with the endpoints defined from the [server](#the-server) implementation.
-3. [**Json**](/core/src/io/JsonFilePackRepository.kt) or [**Cbor**](/core/src/io/CborFilePackRepository.kt):
+3. [**Json**](/kastle-core/src/commonMain/kotlin/io/JsonFilePackRepository.kt) or [**Cbor**](/kastle-core/src/commonMain/kotlin/io/CborFilePackRepository.kt):
    A pre-compiled local repository implementation.
    You can generate these files using the `exportToJson()` or `exportToCbor()` extension functions on any repository implementation.
 
@@ -49,10 +47,10 @@ We currently have a few implementations depending on your requirements:
 You can create a `ProjectGenerator` from any repository implementation listed above:
 
 ```kotlin
-val generator = ProjectGenerator.fromRepository(repository)
+val generator = ProjectGenerator(repository)
 ```
 
-The `ProjectGenerator` interface has a single function for creating a new project:
+The `ProjectGenerator` class has a single function for creating a new project:
 
 ```kotlin
 interface ProjectGenerator {
@@ -60,7 +58,7 @@ interface ProjectGenerator {
 }
 ```
 
-The `ProjectDescriptor` includes a list of desired modules, and all relevant settings for generation.
+The [ProjectDescriptor](/kastle-core/src/commonMain/kotlin/ProjectDescriptor.kt) includes a list of desired packs, and all relevant settings for generation.
 
 The resulting project is returned as a flow of files.
 The `SourceFileEntry` is a simple class with a relative `path` and a `content` function that returns the file contents as a `kotlinx.io.Buffer`.
@@ -81,11 +79,13 @@ Here, you'll find the following endpoints:
 
 1. `/api/packIds`: the list of all pack IDs
 2. `/api/packs`: the list of all packs, omitting file contents 
-3. `/{group}/{id}`: the complete details for a given pack
+3. `/api/packs/{group}/{id}`: the complete details for a given pack
 4. `/generate/preview`: generate a project with the provided settings and return the file listing as JSON
 5. `/generate/download`: generate a project and download as a ZIP archive
 
 All endpoints use JSON for serialization unless specified otherwise.
+
+For more complete documentation, please check our [OpenAPI document](openapi.yaml), or visit the `/docs` endpoint on a running server.
 
 ### Web Interface
 
