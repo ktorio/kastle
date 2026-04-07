@@ -53,6 +53,36 @@ The back-end is deployed from a [branch of this repository](https://github.com/k
 | [kastle-client](kastle-client)       | For making calls to the server from IDE's, websites, etc.      |
 | [repository](repository)             | Contains all sample PACKs for creating new projects.           |
 
+## Using as a Library
+
+To import KASTLE as a library, add the following to your `build.gradle.kts` file:
+
+```kotlin
+// build.gradle.kts
+repositories {
+    maven("https://packages.jetbrains.team/maven/p/kastle/maven")
+}
+dependencies {
+    implementation("org.jetbrains:kastle-core:0.1.0")
+}
+```
+
+Or, if you're creating a custom template repository, use the Gradle plugin:
+
+```kotlin
+// settings.gradle.kts
+pluginManagement {
+    repositories {
+        maven("https://packages.jetbrains.team/maven/p/kastle/maven")
+    }
+}
+
+plugins {
+    id("org.jetbrains.kastle") version "0.1.0"
+}
+```
+
+
 ## Building & Running
 
 This project uses Gradle as a build system.

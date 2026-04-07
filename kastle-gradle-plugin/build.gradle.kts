@@ -3,9 +3,6 @@ plugins {
     alias(libs.plugins.pluginPublish)
 }
 
-group = libs.plugins.kastle.get().pluginId
-version = libs.plugins.kastle.get().version
-
 dependencies {
     implementation(gradleApi())
     implementation(libs.gradlePlugin.kotlin)
