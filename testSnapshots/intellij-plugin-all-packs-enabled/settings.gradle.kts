@@ -1,1 +1,1 @@
-rootProject.name = "intellij-plugin-all-bundled"
+rootProject.name = "intellij-plugin-all-packs-enabled"
