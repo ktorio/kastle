@@ -17,11 +17,6 @@ sources:
     target: file:../README.md
     if: "!isModularEnabled"
 
-  # Git
-  - path: gitignoreItems.hbs
-    target: slot://org.jetbrains.intellij.platform.vcs/git/ignoredItems
-    if: "!isModularEnabled"
-
   # Production sources
 
   ## Plugin descriptor, etc.

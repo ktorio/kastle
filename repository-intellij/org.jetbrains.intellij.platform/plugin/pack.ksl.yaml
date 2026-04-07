@@ -65,3 +65,11 @@ rootSources:
     target: file:gradle/wrapper/gradle-wrapper.properties
   - path: gradlew
   - path: gradlew.bat
+
+  # Git (because slots can't be targeted from module sources)
+  - path: classic/gitignoreItems.hbs
+    target: slot://org.jetbrains.intellij.platform.vcs/git/ignoredItems
+    if: "!isModularEnabled"
+  - path: modular/gitignoreItems.hbs
+    target: slot://org.jetbrains.intellij.platform.vcs/git/ignoredItems
+    if: "isModularEnabled"
