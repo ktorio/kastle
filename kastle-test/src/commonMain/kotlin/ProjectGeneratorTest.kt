@@ -12,7 +12,6 @@ import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-private const val DEFAULT_NAME = "sample"
 private const val DEFAULT_GROUP = "com.acme"
 
 private val testScope = CoroutineScope(CoroutineName("generator-test"))
