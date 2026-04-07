@@ -36,12 +36,16 @@ val _slot: (String) -> TemplateSlot? = { null }
 /**
  * Injects all slots targeting the given slot name.
  */
-val _slots: Map<String, List<TemplateSlot>> = emptyMap()
+val _slots: TemplateSlots = TODO(RUNTIME_ERROR)
 
 /**
  * Inlines the string as raw code.
  */
 fun <E> _unsafe(code: String): E = TODO(RUNTIME_ERROR)
+
+interface TemplateSlots: Map<String, List<TemplateSlot>> {
+    operator fun invoke(key: String)
+}
 
 interface TemplateProperties {
     operator fun <T> getValue(thisRef: Any?, property: KProperty<*>): T = TODO(RUNTIME_ERROR)
