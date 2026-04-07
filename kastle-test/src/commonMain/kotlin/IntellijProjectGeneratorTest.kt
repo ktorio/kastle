@@ -113,9 +113,9 @@ fun IntellijProjectGeneratorTest(
         )
     }
 
-    "intellij-plugin-all-bundled" {
+    "intellij-plugin-all-packs-enabled" {
         generateAndValidateSnapshot(
-            "intellij-plugin-all-bundled",
+            "intellij-plugin-all-packs-enabled",
             listOf(
                 "org.jetbrains.intellij.platform/plugin",
                 "org.jetbrains.intellij.platform.plugins/java",
