@@ -11,7 +11,8 @@ plugins {
 
 ktor {
     openApi {
-        enabled = true
+        // TODO https://youtrack.jetbrains.com/issue/KTOR-9463
+        enabled = false
     }
 }
 

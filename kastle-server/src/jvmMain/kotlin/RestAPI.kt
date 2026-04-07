@@ -77,9 +77,6 @@ fun Routing.backEnd(
                     call.respondText(ContentType.Application.Json) {
                         json.encodeToString(packDescriptor)
                     }
-                }.describe {
-                    // TODO error in Ktor prevents this
-                    //  okResponseSchema<PackManifest>()
                 }
             }
         }
