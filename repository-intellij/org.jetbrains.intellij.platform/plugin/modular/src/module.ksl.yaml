@@ -8,7 +8,16 @@ sources:
     target: file:../../src/main/resources/META-INF/pluginIcon.svg
     if: isModularEnabled
 
-  # Git
-  - path: ../gitignoreItems.hbs
-    target: slot://org.jetbrains.intellij.platform.vcs/git/ignoredItems
-    if: "isModularEnabled"
+  # Files from the root folder
+  - path: ../build.gradle.kts
+    target: file:../../build.gradle.kts
+    if: isModularEnabled
+  - path: ../gradle.properties.hbs
+    target: file:../../gradle.properties
+    if: isModularEnabled
+  - path: ../settings.gradle.kts
+    target: file:../../settings.gradle.kts
+    if: isModularEnabled
+  - path: ../README.md
+    target: file:../../README.md
+    if: isModularEnabled
