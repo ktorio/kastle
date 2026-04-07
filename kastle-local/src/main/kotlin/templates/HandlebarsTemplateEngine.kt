@@ -34,7 +34,7 @@ class HandlebarsTemplateEngine(
         private val bracesPattern = Regex("(?<!\\\\)\\{\\{(?:#?(?<helper>\\p{Alpha}[\\w_]+)\\s+)?(?<content>[^{].*?)}}")
         // Pattern to find escaped braces
         private val escapedBracesPattern = Regex("\\\\(\\{\\{.*?}})")
-        private val variablePattern = Regex("[\\w_.]+")
+        private val variablePattern = Regex("[\\p{Alpha}_]+(?:[_/.-]\\w+)*")
     }
 
     private val randomIds = mutableMapOf<Int, String>()
@@ -46,8 +46,8 @@ class HandlebarsTemplateEngine(
             .decodeToString()
         return with(processEscapedBraces(text)) {
             SourceTemplate(
-                text = text,
                 target = StringLiteral("file:${file.relativeTo(modulePath).toString().removeSuffix(".hbs")}"),
+                text = text,
                 blocks = findBlocks(text)
                     .sortedWith(compareBy<Block> {
                         it.range.first
@@ -64,8 +64,8 @@ class HandlebarsTemplateEngine(
     fun read(target: StringExpression, text: String): SourceTemplate =
         with(processEscapedBraces(text)) {
             SourceTemplate(
-                text = template,
                 target = target,
+                text = template,
                 blocks = findBlocks(text).toList().sortedWith(Comparator { a, b ->
                     val startComparison = a.rangeStart.compareTo(b.rangeStart)
                     if (startComparison != 0) startComparison
@@ -127,7 +127,10 @@ class HandlebarsTemplateEngine(
                             }
                         }
                         else -> yield(InlineValue(
-                            expression = VariableRef(text),
+                            expression = when {
+                                '/' in text -> Expression.QualifiedVariableRef(VariableId.parse(text))
+                                else -> VariableRef(text)
+                            },
                             position = BlockPosition(
                                 line = line,
                                 range = match.rangeAdjusted,

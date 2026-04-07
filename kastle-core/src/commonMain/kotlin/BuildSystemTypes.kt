@@ -374,7 +374,6 @@ fun SourceModuleManifest.tryMerge(other: SourceModuleManifest): SourceModuleMani
 @Serializable(DependencySerializer::class)
 sealed interface Dependency {
     companion object {
-        // TODO make gud
         fun parse(input: String): Dependency {
             val exported = input.endsWith("!")
             val text = if (exported) input.dropLast(1) else input

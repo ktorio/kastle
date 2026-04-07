@@ -156,7 +156,7 @@ class LocalPackRepository(
             val kotlinTemplateEngine = KotlinCompilerTemplateEngine(projectPath)
             val expressionParser = KotlinExpressionParser(kotlinTemplateEngine.psiFileFactory)
             val propertyValues = mutableMapOf(
-                PropertyScope.Pack to readPropertyValues(rawManifest, packId, expressionParser)
+                PropertyScope.Root to readPropertyValues(rawManifest, packId, expressionParser)
             ) + projectPath.moduleFolders().mapNotNull { modulePath ->
                 val relativePath = modulePath.relativeTo(projectPath).toString()
                 val moduleYaml = modulePath.resolve(MODULE_YAML)
@@ -211,12 +211,12 @@ class LocalPackRepository(
                                 )
                             }
                             else -> StaticSource(
-                                contents = text?.toByteArray()?.let(::ByteString)
-                                    ?: file?.takeIf(fs::exists)?.let { fs.source(file).buffered().use { it.readByteString() } }
-                                    ?: error("Missing source file: $targetExpression"),
                                 target = targetExpression,
                                 condition = conditionExpression,
                                 packId = packId,
+                                contents = text?.toByteArray()?.let(::ByteString)
+                                    ?: file?.takeIf(fs::exists)?.let { fs.source(file).buffered().use { it.readByteString() } }
+                                    ?: error("Missing source file: $targetExpression"),
                             )
                         }
                 }
@@ -253,9 +253,9 @@ class LocalPackRepository(
         val value = nodeMap.getScalar("value")?.yamlScalar?.content
         val expression = nodeMap.getScalar("expression")?.yamlScalar?.content?.let(expressionParser::parse)
         if (value != null) {
-            ValueAssignment(variableId, value)
+            ValueAssignment(packId, variableId, value)
         } else if (expression != null) {
-            ExpressionAssignment(variableId, expression)
+            ExpressionAssignment(packId, variableId, expression)
         } else {
             throw IllegalArgumentException("Property value must contain either value or expression: $node")
         }

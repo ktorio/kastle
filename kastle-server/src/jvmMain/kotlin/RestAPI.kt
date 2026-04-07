@@ -1,9 +1,12 @@
 package org.jetbrains.kastle.server
 
 import io.ktor.http.*
+import io.ktor.openapi.*
+import io.ktor.server.plugins.swagger.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.routing.openapi.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectIndexed
@@ -24,6 +27,7 @@ fun Routing.backEnd(
     analyticsRepository: AnalyticsRepository = NoOpAnalyticsRepository,
     json: Json,
 ) {
+    @OptIn(ExperimentalKtorApi::class)
     route("/api") {
 
         /**
@@ -36,6 +40,8 @@ fun Routing.backEnd(
             call.respondBytesWriter(ContentType.Application.Json) {
                 writeJsonFlow(packIds, json)
             }
+        }.describe {
+            okResponseSchema<List<String>>("List of IDs")
         }
         /**
          * Get the version catalogs present in the repository.
@@ -51,6 +57,8 @@ fun Routing.backEnd(
             call.respondBytesWriter(ContentType.Application.Json) {
                 writeJsonFlow(groups, json)
             }
+        }.describe {
+            okResponseSchema<List<Group>>("List of groups")
         }
         route("/packs") {
             /**
@@ -68,9 +76,9 @@ fun Routing.backEnd(
                  */
                 get {
                     val id = readPackId() ?: return@get call.respond(HttpStatusCode.BadRequest)
-                    val repository = repository.read(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+                    val packDescriptor = repository.read(id) ?: return@get call.respond(HttpStatusCode.NotFound)
                     call.respondText(ContentType.Application.Json) {
-                        json.encodeToString(repository)
+                        json.encodeToString(packDescriptor)
                     }
                 }
             }
@@ -84,6 +92,8 @@ fun Routing.backEnd(
                 call.respondBytesWriter(ContentType.Application.Json) {
                     writeJsonFlow(files, json)
                 }
+            }.describe {
+                okResponseSchema<List<String>>("List of files")
             }
             /**
              * Get the contents of a file.
@@ -123,9 +133,13 @@ fun Routing.backEnd(
                     }
                     writeByte('}'.code.toByte())
                 }
+            }.describe {
+                okResponseSchema<Map<String, String>>("Map of file paths to file contents")
             }
             /**
              * Generate a ZIP file containing the project files.
+             *
+             * Response: 200 application/zip A ZIP file containing the project files.
              */
             post("/download") {
                 val settings: ProjectDescriptor = call.receive()
@@ -133,6 +147,29 @@ fun Routing.backEnd(
                 call.respondProjectDownload(settings.name, result)
                 call.recordAnalyticsEvent(analyticsRepository, settings)
             }
+        }
+    }.also { apiRoute ->
+        swaggerUI("/docs") {
+            info = OpenApiInfo(
+                "Kastle API",
+                "1.0.0",
+                "A back-end for generating Kotlin projects"
+            )
+            source = OpenApiDocSource.Routing(ContentType.Application.Yaml) {
+                apiRoute.descendants()
+            }
+        }
+    }
+}
+
+context(inference: JsonSchemaInference)
+private inline fun <reified E: Any> Operation.Builder.okResponseSchema(description: String) {
+    responses {
+        HttpStatusCode.OK {
+            this.schema = inference.jsonSchema<E>().copy(
+                description = description
+            )
+            this.description = description
         }
     }
 }

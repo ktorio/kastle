@@ -10,7 +10,7 @@ import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
 import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.BufferAppendable
-import org.jetbrains.kastle.utils.ListStack
+import org.jetbrains.kastle.utils.LocalVariables
 import org.jetbrains.kastle.utils.Stack
 import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.addVariableOrScope
@@ -54,7 +54,7 @@ class TemplateEvaluator(
             evaluator: TemplateEvaluator = TemplateEvaluator(),
             groupId: String = "com.example",
             packId: PackId = PackId("com.example", "project"),
-            variables: Variables = ListStack(),
+            variables: LocalVariables = Variables().relativeTo(packId),
             slots: SourcesByUrl = emptyMap(),
         ): String {
             val parameters = SourceTemplateIR.Parameters(
@@ -91,13 +91,13 @@ class TemplateEvaluator(
 
         withSourceContext(template.text, appendable) {
             log.trace { template.target.toString() }
-            fun SourceTemplate.traverseSlots(slots: SourcesByUrl, packId: PackId): Sequence<SourceTemplate> =
+            fun SourceTemplate.traverseSlots(slots: SourcesByUrl, packId: PackId, variables: LocalVariables): Sequence<SourceTemplate> =
                 blocks?.asSequence().orEmpty()
-                    .flatMap { block -> slots.lookup(packId, block) }
+                    .flatMap { block -> slots.lookup(packId, block, variables) }
                     .filterIsInstance<SourceTemplate>()
-                    .flatMap { it.traverseSlots(slots, it.packId ?: packId) }
+                    .flatMap { it.traverseSlots(slots, it.packId ?: packId, variables.relativeTo(it.packId ?: packId)) }
                     .plus(this)
-            val slotImports = template.traverseSlots(slots, packId)
+            val slotImports = template.traverseSlots(slots, packId, variables)
                 .flatMap { it.imports?.imports.orEmpty() }
                 .toList()
             val startPosition = when (template.target.extension) {
@@ -149,7 +149,7 @@ class TemplateEvaluator(
                 val skipped = appendBlockContents(
                     block = block,
                     source = template,
-                    slots = slots.lookup(packId, block).map { sourceFile ->
+                    slots = slots.lookup(packId, block, variables).map { sourceFile ->
                         when (sourceFile) {
                             is SourceTemplate -> buildString {
                                 evaluateTo(
@@ -158,7 +158,7 @@ class TemplateEvaluator(
                                         template = sourceFile,
                                         groupId = groupId,
                                         packId = sourceFile.packId ?: packId,
-                                        variables = variables,
+                                        variables = variables.relativeTo(sourceFile.packId ?: packId),
                                         slots = slots,
                                     ),
                                     this
@@ -234,12 +234,12 @@ internal class SourceFileWriteContext(
     fun forEachBlock(
         blocks: List<Block>?,
         startPosition: Int,
-        variables: Variables,
+        variables: LocalVariables,
         op: SourceFileBlockIterationContext.(Block) -> Unit
     ): SourceFileBlockIterationContext =
         SourceFileBlockIterationContext(
             blocks = blocks.orEmpty().sortedBy { it.rangeStart },
-            variables = variables.copy(),
+            variables = variables,
             start = startPosition,
         ).also { context ->
             while (context.i < context.blocks.size) {
@@ -253,7 +253,7 @@ internal class SourceFileWriteContext(
      */
     inner class SourceFileBlockIterationContext(
         val blocks: List<Block>,
-        val variables: Variables,
+        val variables: LocalVariables,
         var start: Int,
         var i: Int = 0,
         var stack: Stack<Block> = Stack.of()
@@ -395,7 +395,7 @@ internal class SourceFileWriteContext(
                                     val list = loops[block] ?: value.toMutableList()
                                     if (list.isNotEmpty()) {
                                         val element = list.removeFirst()
-                                        variables.addVariableOrScope(block.variable to element)
+                                        variables.addVariableOrScope(block.variable, element)
                                         loops[block] = list
                                         append(
                                             source.text,
@@ -421,23 +421,28 @@ internal class SourceFileWriteContext(
     }
 }
 
-private fun SourcesByUrl.lookup(packId: PackId, block: Block): List<SourceFile> {
+private fun SourcesByUrl.lookup(sourcePackId: PackId, block: Block, variables: LocalVariables): List<SourceFile> {
     if (block !is Slot)
         return emptyList()
 
-    val keys = listOf("slot://$packId/${block.name}", "slot:${block.name}")
+    val keys = listOf("slot://$sourcePackId/${block.name}", "slot:${block.name}")
     val values = keys.flatMap { get(it).orEmpty() }
+        .filter { (_, condition, packId) ->
+            if (condition == null) return@filter true
+            val variableScope = variables.relativeTo(packId ?: sourcePackId)
+            condition.evaluate(variableScope).isTruthy()
+        }
     if (values.isEmpty()) {
         when (block.requirement) {
             Requirement.REQUIRED ->
-                throw IllegalArgumentException("Missing slot://$packId/${block.name}")
+                throw IllegalArgumentException("Missing slot://$sourcePackId/${block.name}")
 
             Requirement.OMITTED -> return emptyList()
             Requirement.OPTIONAL -> {}
         }
     }
     require(block is RepeatingSlot || values.size <= 1) {
-        "More than one target for non-repeating slot://$packId/${block.name}"
+        "More than one target for non-repeating slot://$sourcePackId/${block.name}"
     }
     return values.sortedWith(
         compareBy<SourceFile> { (it as? SourceTemplate)?.priority ?: Int.MAX_VALUE }

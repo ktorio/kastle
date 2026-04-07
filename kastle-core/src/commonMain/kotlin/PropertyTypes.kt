@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.trimAngleBrackets
 import org.jetbrains.kastle.utils.trimBraces
+import kotlin.toString
 
 sealed interface PropertyInstance {
     val descriptor: PropertyDescriptor
@@ -13,33 +14,51 @@ sealed interface PropertyInstance {
 data class ResolvedProperty(
     override val descriptor: PropertyDescriptor,
     val value: Any?
-) : PropertyInstance
+) : PropertyInstance {
+    override fun toString(): String = value.toString()
+}
 
 data class DynamicProperty(
     override val descriptor: PropertyDescriptor,
     val assignments: List<PropertyAssignment>
-) : PropertyInstance
+) : PropertyInstance {
+    override fun toString(): String =
+        when(val assignment = assignments.singleOrNull()) {
+            null -> "[${assignments.joinToString(", ") { it.toString() }}]"
+            else -> assignment.toString()
+        }
+}
 
 data class UnresolvedProperty(
     override val descriptor: PropertyDescriptor,
-) : PropertyInstance
+) : PropertyInstance {
+    override fun toString(): String = "???"
+}
 
 @Serializable
 sealed interface  PropertyAssignment {
+    val packId: PackId
     val key: VariableId
 }
 
 @Serializable
 data class ExpressionAssignment(
+    override val packId: PackId,
     override val key: VariableId,
     val expression: Expression,
-) : PropertyAssignment
+) : PropertyAssignment {
+    override fun toString() =
+        expression.toString()
+}
 
 @Serializable
 data class ValueAssignment(
+    override val packId: PackId,
     override val key: VariableId,
     val value: String,
-) : PropertyAssignment
+) : PropertyAssignment {
+    override fun toString() = value
+}
 
 @Serializable
 data class PropertyDescriptor(

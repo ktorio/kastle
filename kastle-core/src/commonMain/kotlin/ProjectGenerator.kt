@@ -11,6 +11,9 @@ import org.jetbrains.kastle.structure.AmperSourceMapping
 import org.jetbrains.kastle.structure.MavenSourceMapping
 import org.jetbrains.kastle.structure.NestedPackagingMapping
 import org.jetbrains.kastle.utils.*
+import kotlin.collections.buildMap
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.text.ifEmpty
 
 class ProjectGenerator(
@@ -30,7 +33,27 @@ class ProjectGenerator(
 
     suspend fun generate(projectDescriptor: ProjectDescriptor): Flow<SourceFileEntry> {
         val project = projectResolver.resolve(projectDescriptor, repository)
-        log.trace { project.name }
+        log.trace {
+            buildString {
+                appendLine("### ${project.name}")
+                append(generateSequence { '=' }.take(project.name.length + 4).joinToString(""))
+            }
+        }
+        log.trace {
+            buildString {
+                appendLine("  Properties:")
+                for ((key, value) in project.properties[PropertyScope.Root].orEmpty()) {
+                    appendLine("    $key = $value")
+                }
+                for ((scope, properties) in project.properties) {
+                    if (scope !is PropertyScope.Module) continue
+                    appendLine("  Module \"${scope.path}\"")
+                    for ((key, value) in properties) {
+                        appendLine("    $key = $value")
+                    }
+                }
+            }
+        }
         log.trace {
             buildString {
                 for (module in project.moduleSources.modules) {
@@ -72,12 +95,12 @@ class ProjectGenerator(
             val visitedPaths = mutableSetOf<String>()
 
             for (source in moduleSources) {
-                val path = getActualPath(source, module)
                 val packId = source.packId ?: run {
                     log.warn { "Skipping ${source.target}; missing pack ID" }
                     continue
                 }
                 val variables = collectVariables(packId, module)
+                val path = getActualPath(source, module, variables)
                 if (source.condition != null && !source.condition?.evaluate(variables).isTruthy()) {
                     log.debug { "Skipping ${source.target}; ${source.condition} = ${source.condition?.evaluate(variables)}" }
                     continue
@@ -116,26 +139,42 @@ class ProjectGenerator(
         }
     }
 
-    private fun Project.getActualPath(source: SourceFile, module: SourceModule): String {
-        val sourcePackId = source.packId
-        val variables = sourcePackId
-            ?.takeIf { source.target is StringTemplate }
-            ?.let { collectVariables(sourcePackId, module) }
-            ?: Variables()
+    private fun getActualPath(
+        source: SourceFile,
+        module: SourceModule,
+        variables: LocalVariables
+    ): String {
         val evaluatedTarget = source.target.evaluate(variables)
-        val relativePath = evaluatedTarget.toString().relativeFile
-
+        val relativePath = evaluatedTarget.relativeFile
         return Path(module.path, relativePath).normalize().toString()
     }
 
-    private fun Project.collectVariables(packId: PackId, module: SourceModule): Stack<Map<String, Any?>> {
-        val pack = packs.find { it.id == packId } ?: throw MissingPackException(packId)
+    private fun Project.collectVariables(packId: PackId, module: SourceModule): LocalVariables {
         val modulePath = module.originalPath.takeIf { it.isNotEmpty() }
-        val baseVariables = resolvedVariables(pack, modulePath) +
-            toVariableEntry() +
-            module.toVariableEntry() +
-            module.slotsVariableEntry(packId)
-        return baseVariables + dynamicVariables(modulePath, baseVariables)
+        val slotSources = slotSources + module.slotSources
+        val variables = resolvedVariables(modulePath).relativeTo(packId).also { variables ->
+            variables["_project"] = this.asTemplateMap()
+            variables["_module"] = module.asTemplateMap()
+            variables["_slots"] = buildMap {
+                for ((url, value) in slotSources) {
+                    // relative url
+                    if (packId.toString() in url)
+                        put(url.relativeFile.removePrefix(packId.toString()).trimStart('/'), value)
+                    // absolute url
+                    put(url, value.map { sourceFile ->
+                        mapOf(
+                            "target" to sourceFile.target.evaluate(variables),
+                            "condition" to sourceFile.condition.toString(),
+                            "pack" to sourceFile.packId,
+                        )
+                    })
+                }
+            }
+        }
+        val dynamicValues =
+            dynamicVariables(modulePath, variables).relativeTo(packId)
+
+        return variables + dynamicValues
     }
 
 }

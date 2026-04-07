@@ -455,14 +455,16 @@ public final class org/jetbrains/kastle/ElseBlock$Companion {
 
 public final class org/jetbrains/kastle/ExpressionAssignment : org/jetbrains/kastle/PropertyAssignment {
 	public static final field Companion Lorg/jetbrains/kastle/ExpressionAssignment$Companion;
-	public fun <init> (Lorg/jetbrains/kastle/VariableId;Lorg/jetbrains/kastle/utils/Expression;)V
-	public final fun component1 ()Lorg/jetbrains/kastle/VariableId;
-	public final fun component2 ()Lorg/jetbrains/kastle/utils/Expression;
-	public final fun copy (Lorg/jetbrains/kastle/VariableId;Lorg/jetbrains/kastle/utils/Expression;)Lorg/jetbrains/kastle/ExpressionAssignment;
-	public static synthetic fun copy$default (Lorg/jetbrains/kastle/ExpressionAssignment;Lorg/jetbrains/kastle/VariableId;Lorg/jetbrains/kastle/utils/Expression;ILjava/lang/Object;)Lorg/jetbrains/kastle/ExpressionAssignment;
+	public fun <init> (Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/VariableId;Lorg/jetbrains/kastle/utils/Expression;)V
+	public final fun component1 ()Lorg/jetbrains/kastle/PackId;
+	public final fun component2 ()Lorg/jetbrains/kastle/VariableId;
+	public final fun component3 ()Lorg/jetbrains/kastle/utils/Expression;
+	public final fun copy (Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/VariableId;Lorg/jetbrains/kastle/utils/Expression;)Lorg/jetbrains/kastle/ExpressionAssignment;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/ExpressionAssignment;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/VariableId;Lorg/jetbrains/kastle/utils/Expression;ILjava/lang/Object;)Lorg/jetbrains/kastle/ExpressionAssignment;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getExpression ()Lorg/jetbrains/kastle/utils/Expression;
 	public fun getKey ()Lorg/jetbrains/kastle/VariableId;
+	public fun getPackId ()Lorg/jetbrains/kastle/PackId;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -1354,6 +1356,7 @@ public final class org/jetbrains/kastle/ProjectModules$Single$Companion {
 public abstract interface class org/jetbrains/kastle/PropertyAssignment {
 	public static final field Companion Lorg/jetbrains/kastle/PropertyAssignment$Companion;
 	public abstract fun getKey ()Lorg/jetbrains/kastle/VariableId;
+	public abstract fun getPackId ()Lorg/jetbrains/kastle/PackId;
 }
 
 public final class org/jetbrains/kastle/PropertyAssignment$Companion {
@@ -1420,8 +1423,8 @@ public final class org/jetbrains/kastle/PropertyScope$Module : org/jetbrains/kas
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/jetbrains/kastle/PropertyScope$Pack : org/jetbrains/kastle/PropertyScope {
-	public static final field INSTANCE Lorg/jetbrains/kastle/PropertyScope$Pack;
+public final class org/jetbrains/kastle/PropertyScope$Root : org/jetbrains/kastle/PropertyScope {
+	public static final field INSTANCE Lorg/jetbrains/kastle/PropertyScope$Root;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -1861,6 +1864,9 @@ public final class org/jetbrains/kastle/SourceDefinition$Companion {
 
 public abstract interface class org/jetbrains/kastle/SourceFile {
 	public static final field Companion Lorg/jetbrains/kastle/SourceFile$Companion;
+	public fun component1 ()Lorg/jetbrains/kastle/utils/StringExpression;
+	public fun component2 ()Lorg/jetbrains/kastle/utils/Expression;
+	public fun component3 ()Lorg/jetbrains/kastle/PackId;
 	public abstract fun getCondition ()Lorg/jetbrains/kastle/utils/Expression;
 	public abstract fun getPackId ()Lorg/jetbrains/kastle/PackId;
 	public abstract fun getTarget ()Lorg/jetbrains/kastle/utils/StringExpression;
@@ -1868,6 +1874,12 @@ public abstract interface class org/jetbrains/kastle/SourceFile {
 
 public final class org/jetbrains/kastle/SourceFile$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/kastle/SourceFile$DefaultImpls {
+	public static fun component1 (Lorg/jetbrains/kastle/SourceFile;)Lorg/jetbrains/kastle/utils/StringExpression;
+	public static fun component2 (Lorg/jetbrains/kastle/SourceFile;)Lorg/jetbrains/kastle/utils/Expression;
+	public static fun component3 (Lorg/jetbrains/kastle/SourceFile;)Lorg/jetbrains/kastle/PackId;
 }
 
 public final class org/jetbrains/kastle/SourceFileEntry {
@@ -2098,17 +2110,17 @@ public final class org/jetbrains/kastle/SourceModuleType$Companion {
 
 public final class org/jetbrains/kastle/SourceTemplate : org/jetbrains/kastle/SourceFile {
 	public static final field Companion Lorg/jetbrains/kastle/SourceTemplate$Companion;
-	public fun <init> (Ljava/lang/String;Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/SourceImports;Ljava/util/List;Lorg/jetbrains/kastle/utils/Expression;Ljava/lang/Integer;Lorg/jetbrains/kastle/PackId;)V
-	public synthetic fun <init> (Ljava/lang/String;Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/SourceImports;Ljava/util/List;Lorg/jetbrains/kastle/utils/Expression;Ljava/lang/Integer;Lorg/jetbrains/kastle/PackId;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lorg/jetbrains/kastle/utils/StringExpression;
-	public final fun component3 ()Lorg/jetbrains/kastle/SourceImports;
-	public final fun component4 ()Ljava/util/List;
-	public final fun component5 ()Lorg/jetbrains/kastle/utils/Expression;
-	public final fun component6 ()Ljava/lang/Integer;
-	public final fun component7 ()Lorg/jetbrains/kastle/PackId;
-	public final fun copy (Ljava/lang/String;Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/SourceImports;Ljava/util/List;Lorg/jetbrains/kastle/utils/Expression;Ljava/lang/Integer;Lorg/jetbrains/kastle/PackId;)Lorg/jetbrains/kastle/SourceTemplate;
-	public static synthetic fun copy$default (Lorg/jetbrains/kastle/SourceTemplate;Ljava/lang/String;Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/SourceImports;Ljava/util/List;Lorg/jetbrains/kastle/utils/Expression;Ljava/lang/Integer;Lorg/jetbrains/kastle/PackId;ILjava/lang/Object;)Lorg/jetbrains/kastle/SourceTemplate;
+	public fun <init> (Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;Ljava/lang/String;Lorg/jetbrains/kastle/SourceImports;Ljava/util/List;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;Ljava/lang/String;Lorg/jetbrains/kastle/SourceImports;Ljava/util/List;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/jetbrains/kastle/utils/StringExpression;
+	public final fun component2 ()Lorg/jetbrains/kastle/utils/Expression;
+	public final fun component3 ()Lorg/jetbrains/kastle/PackId;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lorg/jetbrains/kastle/SourceImports;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Ljava/lang/Integer;
+	public final fun copy (Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;Ljava/lang/String;Lorg/jetbrains/kastle/SourceImports;Ljava/util/List;Ljava/lang/Integer;)Lorg/jetbrains/kastle/SourceTemplate;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/SourceTemplate;Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;Ljava/lang/String;Lorg/jetbrains/kastle/SourceImports;Ljava/util/List;Ljava/lang/Integer;ILjava/lang/Object;)Lorg/jetbrains/kastle/SourceTemplate;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBlocks ()Ljava/util/List;
 	public fun getCondition ()Lorg/jetbrains/kastle/utils/Expression;
@@ -2141,22 +2153,22 @@ public abstract interface class org/jetbrains/kastle/SourceTemplateIR {
 }
 
 public final class org/jetbrains/kastle/SourceTemplateIR$Parameters : org/jetbrains/kastle/SourceTemplateIR {
-	public fun <init> (Ljava/lang/String;Lorg/jetbrains/kastle/SourceTemplate;Ljava/lang/String;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/utils/Stack;Ljava/util/Map;)V
+	public fun <init> (Ljava/lang/String;Lorg/jetbrains/kastle/SourceTemplate;Ljava/lang/String;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/utils/LocalVariables;Ljava/util/Map;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/jetbrains/kastle/SourceTemplate;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Lorg/jetbrains/kastle/PackId;
-	public final fun component5 ()Lorg/jetbrains/kastle/utils/Stack;
+	public final fun component5 ()Lorg/jetbrains/kastle/utils/LocalVariables;
 	public final fun component6 ()Ljava/util/Map;
-	public final fun copy (Ljava/lang/String;Lorg/jetbrains/kastle/SourceTemplate;Ljava/lang/String;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/utils/Stack;Ljava/util/Map;)Lorg/jetbrains/kastle/SourceTemplateIR$Parameters;
-	public static synthetic fun copy$default (Lorg/jetbrains/kastle/SourceTemplateIR$Parameters;Ljava/lang/String;Lorg/jetbrains/kastle/SourceTemplate;Ljava/lang/String;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/utils/Stack;Ljava/util/Map;ILjava/lang/Object;)Lorg/jetbrains/kastle/SourceTemplateIR$Parameters;
+	public final fun copy (Ljava/lang/String;Lorg/jetbrains/kastle/SourceTemplate;Ljava/lang/String;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/utils/LocalVariables;Ljava/util/Map;)Lorg/jetbrains/kastle/SourceTemplateIR$Parameters;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/SourceTemplateIR$Parameters;Ljava/lang/String;Lorg/jetbrains/kastle/SourceTemplate;Ljava/lang/String;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/utils/LocalVariables;Ljava/util/Map;ILjava/lang/Object;)Lorg/jetbrains/kastle/SourceTemplateIR$Parameters;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getGroupId ()Ljava/lang/String;
 	public final fun getPackId ()Lorg/jetbrains/kastle/PackId;
 	public fun getPath ()Ljava/lang/String;
 	public final fun getSlots ()Ljava/util/Map;
 	public final fun getTemplate ()Lorg/jetbrains/kastle/SourceTemplate;
-	public final fun getVariables ()Lorg/jetbrains/kastle/utils/Stack;
+	public final fun getVariables ()Lorg/jetbrains/kastle/utils/LocalVariables;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -2176,14 +2188,14 @@ public final class org/jetbrains/kastle/SourceTemplateIR$Static : org/jetbrains/
 
 public final class org/jetbrains/kastle/StaticSource : org/jetbrains/kastle/SourceFile {
 	public static final field Companion Lorg/jetbrains/kastle/StaticSource$Companion;
-	public fun <init> (Lkotlinx/io/bytestring/ByteString;Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;)V
-	public synthetic fun <init> (Lkotlinx/io/bytestring/ByteString;Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lkotlinx/io/bytestring/ByteString;
-	public final fun component2 ()Lorg/jetbrains/kastle/utils/StringExpression;
-	public final fun component3 ()Lorg/jetbrains/kastle/utils/Expression;
-	public final fun component4 ()Lorg/jetbrains/kastle/PackId;
-	public final fun copy (Lkotlinx/io/bytestring/ByteString;Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;)Lorg/jetbrains/kastle/StaticSource;
-	public static synthetic fun copy$default (Lorg/jetbrains/kastle/StaticSource;Lkotlinx/io/bytestring/ByteString;Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;ILjava/lang/Object;)Lorg/jetbrains/kastle/StaticSource;
+	public fun <init> (Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;Lkotlinx/io/bytestring/ByteString;)V
+	public synthetic fun <init> (Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;Lkotlinx/io/bytestring/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/jetbrains/kastle/utils/StringExpression;
+	public final fun component2 ()Lorg/jetbrains/kastle/utils/Expression;
+	public final fun component3 ()Lorg/jetbrains/kastle/PackId;
+	public final fun component4 ()Lkotlinx/io/bytestring/ByteString;
+	public final fun copy (Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;Lkotlinx/io/bytestring/ByteString;)Lorg/jetbrains/kastle/StaticSource;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/StaticSource;Lorg/jetbrains/kastle/utils/StringExpression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;Lkotlinx/io/bytestring/ByteString;ILjava/lang/Object;)Lorg/jetbrains/kastle/StaticSource;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getCondition ()Lorg/jetbrains/kastle/utils/Expression;
 	public final fun getContents ()Lkotlinx/io/bytestring/ByteString;
@@ -2229,8 +2241,8 @@ public final class org/jetbrains/kastle/TemplateEvaluator {
 }
 
 public final class org/jetbrains/kastle/TemplateEvaluator$Companion {
-	public final fun toString (Lorg/jetbrains/kastle/SourceTemplate;Lorg/jetbrains/kastle/TemplateEvaluator;Ljava/lang/String;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/utils/Stack;Ljava/util/Map;)Ljava/lang/String;
-	public static synthetic fun toString$default (Lorg/jetbrains/kastle/TemplateEvaluator$Companion;Lorg/jetbrains/kastle/SourceTemplate;Lorg/jetbrains/kastle/TemplateEvaluator;Ljava/lang/String;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/utils/Stack;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun toString (Lorg/jetbrains/kastle/SourceTemplate;Lorg/jetbrains/kastle/TemplateEvaluator;Ljava/lang/String;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/utils/LocalVariables;Ljava/util/Map;)Ljava/lang/String;
+	public static synthetic fun toString$default (Lorg/jetbrains/kastle/TemplateEvaluator$Companion;Lorg/jetbrains/kastle/SourceTemplate;Lorg/jetbrains/kastle/TemplateEvaluator;Ljava/lang/String;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/utils/LocalVariables;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class org/jetbrains/kastle/TemplateTypesKt {
@@ -2283,13 +2295,15 @@ public final class org/jetbrains/kastle/UnsafeBlock$Companion {
 
 public final class org/jetbrains/kastle/ValueAssignment : org/jetbrains/kastle/PropertyAssignment {
 	public static final field Companion Lorg/jetbrains/kastle/ValueAssignment$Companion;
-	public fun <init> (Lorg/jetbrains/kastle/VariableId;Ljava/lang/String;)V
-	public final fun component1 ()Lorg/jetbrains/kastle/VariableId;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Lorg/jetbrains/kastle/VariableId;Ljava/lang/String;)Lorg/jetbrains/kastle/ValueAssignment;
-	public static synthetic fun copy$default (Lorg/jetbrains/kastle/ValueAssignment;Lorg/jetbrains/kastle/VariableId;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kastle/ValueAssignment;
+	public fun <init> (Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/VariableId;Ljava/lang/String;)V
+	public final fun component1 ()Lorg/jetbrains/kastle/PackId;
+	public final fun component2 ()Lorg/jetbrains/kastle/VariableId;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/VariableId;Ljava/lang/String;)Lorg/jetbrains/kastle/ValueAssignment;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/ValueAssignment;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/VariableId;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kastle/ValueAssignment;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getKey ()Lorg/jetbrains/kastle/VariableId;
+	public fun getPackId ()Lorg/jetbrains/kastle/PackId;
 	public final fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -2758,7 +2772,7 @@ public final class org/jetbrains/kastle/utils/DevNull : java/lang/Appendable {
 
 public abstract interface class org/jetbrains/kastle/utils/Expression {
 	public static final field Companion Lorg/jetbrains/kastle/utils/Expression$Companion;
-	public abstract fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public abstract fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 }
 
 public final class org/jetbrains/kastle/utils/Expression$BinaryOp : org/jetbrains/kastle/utils/Expression {
@@ -2770,7 +2784,7 @@ public final class org/jetbrains/kastle/utils/Expression$BinaryOp : org/jetbrain
 	public final fun copy (Lorg/jetbrains/kastle/utils/BinaryOperator;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/utils/Expression;)Lorg/jetbrains/kastle/utils/Expression$BinaryOp;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$BinaryOp;Lorg/jetbrains/kastle/utils/BinaryOperator;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/utils/Expression;ILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$BinaryOp;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public final fun getLeft ()Lorg/jetbrains/kastle/utils/Expression;
 	public final fun getOp ()Lorg/jetbrains/kastle/utils/BinaryOperator;
 	public final fun getRight ()Lorg/jetbrains/kastle/utils/Expression;
@@ -2800,7 +2814,8 @@ public final class org/jetbrains/kastle/utils/Expression$BooleanLiteral : org/je
 	public final fun copy (Z)Lorg/jetbrains/kastle/utils/Expression$BooleanLiteral;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$BooleanLiteral;ZILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$BooleanLiteral;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Boolean;
+	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public fun getValue ()Ljava/lang/Boolean;
 	public synthetic fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
@@ -2829,7 +2844,8 @@ public final class org/jetbrains/kastle/utils/Expression$CharLiteral : org/jetbr
 	public final fun copy (C)Lorg/jetbrains/kastle/utils/Expression$CharLiteral;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$CharLiteral;CILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$CharLiteral;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Character;
+	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public fun getValue ()Ljava/lang/Character;
 	public synthetic fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
@@ -2862,7 +2878,8 @@ public final class org/jetbrains/kastle/utils/Expression$DoubleLiteral : org/jet
 	public final fun copy (D)Lorg/jetbrains/kastle/utils/Expression$DoubleLiteral;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$DoubleLiteral;DILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$DoubleLiteral;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Double;
+	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public fun getValue ()Ljava/lang/Double;
 	public synthetic fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
@@ -2893,7 +2910,7 @@ public final class org/jetbrains/kastle/utils/Expression$IfElse : org/jetbrains/
 	public final fun copy (Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/utils/Expression;)Lorg/jetbrains/kastle/utils/Expression$IfElse;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$IfElse;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/utils/Expression;ILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$IfElse;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public final fun getCondition ()Lorg/jetbrains/kastle/utils/Expression;
 	public final fun getElseBranch ()Lorg/jetbrains/kastle/utils/Expression;
 	public final fun getThenBranch ()Lorg/jetbrains/kastle/utils/Expression;
@@ -2923,7 +2940,8 @@ public final class org/jetbrains/kastle/utils/Expression$IntLiteral : org/jetbra
 	public final fun copy (I)Lorg/jetbrains/kastle/utils/Expression$IntLiteral;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$IntLiteral;IILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$IntLiteral;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Integer;
+	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public fun getValue ()Ljava/lang/Integer;
 	public synthetic fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
@@ -2953,8 +2971,8 @@ public final class org/jetbrains/kastle/utils/Expression$Lambda : org/jetbrains/
 	public final fun copy (Ljava/util/List;Lorg/jetbrains/kastle/utils/Expression;)Lorg/jetbrains/kastle/utils/Expression$Lambda;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$Lambda;Ljava/util/List;Lorg/jetbrains/kastle/utils/Expression;ILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$Lambda;
 	public fun equals (Ljava/lang/Object;)Z
-	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Lkotlin/jvm/functions/Function1;
+	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Lkotlin/jvm/functions/Function1;
 	public final fun getBody ()Lorg/jetbrains/kastle/utils/Expression;
 	public final fun getParamNames ()Ljava/util/List;
 	public fun hashCode ()I
@@ -2977,12 +2995,12 @@ public final class org/jetbrains/kastle/utils/Expression$Lambda$Companion {
 }
 
 public abstract interface class org/jetbrains/kastle/utils/Expression$Literal : org/jetbrains/kastle/utils/Expression {
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public abstract fun getValue ()Ljava/lang/Object;
 }
 
 public final class org/jetbrains/kastle/utils/Expression$Literal$DefaultImpls {
-	public static fun evaluate (Lorg/jetbrains/kastle/utils/Expression$Literal;Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public static fun evaluate (Lorg/jetbrains/kastle/utils/Expression$Literal;Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 }
 
 public final class org/jetbrains/kastle/utils/Expression$LongLiteral : org/jetbrains/kastle/utils/Expression$Literal {
@@ -2992,7 +3010,8 @@ public final class org/jetbrains/kastle/utils/Expression$LongLiteral : org/jetbr
 	public final fun copy (J)Lorg/jetbrains/kastle/utils/Expression$LongLiteral;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$LongLiteral;JILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$LongLiteral;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Long;
+	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public fun getValue ()Ljava/lang/Long;
 	public synthetic fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
@@ -3023,7 +3042,7 @@ public final class org/jetbrains/kastle/utils/Expression$MethodCall : org/jetbra
 	public final fun copy (Lorg/jetbrains/kastle/utils/Expression;Ljava/lang/String;Ljava/util/List;)Lorg/jetbrains/kastle/utils/Expression$MethodCall;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$MethodCall;Lorg/jetbrains/kastle/utils/Expression;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$MethodCall;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public final fun getArgs ()Ljava/util/List;
 	public final fun getMethodName ()Ljava/lang/String;
 	public final fun getReceiver ()Lorg/jetbrains/kastle/utils/Expression;
@@ -3049,7 +3068,7 @@ public final class org/jetbrains/kastle/utils/Expression$MethodCall$Companion {
 public final class org/jetbrains/kastle/utils/Expression$NullLiteral : org/jetbrains/kastle/utils/Expression$Literal {
 	public static final field INSTANCE Lorg/jetbrains/kastle/utils/Expression$NullLiteral;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public fun getValue ()Ljava/lang/Object;
 	public fun hashCode ()I
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
@@ -3064,7 +3083,7 @@ public final class org/jetbrains/kastle/utils/Expression$PostfixOp : org/jetbrai
 	public final fun copy (Lorg/jetbrains/kastle/utils/PostfixOperator;Lorg/jetbrains/kastle/utils/Expression;)Lorg/jetbrains/kastle/utils/Expression$PostfixOp;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$PostfixOp;Lorg/jetbrains/kastle/utils/PostfixOperator;Lorg/jetbrains/kastle/utils/Expression;ILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$PostfixOp;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public final fun getOp ()Lorg/jetbrains/kastle/utils/PostfixOperator;
 	public final fun getTarget ()Lorg/jetbrains/kastle/utils/Expression;
 	public fun hashCode ()I
@@ -3094,7 +3113,7 @@ public final class org/jetbrains/kastle/utils/Expression$PrefixOp : org/jetbrain
 	public final fun copy (Lorg/jetbrains/kastle/utils/PrefixOperator;Lorg/jetbrains/kastle/utils/Expression;)Lorg/jetbrains/kastle/utils/Expression$PrefixOp;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$PrefixOp;Lorg/jetbrains/kastle/utils/PrefixOperator;Lorg/jetbrains/kastle/utils/Expression;ILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$PrefixOp;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public final fun getOp ()Lorg/jetbrains/kastle/utils/PrefixOperator;
 	public final fun getTarget ()Lorg/jetbrains/kastle/utils/Expression;
 	public fun hashCode ()I
@@ -3116,6 +3135,34 @@ public final class org/jetbrains/kastle/utils/Expression$PrefixOp$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class org/jetbrains/kastle/utils/Expression$QualifiedVariableRef : org/jetbrains/kastle/utils/Expression {
+	public static final field Companion Lorg/jetbrains/kastle/utils/Expression$QualifiedVariableRef$Companion;
+	public fun <init> (Lorg/jetbrains/kastle/VariableId;)V
+	public final fun component1 ()Lorg/jetbrains/kastle/VariableId;
+	public final fun copy (Lorg/jetbrains/kastle/VariableId;)Lorg/jetbrains/kastle/utils/Expression$QualifiedVariableRef;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$QualifiedVariableRef;Lorg/jetbrains/kastle/VariableId;ILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$QualifiedVariableRef;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
+	public final fun getVariableId ()Lorg/jetbrains/kastle/VariableId;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class org/jetbrains/kastle/utils/Expression$QualifiedVariableRef$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/kastle/utils/Expression$QualifiedVariableRef$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/kastle/utils/Expression$QualifiedVariableRef;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/kastle/utils/Expression$QualifiedVariableRef;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/kastle/utils/Expression$QualifiedVariableRef$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class org/jetbrains/kastle/utils/Expression$VariableRef : org/jetbrains/kastle/utils/Expression {
 	public static final field Companion Lorg/jetbrains/kastle/utils/Expression$VariableRef$Companion;
 	public fun <init> (Ljava/lang/String;)V
@@ -3123,7 +3170,7 @@ public final class org/jetbrains/kastle/utils/Expression$VariableRef : org/jetbr
 	public final fun copy (Ljava/lang/String;)Lorg/jetbrains/kastle/utils/Expression$VariableRef;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/Expression$VariableRef;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kastle/utils/Expression$VariableRef;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public final fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -3170,6 +3217,26 @@ public final class org/jetbrains/kastle/utils/ListStack : org/jetbrains/kastle/u
 	public fun plusAssign (Ljava/lang/Object;)V
 	public fun pop ()Ljava/lang/Object;
 	public fun push (Ljava/lang/Object;)V
+}
+
+public final class org/jetbrains/kastle/utils/LocalVariables : org/jetbrains/kastle/utils/Variables {
+	public fun <init> (Ljava/util/List;Lorg/jetbrains/kastle/utils/Variables;)V
+	public fun <init> (Lorg/jetbrains/kastle/PackId;Ljava/util/Map;)V
+	public final fun get (Ljava/lang/String;)Ljava/lang/Object;
+	public fun get (Lorg/jetbrains/kastle/PackId;Ljava/lang/String;)Ljava/lang/Object;
+	public fun get (Lorg/jetbrains/kastle/VariableId;)Ljava/lang/Object;
+	public final fun getPackIds ()Ljava/util/List;
+	public fun getStack ()Lorg/jetbrains/kastle/utils/Stack;
+	public final fun getVariables ()Lorg/jetbrains/kastle/utils/Variables;
+	public final fun plus (Lorg/jetbrains/kastle/utils/LocalVariables;)Lorg/jetbrains/kastle/utils/LocalVariables;
+	public fun plus (Lorg/jetbrains/kastle/utils/Variables;)Lorg/jetbrains/kastle/utils/Variables;
+	public final fun plusAssign (Ljava/util/Map;)V
+	public final fun plusAssign (Lkotlin/Pair;)V
+	public fun plusAssign (Lorg/jetbrains/kastle/utils/Variables;)V
+	public fun pop ()Ljava/util/Map;
+	public fun relativeTo ([Lorg/jetbrains/kastle/PackId;)Lorg/jetbrains/kastle/utils/LocalVariables;
+	public final fun set (Ljava/lang/String;Ljava/lang/Object;)V
+	public fun set (Lorg/jetbrains/kastle/VariableId;Ljava/lang/Object;)V
 }
 
 public final class org/jetbrains/kastle/utils/MapEncoder : kotlinx/serialization/encoding/AbstractEncoder {
@@ -3299,6 +3366,7 @@ public final class org/jetbrains/kastle/utils/StackKt {
 
 public abstract interface class org/jetbrains/kastle/utils/StringExpression : org/jetbrains/kastle/utils/Expression {
 	public static final field Companion Lorg/jetbrains/kastle/utils/StringExpression$Companion;
+	public abstract fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/String;
 	public abstract fun removeExtension (Ljava/lang/String;)Lorg/jetbrains/kastle/utils/StringExpression;
 }
 
@@ -3313,7 +3381,8 @@ public final class org/jetbrains/kastle/utils/StringLiteral : org/jetbrains/kast
 	public final fun copy (Ljava/lang/String;)Lorg/jetbrains/kastle/utils/StringLiteral;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/StringLiteral;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kastle/utils/StringLiteral;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
+	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/String;
 	public synthetic fun getValue ()Ljava/lang/Object;
 	public fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -3344,8 +3413,8 @@ public final class org/jetbrains/kastle/utils/StringTemplate : org/jetbrains/kas
 	public final fun copy (Ljava/util/List;)Lorg/jetbrains/kastle/utils/StringTemplate;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/utils/StringTemplate;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/kastle/utils/StringTemplate;
 	public fun equals (Ljava/lang/Object;)Z
-	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/Object;
-	public fun evaluate (Lorg/jetbrains/kastle/utils/Stack;)Ljava/lang/String;
+	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
+	public fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/String;
 	public final fun getEntries ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun removeExtension (Ljava/lang/String;)Lorg/jetbrains/kastle/utils/StringExpression;
@@ -3456,11 +3525,28 @@ public final class org/jetbrains/kastle/utils/UrlsKt {
 	public static final fun takeIfSlot (Lorg/jetbrains/kastle/utils/StringExpression;)Lorg/jetbrains/kastle/utils/StringExpression;
 }
 
+public abstract interface class org/jetbrains/kastle/utils/Variables {
+	public abstract fun get (Lorg/jetbrains/kastle/PackId;Ljava/lang/String;)Ljava/lang/Object;
+	public fun get (Lorg/jetbrains/kastle/VariableId;)Ljava/lang/Object;
+	public abstract fun getStack ()Lorg/jetbrains/kastle/utils/Stack;
+	public fun plus (Lorg/jetbrains/kastle/utils/Variables;)Lorg/jetbrains/kastle/utils/Variables;
+	public abstract fun plusAssign (Lorg/jetbrains/kastle/utils/Variables;)V
+	public fun pop ()Ljava/util/Map;
+	public fun relativeTo ([Lorg/jetbrains/kastle/PackId;)Lorg/jetbrains/kastle/utils/LocalVariables;
+	public abstract fun set (Lorg/jetbrains/kastle/VariableId;Ljava/lang/Object;)V
+}
+
+public final class org/jetbrains/kastle/utils/Variables$DefaultImpls {
+	public static fun get (Lorg/jetbrains/kastle/utils/Variables;Lorg/jetbrains/kastle/VariableId;)Ljava/lang/Object;
+	public static fun plus (Lorg/jetbrains/kastle/utils/Variables;Lorg/jetbrains/kastle/utils/Variables;)Lorg/jetbrains/kastle/utils/Variables;
+	public static fun pop (Lorg/jetbrains/kastle/utils/Variables;)Ljava/util/Map;
+	public static fun relativeTo (Lorg/jetbrains/kastle/utils/Variables;[Lorg/jetbrains/kastle/PackId;)Lorg/jetbrains/kastle/utils/LocalVariables;
+}
+
 public final class org/jetbrains/kastle/utils/VariablesKt {
-	public static final fun Variables ([Lkotlin/Pair;)Lorg/jetbrains/kastle/utils/Stack;
-	public static final fun addVariableOrScope (Lorg/jetbrains/kastle/utils/Stack;Lkotlin/Pair;)V
-	public static final fun get (Lorg/jetbrains/kastle/utils/Stack;Ljava/lang/String;)Ljava/lang/Object;
-	public static final fun plus (Lorg/jetbrains/kastle/utils/Stack;Lkotlin/Pair;)Lorg/jetbrains/kastle/utils/Stack;
-	public static final fun plusAssign (Lorg/jetbrains/kastle/utils/Stack;Lkotlin/Pair;)V
+	public static final fun Variables (Ljava/lang/Iterable;)Lorg/jetbrains/kastle/utils/Variables;
+	public static final fun Variables (Ljava/util/Map;)Lorg/jetbrains/kastle/utils/Variables;
+	public static final fun Variables ([Lkotlin/Pair;)Lorg/jetbrains/kastle/utils/Variables;
+	public static final fun addVariableOrScope (Lorg/jetbrains/kastle/utils/LocalVariables;Ljava/lang/String;Ljava/lang/Object;)V
 }
 

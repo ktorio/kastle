@@ -52,11 +52,23 @@ Note, this does not allow for default values, but you can use nullable types.
 
 ## Assigning values from packs
 
-For `hidden` properties, you can assign values from other packs. For example:
+You can assign values from other packs. For example:
 
 ```yaml
 propertyValues:
-  io.ktor/server-core/serverModules: SerializationKt.configureSerialization
+  - key: io.ktor/server-core/serverModules
+    value: SerializationKt.configureSerialization
 ```
 
-In this example, the value is parsed based on the declaration of the target _pack_.
+In this example, the value is parsed based on the declaration of the target _pack_.  This can be useful for hidden properties.
+
+Dynamic expressions can be applied for properties as well.  This is useful for handlebars templates because inline expressions are not possible.
+
+Here is an example:
+```yaml
+propertyValues:
+  - key: isSinglePlatform
+    expression: _module.platforms.size == 1
+```
+
+The expressions are parsed with the Kotlin compiler, though only a subset of Kotlin is supported in the script engine.
