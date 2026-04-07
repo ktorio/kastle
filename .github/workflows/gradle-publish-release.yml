@@ -11,7 +11,7 @@ jobs:
   publish:
     name: Publish Release to Maven
     runs-on: ubuntu-latest
-    environment: Publish Environment
+    environment: Publishing
 
     steps:
       - name: Checkout
