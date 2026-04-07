@@ -1,4 +1,4 @@
-package com.acme.test
+package com.acme
 
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
