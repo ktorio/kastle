@@ -10,7 +10,6 @@ import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.LogLevel
 import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.BufferAppendable
-import org.jetbrains.kastle.utils.ListStack
 import org.jetbrains.kastle.utils.LocalVariables
 import org.jetbrains.kastle.utils.Stack
 import org.jetbrains.kastle.utils.Variables
@@ -422,24 +421,28 @@ internal class SourceFileWriteContext(
     }
 }
 
-private fun SourcesByUrl.lookup(packId: PackId, block: Block, variables: LocalVariables): List<SourceFile> {
+private fun SourcesByUrl.lookup(sourcePackId: PackId, block: Block, variables: LocalVariables): List<SourceFile> {
     if (block !is Slot)
         return emptyList()
 
-    val keys = listOf("slot://$packId/${block.name}", "slot:${block.name}")
+    val keys = listOf("slot://$sourcePackId/${block.name}", "slot:${block.name}")
     val values = keys.flatMap { get(it).orEmpty() }
-        .filter { it.condition == null || it.condition!!.evaluate(variables).isTruthy() }
+        .filter { (_, condition, packId) ->
+            if (condition == null) return@filter true
+            val variableScope = variables.relativeTo(packId ?: sourcePackId)
+            condition.evaluate(variableScope).isTruthy()
+        }
     if (values.isEmpty()) {
         when (block.requirement) {
             Requirement.REQUIRED ->
-                throw IllegalArgumentException("Missing slot://$packId/${block.name}")
+                throw IllegalArgumentException("Missing slot://$sourcePackId/${block.name}")
 
             Requirement.OMITTED -> return emptyList()
             Requirement.OPTIONAL -> {}
         }
     }
     require(block is RepeatingSlot || values.size <= 1) {
-        "More than one target for non-repeating slot://$packId/${block.name}"
+        "More than one target for non-repeating slot://$sourcePackId/${block.name}"
     }
     return values.sortedWith(
         compareBy<SourceFile> { (it as? SourceTemplate)?.priority ?: Int.MAX_VALUE }

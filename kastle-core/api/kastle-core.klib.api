@@ -1149,6 +1149,10 @@ sealed interface org.jetbrains.kastle/SourceFile { // org.jetbrains.kastle/Sourc
     abstract val target // org.jetbrains.kastle/SourceFile.target|{}target[0]
         abstract fun <get-target>(): org.jetbrains.kastle.utils/StringExpression // org.jetbrains.kastle/SourceFile.target.<get-target>|<get-target>(){}[0]
 
+    open fun component1(): org.jetbrains.kastle.utils/StringExpression // org.jetbrains.kastle/SourceFile.component1|component1(){}[0]
+    open fun component2(): org.jetbrains.kastle.utils/Expression? // org.jetbrains.kastle/SourceFile.component2|component2(){}[0]
+    open fun component3(): org.jetbrains.kastle/PackId? // org.jetbrains.kastle/SourceFile.component3|component3(){}[0]
+
     final object Companion : kotlinx.serialization.internal/SerializerFactory { // org.jetbrains.kastle/SourceFile.Companion|null[0]
         final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/SourceFile> // org.jetbrains.kastle/SourceFile.Companion.serializer|serializer(){}[0]
         final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // org.jetbrains.kastle/SourceFile.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
@@ -3153,7 +3157,7 @@ final class org.jetbrains.kastle/SourceModuleManifest : org.jetbrains.kastle/Sou
 }
 
 final class org.jetbrains.kastle/SourceTemplate : org.jetbrains.kastle/SourceFile { // org.jetbrains.kastle/SourceTemplate|null[0]
-    constructor <init>(kotlin/String, org.jetbrains.kastle.utils/StringExpression, org.jetbrains.kastle/SourceImports? = ..., kotlin.collections/List<org.jetbrains.kastle/Block>? = ..., org.jetbrains.kastle.utils/Expression? = ..., kotlin/Int? = ..., org.jetbrains.kastle/PackId? = ...) // org.jetbrains.kastle/SourceTemplate.<init>|<init>(kotlin.String;org.jetbrains.kastle.utils.StringExpression;org.jetbrains.kastle.SourceImports?;kotlin.collections.List<org.jetbrains.kastle.Block>?;org.jetbrains.kastle.utils.Expression?;kotlin.Int?;org.jetbrains.kastle.PackId?){}[0]
+    constructor <init>(org.jetbrains.kastle.utils/StringExpression, org.jetbrains.kastle.utils/Expression? = ..., org.jetbrains.kastle/PackId? = ..., kotlin/String, org.jetbrains.kastle/SourceImports? = ..., kotlin.collections/List<org.jetbrains.kastle/Block>? = ..., kotlin/Int? = ...) // org.jetbrains.kastle/SourceTemplate.<init>|<init>(org.jetbrains.kastle.utils.StringExpression;org.jetbrains.kastle.utils.Expression?;org.jetbrains.kastle.PackId?;kotlin.String;org.jetbrains.kastle.SourceImports?;kotlin.collections.List<org.jetbrains.kastle.Block>?;kotlin.Int?){}[0]
 
     final val blocks // org.jetbrains.kastle/SourceTemplate.blocks|{}blocks[0]
         final fun <get-blocks>(): kotlin.collections/List<org.jetbrains.kastle/Block>? // org.jetbrains.kastle/SourceTemplate.blocks.<get-blocks>|<get-blocks>(){}[0]
@@ -3170,14 +3174,14 @@ final class org.jetbrains.kastle/SourceTemplate : org.jetbrains.kastle/SourceFil
     final val text // org.jetbrains.kastle/SourceTemplate.text|{}text[0]
         final fun <get-text>(): kotlin/String // org.jetbrains.kastle/SourceTemplate.text.<get-text>|<get-text>(){}[0]
 
-    final fun component1(): kotlin/String // org.jetbrains.kastle/SourceTemplate.component1|component1(){}[0]
-    final fun component2(): org.jetbrains.kastle.utils/StringExpression // org.jetbrains.kastle/SourceTemplate.component2|component2(){}[0]
-    final fun component3(): org.jetbrains.kastle/SourceImports? // org.jetbrains.kastle/SourceTemplate.component3|component3(){}[0]
-    final fun component4(): kotlin.collections/List<org.jetbrains.kastle/Block>? // org.jetbrains.kastle/SourceTemplate.component4|component4(){}[0]
-    final fun component5(): org.jetbrains.kastle.utils/Expression? // org.jetbrains.kastle/SourceTemplate.component5|component5(){}[0]
-    final fun component6(): kotlin/Int? // org.jetbrains.kastle/SourceTemplate.component6|component6(){}[0]
-    final fun component7(): org.jetbrains.kastle/PackId? // org.jetbrains.kastle/SourceTemplate.component7|component7(){}[0]
-    final fun copy(kotlin/String = ..., org.jetbrains.kastle.utils/StringExpression = ..., org.jetbrains.kastle/SourceImports? = ..., kotlin.collections/List<org.jetbrains.kastle/Block>? = ..., org.jetbrains.kastle.utils/Expression? = ..., kotlin/Int? = ..., org.jetbrains.kastle/PackId? = ...): org.jetbrains.kastle/SourceTemplate // org.jetbrains.kastle/SourceTemplate.copy|copy(kotlin.String;org.jetbrains.kastle.utils.StringExpression;org.jetbrains.kastle.SourceImports?;kotlin.collections.List<org.jetbrains.kastle.Block>?;org.jetbrains.kastle.utils.Expression?;kotlin.Int?;org.jetbrains.kastle.PackId?){}[0]
+    final fun component1(): org.jetbrains.kastle.utils/StringExpression // org.jetbrains.kastle/SourceTemplate.component1|component1(){}[0]
+    final fun component2(): org.jetbrains.kastle.utils/Expression? // org.jetbrains.kastle/SourceTemplate.component2|component2(){}[0]
+    final fun component3(): org.jetbrains.kastle/PackId? // org.jetbrains.kastle/SourceTemplate.component3|component3(){}[0]
+    final fun component4(): kotlin/String // org.jetbrains.kastle/SourceTemplate.component4|component4(){}[0]
+    final fun component5(): org.jetbrains.kastle/SourceImports? // org.jetbrains.kastle/SourceTemplate.component5|component5(){}[0]
+    final fun component6(): kotlin.collections/List<org.jetbrains.kastle/Block>? // org.jetbrains.kastle/SourceTemplate.component6|component6(){}[0]
+    final fun component7(): kotlin/Int? // org.jetbrains.kastle/SourceTemplate.component7|component7(){}[0]
+    final fun copy(org.jetbrains.kastle.utils/StringExpression = ..., org.jetbrains.kastle.utils/Expression? = ..., org.jetbrains.kastle/PackId? = ..., kotlin/String = ..., org.jetbrains.kastle/SourceImports? = ..., kotlin.collections/List<org.jetbrains.kastle/Block>? = ..., kotlin/Int? = ...): org.jetbrains.kastle/SourceTemplate // org.jetbrains.kastle/SourceTemplate.copy|copy(org.jetbrains.kastle.utils.StringExpression;org.jetbrains.kastle.utils.Expression?;org.jetbrains.kastle.PackId?;kotlin.String;org.jetbrains.kastle.SourceImports?;kotlin.collections.List<org.jetbrains.kastle.Block>?;kotlin.Int?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/SourceTemplate.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/SourceTemplate.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/SourceTemplate.toString|toString(){}[0]
@@ -3199,7 +3203,7 @@ final class org.jetbrains.kastle/SourceTemplate : org.jetbrains.kastle/SourceFil
 }
 
 final class org.jetbrains.kastle/StaticSource : org.jetbrains.kastle/SourceFile { // org.jetbrains.kastle/StaticSource|null[0]
-    constructor <init>(kotlinx.io.bytestring/ByteString, org.jetbrains.kastle.utils/StringExpression, org.jetbrains.kastle.utils/Expression? = ..., org.jetbrains.kastle/PackId? = ...) // org.jetbrains.kastle/StaticSource.<init>|<init>(kotlinx.io.bytestring.ByteString;org.jetbrains.kastle.utils.StringExpression;org.jetbrains.kastle.utils.Expression?;org.jetbrains.kastle.PackId?){}[0]
+    constructor <init>(org.jetbrains.kastle.utils/StringExpression, org.jetbrains.kastle.utils/Expression? = ..., org.jetbrains.kastle/PackId? = ..., kotlinx.io.bytestring/ByteString) // org.jetbrains.kastle/StaticSource.<init>|<init>(org.jetbrains.kastle.utils.StringExpression;org.jetbrains.kastle.utils.Expression?;org.jetbrains.kastle.PackId?;kotlinx.io.bytestring.ByteString){}[0]
 
     final val condition // org.jetbrains.kastle/StaticSource.condition|{}condition[0]
         final fun <get-condition>(): org.jetbrains.kastle.utils/Expression? // org.jetbrains.kastle/StaticSource.condition.<get-condition>|<get-condition>(){}[0]
@@ -3210,11 +3214,11 @@ final class org.jetbrains.kastle/StaticSource : org.jetbrains.kastle/SourceFile 
     final val target // org.jetbrains.kastle/StaticSource.target|{}target[0]
         final fun <get-target>(): org.jetbrains.kastle.utils/StringExpression // org.jetbrains.kastle/StaticSource.target.<get-target>|<get-target>(){}[0]
 
-    final fun component1(): kotlinx.io.bytestring/ByteString // org.jetbrains.kastle/StaticSource.component1|component1(){}[0]
-    final fun component2(): org.jetbrains.kastle.utils/StringExpression // org.jetbrains.kastle/StaticSource.component2|component2(){}[0]
-    final fun component3(): org.jetbrains.kastle.utils/Expression? // org.jetbrains.kastle/StaticSource.component3|component3(){}[0]
-    final fun component4(): org.jetbrains.kastle/PackId? // org.jetbrains.kastle/StaticSource.component4|component4(){}[0]
-    final fun copy(kotlinx.io.bytestring/ByteString = ..., org.jetbrains.kastle.utils/StringExpression = ..., org.jetbrains.kastle.utils/Expression? = ..., org.jetbrains.kastle/PackId? = ...): org.jetbrains.kastle/StaticSource // org.jetbrains.kastle/StaticSource.copy|copy(kotlinx.io.bytestring.ByteString;org.jetbrains.kastle.utils.StringExpression;org.jetbrains.kastle.utils.Expression?;org.jetbrains.kastle.PackId?){}[0]
+    final fun component1(): org.jetbrains.kastle.utils/StringExpression // org.jetbrains.kastle/StaticSource.component1|component1(){}[0]
+    final fun component2(): org.jetbrains.kastle.utils/Expression? // org.jetbrains.kastle/StaticSource.component2|component2(){}[0]
+    final fun component3(): org.jetbrains.kastle/PackId? // org.jetbrains.kastle/StaticSource.component3|component3(){}[0]
+    final fun component4(): kotlinx.io.bytestring/ByteString // org.jetbrains.kastle/StaticSource.component4|component4(){}[0]
+    final fun copy(org.jetbrains.kastle.utils/StringExpression = ..., org.jetbrains.kastle.utils/Expression? = ..., org.jetbrains.kastle/PackId? = ..., kotlinx.io.bytestring/ByteString = ...): org.jetbrains.kastle/StaticSource // org.jetbrains.kastle/StaticSource.copy|copy(org.jetbrains.kastle.utils.StringExpression;org.jetbrains.kastle.utils.Expression?;org.jetbrains.kastle.PackId?;kotlinx.io.bytestring.ByteString){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/StaticSource.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/StaticSource.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/StaticSource.toString|toString(){}[0]

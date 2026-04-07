@@ -211,12 +211,12 @@ class LocalPackRepository(
                                 )
                             }
                             else -> StaticSource(
-                                contents = text?.toByteArray()?.let(::ByteString)
-                                    ?: file?.takeIf(fs::exists)?.let { fs.source(file).buffered().use { it.readByteString() } }
-                                    ?: error("Missing source file: $targetExpression"),
                                 target = targetExpression,
                                 condition = conditionExpression,
                                 packId = packId,
+                                contents = text?.toByteArray()?.let(::ByteString)
+                                    ?: file?.takeIf(fs::exists)?.let { fs.source(file).buffered().use { it.readByteString() } }
+                                    ?: error("Missing source file: $targetExpression"),
                             )
                         }
                 }

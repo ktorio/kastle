@@ -12,7 +12,6 @@ import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.LocalVariables
 import org.jetbrains.kastle.utils.StringExpression
 import org.jetbrains.kastle.utils.StringLiteral
-import org.jetbrains.kastle.utils.Variables
 import kotlin.jvm.JvmInline
 
 @Serializable
@@ -30,6 +29,10 @@ sealed interface SourceFile {
     val condition: Expression?
     // Pack ID for variable resolution when target has expressions
     val packId: PackId?
+
+    operator fun component1(): StringExpression = target
+    operator fun component2(): Expression? = condition
+    operator fun component3(): PackId? = packId
 }
 
 /**
@@ -46,11 +49,11 @@ fun SourceFile.copy(
 @Serializable
 @SerialName("static")
 data class StaticSource(
-    @Serializable(with = ByteStringSerializer::class)
-    val contents: ByteString,
     override val target: StringExpression,
     override val condition: Expression? = null,
     override val packId: PackId? = null,
+    @Serializable(with = ByteStringSerializer::class)
+    val contents: ByteString,
 ): SourceFile {
     companion object {
         fun FileSystem.sourceFile(
@@ -62,9 +65,9 @@ data class StaticSource(
                 it.readByteString()
             }
             return StaticSource(
-                contents = bytes,
                 target = StringLiteral("file:${file.relativeTo(basePath)}"),
                 condition = condition,
+                contents = bytes,
             )
         }
     }
@@ -73,14 +76,14 @@ data class StaticSource(
 @Serializable
 @SerialName("template")
 data class SourceTemplate(
-    val text: String,
     override val target: StringExpression,
+    override val condition: Expression? = null,
+    override val packId: PackId? = null,
+    val text: String,
     val imports: SourceImports? = null,
     val blocks: List<Block>? = null,
-    override val condition: Expression? = null,
-    val priority: Int? = null,
     // this is here also to sort out files after modules are merged
-    override val packId: PackId? = null,
+    val priority: Int? = null,
 ): SourceFile
 
 @Serializable

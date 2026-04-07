@@ -122,8 +122,8 @@ internal class KotlinCompilerTemplateEngine(
 
         return when (target.protocol) {
             "file" -> SourceTemplate(
-                text = ktFile.text,
                 target = target,
+                text = ktFile.text,
                 imports = ktFile.readImports(),
                 blocks = ktFile.findBlocks(),
             )
@@ -142,8 +142,8 @@ internal class KotlinCompilerTemplateEngine(
                 }
 
                 SourceTemplate(
-                    text = ktFile.text,
                     target = target,
+                    text = ktFile.text,
                     imports = ktFile.readImports(),
                     blocks = nestedBlocks,
                 )
