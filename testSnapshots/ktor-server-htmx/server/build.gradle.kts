@@ -19,6 +19,9 @@ tasks.named("processResources") {
     dependsOn(copyWebDistToServerResources)
 }
 
+kotlin {
+    jvmToolchain(21)
+}
 dependencies {
     implementation(ktorLibs.htmx.html)
     implementation(ktorLibs.server.core)

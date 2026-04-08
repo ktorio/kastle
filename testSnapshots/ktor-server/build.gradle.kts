@@ -9,14 +9,13 @@ plugins {
 group = "com.acme"
 version = "1.0.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-}
-
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
 }
 
+kotlin {
+    jvmToolchain(21)
+}
 dependencies {
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.contentNegotiation)
