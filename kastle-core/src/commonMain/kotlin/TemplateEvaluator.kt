@@ -329,7 +329,8 @@ internal class SourceFileWriteContext(
                     conditions[parent] = matched || conditions[parent] ?: false
 
                     if (matched) {
-                        append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
+                        val bodyEnd = child?.outerStart ?: source.text.lastNonWhitespace(block.bodyEnd, block.bodyStart)
+                        append(source.text, block.bodyStart, bodyEnd, block.level)
                         false
                     } else skipContents()
                 }
@@ -346,7 +347,8 @@ internal class SourceFileWriteContext(
                     val ifResult = conditions[parent]
                     log.trace { "  ${block.positionPrefix} ELSE  ^${parent.lineNumber} -> !$ifResult -> ${ifResult == false}" }
                     if (ifResult == false) {
-                        append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
+                        val bodyEnd = child?.outerStart ?: source.text.lastNonWhitespace(block.bodyEnd, block.bodyStart)
+                        append(source.text, block.bodyStart, bodyEnd, block.level)
                         false
                     } else skipContents()
                 }
@@ -382,7 +384,8 @@ internal class SourceFileWriteContext(
                                 conditions[parent] = it
                             }
                             if (condition) {
-                                append(source.text, block.bodyStart, child?.outerStart ?: block.bodyEnd, block.level)
+                                val bodyEnd = child?.outerStart ?: source.text.lastNonWhitespace(block.bodyEnd, block.bodyStart)
+                                append(source.text, block.bodyStart, bodyEnd, block.level)
                                 false
                             } else skipContents()
                         }
