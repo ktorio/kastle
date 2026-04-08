@@ -29,6 +29,7 @@ dependencies {
     testImplementation(project(":kastle-templates"))
     testImplementation(project(":kastle-test"))
     testImplementation(libs.kotest.junit5)
+    testImplementation(kotlin("test"))
 }
 
 tasks {

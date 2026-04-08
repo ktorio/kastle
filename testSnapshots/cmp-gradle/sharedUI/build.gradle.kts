@@ -1,7 +1,6 @@
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
@@ -29,7 +28,6 @@ kotlin {
         }
     }
     jvm()
-
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -61,7 +59,6 @@ kotlin {
 
         commonTest.dependencies {
             kotlin("test")
-        
         }
     }
 }
