@@ -56,6 +56,8 @@ abstract class FileSystemPackRepository(
         }
     }
     private val versionsDir = root.resolve("versions")
+    private val metaExt = ".meta.$ext"
+    private val versionsExt = ".versions.$ext"
 
     abstract fun readDescriptor(path: Path): PackDescriptor?
     abstract fun writeDescriptor(path: Path, descriptor: PackDescriptor)
@@ -94,26 +96,26 @@ abstract class FileSystemPackRepository(
 
     override fun getAll(): Flow<PackMetadata> =
         allPackFiles()
-            .filter { it.name.endsWith(".meta.${ext}") }
+            .filter { it.name.endsWith(".$metaExt") }
             .mapNotNull(tryRead(::readMetadata))
             .asFlow()
 
     override fun readAll(): Flow<PackDescriptor> {
         return allPackFiles()
-            .filter { it.name.endsWith(".${ext}") && !it.name.endsWith(".meta.${ext}") }
+            .filter { it.name.endsWith(".${ext}") && !it.name.endsWith(".$metaExt") }
             .mapNotNull(tryRead(::readDescriptor))
             .asFlow()
     }
 
     override suspend fun get(packId: PackId): PackMetadata? =
-        readMetadata(root.resolve("$packId.$ext"))
+        readMetadata(root.resolve("$packId.$metaExt"))
 
     override suspend fun read(packId: PackId): PackDescriptor? =
         readDescriptor(root.resolve("$packId.$ext"))
 
     override suspend fun add(descriptor: PackDescriptor) {
         val completeFile = root.resolve("${descriptor.id}.$ext")
-        val metaFile = root.resolve("${descriptor.id}.meta.$ext")
+        val metaFile = root.resolve("${descriptor.id}.$metaExt")
         completeFile.parent?.let(fs::createDirectories)
         writeDescriptor(completeFile, descriptor)
         writeMetadata(metaFile, descriptor.manifest)
@@ -124,7 +126,7 @@ abstract class FileSystemPackRepository(
     }
 
     override suspend fun versions(): VersionsCatalog =
-        readVersions(versionsDir.resolve("${VersionsCatalog.DEFAULT_NAME}.versions.$ext"))
+        readVersions(versionsDir.resolve("${VersionsCatalog.DEFAULT_NAME}.$versionsExt"))
 
     override suspend fun catalogs(): List<VersionsCatalog> {
         if (!fs.isDirectory(versionsDir)) return emptyList()
@@ -134,7 +136,7 @@ abstract class FileSystemPackRepository(
     override suspend fun catalogs(catalogs: List<VersionsCatalog>) {
         fs.mkdirs(versionsDir)
         for (catalog in catalogs) {
-            writeVersions(root.resolve("versions/${catalog.name}.versions.$ext"), catalog)
+            writeVersions(root.resolve("versions/${catalog.name}.$versionsExt"), catalog)
         }
     }
 
