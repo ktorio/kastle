@@ -2,6 +2,24 @@
 
 _**K**otlin **A**pplication **S**ourcecode **T**emplating and **L**ayout **E**ngine_
 
+## About
+
+This project is an experimental tool for generating Kotlin source code from Kotlin source code.  The core concept is 
+to leverage the Kotlin compiler and language features to create a powerful templating engine.  Since the templates are 
+Kotlin sources themselves, we can provide a safe developer experience that is otherwise impossible with more traditional 
+code generation tools.
+
+You can find KASTLE applications in the following places:
+
+- [KASTLE Test Server](https://ksl.labs.jb.gg) <br />
+  Our HTMX test front-end is deployed from the `main` branch to a server for ad-hoc manual testing.
+- [Ktor Project Generator](https://start.ktor.io) <br />
+  This generator includes a custom web front-end and API used in IntelliJ IDEA. <br />
+  The KASTLE repository is supplied from the [Ktor plugin registry](https://github.com/ktorio/ktor-plugin-registry).
+- [Intellij Platform Plugin Generator](https://plugins.jetbrains.com/generator)
+  This generator provides an easy way for developers to create new plugins for IntelliJ IDEA. <br />
+  The back-end is deployed from a [branch of this repository](https://github.com/ktorio/kastle/tree/ide-plugin-wizard).
+
 ## Documentation
 
 About:
@@ -17,30 +35,6 @@ Usage:
     Using our custom handlebars template engine for non-Kotlin files.
   - [Properties](docs/properties.md) <br />
     For working with properties, declared in the manifests and referenced in templates.
-
-## Deployments
-
-### KASTLE Test Server
-
-[https://ksl.labs.jb.gg](https://ksl.labs.jb.gg/)
-
-Our HTMX test front-end is deployed from the `main` branch to a server for ad-hoc manual testing.
-
-### Ktor Project Generator
-
-[https://start.ktor.io](https://start.ktor.io) <br />
-
-This generator includes a custom web front-end and API used in IntelliJ IDEA.
-
-The KASTLE repository is supplied from the [Ktor plugin registry](https://github.com/ktorio/ktor-plugin-registry).
-
-### Intellij Platform Plugin Generator
-
-[https://plugins.jetbrains.com/generator](https://plugins.jetbrains.com/generator)
-
-This generator provides an easy way for developers to create new plugins for IntelliJ IDEA.
-
-The back-end is deployed from a [branch of this repository](https://github.com/ktorio/kastle/tree/ide-plugin-wizard).
 
 ## Project structure
 
