@@ -31,6 +31,7 @@ abstract class FileSystemPackRepository(
         ): MutablePackRepository {
             if (clear) fs.deleteRecursively(path)
             fs.mkdirs(path)
+
             val export = when(fileFormat) {
                 JSON -> JsonFilePackRepository(path, fs)
                 CBOR -> CborFilePackRepository(path, fs)
@@ -41,7 +42,9 @@ abstract class FileSystemPackRepository(
 
             // extra files
             files().collect { path ->
-                readFile(path)?.let { export.file(path, it) }
+                readFile(path)?.let {
+                    export.file(path, it)
+                }
             }
 
             // sources and manifests
@@ -56,8 +59,8 @@ abstract class FileSystemPackRepository(
         }
     }
     private val versionsDir = root.resolve("versions")
-    private val metaExt = ".meta.$ext"
-    private val versionsExt = ".versions.$ext"
+    private val metaExt = "meta.$ext"
+    private val versionsExt = "versions.$ext"
 
     abstract fun readDescriptor(path: Path): PackDescriptor?
     abstract fun writeDescriptor(path: Path, descriptor: PackDescriptor)
@@ -116,9 +119,14 @@ abstract class FileSystemPackRepository(
     override suspend fun add(descriptor: PackDescriptor) {
         val completeFile = root.resolve("${descriptor.id}.$ext")
         val metaFile = root.resolve("${descriptor.id}.$metaExt")
+        // manifest is moved up on level, so icon paths must be modified
+        val manifest = descriptor.manifest.copy(
+            icon = descriptor.manifest.icon?.let { "${descriptor.id}/$it" }
+        )
+        val modifiedDescriptor = descriptor.copy(manifest = manifest)
         completeFile.parent?.let(fs::createDirectories)
-        writeDescriptor(completeFile, descriptor)
-        writeMetadata(metaFile, descriptor.manifest)
+        writeDescriptor(completeFile, modifiedDescriptor)
+        writeMetadata(metaFile, manifest)
     }
 
     override suspend fun remove(id: PackId) {
