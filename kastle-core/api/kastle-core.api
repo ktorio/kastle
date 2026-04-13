@@ -871,12 +871,12 @@ public final class org/jetbrains/kastle/NamedSlot$Companion {
 
 public final class org/jetbrains/kastle/PackDescriptor : org/jetbrains/kastle/PackMetadata {
 	public static final field Companion Lorg/jetbrains/kastle/PackDescriptor$Companion;
-	public fun <init> (Lorg/jetbrains/kastle/PackMetadata;Ljava/util/Map;Lorg/jetbrains/kastle/PackSources;)V
-	public final fun component1 ()Lorg/jetbrains/kastle/PackMetadata;
+	public fun <init> (Lorg/jetbrains/kastle/PackManifest;Ljava/util/Map;Lorg/jetbrains/kastle/PackSources;)V
+	public final fun component1 ()Lorg/jetbrains/kastle/PackManifest;
 	public final fun component2 ()Ljava/util/Map;
 	public final fun component3 ()Lorg/jetbrains/kastle/PackSources;
-	public final fun copy (Lorg/jetbrains/kastle/PackMetadata;Ljava/util/Map;Lorg/jetbrains/kastle/PackSources;)Lorg/jetbrains/kastle/PackDescriptor;
-	public static synthetic fun copy$default (Lorg/jetbrains/kastle/PackDescriptor;Lorg/jetbrains/kastle/PackMetadata;Ljava/util/Map;Lorg/jetbrains/kastle/PackSources;ILjava/lang/Object;)Lorg/jetbrains/kastle/PackDescriptor;
+	public final fun copy (Lorg/jetbrains/kastle/PackManifest;Ljava/util/Map;Lorg/jetbrains/kastle/PackSources;)Lorg/jetbrains/kastle/PackDescriptor;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/PackDescriptor;Lorg/jetbrains/kastle/PackManifest;Ljava/util/Map;Lorg/jetbrains/kastle/PackSources;ILjava/lang/Object;)Lorg/jetbrains/kastle/PackDescriptor;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCommonSources ()Ljava/util/List;
 	public fun getDescription ()Ljava/lang/String;
@@ -886,7 +886,7 @@ public final class org/jetbrains/kastle/PackDescriptor : org/jetbrains/kastle/Pa
 	public fun getId ()Lorg/jetbrains/kastle/PackId;
 	public fun getLicense ()Ljava/lang/String;
 	public fun getLinks ()Lorg/jetbrains/kastle/PackLinks;
-	public final fun getManifest ()Lorg/jetbrains/kastle/PackMetadata;
+	public final fun getManifest ()Lorg/jetbrains/kastle/PackManifest;
 	public fun getModules ()Ljava/util/List;
 	public fun getName ()Ljava/lang/String;
 	public fun getPluginRepositories ()Ljava/util/List;

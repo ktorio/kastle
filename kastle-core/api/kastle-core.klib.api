@@ -2380,7 +2380,7 @@ final class org.jetbrains.kastle/NamedSlot : org.jetbrains.kastle/Slot { // org.
 }
 
 final class org.jetbrains.kastle/PackDescriptor : org.jetbrains.kastle/PackMetadata { // org.jetbrains.kastle/PackDescriptor|null[0]
-    constructor <init>(org.jetbrains.kastle/PackMetadata, kotlin.collections/Map<org.jetbrains.kastle/PropertyScope, kotlin.collections/List<org.jetbrains.kastle/PropertyAssignment>>, org.jetbrains.kastle/PackSources) // org.jetbrains.kastle/PackDescriptor.<init>|<init>(org.jetbrains.kastle.PackMetadata;kotlin.collections.Map<org.jetbrains.kastle.PropertyScope,kotlin.collections.List<org.jetbrains.kastle.PropertyAssignment>>;org.jetbrains.kastle.PackSources){}[0]
+    constructor <init>(org.jetbrains.kastle/PackManifest, kotlin.collections/Map<org.jetbrains.kastle/PropertyScope, kotlin.collections/List<org.jetbrains.kastle/PropertyAssignment>>, org.jetbrains.kastle/PackSources) // org.jetbrains.kastle/PackDescriptor.<init>|<init>(org.jetbrains.kastle.PackManifest;kotlin.collections.Map<org.jetbrains.kastle.PropertyScope,kotlin.collections.List<org.jetbrains.kastle.PropertyAssignment>>;org.jetbrains.kastle.PackSources){}[0]
 
     final val commonSources // org.jetbrains.kastle/PackDescriptor.commonSources|{}commonSources[0]
         final fun <get-commonSources>(): kotlin.collections/List<org.jetbrains.kastle/SourceFile> // org.jetbrains.kastle/PackDescriptor.commonSources.<get-commonSources>|<get-commonSources>(){}[0]
@@ -2399,7 +2399,7 @@ final class org.jetbrains.kastle/PackDescriptor : org.jetbrains.kastle/PackMetad
     final val links // org.jetbrains.kastle/PackDescriptor.links|{}links[0]
         final fun <get-links>(): org.jetbrains.kastle/PackLinks? // org.jetbrains.kastle/PackDescriptor.links.<get-links>|<get-links>(){}[0]
     final val manifest // org.jetbrains.kastle/PackDescriptor.manifest|{}manifest[0]
-        final fun <get-manifest>(): org.jetbrains.kastle/PackMetadata // org.jetbrains.kastle/PackDescriptor.manifest.<get-manifest>|<get-manifest>(){}[0]
+        final fun <get-manifest>(): org.jetbrains.kastle/PackManifest // org.jetbrains.kastle/PackDescriptor.manifest.<get-manifest>|<get-manifest>(){}[0]
     final val modules // org.jetbrains.kastle/PackDescriptor.modules|{}modules[0]
         final fun <get-modules>(): kotlin.collections/List<org.jetbrains.kastle/SourceModuleMetadata> // org.jetbrains.kastle/PackDescriptor.modules.<get-modules>|<get-modules>(){}[0]
     final val name // org.jetbrains.kastle/PackDescriptor.name|{}name[0]
@@ -2425,10 +2425,10 @@ final class org.jetbrains.kastle/PackDescriptor : org.jetbrains.kastle/PackMetad
     final val version // org.jetbrains.kastle/PackDescriptor.version|{}version[0]
         final fun <get-version>(): org.jetbrains.kastle/SemanticVersion // org.jetbrains.kastle/PackDescriptor.version.<get-version>|<get-version>(){}[0]
 
-    final fun component1(): org.jetbrains.kastle/PackMetadata // org.jetbrains.kastle/PackDescriptor.component1|component1(){}[0]
+    final fun component1(): org.jetbrains.kastle/PackManifest // org.jetbrains.kastle/PackDescriptor.component1|component1(){}[0]
     final fun component2(): kotlin.collections/Map<org.jetbrains.kastle/PropertyScope, kotlin.collections/List<org.jetbrains.kastle/PropertyAssignment>> // org.jetbrains.kastle/PackDescriptor.component2|component2(){}[0]
     final fun component3(): org.jetbrains.kastle/PackSources // org.jetbrains.kastle/PackDescriptor.component3|component3(){}[0]
-    final fun copy(org.jetbrains.kastle/PackMetadata = ..., kotlin.collections/Map<org.jetbrains.kastle/PropertyScope, kotlin.collections/List<org.jetbrains.kastle/PropertyAssignment>> = ..., org.jetbrains.kastle/PackSources = ...): org.jetbrains.kastle/PackDescriptor // org.jetbrains.kastle/PackDescriptor.copy|copy(org.jetbrains.kastle.PackMetadata;kotlin.collections.Map<org.jetbrains.kastle.PropertyScope,kotlin.collections.List<org.jetbrains.kastle.PropertyAssignment>>;org.jetbrains.kastle.PackSources){}[0]
+    final fun copy(org.jetbrains.kastle/PackManifest = ..., kotlin.collections/Map<org.jetbrains.kastle/PropertyScope, kotlin.collections/List<org.jetbrains.kastle/PropertyAssignment>> = ..., org.jetbrains.kastle/PackSources = ...): org.jetbrains.kastle/PackDescriptor // org.jetbrains.kastle/PackDescriptor.copy|copy(org.jetbrains.kastle.PackManifest;kotlin.collections.Map<org.jetbrains.kastle.PropertyScope,kotlin.collections.List<org.jetbrains.kastle.PropertyAssignment>>;org.jetbrains.kastle.PackSources){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/PackDescriptor.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/PackDescriptor.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/PackDescriptor.toString|toString(){}[0]
