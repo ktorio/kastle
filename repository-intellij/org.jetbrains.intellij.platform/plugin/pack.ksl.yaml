@@ -54,15 +54,6 @@ rootSources:
   - path: gradlew
   - path: gradlew.bat
 
-  # Gradle
-  - path: gradle/libs.versions.toml.hbs
-    target: file:gradle/libs.versions.toml
-  - path: gradle/wrapper/gradle-wrapper.jar
-  - path: gradle/wrapper/gradle-wrapper.properties.hbs
-    target: file:gradle/wrapper/gradle-wrapper.properties
-  - path: gradlew
-  - path: gradlew.bat
-
   # Gradle build script
   - path: classic/build.gradle-template.kts
     target: file:build.gradle.kts
