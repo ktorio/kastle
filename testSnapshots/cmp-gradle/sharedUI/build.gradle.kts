@@ -1,7 +1,6 @@
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
@@ -29,7 +28,6 @@ kotlin {
         }
     }
     jvm()
-
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -49,19 +47,18 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(libs.compose.runtime)
+            api(libs.androidx.lifecycle.runtimeCompose)
+            api(libs.androidx.lifecycle.viewmodelCompose)
+            api(libs.compose.components.resources)
             api(libs.compose.foundation)
             api(libs.compose.material3)
+            api(libs.compose.runtime)
             api(libs.compose.ui)
             api(libs.compose.uiToolingPreview)
-            api(libs.compose.components.resources)
-            api(libs.androidx.lifecycle.viewmodelCompose)
-            api(libs.androidx.lifecycle.runtimeCompose)
         }
 
         commonTest.dependencies {
             kotlin("test")
-        
         }
     }
 }

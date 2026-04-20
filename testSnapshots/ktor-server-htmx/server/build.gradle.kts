@@ -1,7 +1,6 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-
     alias(ktorLibs.plugins.ktor)
 }
 
@@ -19,13 +18,17 @@ tasks.named("processResources") {
     dependsOn(copyWebDistToServerResources)
 }
 
+kotlin {
+    jvmToolchain(21)
+}
 dependencies {
-    implementation(ktorLibs.server.core)
-    implementation(libs.logback.classic)
-    implementation(ktorLibs.server.netty)
-    implementation(ktorLibs.server.htmx)
-    implementation(ktorLibs.server.htmlBuilder)
     implementation(ktorLibs.htmx.html)
+    implementation(ktorLibs.server.core)
+    implementation(ktorLibs.server.htmlBuilder)
+    implementation(ktorLibs.server.htmx)
+    implementation(ktorLibs.server.netty)
+    implementation(libs.logback.classic)
+
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
 }

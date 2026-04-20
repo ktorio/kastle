@@ -17,11 +17,6 @@ plugins {
 if (_project.modules.size == 1) {
     group = _project.group
     version = "1.0.0-SNAPSHOT"
-
-    repositories {
-        mavenCentral()
-        _slots("gradleRepositories")
-    }
 }
 
 _slots("buildRoot")
@@ -146,6 +141,11 @@ if (_module.platform != "jvm") {
         }
     }
 } else {
+    if (_slots.contains("kotlinRoot")) {
+        kotlin {
+            _slots("kotlinRoot")
+        }
+    }
     dependencies {
         for (dependency in _module.dependencies.values.flatten()) {
             when (dependency.type) {
@@ -172,6 +172,7 @@ if (_module.platform != "jvm") {
                 }
             }
         }
+
         testImplementation(kotlin("test"))
         for (dependency in _module.testDependencies.values.flatten()) {
             when (dependency.type) {

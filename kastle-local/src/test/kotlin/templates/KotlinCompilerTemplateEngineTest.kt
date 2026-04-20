@@ -16,7 +16,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
     fun localVars(vararg pairs: Pair<String, Any?>) =
         LocalVariables(packId, pairs.toMap())
 
-    suspend fun template(text: String): SourceTemplate =
+    fun template(text: String): SourceTemplate =
         engine.read(text = text)
 
     "literals" {
@@ -94,7 +94,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
                     smallNumber()
                 }
             }
-        """.trimIndent())
+        """.trimIndent().trim('\n'))
 
         template.toString(
             variables = localVars("number" to 60)
@@ -102,7 +102,6 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
             
             fun main() {
                 bigNumber()
-            
             }
         """.trimIndent()
 
@@ -112,7 +111,6 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
             
             fun main() {
                 smallNumber()
-            
             }
         """.trimIndent()
     }
