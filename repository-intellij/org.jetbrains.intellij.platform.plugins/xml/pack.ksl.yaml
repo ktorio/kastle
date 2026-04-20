@@ -16,59 +16,25 @@ commonSources:
     #language=kotlin
     text: |
       bundledModule("intellij.xml.psi")
-      bundledModule("intellij.xml.dom")
+      bundledModule("intellij.xml.psi.impl")
     priority: 80
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
     #language=xml
     text: |
       <module name="intellij.xml.psi"/>
-      <module name="intellij.xml.dom"/>
+      <module name="intellij.xml.psi.impl"/>
     priority: 80
 
   ## Backend
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
     #language=kotlin
     text: |
-      bundledModule("intellij.xml.dom")
-      bundledModule("intellij.xml.dom.impl")
-      bundledModule("intellij.xml.structureView")
-      bundledModule("intellij.xml.structureView.impl")
       bundledModule("intellij.xml.psi")
       bundledModule("intellij.xml.psi.impl")
-      bundledModule("intellij.xml.analysis")
-      bundledModule("intellij.xml.emmet")
-      bundledModule("intellij.xml.emmet.backend")
-      bundledModule("intellij.xml.ui.common")
-      bundledModule("intellij.xml.parser")
-      bundledModule("intellij.xml.syntax")
-      bundledModule("intellij.relaxng")
-      bundledModule("intellij.xml.impl")
-      bundledModule("intellij.xml.analysis.impl")
-      bundledModule("intellij.libraries.cglib")
-      bundledModule("intellij.libraries.xerces")
-      bundledModule("intellij.xml.langInjection")
-      bundledModule("intellij.xml.langInjection.xpath")
     priority: 80
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
     text: |
-      <module name="intellij.xml.dom"/>
-      <module name="intellij.xml.dom.impl"/>
-      <module name="intellij.xml.structureView"/>
-      <module name="intellij.xml.structureView.impl"/>
       <module name="intellij.xml.psi"/>
       <module name="intellij.xml.psi.impl"/>
-      <module name="intellij.xml.analysis"/>
-      <module name="intellij.xml.emmet"/>
-      <module name="intellij.xml.emmet.backend"/>
-      <module name="intellij.xml.ui.common"/>
-      <module name="intellij.xml.parser"/>
-      <module name="intellij.xml.syntax"/>
-      <module name="intellij.relaxng"/>
-      <module name="intellij.xml.impl"/>
-      <module name="intellij.xml.analysis.impl"/>
-      <module name="intellij.libraries.cglib"/>
-      <module name="intellij.libraries.xerces"/>
-      <module name="intellij.xml.langInjection"/>
-      <module name="intellij.xml.langInjection.xpath"/>
     priority: 80

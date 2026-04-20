@@ -29,7 +29,9 @@ commonSources:
     text: compatiblePlugin("org.jetbrains.plugins.go")
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
-    text: <plugin id="org.jetbrains.plugins.go"/>
+    text: |
+      <module name="intellij.go.frontback"/>
+      <module name="intellij.go.impl"/>
 
   ## Frontend
   - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies

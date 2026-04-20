@@ -29,11 +29,7 @@ commonSources:
     text: compatiblePlugin("com.jetbrains.php")
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
-    text: |
-      <module name="intellij.symfony"/>
-      <module name="intellij.php.frontback.impl"/>
-      <module name="intellij.php.completionMLRanking"/>
-      <module name="intellij.php.mcp"/>
+    text: <module name="intellij.php.frontback.impl"/>
 
   ## Frontend
   - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies

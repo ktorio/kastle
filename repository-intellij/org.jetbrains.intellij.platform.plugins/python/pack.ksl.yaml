@@ -21,7 +21,9 @@ commonSources:
     text: compatiblePlugin("PythonCore")
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
     #language=xml
-    text: <module name="intellij.python.common"/>
+    text: |
+      <module name="intellij.python.psi"/>
+      <module name="intellij.python.psi.impl"/>
 
   ## Backend
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
@@ -29,7 +31,9 @@ commonSources:
     text: compatiblePlugin("PythonCore")
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
-    text: <plugin id="PythonCore"/>
+    text: |
+      <module name="intellij.python.psi"/>
+      <module name="intellij.python.psi.impl"/>
 
   ## Frontend
   - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
