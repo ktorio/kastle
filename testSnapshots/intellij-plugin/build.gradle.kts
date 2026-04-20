@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.intellijPlatform)
 }
-
+error
 group = "com.acme"
 version = "1.0.0-SNAPSHOT"
 
