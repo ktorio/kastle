@@ -25,7 +25,8 @@ repositories {
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
     intellijPlatform {
-        intellijIdea(providers.gradleProperty("platformVersion"))
+        val platformVersion: String by _properties
+        intellijIdea(platformVersion)
         testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
 
         if (_slots.contains("buildScriptDependencies")) {
