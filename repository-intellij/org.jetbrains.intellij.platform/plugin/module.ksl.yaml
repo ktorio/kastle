@@ -1,1 +1,3 @@
 platform: jvm
+testDependencies:
+  - $libs.junit
