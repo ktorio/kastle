@@ -14,7 +14,7 @@ pluginPublish = "2.0.0"
 kastle = "1.0.0-SNAPSHOT"
 agp = "9.1.0"
 composeMultiplatform = "1.11.0-beta01"
-commonmark = "0.27.0"
+commonmark = "0.28.0"
 
 [libraries]
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
