@@ -63,7 +63,9 @@ fun interface ProjectResolver {
                 else -> repository.versions()
             }
             val versions = TreeMap<String, String>().also { versions ->
-                versions["kotlin"] = repositoryLibsCatalog.versions["kotlin"] ?: missingVersion("kotlin")
+                if (!isIntellijPlugin(packs)) {
+                    versions["kotlin"] = repositoryLibsCatalog.versions["kotlin"] ?: missingVersion("kotlin")
+                }
             }
             val projectCatalog = TreeMap<String, CatalogArtifact>()
             val gradlePlugins = TreeMap<String, GradlePlugin>()
@@ -129,6 +131,16 @@ fun interface ProjectResolver {
                 gradle = gradleSettings,
                 packaging = descriptor.packaging,
             )
+        }
+
+        /**
+         * For IntelliJ Plugin projects, we don't use version catalog for Gradle plugins,
+         * so we don't want to render the Kotlin plugin version.
+         */
+        // TODO: Consider creating a PR for KASTLE, to not set kotlin for each project,
+        //  but add it manually to a version catalog where needed.
+        private fun isIntellijPlugin(packs: List<PackDescriptor>): Boolean {
+            return packs.any { it.id.toString() == "org.jetbrains.intellij.platform/plugin" }
         }
 
         /**
