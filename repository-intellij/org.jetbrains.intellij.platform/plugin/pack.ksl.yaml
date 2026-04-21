@@ -14,23 +14,18 @@ properties:
     type: boolean
     default: false
     hidden: true
+  - key: pluginName
+    type: string
+    hidden: true
   # Values are managed in propertyValues below:
   - key: platformVersion
-    type: string
-    hidden: true
-  - key: pluginSinceBuild
-    type: string
-    hidden: true
-  - key: pluginName
     type: string
     hidden: true
 
 propertyValues:
   # Common versions management:
   - key: org.jetbrains.intellij.platform/plugin/platformVersion
-    value: "2025.3.1"
-  - key: org.jetbrains.intellij.platform/plugin/pluginSinceBuild
-    value: "253"
+    value: "2025.2.6.1"
 
   # Post-processed input properties:
   - key: pluginName
@@ -58,6 +53,8 @@ rootSources:
     target: file:settings.gradle.kts
 
   # README and friends
+  - path: classic/CHANGELOG.md.hbs
+    target: file:CHANGELOG.md
   - path: classic/README.md.hbs
     target: file:README.md
 
