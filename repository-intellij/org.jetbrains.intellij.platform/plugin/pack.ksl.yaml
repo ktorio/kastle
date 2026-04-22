@@ -34,6 +34,8 @@ propertyValues:
 rootSources:
   # Run configurations
   - path: .run/Run Plugin.run.xml
+  - path: .run/Run Tests.run.xml
+  - path: .run/Run Verifications.run.xml
 
   # Gradle
   - path: gradle/libs.versions.toml.hbs
