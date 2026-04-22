@@ -1,7 +1,9 @@
-package kastle
+
 
 import com.intellij.DynamicBundle
+{{#unless isKotlinEnabled}}
 import org.jetbrains.annotations.Nls
+{{/unless}}
 import org.jetbrains.annotations.PropertyKey
 import java.util.function.Supplier
 
@@ -11,12 +13,12 @@ internal object MyMessageBundle {
     private val instance = DynamicBundle(MyMessageBundle::class.java, BUNDLE)
 
     @JvmStatic
-    fun message(key: @PropertyKey(resourceBundle = BUNDLE) String, vararg params: Any?): @Nls String {
+    fun message(key: @PropertyKey(resourceBundle = BUNDLE) String, vararg params: Any?): {{#if isKotlinEnabled}}String{{else}}@Nls String{{/if}} {
         return instance.getMessage(key, *params)
     }
 
     @JvmStatic
-    fun lazyMessage(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any?): Supplier<@Nls String> {
+    fun lazyMessage(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any?): Supplier<{{#if isKotlinEnabled}}String{{else}}@Nls String{{/if}}> {
         return instance.getLazyMessage(key, *params)
     }
 }
