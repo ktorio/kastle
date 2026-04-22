@@ -25,7 +25,7 @@ properties:
 propertyValues:
   # Common versions management:
   - key: org.jetbrains.intellij.platform/plugin/platformVersion
-    value: "2025.2.6.1"
+    value: "2025.3.1"
 
   # Post-processed input properties:
   - key: pluginName
