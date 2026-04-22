@@ -4,9 +4,8 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij.platform")
     id("org.jetbrains.changelog")
-//TODO: what about Gradle lib catalog?
+    id("org.jetbrains.intellij.platform")
 }
 
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html

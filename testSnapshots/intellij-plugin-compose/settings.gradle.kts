@@ -5,6 +5,7 @@ rootProject.name = "intellij-plugin-compose"
 pluginManagement {
     plugins {
         id("org.jetbrains.kotlin.jvm") version "1.0.0"
+        id("org.jetbrains.kotlin.plugin.compose") version "1.0.0"
         id("org.jetbrains.changelog") version "1.0.0"
     }
 }

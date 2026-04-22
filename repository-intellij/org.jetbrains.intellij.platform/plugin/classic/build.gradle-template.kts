@@ -3,13 +3,10 @@ import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
-    id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij.platform")
-    id("org.jetbrains.changelog")
-//TODO: what about Gradle lib catalog?
-    for (item in _module.gradle.plugins) {
-    alias(_unsafe("libs.plugins.${item}"))
+    for (plugin in _project.gradle.plugins) {
+    id(plugin.id)
     }
+    id("org.jetbrains.intellij.platform")
 }
 
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html

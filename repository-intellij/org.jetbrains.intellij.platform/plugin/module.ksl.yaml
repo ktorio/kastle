@@ -1,3 +1,7 @@
 platform: jvm
 testDependencies:
   - $libs.junit
+gradle:
+  plugins:
+    - plugin1-kotlin-jvm
+    - plugin3-changelog

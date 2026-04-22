@@ -4,8 +4,9 @@ rootProject.name = _project.name
 
 pluginManagement {
     plugins {
-        id("org.jetbrains.kotlin.jvm") version "2.1.20"
-        id("org.jetbrains.changelog") version "2.5.0"
+        for (plugin in _project.gradle.plugins) {
+            id(plugin.id) version plugin.version
+        }
     }
 }
 
