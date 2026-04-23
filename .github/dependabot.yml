@@ -9,3 +9,7 @@ updates:
       all-gradle:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "com.charleskorn.kaml:kaml"
+      - dependency-name: "org.jetbrains.kotlinx:kotlinx-datetime"
+      - dependency-name: "io.kotest:*"
