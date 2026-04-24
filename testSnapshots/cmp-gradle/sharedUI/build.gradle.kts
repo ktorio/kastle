@@ -54,6 +54,7 @@ kotlin {
             api(libs.compose.material3)
             api(libs.compose.runtime)
             api(libs.compose.ui)
+            api(libs.compose.uiTooling)
             api(libs.compose.uiToolingPreview)
         }
 

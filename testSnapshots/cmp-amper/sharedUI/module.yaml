@@ -11,6 +11,7 @@ dependencies:
   - $libs.compose.material3: exported
   - $libs.compose.runtime: exported
   - $libs.compose.ui: exported
+  - $libs.compose.uiTooling: exported
   - $libs.compose.uiToolingPreview: exported
 
 test-dependencies@jvm:test-dependencies@android:test-dependencies@ios:test-dependencies@js:test-dependencies@wasmJs:test-dependencies:

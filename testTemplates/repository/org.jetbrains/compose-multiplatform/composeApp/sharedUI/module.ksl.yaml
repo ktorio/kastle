@@ -5,6 +5,7 @@ dependencies:
   - $libs.compose.foundation!
   - $libs.compose.material3!
   - $libs.compose.ui!
+  - $libs.compose.uiTooling!
   - $libs.compose.uiToolingPreview!
   - $libs.compose.components.resources!
   - $libs.androidx.lifecycle.viewmodelCompose!
