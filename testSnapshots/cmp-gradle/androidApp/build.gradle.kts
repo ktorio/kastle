@@ -33,13 +33,9 @@ android {
     }
 }
 
-kotlin {
+dependencies {
+    implementation(project(":sharedUI"))
+    implementation(libs.androidx.activity.compose)
 
-    sourceSets {
-        androidMain.dependencies {
-            implementation(project(":sharedUI"))
-            implementation(libs.androidx.activity.compose)
-        }
-
-    }
+    testImplementation(kotlin("test"))
 }

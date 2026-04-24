@@ -22,7 +22,7 @@ if (_project.modules.size == 1) {
 
 _slots("buildRoot")
 
-if (_module.platform != "jvm") {
+if (_module.platform != "jvm" && _module.platform != "android") {
     kotlin {
         _slots("kotlinRoot")
         for (platform in _module.platforms) {
