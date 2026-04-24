@@ -5,6 +5,7 @@ plugins {
         "jvm" -> {
             alias(libs.plugins.kotlin.jvm)
         }
+        "android" -> {}
         else -> {
             alias(libs.plugins.kotlin.multiplatform)
         }
