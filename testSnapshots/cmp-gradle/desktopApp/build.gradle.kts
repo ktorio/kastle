@@ -20,7 +20,7 @@ compose.desktop {
 
 dependencies {
     implementation(project(":sharedUI"))
-    implementation(composeLibs.desktop.currentOs)
+    implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutinesSwing)
 
     testImplementation(kotlin("test"))

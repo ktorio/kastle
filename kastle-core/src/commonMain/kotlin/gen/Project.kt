@@ -185,6 +185,11 @@ private fun Dependency.toTemplateType(modulePath: String): TemplateBuildDependen
             args = args.map { it.wrapQuotes() },
             exported = exported,
         )
+        is ReferenceDependency -> TemplateBuildDependency(
+            type = "reference",
+            reference = reference,
+            exported = exported,
+        )
     }
 
 private operator fun TemplateBuildDependency.plus(artifact: TemplateCatalogArtifact?): TemplateBuildDependency =

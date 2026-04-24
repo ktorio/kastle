@@ -386,6 +386,9 @@ sealed interface Dependency {
         fun parse(input: String): Dependency {
             val exported = input.endsWith("!")
             val text = if (exported) input.dropLast(1) else input
+            ReferenceDependency.tryParse(text)?.let { referenceDependency ->
+                return referenceDependency
+            }
             FunctionDependency.tryParse(text)?.let { functionDependency ->
                 return functionDependency
             }
@@ -484,6 +487,23 @@ data class FunctionDependency(
             append(args.joinToString(", ") { it.wrapQuotes() })
         append(")")
     }
+}
+
+@Serializable
+data class ReferenceDependency(
+    val reference: String,
+): Dependency {
+    companion object {
+        private val referencePattern = Regex("""^([a-zA-Z_]\w*)(\.([a-zA-Z_]\w*))*$""")
+
+        fun tryParse(text: String): ReferenceDependency? {
+            if (!referencePattern.matches(text)) return null
+            return ReferenceDependency(text)
+        }
+    }
+    override val exported: Boolean get() = false
+
+    override fun toString(): String = reference
 }
 
 @Serializable

@@ -3,7 +3,6 @@ product: jvm/app
 
 dependencies:
   - ../sharedUI
-  - $composeLibs.desktop.currentOs
   - $libs.kotlinx.coroutinesSwing
 
 test-dependencies:

@@ -107,6 +107,13 @@ if (_module.platform != "jvm") {
                                         implementation(_unsafe("${dependency.functionName}(${dependency.args.joinToString()})"))
                                     }
                                 }
+                                "reference" -> {
+                                    if (dependency.exported) {
+                                        api(_unsafe("${dependency.reference}"))
+                                    } else {
+                                        implementation(_unsafe("${dependency.reference}"))
+                                    }
+                                }
                             }
                         }
                     }
@@ -132,6 +139,9 @@ if (_module.platform != "jvm") {
                                 }
                                 "function" -> {
                                     implementation(_unsafe("${dependency.functionName}(${dependency.args.joinToString()})"))
+                                }
+                                "reference" -> {
+                                    implementation(_unsafe("${dependency.reference}"))
                                 }
                             }
                         }
@@ -170,6 +180,13 @@ if (_module.platform != "jvm") {
                         implementation(_unsafe("${dependency.key}"))
                     }
                 }
+                "reference" -> {
+                    if (dependency.exported) {
+                        api(_unsafe("${dependency.reference}"))
+                    } else {
+                        implementation(_unsafe("${dependency.reference}"))
+                    }
+                }
             }
         }
 
@@ -184,6 +201,9 @@ if (_module.platform != "jvm") {
                 }
                 "catalog" -> {
                     testImplementation(_unsafe("${dependency.key}"))
+                }
+                "reference" -> {
+                    testImplementation(_unsafe("${dependency.reference}"))
                 }
             }
         }

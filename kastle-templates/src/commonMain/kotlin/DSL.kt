@@ -140,6 +140,7 @@ data class TemplateBuildDependency(
     val version: String? = null,
     val versionRef: String? = null,
     val path: String? = null,
+    val reference: String? = null,
     val gradlePath: String? = null,
     val key: String? = null,
     val functionName: String? = null,

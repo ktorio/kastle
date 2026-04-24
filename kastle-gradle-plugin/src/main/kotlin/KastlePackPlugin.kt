@@ -6,6 +6,7 @@ import kotlinx.coroutines.runBlocking
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.jetbrains.compose.ComposePlugin
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
@@ -448,6 +449,14 @@ abstract class KastlePackPlugin : Plugin<Project> {
             is FunctionDependency -> {
                 error("Unsupported function dependency ${dependency.functionName} for JVM module")
             }
+
+            is ReferenceDependency -> {
+                val artifact = when (dependency.reference) {
+                    "compose.desktop.currentOs" -> ComposePlugin.Dependencies(project).desktop.currentOs
+                    else -> error("Unsupported reference dependency ${dependency.reference}")
+                }
+                dependencies.add(configurationName, artifact)
+            }
         }
     }
 
@@ -487,6 +496,14 @@ abstract class KastlePackPlugin : Plugin<Project> {
 
                     else -> error("Unsupported function dependency ${dependency.functionName}")
                 }
+            }
+
+            is ReferenceDependency -> {
+                val artifact = when (dependency.reference) {
+                    "compose.desktop.currentOs" -> ComposePlugin.Dependencies(project).desktop.currentOs
+                    else -> error("Unsupported reference dependency ${dependency.reference}")
+                }
+                dependencies.add(sourceSet.apiConfigurationName, artifact)
             }
         }
     }
