@@ -39,7 +39,7 @@ class TestServer {
             runTestApplication {
                 application {
                     dependencies {
-                        provide<PackRepository> { LocalPackRepository(Path("../repository"), random = Random(42L)) }
+                        provide<PackRepository> { LocalPackRepository(Path(TEST_TEMPLATES_ROOT), random = Random(42L)) }
                         provide<ProjectGenerator> { ProjectGenerator(resolve()) }
                     }
                     json()

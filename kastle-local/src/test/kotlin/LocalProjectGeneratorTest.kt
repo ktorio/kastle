@@ -6,6 +6,6 @@ import kotlin.random.Random
 
 class LocalProjectGeneratorTest: StringSpec(
     ProjectGeneratorTest {
-        LocalPackRepository(Path("../repository"), random = Random(42L))
+        LocalPackRepository(Path(TEST_TEMPLATES_ROOT), random = Random(42L))
     }
 )
