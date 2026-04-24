@@ -13,7 +13,7 @@ import kotlin.random.Random
 @OptIn(ExperimentalPathApi::class, ExperimentalSerializationApi::class)
 class CborProjectGeneratorTest: StringSpec(
     ProjectGeneratorTest {
-        val local = LocalPackRepository(Path("../repository"), random = Random(42L))
+        val local = LocalPackRepository(Path(TEST_TEMPLATES_ROOT), random = Random(42L))
         val exportDir = Path(SystemTemporaryDirectory, "cbor_export")
         SystemFileSystem.deleteRecursively(exportDir)
         SystemFileSystem.createDirectories(exportDir)

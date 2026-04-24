@@ -510,7 +510,9 @@ class LocalPackRepository(
     }
 
     private fun loadVersionCatalog(catalogPath: String): VersionsCatalog? {
-        return root.resolve(catalogPath).readToml<VersionsCatalog>(fs)
+        return runCatching {
+            root.resolve(catalogPath).readToml<VersionsCatalog>(fs)
+        }.getOrNull()
     }
 
     private suspend fun StringExpression.getExtensionFromSlot(): TemplateFormat {

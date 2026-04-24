@@ -71,7 +71,11 @@ fun interface ProjectResolver {
             for (module in moduleSources.modules) {
                 for (catalogRef in module.gradlePlugins) {
                     val catalogKey = catalogRef.tomlKey
-                    val (id, version) = repositoryLibsCatalog.plugins[catalogKey] ?: continue
+                    // ignore plugins outside libs
+                    if (catalogRef.catalog != "libs") continue
+                    val artifact = repositoryLibsCatalog.plugins[catalogKey]
+                    require(artifact != null) { "Missing gradle plugin: $catalogKey" }
+                    val (id, version) = artifact
                     if (version is CatalogVersion.Ref)
                         versions[version.ref] = repositoryLibsCatalog.versions[version.ref] ?: missingVersion(version.ref)
                     gradlePlugins[catalogKey] = GradlePlugin(id, catalogRef.key, catalogKey, version)

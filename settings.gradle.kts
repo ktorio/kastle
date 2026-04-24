@@ -38,4 +38,4 @@ include(
 
 // Sample repository,
 //   Requires plugin to be published.  Uncomment for editing
-//includeBuild("repository")
+//includeBuild("testTemplates")
