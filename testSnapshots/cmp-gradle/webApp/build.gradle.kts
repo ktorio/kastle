@@ -19,8 +19,9 @@ kotlin {
 
     sourceSets {
         webMain.dependencies {
-            implementation(project(":sharedUI"))
+            implementation(project(":shared"))
         }
 
     }
 }
+

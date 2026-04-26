@@ -2,7 +2,7 @@
 product: web/app
 
 dependencies:
-  - ../sharedUI
+  - ../shared
 
 test-dependencies:
 

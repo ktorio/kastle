@@ -37,7 +37,7 @@ sources:
           iosSimulatorArm64()
       ).forEach { iosTarget ->
           iosTarget.binaries.framework {
-              baseName = "SharedUI"
+              baseName = "Shared"
               isStatic = true
           }
       }

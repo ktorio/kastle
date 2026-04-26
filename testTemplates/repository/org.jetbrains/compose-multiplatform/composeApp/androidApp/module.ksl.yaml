@@ -1,7 +1,7 @@
 platform: android
 
 dependencies:
-  - ../sharedUI
+  - ../shared
   - $libs.androidx.activity.compose
 
 amper:

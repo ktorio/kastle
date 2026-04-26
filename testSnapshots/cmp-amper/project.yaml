@@ -1,7 +1,7 @@
 modules:
   - androidApp
   - desktopApp
-  - sharedUI
+  - shared
   - webApp
 
 repositories:

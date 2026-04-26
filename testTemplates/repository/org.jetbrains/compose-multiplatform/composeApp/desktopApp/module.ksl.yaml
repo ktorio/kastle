@@ -1,7 +1,7 @@
 platform: jvm
 
 dependencies:
-  - ../sharedUI
+  - ../shared
   - compose.desktop.currentOs
   - $libs.kotlinx.coroutinesSwing
 

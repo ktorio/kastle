@@ -2,7 +2,7 @@
 product: jvm/app
 
 dependencies:
-  - ../sharedUI
+  - ../shared
   - $libs.kotlinx.coroutinesSwing
 
 test-dependencies:

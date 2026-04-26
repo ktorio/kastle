@@ -32,5 +32,5 @@ plugins {
 }
 include(":androidApp")
 include(":desktopApp")
-include(":sharedUI")
+include(":shared")
 include(":webApp")

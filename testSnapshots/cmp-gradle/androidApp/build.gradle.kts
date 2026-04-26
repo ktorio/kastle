@@ -7,7 +7,7 @@ plugins {
 
 
 dependencies {
-    implementation(project(":sharedUI"))
+    implementation(project(":shared"))
     implementation(libs.androidx.activity.compose)
 
     testImplementation(kotlin("test"))
