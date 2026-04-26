@@ -2,28 +2,44 @@ rootProject.name = _project.name
 
 pluginManagement {
     repositories {
-        mavenCentral()
-        gradlePluginPortal()
         for (repository in _project.gradle.repositories) {
-            if (repository.gradleFunction != null) {
+            if (repository.gradleFunction == "google") {
+                google {
+                    mavenContent {
+                        includeGroupAndSubgroups("androidx")
+                        includeGroupAndSubgroups("com.android")
+                        includeGroupAndSubgroups("com.google")
+                    }
+                }
+            } else if (repository.gradleFunction != null) {
                 _unsafe("${repository.gradleFunction}()")
             } else {
                 maven(repository.url)
             }
         }
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
 
 dependencyResolutionManagement {
     repositories {
-        mavenCentral()
         for (repository in _project.gradle.repositories) {
-            if (repository.gradleFunction != null) {
+            if (repository.gradleFunction == "google") {
+                google {
+                    mavenContent {
+                        includeGroupAndSubgroups("androidx")
+                        includeGroupAndSubgroups("com.android")
+                        includeGroupAndSubgroups("com.google")
+                    }
+                }
+            } else if (repository.gradleFunction != null) {
                 _unsafe("${repository.gradleFunction}()")
             } else {
                 maven(repository.url)
             }
         }
+        mavenCentral()
     }
     if (_slots.contains("versionCatalogs")) {
         versionCatalogs {
