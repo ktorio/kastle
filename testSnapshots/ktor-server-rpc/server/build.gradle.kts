@@ -1,15 +1,11 @@
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlinJvm)
     alias(ktorLibs.plugins.ktor)
     alias(libs.plugins.kotlinx.rpc)
     alias(libs.plugins.kotlin.serialization)
 }
 
-
-application {
-    mainClass = "io.ktor.server.netty.EngineMain"
-}
 
 kotlin {
     jvmToolchain(21)
@@ -25,4 +21,8 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
     testImplementation(libs.kotlinx.rpc.client)
+}
+
+application {
+    mainClass = "io.ktor.server.netty.EngineMain"
 }

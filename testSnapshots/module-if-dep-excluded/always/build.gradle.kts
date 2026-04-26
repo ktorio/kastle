@@ -1,9 +1,10 @@
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlinJvm)
 }
 
 
 dependencies {
     testImplementation(kotlin("test"))
 }
+

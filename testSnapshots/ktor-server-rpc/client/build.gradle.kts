@@ -1,6 +1,6 @@
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinx.rpc)
 }
 
@@ -29,3 +29,4 @@ kotlin {
         }
     }
 }
+
