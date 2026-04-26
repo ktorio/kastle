@@ -6,6 +6,13 @@ plugins {
 }
 
 
+dependencies {
+    implementation(project(":sharedUI"))
+    implementation(libs.androidx.activity.compose)
+
+    testImplementation(kotlin("test"))
+}
+
 android {
     namespace = "com.acme"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -31,11 +38,4 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-}
-
-dependencies {
-    implementation(project(":sharedUI"))
-    implementation(libs.androidx.activity.compose)
-
-    testImplementation(kotlin("test"))
 }

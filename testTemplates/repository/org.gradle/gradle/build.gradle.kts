@@ -3,11 +3,11 @@ val isExecutable: Boolean by _properties
 plugins {
     when(_module.platform) {
         "jvm" -> {
-            alias(libs.plugins.kotlin.jvm)
+            alias(libs.plugins.kotlinJvm)
         }
         "android" -> {}
         else -> {
-            alias(libs.plugins.kotlin.multiplatform)
+            alias(libs.plugins.kotlinMultiplatform)
         }
     }
     for (item in _module.gradle.plugins) {
@@ -19,8 +19,6 @@ if (_project.modules.size == 1) {
     group = _project.group
     version = "1.0.0-SNAPSHOT"
 }
-
-_slots("buildRoot")
 
 if (_module.platform != "jvm" && _module.platform != "android") {
     kotlin {
@@ -210,3 +208,5 @@ if (_module.platform != "jvm" && _module.platform != "android") {
         }
     }
 }
+
+_slots("buildRoot")

@@ -1,7 +1,7 @@
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform) apply false
-    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.androidMultiplatformLibrary) apply false
     alias(libs.plugins.composeCompiler) apply false

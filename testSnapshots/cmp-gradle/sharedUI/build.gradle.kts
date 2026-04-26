@@ -1,15 +1,11 @@
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
 }
 
-
-dependencies {
-    "androidRuntimeClasspath"(libs.compose.uiTooling)
-}
 
 kotlin {
     androidLibrary {
@@ -62,4 +58,8 @@ kotlin {
             kotlin("test")
         }
     }
+}
+
+dependencies {
+    "androidRuntimeClasspath"(libs.compose.uiTooling)
 }
