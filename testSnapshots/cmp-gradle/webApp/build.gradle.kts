@@ -19,7 +19,7 @@ kotlin {
 
     sourceSets {
         webMain.dependencies {
-            implementation(project(":shared"))
+            implementation(projects.shared)
         }
 
     }

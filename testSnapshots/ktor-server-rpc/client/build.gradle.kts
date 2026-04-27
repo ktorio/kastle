@@ -19,7 +19,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":core"))
+            implementation(projects.core)
             implementation(ktorLibs.client.core)
             implementation(libs.kotlinx.rpc.client)
         }

@@ -1,4 +1,5 @@
 rootProject.name = "module-if-dep-excluded"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {

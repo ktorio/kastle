@@ -11,7 +11,7 @@ kotlin {
     jvmToolchain(21)
 }
 dependencies {
-    implementation(project(":core"))
+    implementation(projects.core)
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.core)
     implementation(ktorLibs.server.netty)

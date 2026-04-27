@@ -83,7 +83,7 @@ if (_module.platform != "jvm" && _module.platform != "android") {
                                         _unsafe("${dependency.scope}")("${dependency.group}:${dependency.artifact}:${dependency.version}")
                                     }
                                     "project" -> {
-                                        _unsafe("${dependency.scope}")(project(dependency.gradlePath))
+                                        _unsafe("${dependency.scope}")(_unsafe("${dependency.typesafeProjectAccessor}"))
                                     }
                                     "catalog" -> {
                                         _unsafe("${dependency.scope}")(_unsafe("${dependency.key}"))
@@ -114,7 +114,7 @@ if (_module.platform != "jvm" && _module.platform != "android") {
                                         _unsafe("${dependency.scope}")("${dependency.group}:${dependency.artifact}:${dependency.version}")
                                     }
                                     "project" -> {
-                                        _unsafe("${dependency.scope}")(project(dependency.gradlePath))
+                                        _unsafe("${dependency.scope}")(_unsafe("${dependency.typesafeProjectAccessor}"))
                                     }
                                     "catalog" -> {
                                         _unsafe("${dependency.scope}")(_unsafe("${dependency.key}"))
@@ -143,7 +143,7 @@ if (_module.platform != "jvm" && _module.platform != "android") {
                             _unsafe("${dependency.scope}")("${dependency.group}:${dependency.artifact}:${dependency.version}")
                         }
                         "project" -> {
-                            _unsafe("${dependency.scope}")(project(dependency.gradlePath))
+                            _unsafe("${dependency.scope}")(_unsafe("${dependency.typesafeProjectAccessor}"))
                         }
                         "catalog" -> {
                             _unsafe("${dependency.scope}")(_unsafe("${dependency.key}"))
@@ -161,7 +161,7 @@ if (_module.platform != "jvm" && _module.platform != "android") {
                             _unsafe("test${dependency.scope.replaceFirstChar { c -> c.uppercaseChar() }}")("${dependency.group}:${dependency.artifact}:${dependency.version}")
                         }
                         "project" -> {
-                            _unsafe("test${dependency.scope.replaceFirstChar { c -> c.uppercaseChar() }}")(project(dependency.gradlePath))
+                            _unsafe("test${dependency.scope.replaceFirstChar { c -> c.uppercaseChar() }}")(_unsafe("${dependency.typesafeProjectAccessor}"))
                         }
                         "catalog" -> {
                             _unsafe("test${dependency.scope.replaceFirstChar { c -> c.uppercaseChar() }}")(_unsafe("${dependency.key}"))
@@ -187,7 +187,7 @@ if (_module.platform != "jvm" && _module.platform != "android") {
                     _unsafe("${dependency.scope}")("${dependency.group}:${dependency.artifact}:${dependency.version}")
                 }
                 "project" -> {
-                    _unsafe("${dependency.scope}")(project(dependency.gradlePath))
+                    _unsafe("${dependency.scope}")(_unsafe("${dependency.typesafeProjectAccessor}"))
                 }
                 "catalog" -> {
                     _unsafe("${dependency.scope}")(_unsafe("${dependency.key}"))
@@ -205,7 +205,7 @@ if (_module.platform != "jvm" && _module.platform != "android") {
                     _unsafe("test${dependency.scope.replaceFirstChar { c -> c.uppercaseChar() }}")("${dependency.group}:${dependency.artifact}:${dependency.version}")
                 }
                 "project" -> {
-                    _unsafe("test${dependency.scope.replaceFirstChar { c -> c.uppercaseChar() }}")(project(dependency.gradlePath))
+                    _unsafe("test${dependency.scope.replaceFirstChar { c -> c.uppercaseChar() }}")(_unsafe("${dependency.typesafeProjectAccessor}"))
                 }
                 "catalog" -> {
                     _unsafe("test${dependency.scope.replaceFirstChar { c -> c.uppercaseChar() }}")(_unsafe("${dependency.key}"))

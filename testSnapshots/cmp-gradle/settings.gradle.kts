@@ -1,4 +1,5 @@
 rootProject.name = "cmp-gradle"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {

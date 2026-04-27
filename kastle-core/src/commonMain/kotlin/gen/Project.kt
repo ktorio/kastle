@@ -170,6 +170,7 @@ private fun Dependency.toTemplateType(modulePath: String): TemplateBuildDependen
             type = "project",
             path = path,
             gradlePath = gradlePath(modulePath),
+            typesafeProjectAccessor = typesafeProjectAccessor(modulePath),
             scope = scope,
         )
         is CatalogReference -> TemplateBuildDependency(
@@ -251,6 +252,19 @@ private fun ModuleDependency.gradlePath(modulePath: String): String = buildStrin
     val actualPath = Path(modulePath).resolve(path).normalize()
     append(':')
     append(actualPath.toString().replace('/', ':'))
+}
+
+private fun ModuleDependency.typesafeProjectAccessor(modulePath: String): String = buildString {
+    val actualPath = Path(modulePath).resolve(path).normalize()
+    append("projects")
+    for (segment in actualPath.toString().split('/')) {
+        append('.')
+        val parts = segment.split('-', '_')
+        append(parts.first())
+        for (part in parts.drop(1)) {
+            append(part.replaceFirstChar { it.titlecase() })
+        }
+    }
 }
 
 // TODO small hack for working with maven
