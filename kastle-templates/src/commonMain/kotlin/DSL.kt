@@ -145,7 +145,7 @@ data class TemplateBuildDependency(
     val key: String? = null,
     val functionName: String? = null,
     val args: List<String>? = null,
-    val exported: Boolean = false,
+    val scope: String = "implementation",
 )
 
 @Serializable

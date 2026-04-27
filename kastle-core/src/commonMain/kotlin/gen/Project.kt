@@ -164,18 +164,18 @@ private fun Dependency.toTemplateType(modulePath: String): TemplateBuildDependen
             group = group,
             artifact = artifact,
             version = version,
-            exported = exported,
+            scope = scope,
         )
         is ModuleDependency -> TemplateBuildDependency(
             type = "project",
             path = path,
             gradlePath = gradlePath(modulePath),
-            exported = exported,
+            scope = scope,
         )
         is CatalogReference -> TemplateBuildDependency(
             type = "catalog",
             key = key,
-            exported = exported,
+            scope = scope,
         ) + project.libraries[tomlKey]?.toTemplateType()
 
         is FunctionDependency -> TemplateBuildDependency(
@@ -183,12 +183,12 @@ private fun Dependency.toTemplateType(modulePath: String): TemplateBuildDependen
             functionName = functionName,
             // TODO should use expressions
             args = args.map { it.wrapQuotes() },
-            exported = exported,
+            scope = scope,
         )
         is ReferenceDependency -> TemplateBuildDependency(
             type = "reference",
             reference = reference,
-            exported = exported,
+            scope = scope,
         )
     }
 

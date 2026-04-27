@@ -1,6 +1,9 @@
 package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.kastle.Dependency.Companion.DEFAULT_SCOPE
+import org.jetbrains.kastle.Dependency.Companion.EXPORTED_SCOPE
+import org.jetbrains.kastle.Dependency.Companion.parseScope
 import org.jetbrains.kastle.ProjectModules.*
 import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.TreeMap.Companion.toTreeMap
@@ -383,40 +386,53 @@ fun SourceModuleManifest.tryMerge(other: SourceModuleManifest): SourceModuleMani
 @Serializable(DependencySerializer::class)
 sealed interface Dependency {
     companion object {
+        const val DEFAULT_SCOPE = "implementation"
+        const val EXPORTED_SCOPE = "api"
+
+        fun parseScope(input: String): String = when (val idx = input.indexOf('!')) {
+            -1 -> DEFAULT_SCOPE
+            input.lastIndex -> EXPORTED_SCOPE
+            else -> input.substring(idx + 1)
+        }
+
         fun parse(input: String): Dependency {
-            val exported = input.endsWith("!")
-            val text = if (exported) input.dropLast(1) else input
-            ReferenceDependency.tryParse(text)?.let { referenceDependency ->
+            ReferenceDependency.tryParse(input)?.let { referenceDependency ->
                 return referenceDependency
             }
-            FunctionDependency.tryParse(text)?.let { functionDependency ->
+            FunctionDependency.tryParse(input)?.let { functionDependency ->
                 return functionDependency
             }
-            if (text.startsWith("$"))
+            if (input.startsWith("$"))
                 return CatalogReference.parse(input)
-            if (!text.contains(":"))
-                return ModuleDependency(text, exported = exported)
+            if (!input.contains(":"))
+                return ModuleDependency.parse(input)
 
-            val segments = text.split(':', limit = 3)
-            require(segments.size == 3) { "Invalid dependency string: $text" }
-            val (group, artifact, version) = segments
-            return ArtifactDependency(group, artifact, version, exported = exported)
+            return ArtifactDependency.parse(input)
         }
     }
 
-    val exported: Boolean
+    val scope: String
 }
+
+context(dependency: Dependency)
+private fun StringBuilder.appendScope(): StringBuilder = when (val scope = dependency.scope) {
+    DEFAULT_SCOPE -> ""
+    EXPORTED_SCOPE -> "!"
+    else -> scope
+}.let(::append)
 
 @Serializable(CatalogReferenceSerializer::class)
 data class CatalogReference(
     val key: String,
-    override val exported: Boolean = false,
+    override val scope: String,
 ): Dependency {
     companion object {
-        fun parse(key: String): CatalogReference {
+        fun parse(text: String): CatalogReference {
+            val scope = parseScope(text)
+            val text = text.substringBefore('!')
             return CatalogReference(
-                key = key.trimStart('$').trimEnd('!'),
-                exported = key.endsWith('!')
+                key = text.trimStart('$'),
+                scope = scope,
             )
         }
     }
@@ -428,13 +444,13 @@ data class CatalogReference(
     override fun toString(): String = buildString {
         append('$')
         append(key)
-        if (exported) append("!")
+        appendScope()
     }
 }
 
 fun CatalogReference.gradleFormat(versionsCatalog: VersionsCatalog): String? {
     val artifact = versionsCatalog.libraries[tomlKey] ?: return null
-    val versionNumber = when(artifact.version) {
+    val versionNumber = when (artifact.version) {
         is CatalogVersion.Ref -> versionsCatalog.versions[artifact.version.ref] ?: return null
         is CatalogVersion.Number -> artifact.version.number
     }
@@ -447,38 +463,46 @@ data class ArtifactDependency(
     val group: String,
     val artifact: String,
     val version: String,
-    override val exported: Boolean = false,
+    override val scope: String,
 ): Dependency {
     companion object {
         fun parse(text: String): ArtifactDependency {
+            val scope = parseScope(text)
+            val text = text.substringBefore('!')
             val segments = text.split(':', limit = 3)
             require(segments.size == 3) { "Invalid dependency string: $text" }
             val (group, artifact, version) = segments
-            return ArtifactDependency(group, artifact, version, exported = false)
+            return ArtifactDependency(group, artifact, version, scope = scope)
         }
     }
 
     override fun toString(): String = buildString {
         append("$group:$artifact:$version")
-        if (exported) append(":!")
+        appendScope()
     }
 }
 
 @Serializable
 data class FunctionDependency(
     val functionName: String,
-    val args: List<String> = emptyList()
+    val args: List<String> = emptyList(),
+    override val scope: String,
 ): Dependency {
     companion object {
         private val functionPattern = Regex("""^([a-zA-Z_]\w*)(?:\((.*)\))?$""")
 
         fun tryParse(text: String): FunctionDependency? {
+            val scope = parseScope(text)
+            val text = text.substringBefore('!')
             val match = functionPattern.matchEntire(text) ?: return null
             val (functionName, args) = match.destructured
-            return FunctionDependency(functionName, args.split(',').map { it.trim().unwrapQuotes() })
+            return FunctionDependency(
+                functionName,
+                args.split(',').map { it.trim().unwrapQuotes() },
+                scope = scope
+            )
         }
     }
-    override val exported: Boolean get() = false
 
     override fun toString(): String = buildString {
         append(functionName)
@@ -486,34 +510,50 @@ data class FunctionDependency(
         if (args.isNotEmpty())
             append(args.joinToString(", ") { it.wrapQuotes() })
         append(")")
+        appendScope()
     }
 }
 
 @Serializable
 data class ReferenceDependency(
     val reference: String,
+    override val scope: String,
 ): Dependency {
     companion object {
         private val referencePattern = Regex("""^([a-zA-Z_]\w*)(\.([a-zA-Z_]\w*))*$""")
 
         fun tryParse(text: String): ReferenceDependency? {
+            val scope = parseScope(text)
+            val text = text.substringBefore('!')
             if (!referencePattern.matches(text)) return null
-            return ReferenceDependency(text)
+            return ReferenceDependency(text, scope = scope)
         }
     }
-    override val exported: Boolean get() = false
 
-    override fun toString(): String = reference
+    override fun toString(): String = buildString {
+        append(reference)
+        appendScope()
+    }
 }
 
 @Serializable
 data class ModuleDependency(
     val path: String,
-    override val exported: Boolean,
+    override val scope: String,
 ): Dependency {
+    companion object {
+        fun parse(text: String): ModuleDependency {
+            val scope = parseScope(text)
+            val text = text.substringBefore('!')
+            return ModuleDependency(
+                path = text,
+                scope = scope,
+            )
+        }
+    }
     override fun toString(): String = buildString {
         append(path)
-        if (exported) append("!")
+        appendScope()
     }
 }
 

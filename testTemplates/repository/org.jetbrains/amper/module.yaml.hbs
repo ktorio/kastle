@@ -14,11 +14,11 @@ product: {{ _module.type }}
 {{#each value}}
 {{#when type}}
 {{ "maven" }}
-  - {{ group }}:{{ artifact }}:{{ version }}{{#if exported}}: exported{{/if}}
+  - {{ group }}:{{ artifact }}:{{ version }}{{#when scope}}{{ "api" }}: exported{{/when}}
 {{ "project" }}
-  - {{ path }}{{#if exported}}: exported{{/if}}
+  - {{ path }}{{#when scope}}{{ "api" }}: exported{{/when}}
 {{ "catalog" }}
-  - ${{ key }}{{#if exported}}: exported{{/if}}
+  - ${{ key }}{{#when scope}}{{ "api" }}: exported{{/when}}
 {{/when}}
 {{/each}}
 {{/each}}
