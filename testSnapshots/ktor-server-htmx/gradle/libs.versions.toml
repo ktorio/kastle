@@ -1,6 +1,6 @@
 [versions]
-kotlin = "2.3.20"
-logback = "1.5.32"
+kotlin = "2.3.20-Beta2"
+logback = "1.5.29"
 
 [libraries]
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
