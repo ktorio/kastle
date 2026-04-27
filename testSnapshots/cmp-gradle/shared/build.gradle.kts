@@ -50,7 +50,6 @@ kotlin {
             api(libs.compose.material3)
             api(libs.compose.runtime)
             api(libs.compose.ui)
-            api(libs.compose.uiTooling)
             api(libs.compose.uiToolingPreview)
         }
 
@@ -61,5 +60,6 @@ kotlin {
 }
 
 dependencies {
-    "androidRuntimeClasspath"(libs.compose.uiTooling)
+    androidRuntimeClasspath(libs.compose.uiTooling)
 }
+

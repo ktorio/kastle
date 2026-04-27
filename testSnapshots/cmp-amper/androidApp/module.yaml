@@ -6,6 +6,8 @@ product:
 dependencies:
   - ../shared
   - $libs.androidx.activity.compose
+  - $libs.compose.uiTooling
+  - $libs.compose.uiToolingPreview
 
 test-dependencies:
 

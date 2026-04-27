@@ -9,6 +9,8 @@ plugins {
 dependencies {
     implementation(project(":shared"))
     implementation(libs.androidx.activity.compose)
+    debugImplementation(libs.compose.uiTooling)
+    implementation(libs.compose.uiToolingPreview)
 
     testImplementation(kotlin("test"))
 }

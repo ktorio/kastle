@@ -5,7 +5,7 @@ dependencies:
   - $libs.compose.foundation!
   - $libs.compose.material3!
   - $libs.compose.ui!
-  - $libs.compose.uiTooling!
+  - $libs.compose.uiTooling!androidRuntimeClasspath
   - $libs.compose.uiToolingPreview!
   - $libs.compose.components.resources!
   - $libs.androidx.lifecycle.viewmodelCompose!
@@ -23,11 +23,6 @@ amper:
 sources:
   - path: composeResources/*
   - path: ../iosApp/*
-  - target: slot://org.gradle/gradle/buildRoot
-    text: |-
-      dependencies {
-          "androidRuntimeClasspath"(libs.compose.uiTooling)
-      }
   - target: slot://org.gradle/gradle/kotlinRoot
     path: android.gradle.kts
   - target: slot://org.gradle/gradle/iosOverride

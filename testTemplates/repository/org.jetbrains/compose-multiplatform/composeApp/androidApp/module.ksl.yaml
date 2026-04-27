@@ -3,6 +3,8 @@ platform: android
 dependencies:
   - ../shared
   - $libs.androidx.activity.compose
+  - $libs.compose.uiToolingPreview
+  - $libs.compose.uiTooling!debugImplementation
 
 amper:
   compose: enabled
