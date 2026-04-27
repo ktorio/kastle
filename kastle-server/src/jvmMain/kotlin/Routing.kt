@@ -20,13 +20,14 @@ fun Application.routing() {
     val analytics: AnalyticsRepository by dependencies
     val json: Json by dependencies
     val basePath = propertyOrNull<String>("frontEnd.basePath") ?: ""
+    val googleTagManagerId = propertyOrNull<String>("frontEnd.googleTagManagerId")
 
     routing {
         staticResources("/assets", "/assets")
         staticResources("$basePath/assets", "/assets")
         frontEnd(repository, generator, analytics, basePath)
         backEnd(repository, generator, analytics, json)
-        wizardFrontEnd(repository, generator, analytics, basePath)
+        wizardFrontEnd(repository, generator, analytics, basePath, googleTagManagerId)
 
         // health check needed for cloud deployment
         get("/healthz") {
