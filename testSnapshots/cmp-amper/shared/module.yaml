@@ -4,15 +4,15 @@ product:
   platforms: [jvm, android, ios, js, wasmJs]
 
 dependencies:
-  - $libs.androidx.lifecycle.runtimeCompose: exported
-  - $libs.androidx.lifecycle.viewmodelCompose: exported
-  - $libs.compose.components.resources: exported
-  - $libs.compose.foundation: exported
-  - $libs.compose.material3: exported
-  - $libs.compose.runtime: exported
-  - $libs.compose.ui: exported
+  - $libs.androidx.lifecycle.runtimeCompose
+  - $libs.androidx.lifecycle.viewmodelCompose
+  - $libs.compose.components.resources
+  - $libs.compose.foundation
+  - $libs.compose.material3
+  - $libs.compose.runtime
+  - $libs.compose.ui
   - $libs.compose.uiTooling
-  - $libs.compose.uiToolingPreview: exported
+  - $libs.compose.uiToolingPreview
 
 test-dependencies@jvm:test-dependencies@android:test-dependencies@ios:test-dependencies@js:test-dependencies@wasmJs:test-dependencies:
 

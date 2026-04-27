@@ -1,15 +1,15 @@
 platforms: [jvm, android, ios, js, wasmJs]
 
 dependencies:
-  - $libs.compose.runtime!
-  - $libs.compose.foundation!
-  - $libs.compose.material3!
-  - $libs.compose.ui!
+  - $libs.compose.runtime
+  - $libs.compose.foundation
+  - $libs.compose.material3
+  - $libs.compose.ui
   - $libs.compose.uiTooling!androidRuntimeClasspath
-  - $libs.compose.uiToolingPreview!
-  - $libs.compose.components.resources!
-  - $libs.androidx.lifecycle.viewmodelCompose!
-  - $libs.androidx.lifecycle.runtimeCompose!
+  - $libs.compose.uiToolingPreview
+  - $libs.compose.components.resources
+  - $libs.androidx.lifecycle.viewmodelCompose
+  - $libs.androidx.lifecycle.runtimeCompose
 
 gradle:
   plugins:
