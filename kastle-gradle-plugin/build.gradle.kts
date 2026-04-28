@@ -11,7 +11,8 @@ dependencies {
     implementation(libs.gradlePlugin.composeCompiler)
     implementation(libs.gradlePlugin.composeMultiplatform)
 
-    compileOnly(libs.kotlin.compiler)
+    // important that we use implementation here
+    implementation(libs.kotlin.compiler)
 
     implementation(project(":kastle-core"))
     implementation(project(":kastle-local"))
