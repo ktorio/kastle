@@ -18,3 +18,8 @@ gradle:
 sources:
   - path: android.gradle.kts
     target: slot://org.gradle/gradle/buildRoot
+  - target: slot://org.gradle/gradle/kotlinRoot
+    text: |-
+      compilerOptions {
+          jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+      }
