@@ -2,6 +2,7 @@ platform: web
 
 dependencies:
   - ../shared
+  - $libs.compose.ui
 
 gradle:
   plugins:

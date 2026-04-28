@@ -2,6 +2,7 @@
 product: web/app
 
 dependencies:
+  - $libs.compose.ui
   - ../shared
 
 test-dependencies:

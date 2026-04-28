@@ -7,6 +7,7 @@ plugins {
 
 
 dependencies {
+    implementation(libs.compose.uiToolingPreview)
     implementation(libs.kotlinx.coroutinesSwing)
     implementation(projects.shared)
     implementation(compose.desktop.currentOs)

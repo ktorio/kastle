@@ -2,6 +2,7 @@
 product: jvm/app
 
 dependencies:
+  - $libs.compose.uiToolingPreview
   - $libs.kotlinx.coroutinesSwing
   - ../shared
 

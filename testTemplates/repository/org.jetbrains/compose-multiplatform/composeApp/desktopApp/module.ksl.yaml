@@ -4,6 +4,7 @@ dependencies:
   - ../shared
   - compose.desktop.currentOs
   - $libs.kotlinx.coroutinesSwing
+  - $libs.compose.uiToolingPreview
 
 gradle:
   plugins:
