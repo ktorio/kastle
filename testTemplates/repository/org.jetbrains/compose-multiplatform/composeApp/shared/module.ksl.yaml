@@ -11,6 +11,9 @@ dependencies:
   - $libs.androidx.lifecycle.viewmodelCompose
   - $libs.androidx.lifecycle.runtimeCompose
 
+dependencies@android:
+  - $libs.compose.uiToolingPreview
+
 gradle:
   plugins:
     - $libs.plugins.androidMultiplatformLibrary

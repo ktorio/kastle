@@ -3,7 +3,8 @@ product:
   type: lib
   platforms: [ios, jvm, js, wasmJs, android]
 
-dependencies:
+dependencies@android:
+  - $libs.compose.uiToolingPreviewdependencies:
   - $libs.compose.uiTooling
   - $libs.androidx.lifecycle.runtimeCompose
   - $libs.androidx.lifecycle.viewmodelCompose
