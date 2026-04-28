@@ -7,6 +7,8 @@ import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.TemplateEvaluator.Companion.toString
 import org.jetbrains.kastle.utils.LocalVariables
 import org.jetbrains.kastle.utils.Variables
+import org.jetbrains.kotlin.config.CommonConfigurationKeys
+import org.jetbrains.kotlin.config.LanguageFeature
 
 class KotlinCompilerTemplateEngineTest : StringSpec({
 
@@ -18,6 +20,16 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
 
     fun template(text: String): SourceTemplate =
         engine.read(text = text)
+
+    "uses K2 compiler front-end configuration" {
+        engine.environment.configuration.get(CommonConfigurationKeys.USE_FIR) shouldBe true
+        engine.environment.configuration.get(CommonConfigurationKeys.USE_LIGHT_TREE) shouldBe false
+        engine.environment.configuration
+            .get(CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS)!!
+            .also { it.getFeatureSupport(LanguageFeature.ContextParameters) shouldBe LanguageFeature.State.ENABLED }
+            .languageVersion
+            .usesK2 shouldBe true
+    }
 
     "literals" {
         val template = template("""
@@ -32,6 +44,20 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         template.toString(
             variables = localVars("title" to "Hello, World!")
         ) shouldBe "\nval html = html {\n    h1 {\n        +\"Hello, World!\"\n    }\n}"
+    }
+
+    "context parameter syntax" {
+        val template = template("""
+            val title: String by _properties
+            context(_: String)
+            fun render() {
+                println(title)
+            }
+        """.trimIndent())
+
+        template.toString(
+            variables = localVars("title" to "Hello, K2!")
+        ) shouldBe "\ncontext(_: String)\nfun render() {\n    println(\"Hello, K2!\")\n}"
     }
 
     "string interpolation" {

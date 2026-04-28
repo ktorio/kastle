@@ -13,8 +13,12 @@ import org.jetbrains.kastle.io.resolve
 private val DEFAULT_IGNORE_FILES = setOf(
     ".gitkeep",
     "gradle-wrapper.jar",
+    ".gradle",
+    "build",
     "README.md" // TODO something going on with git on the md spacing
 )
+
+const val TEST_TEMPLATES_ROOT = "../testTemplates/repository"
 
 expect fun shouldReplaceSnapshots(): Boolean
 
@@ -69,12 +73,12 @@ fun assertFilesAreEqual(
     }
 
     val expectedFiles = walkFiles(expected, fs)
-        .filter { !ignorePaths.contains(it.name) }
+        .filter { path -> path.toString().split("/").none { it in ignorePaths } }
         .map { relativePath(expected, it) }
         .sorted()
 
     val actualFiles = walkFiles(actual, fs)
-        .filter { !ignorePaths.contains(it.name) }
+        .filter { path -> path.toString().split("/").none { it in ignorePaths } }
         .map { relativePath(actual, it) }
         .sorted()
 

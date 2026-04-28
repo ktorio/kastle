@@ -21,11 +21,15 @@ import org.jetbrains.kotlin.K1Deprecation
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
-import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
+import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.config.ApiVersion
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
+import org.jetbrains.kotlin.config.LanguageFeature
+import org.jetbrains.kotlin.config.LanguageVersion
+import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.lexer.KtSingleValueToken
 import org.jetbrains.kotlin.psi.KtElement
@@ -64,19 +68,33 @@ internal class KotlinCompilerTemplateEngine(
             put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, stderrMessages)
             path?.parent?.name?.let { put(CommonConfigurationKeys.MODULE_NAME, it) }
             put(CommonConfigurationKeys.ALLOW_ANY_SCRIPTS_IN_SOURCE_ROOTS, true)
+            put(CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS, k2LanguageVersionSettings())
+            put(CommonConfigurationKeys.USE_FIR, true)
+            put(CommonConfigurationKeys.USE_LIGHT_TREE, false)
             put(JVMConfigurationKeys.JDK_HOME, File(System.getenv("JAVA_HOME")))
 
             path?.let { addKotlinSourceRoot(path.toString()) }
         }
         @OptIn(K1Deprecation::class)
-        environment = KotlinCoreEnvironment.createForProduction(
+        environment = K2JVMCompiler.createCoreEnvironment(
             Disposer.newDisposable(),
             configuration,
-            EnvironmentConfigFiles.JVM_CONFIG_FILES
-        )
+            stderrMessages,
+            configuration.get(CommonConfigurationKeys.MODULE_NAME) ?: "kastle-template"
+        ) ?: error("Failed to create K2 Kotlin compiler environment")
         psiFileFactory = PsiFileFactory.getInstance(environment.project)
         expressionParser = KotlinExpressionParser(psiFileFactory)
     }
+
+    private fun k2LanguageVersionSettings(): LanguageVersionSettingsImpl =
+        LanguageVersion.LATEST_STABLE.let { languageVersion ->
+            LanguageVersionSettingsImpl(
+                languageVersion = languageVersion,
+                apiVersion = ApiVersion.createByLanguageVersion(languageVersion),
+                analysisFlags = emptyMap(),
+                specificFeatures = mapOf(LanguageFeature.ContextParameters to LanguageFeature.State.ENABLED),
+            )
+        }
 
     val ktFiles: List<KtFile> by lazy {
         environment.getSourceFiles()
