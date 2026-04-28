@@ -14,6 +14,9 @@ dependencies:
 dependencies@android:
   - $libs.compose.uiToolingPreview
 
+dependencies@js:
+  - $libs.wrappers.browser
+
 gradle:
   plugins:
     - $libs.plugins.androidMultiplatformLibrary

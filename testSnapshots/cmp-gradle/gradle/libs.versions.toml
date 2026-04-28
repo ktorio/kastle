@@ -7,6 +7,7 @@ androidx-activity = "1.12.4"
 androidx-lifecycle = "2.9.6"
 composeMultiplatform = "1.11.0-alpha02"
 kotlin = "2.3.20-Beta2"
+kotlin-wrappers = "2026.2.9"
 kotlinx-coroutines = "1.10.2"
 material3 = "1.11.0-alpha02"
 
@@ -22,6 +23,7 @@ compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMul
 compose-uiTooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "composeMultiplatform" }
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+wrappers-browser = { module = "org.jetbrains.kotlin-wrappers:kotlin-browser", version.ref = "kotlin-wrappers" }
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

@@ -43,6 +43,9 @@ kotlin {
     }
 
     sourceSets {
+        jsMain.dependencies {
+            implementation(libs.wrappers.browser)
+        }
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
         }
