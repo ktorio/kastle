@@ -22,7 +22,6 @@ if (_project.modules.size == 1) {
 
 if (_module.platform != "jvm" && _module.platform != "android") {
     kotlin {
-        _slots("kotlinRoot")
         for (platform in _module.platforms) {
             when(platform) {
                 "jvm" -> {
@@ -71,6 +70,8 @@ if (_module.platform != "jvm" && _module.platform != "android") {
                 }
             }
         }
+
+        _slots("kotlinRoot")
 
         sourceSets {
             for (e in _module.dependencies.entries) {
