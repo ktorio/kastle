@@ -13,7 +13,6 @@ fun HTML.wizardIndexHtml(
     basePath: String,
     view: WizardView = WizardView(),
     packs: List<PackDescriptor> = emptyList(),
-    googleTagManagerId: String? = null,
 ) {
     head {
         title { +"IntelliJ Platform Plugin Generator" }
@@ -35,21 +34,6 @@ fun HTML.wizardIndexHtml(
     }
 
     body {
-        if (googleTagManagerId != null) {
-            noScript {
-                unsafe {
-                    //language=HTML
-                    +"""<iframe src="//www.googletagmanager.com/ns.html?id=$googleTagManagerId" height="0" width="0" style="display:none;visibility:hidden"></iframe>"""
-                }
-            }
-            script {
-                unsafe {
-                    //language=JavaScript
-                    +"""(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','$googleTagManagerId');"""
-                }
-            }
-        }
-
         // Header
         wizardHeader(basePath)
 
