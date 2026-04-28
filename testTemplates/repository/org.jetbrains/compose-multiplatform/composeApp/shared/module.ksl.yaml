@@ -1,4 +1,4 @@
-platforms: [jvm, android, ios, js, wasmJs]
+platforms: [ios, jvm, js, wasmJs, android]
 
 dependencies:
   - $libs.compose.runtime
