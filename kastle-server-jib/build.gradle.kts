@@ -6,7 +6,7 @@ plugins {
 val exportDir = rootDir.resolve("export")
 
 tasks.register<GradleBuild>("exportSamples") {
-    dir = rootDir.resolve("repository")
+    dir = rootDir.resolve("testTemplates")
     tasks = listOf("kslExportToCbor")
     startParameter.projectProperties["exportPath"] = exportDir.absolutePath
 }
