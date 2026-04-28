@@ -7,9 +7,9 @@ plugins {
 
 
 dependencies {
+    implementation(libs.kotlinx.coroutinesSwing)
     implementation(projects.shared)
     implementation(compose.desktop.currentOs)
-    implementation(libs.kotlinx.coroutinesSwing)
 
     testImplementation(kotlin("test"))
 }

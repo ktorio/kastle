@@ -11,12 +11,12 @@ kotlin {
     jvmToolchain(21)
 }
 dependencies {
-    implementation(projects.core)
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.core)
     implementation(ktorLibs.server.netty)
     implementation(libs.kotlinx.rpc.server)
     implementation(libs.logback.classic)
+    implementation(projects.core)
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)

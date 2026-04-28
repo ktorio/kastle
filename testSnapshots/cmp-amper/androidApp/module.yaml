@@ -4,10 +4,10 @@ product:
   platforms: [android]
 
 dependencies:
-  - ../shared
-  - $libs.androidx.activity.compose
   - $libs.compose.uiTooling
+  - $libs.androidx.activity.compose
   - $libs.compose.uiToolingPreview
+  - ../shared
 
 test-dependencies:
 

@@ -2,8 +2,8 @@
 product: jvm/app
 
 dependencies:
-  - ../shared
   - $libs.kotlinx.coroutinesSwing
+  - ../shared
 
 test-dependencies:
 

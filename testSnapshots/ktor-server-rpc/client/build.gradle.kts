@@ -19,9 +19,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core)
             implementation(ktorLibs.client.core)
             implementation(libs.kotlinx.rpc.client)
+            implementation(projects.core)
         }
 
         commonTest.dependencies {

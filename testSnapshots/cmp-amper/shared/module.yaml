@@ -4,6 +4,7 @@ product:
   platforms: [ios, jvm, js, wasmJs, android]
 
 dependencies:
+  - $libs.compose.uiTooling
   - $libs.androidx.lifecycle.runtimeCompose
   - $libs.androidx.lifecycle.viewmodelCompose
   - $libs.compose.components.resources
@@ -11,7 +12,6 @@ dependencies:
   - $libs.compose.material3
   - $libs.compose.runtime
   - $libs.compose.ui
-  - $libs.compose.uiTooling
   - $libs.compose.uiToolingPreview
 
 test-dependencies@ios:test-dependencies@jvm:test-dependencies@js:test-dependencies@wasmJs:test-dependencies@android:test-dependencies:
