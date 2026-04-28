@@ -43,9 +43,6 @@ kotlin {
     }
 
     sourceSets {
-        jsMain.dependencies {
-            implementation(libs.wrappers.browser)
-        }
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
         }
@@ -58,6 +55,9 @@ kotlin {
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)
             implementation(libs.compose.uiToolingPreview)
+        }
+        jsMain.dependencies {
+            implementation(libs.wrappers.browser)
         }
 
         commonTest.dependencies {

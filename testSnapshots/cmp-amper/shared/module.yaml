@@ -3,8 +3,7 @@ product:
   type: lib
   platforms: [ios, jvm, js, wasmJs, android]
 
-dependencies@js:
-  - $libs.wrappers.browserdependencies@android:
+dependencies@android:
   - $libs.compose.uiToolingPreviewdependencies:
   - $libs.compose.uiTooling
   - $libs.androidx.lifecycle.runtimeCompose
@@ -14,9 +13,10 @@ dependencies@js:
   - $libs.compose.material3
   - $libs.compose.runtime
   - $libs.compose.ui
-  - $libs.compose.uiToolingPreview
+  - $libs.compose.uiToolingPreviewdependencies:
+  - $libs.wrappers.browser
 
-test-dependencies@ios:test-dependencies@jvm:test-dependencies@js:test-dependencies@wasmJs:test-dependencies@android:test-dependencies:
+test-dependencies@android:test-dependencies:test-dependencies:test-dependencies:test-dependencies:test-dependencies:
 
 settings:
   compose: enabled

@@ -74,6 +74,7 @@ private fun SourceModule.toTemplateType(): TemplateSourceModule =
         amper = amper.toTemplateType(),
         dependencies = dependencies.asSequence()
             .filter { it.value.isNotEmpty() }
+            .sortedBy { it.key.code }
             .associate { (platform, deps) ->
                 platform.code to deps.map {
                     it.toTemplateType(path)
@@ -93,6 +94,7 @@ private fun SourceModule.toTemplateType(): TemplateSourceModule =
                 )
             },
         testDependencies = testDependencies.asSequence()
+            .sortedBy { it.key.code }
             .associate { (platform, deps) ->
                 platform.code to deps.map { it.toTemplateType(path) }
             },
