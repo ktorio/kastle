@@ -94,6 +94,7 @@ private fun SourceModule.toTemplateType(): TemplateSourceModule =
                 )
             },
         testDependencies = testDependencies.asSequence()
+            .filter { it.value.isNotEmpty() }
             .sortedBy { it.key.code }
             .associate { (platform, deps) ->
                 platform.code to deps.map { it.toTemplateType(path) }

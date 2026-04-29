@@ -5,7 +5,7 @@ dependencies:
   - $libs.compose.ui
   - ../shared
 
-test-dependencies:
+
 
 settings:
   compose: enabled

@@ -1,6 +1,5 @@
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinx.rpc)
 }
 
@@ -24,9 +23,6 @@ kotlin {
             implementation(projects.core)
         }
 
-        commonTest.dependencies {
-            kotlin("test")
-        }
     }
 }
 

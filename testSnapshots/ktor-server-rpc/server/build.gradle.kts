@@ -17,8 +17,7 @@ dependencies {
     implementation(libs.kotlinx.rpc.server)
     implementation(libs.logback.classic)
     implementation(projects.core)
-
-    testImplementation(kotlin("test"))
+    testImplementation(libs.kotlin.test)
     testImplementation(ktorLibs.server.testHost)
     testImplementation(libs.kotlinx.rpc.client)
 }

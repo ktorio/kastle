@@ -6,7 +6,7 @@ dependencies:
   - $libs.kotlinx.coroutinesSwing
   - ../shared
 
-test-dependencies:
+
 
 settings:
   compose: enabled

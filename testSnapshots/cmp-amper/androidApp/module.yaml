@@ -9,7 +9,7 @@ dependencies:
   - $libs.compose.uiToolingPreview
   - ../shared
 
-test-dependencies:
+
 
 settings:
   compose: enabled
