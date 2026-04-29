@@ -16,8 +16,6 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.compose.uiToolingPreview)
     implementation(projects.shared)
-
-    testImplementation(kotlin("test"))
 }
 
 android {

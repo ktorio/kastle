@@ -39,6 +39,12 @@
             <version>${logback_version}</version>
         </dependency>
         <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-test</artifactId>
+            <version>${kotlin_version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>null</groupId>
             <artifactId>null</artifactId>
             <version>null</version>

@@ -186,8 +186,6 @@ if (_module.platform != "jvm" && _module.platform != "android") {
                 }
             }
         }
-
-        testImplementation(kotlin("test"))
         for (dependency in _module.testDependencies.values.flatten()) {
             when (dependency.type) {
                 "maven" -> {

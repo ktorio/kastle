@@ -3,6 +3,7 @@ dependencies:
   - $ktorLibs.server.core
   - $libs.logback.classic
 testDependencies:
+  - $libs.kotlin.test
   - $ktorLibs.server.testHost
 gradle:
   plugins:

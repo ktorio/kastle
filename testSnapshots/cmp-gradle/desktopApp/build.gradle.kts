@@ -11,8 +11,6 @@ dependencies {
     implementation(libs.kotlinx.coroutinesSwing)
     implementation(projects.shared)
     implementation(compose.desktop.currentOs)
-
-    testImplementation(kotlin("test"))
 }
 
 compose.desktop {
