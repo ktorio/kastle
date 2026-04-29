@@ -6,6 +6,7 @@ dependencies:
 
 gradle:
   plugins:
+    - $libs.plugins.kotlinMultiplatform
     - $libs.plugins.composeMultiplatform
     - $libs.plugins.composeCompiler
 

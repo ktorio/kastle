@@ -11,8 +11,6 @@
 {{/if}}
 
 [plugins]
-kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 {{#each _project.gradle.plugins}}
 {{ catalogKey }} = { id = "{{ id }}", {{#if versionRef}}version.ref = "{{versionRef}}"{{else}}version = "{{version}}"{{/if}} }
 {{/each}}

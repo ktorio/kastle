@@ -1,15 +1,6 @@
 val isExecutable: Boolean by _properties
 
 plugins {
-    when(_module.platform) {
-        "jvm" -> {
-            alias(libs.plugins.kotlinJvm)
-        }
-        "android" -> {}
-        else -> {
-            alias(libs.plugins.kotlinMultiplatform)
-        }
-    }
     for (item in _module.gradle.plugins) {
         alias(_unsafe("${item}"))
     }

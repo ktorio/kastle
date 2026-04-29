@@ -6,6 +6,7 @@ testDependencies:
   - $ktorLibs.server.testHost
 gradle:
   plugins:
+    - $libs.plugins.kotlinJvm
     - ktorLibs.plugins.ktor
 amper:
   ktor: enabled
