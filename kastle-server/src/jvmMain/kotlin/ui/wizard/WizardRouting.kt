@@ -19,7 +19,8 @@ fun Routing.wizardFrontEnd(
     repository: PackRepository,
     generator: ProjectGenerator,
     analyticsRepository: AnalyticsRepository = NoOpAnalyticsRepository,
-    basePath: String = ""
+    basePath: String = "",
+    googleTagManagerId: String? = null,
 ) {
     // Main wizard page
     get {
@@ -29,7 +30,7 @@ fun Routing.wizardFrontEnd(
             .sortedBy { it.name }
 
         call.respondHtml {
-            wizardIndexHtml(basePath, view, packs)
+            wizardIndexHtml(basePath, view, packs, googleTagManagerId)
         }
     }
 
