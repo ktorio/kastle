@@ -3,5 +3,5 @@ testDependencies:
   - $libs.junit
 gradle:
   plugins:
-    - plugin1-kotlin-jvm
-    - plugin3-changelog
+    - libs.plugin1-kotlin-jvm
+    - libs.plugin3-changelog
