@@ -17,6 +17,9 @@ dependencies@android:
 dependencies@js:
   - $libs.wrappers.browser
 
+testDependencies:
+  - $libs.kotlin.test
+
 gradle:
   plugins:
     - $libs.plugins.androidMultiplatformLibrary

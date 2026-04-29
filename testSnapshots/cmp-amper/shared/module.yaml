@@ -16,7 +16,8 @@ dependencies@android:
   - $libs.compose.uiToolingPreviewdependencies:
   - $libs.wrappers.browser
 
-test-dependencies@android:test-dependencies:test-dependencies:test-dependencies:test-dependencies:test-dependencies:
+test-dependencies@android:test-dependencies:
+- $libs.kotlin.testtest-dependencies:test-dependencies:test-dependencies:test-dependencies:
 
 settings:
   compose: enabled

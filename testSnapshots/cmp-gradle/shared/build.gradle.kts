@@ -61,7 +61,7 @@ kotlin {
         }
 
         commonTest.dependencies {
-            kotlin("test")
+            implementation(libs.kotlin.test)
         }
     }
 }
