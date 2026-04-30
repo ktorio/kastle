@@ -5,7 +5,7 @@ public final class kastle/DSLKt {
 	public static final fun get_project ()Lkastle/TemplateProject;
 	public static final fun get_properties ()Lkastle/TemplateProperties;
 	public static final fun get_slot ()Lkotlin/jvm/functions/Function1;
-	public static final fun get_slots ()Ljava/util/Map;
+	public static final fun get_slots ()Lkastle/TemplateSlots;
 }
 
 public final class kastle/TemplateAmperApplicationSettings {
@@ -415,6 +415,10 @@ public final class kastle/TemplateProperties$DefaultImpls {
 
 public abstract interface class kastle/TemplateSlot {
 	public abstract fun get ()Ljava/lang/Object;
+}
+
+public abstract interface class kastle/TemplateSlots : java/util/Map, kotlin/jvm/internal/markers/KMappedMarker {
+	public abstract fun invoke (Ljava/lang/String;)V
 }
 
 public final class kastle/TemplateSourceModule {

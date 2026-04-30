@@ -41,7 +41,7 @@ You can read more about this file in the [Plugin Configuration File][docs:plugin
 
 If you're still not quite sure what this is all about, read our introduction: [What is the IntelliJ Platform?][docs:intro]
 
-$H$H Predefined Run/Debug configurations
+## Predefined Run/Debug configurations
 
 Within the default project structure, there is a `.run` directory provided containing predefined *Run/Debug configurations* that expose corresponding Gradle tasks:
 

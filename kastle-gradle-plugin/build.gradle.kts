@@ -3,9 +3,6 @@ plugins {
     alias(libs.plugins.pluginPublish)
 }
 
-group = libs.plugins.kastle.get().pluginId
-version = libs.plugins.kastle.get().version
-
 dependencies {
     implementation(gradleApi())
     implementation(libs.gradlePlugin.kotlin)
@@ -14,7 +11,8 @@ dependencies {
     implementation(libs.gradlePlugin.composeCompiler)
     implementation(libs.gradlePlugin.composeMultiplatform)
 
-    compileOnly(libs.kotlin.compiler)
+    // important that we use implementation here
+    implementation(libs.kotlin.compiler)
 
     implementation(project(":kastle-core"))
     implementation(project(":kastle-local"))

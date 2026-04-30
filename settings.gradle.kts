@@ -17,7 +17,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("ktorLibs") {
-            from("io.ktor:ktor-version-catalog:3.4.2")
+            from("io.ktor:ktor-version-catalog:3.4.3")
         }
     }
 }
@@ -40,4 +40,4 @@ include(
 
 // Sample repository,
 //   Requires plugin to be published.  Uncomment for editing
-//includeBuild("repository")
+//includeBuild("testTemplates")

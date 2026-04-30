@@ -1,5 +1,4 @@
 import io.kotest.framework.gradle.tasks.KotestJvmTask
-import org.gradle.internal.classpath.Instrumented.systemProperty
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -30,6 +29,7 @@ dependencies {
     testImplementation(project(":kastle-templates"))
     testImplementation(project(":kastle-test"))
     testImplementation(libs.kotest.junit5)
+    testImplementation(kotlin("test"))
 }
 
 tasks {

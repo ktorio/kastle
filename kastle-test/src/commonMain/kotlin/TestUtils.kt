@@ -13,8 +13,12 @@ import org.jetbrains.kastle.io.resolve
 private val DEFAULT_IGNORE_FILES = setOf(
     ".gitkeep",
     "gradle-wrapper.jar",
+    ".gradle",
+    "build",
     "README.md" // TODO something going on with git on the md spacing
 )
+
+const val TEST_TEMPLATES_ROOT = "../testTemplates/repository"
 
 expect fun shouldReplaceSnapshots(): Boolean
 
@@ -69,12 +73,12 @@ fun assertFilesAreEqual(
     }
 
     val expectedFiles = walkFiles(expected, fs)
-        .filter { !ignorePaths.contains(it.name) }
+        .filter { path -> path.toString().split("/").none { it in ignorePaths } }
         .map { relativePath(expected, it) }
         .sorted()
 
     val actualFiles = walkFiles(actual, fs)
-        .filter { !ignorePaths.contains(it.name) }
+        .filter { path -> path.toString().split("/").none { it in ignorePaths } }
         .map { relativePath(actual, it) }
         .sorted()
 
@@ -163,7 +167,7 @@ fun String.normalize(): String {
     // timestamps
     result = result.replace(Regex("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3,9}Z"""), "2023-02-03T23:23:23.000Z")
     // versions
-    result = result.replace(Regex("""\d+\.\d+\.\d+(?:-[\w-]+)?"""), "1.0.0")
+    result = result.replace(Regex("""\d+\.\d+\.\d+(?:\.\d+)*(?:-[\w-]+)?"""), "1.0.0")
     // UUIDs
     result = result.replace(Regex("""[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"""), "00000000-0000-0000-0000-000000000000")
 

@@ -14,24 +14,22 @@ properties:
     type: boolean
     default: false
     hidden: true
+  - key: isKotlinEnabled
+    type: boolean
+    default: false
+    hidden: true
   - key: isModularEnabled
     type: boolean
     default: false
+    hidden: true
+  - key: pluginName
+    type: string
     hidden: true
   # Values are managed in propertyValues below:
   - key: gradlePluginVersion
     type: string
     hidden: true
   - key: platformVersion
-    type: string
-    hidden: true
-  - key: pluginSinceBuild
-    type: string
-    hidden: true
-  - key: gradleVersion
-    type: string
-    hidden: true
-  - key: pluginName
     type: string
     hidden: true
 
@@ -41,10 +39,6 @@ propertyValues:
     value: "2.13.1"
   - key: org.jetbrains.intellij.platform/plugin/platformVersion
     value: "2025.3.1"
-  - key: org.jetbrains.intellij.platform/plugin/pluginSinceBuild
-    value: "253"
-  - key: org.jetbrains.intellij.platform/plugin/gradleVersion
-    value: "9.2.1"
 
   # Post-processed input properties:
   - key: pluginName
@@ -56,6 +50,8 @@ rootSources:
 
   # Run configurations
   - path: .run/Run Plugin.run.xml
+  - path: .run/Run Tests.run.xml
+  - path: .run/Run Verifications.run.xml
 
   # Gradle
   - path: gradle/libs.versions.toml.hbs

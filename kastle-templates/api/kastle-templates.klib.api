@@ -19,6 +19,10 @@ abstract interface kastle/TemplateSlot { // kastle/TemplateSlot|null[0]
     abstract fun <#A1: kotlin/Any?> get(): #A1 // kastle/TemplateSlot.get|get(){0§<kotlin.Any?>}[0]
 }
 
+abstract interface kastle/TemplateSlots : kotlin.collections/Map<kotlin/String, kotlin.collections/List<kastle/TemplateSlot>> { // kastle/TemplateSlots|null[0]
+    abstract fun invoke(kotlin/String) // kastle/TemplateSlots.invoke|invoke(kotlin.String){}[0]
+}
+
 final class kastle/TemplateAmperApplicationSettings { // kastle/TemplateAmperApplicationSettings|null[0]
     constructor <init>(kotlin/String? = ...) // kastle/TemplateAmperApplicationSettings.<init>|<init>(kotlin.String?){}[0]
 
@@ -492,6 +496,6 @@ final val kastle/_properties // kastle/_properties|{}_properties[0]
 final val kastle/_slot // kastle/_slot|{}_slot[0]
     final fun <get-_slot>(): kotlin/Function1<kotlin/String, kastle/TemplateSlot?> // kastle/_slot.<get-_slot>|<get-_slot>(){}[0]
 final val kastle/_slots // kastle/_slots|{}_slots[0]
-    final fun <get-_slots>(): kotlin.collections/Map<kotlin/String, kotlin.collections/List<kastle/TemplateSlot>> // kastle/_slots.<get-_slots>|<get-_slots>(){}[0]
+    final fun <get-_slots>(): kastle/TemplateSlots // kastle/_slots.<get-_slots>|<get-_slots>(){}[0]
 
 final fun <#A: kotlin/Any?> kastle/_unsafe(kotlin/String): #A // kastle/_unsafe|_unsafe(kotlin.String){0§<kotlin.Any?>}[0]

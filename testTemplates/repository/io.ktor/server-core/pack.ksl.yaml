@@ -1,0 +1,64 @@
+name: Ktor Server
+description: Adds a Ktor HTTP server
+tags:
+  - core
+  - server
+properties:
+  - key: serverModules
+    type: list<string>?
+    hidden: true
+  - key: mainClass
+    type: string
+    hidden: true
+  - key: engineClass
+    type: string
+    hidden: true
+  - key: hasHttp
+    type: boolean
+    hidden: true
+  - key: hasSerialization
+    type: boolean
+    hidden: true
+  - key: hasMonitoring
+    type: boolean
+    hidden: true
+  - key: hasSecurity
+    type: boolean
+    hidden: true
+  - key: hasDatabases
+    type: boolean
+    hidden: true
+  - key: hasKtorGradle
+    type: boolean
+    hidden: true
+  - key: configFormat
+    type: enum { HOCON, YAML, none }
+    default: HOCON
+  - key: features
+    type: list<map<string,string>>
+    hidden: true
+  - key: serverTarget
+    type: string
+    hidden: true
+propertyValues:
+  - key: hasHttp
+    expression: _slots.contains("http")
+  - key: hasSerialization
+    expression: _slots.contains("serialization")
+  - key: hasMonitoring
+    expression: _slots.contains("monitoring")
+  - key: hasSecurity
+    expression: _slots.contains("security")
+  - key: hasDatabases
+    expression: _slots.contains("databases")
+  - key: hasKtorGradle
+    expression: _slots.contains("gradlePlugin")
+  - key: features
+    expression: _project.packs.filter { !it.tags.contains("core") }
+  - key: serverTarget
+    expression: if (_project.modules.any { it.path == "server" }) ":server:" else ""
+rootSources:
+  - target: slot://org.gradle/gradle/versionCatalogs
+    text: create("ktorLibs").from("io.ktor:ktor-version-catalog:3.4.0")
+  - target: file://README.md
+    path: README.md.hbs

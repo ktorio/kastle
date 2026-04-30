@@ -3,10 +3,12 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 
+val exportDir = rootDir.resolve("export")
+
 tasks.register<GradleBuild>("exportPluginRepository") {
-    dir = layout.settingsDirectory.dir("repository-intellij").asFile
+    dir = rootDir.resolve("repository-intellij")
     tasks = listOf("kslExportToCbor")
-    startParameter.projectProperties["exportPath"] = layout.projectDirectory.dir("export").asFile.absolutePath
+    startParameter.projectProperties["exportPath"] = exportDir.absolutePath
 }
 
 tasks.jib {
@@ -22,7 +24,7 @@ jib {
     extraDirectories {
         paths {
             path {
-                setFrom(layout.projectDirectory.dir("export"))
+                setFrom(exportDir)
                 into = "/repository"
             }
         }

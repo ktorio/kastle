@@ -155,14 +155,15 @@ const val DEFAULT_ICON_PATH = "https://intellij-icons.jetbrains.design/icons/All
 
 private fun packIconSrc(pack: PackDescriptor): String {
     // TODO: it turned out that some icons don't have ExpUI icons; think about a better solution for this
-    return when (pack.icon) {
+    val icon = pack.icon?.substringAfterLast('/')
+    return when (icon) {
         "AllIcons.Language.GO" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/go.svg"
         "AllIcons.Language.Kotlin" -> "https://intellij-icons.jetbrains.design/icons/KotlinBaseResourcesIcons/org/jetbrains/kotlin/idea/icons/expui/kotlin.svg"
         "AllIcons.Language.Python" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/python.svg"
         "AllIcons.Language.Ruby" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/ruby.svg"
         "AllIcons.Language.Rust" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/rust.svg"
         else -> {
-            val (containerClass, path) = pack.icon?.split(".", limit = 2) ?: return DEFAULT_ICON_PATH
+            val (containerClass, path) = icon?.split(".", limit = 2) ?: return DEFAULT_ICON_PATH
             val pathSegments = path.split(".")
             val iconRelativePath = pathSegments.joinToString("/") { it.first().lowercase() + it.substring(1) }
             "https://intellij-icons.jetbrains.design/icons/$containerClass/expui/$iconRelativePath.svg"

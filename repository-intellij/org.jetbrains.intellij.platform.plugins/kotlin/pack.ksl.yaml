@@ -4,6 +4,10 @@ icon: AllIcons.Language.Kotlin
 links:
   home: https://plugins.jetbrains.com/plugin/6954-kotlin
 
+propertyValues:
+  - key: org.jetbrains.intellij.platform/plugin/isKotlinEnabled
+    value: true
+
 commonSources:
   # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies

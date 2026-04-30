@@ -92,6 +92,19 @@ fun IntellijProjectGeneratorTest(
         )
     }
 
+    "intellij-plugin-kotlin-with-samples" {
+        generateAndValidateSnapshot(
+            "intellij-plugin-kotlin-with-samples",
+            listOf(
+                "org.jetbrains.intellij.platform/plugin",
+                "org.jetbrains.intellij.platform.plugins/kotlin",
+            ),
+            properties = mapOf(
+                VariableId.parse("org.jetbrains.intellij.platform/plugin/addSampleCode") to "true",
+            ),
+        )
+    }
+
     "intellij-plugin-java-kotlin" {
         generateAndValidateSnapshot(
             "intellij-plugin-java-kotlin",

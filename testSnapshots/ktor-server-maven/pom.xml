@@ -8,16 +8,30 @@
     <name>ktor-server-maven</name>
     <properties>
         <kotlin.code.style>official</kotlin.code.style>
-        <kotlin_version>2.3.20</kotlin_version>
-        <ktor_version>3.4.2</ktor_version>
-        <logback_version>1.5.32</logback_version>
+        <kotlin_version>2.3.20-Beta2</kotlin_version>
+        <logback_version>1.5.29</logback_version>
         
     </properties>
     <dependencies>
         <dependency>
-            <groupId>io.ktor</groupId>
-            <artifactId>ktor-server-core</artifactId>
-            <version>${ktor_version}</version>
+            <groupId>null</groupId>
+            <artifactId>null</artifactId>
+            <version>null</version>
+        </dependency>
+        <dependency>
+            <groupId>null</groupId>
+            <artifactId>null</artifactId>
+            <version>null</version>
+        </dependency>
+        <dependency>
+            <groupId>null</groupId>
+            <artifactId>null</artifactId>
+            <version>null</version>
+        </dependency>
+        <dependency>
+            <groupId>null</groupId>
+            <artifactId>null</artifactId>
+            <version>null</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -25,24 +39,9 @@
             <version>${logback_version}</version>
         </dependency>
         <dependency>
-            <groupId>io.ktor</groupId>
-            <artifactId>ktor-server-netty</artifactId>
-            <version>${ktor_version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.ktor</groupId>
-            <artifactId>ktor-server-content-negotiation</artifactId>
-            <version>${ktor_version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.ktor</groupId>
-            <artifactId>ktor-serialization-kotlinx-json</artifactId>
-            <version>${ktor_version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.ktor</groupId>
-            <artifactId>ktor-server-test-host</artifactId>
-            <version>${ktor_version}</version>
+            <groupId>null</groupId>
+            <artifactId>null</artifactId>
+            <version>null</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -45,7 +45,7 @@ data class PackManifest(
 
 @Serializable
 data class PackDescriptor(
-    val manifest: PackMetadata,
+    val manifest: PackManifest,
     val propertyValues: PackPropertyAssignments,
     val sources: PackSources,
 ): PackMetadata by manifest {

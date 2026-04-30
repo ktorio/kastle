@@ -75,7 +75,14 @@ private fun SourceModule.toTemplateType(): TemplateSourceModule =
         dependencies = dependencies.asSequence()
             .filter { it.value.isNotEmpty() }
             .associate { (platform, deps) ->
-                platform.code to deps.map { it.toTemplateType(path) }
+                platform.code to deps.map {
+                    it.toTemplateType(path)
+                }.sortedWith(
+                    compareBy(
+                        { it.path ?: "zz" },
+                        { it.key },
+                    )
+                )
             },
         testDependencies = testDependencies.asSequence()
             .associate { (platform, deps) ->

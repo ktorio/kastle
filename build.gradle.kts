@@ -7,16 +7,19 @@ plugins {
 val refType: String? = System.getenv("GITHUB_REF_TYPE")
 val refName: String? = System.getenv("GITHUB_REF_NAME")
 
-subprojects {
-    group = "org.jetbrains"
-    version = when {
-        refType == "tag" && refName?.startsWith("release-") == true -> {
-            refName.removePrefix("release-").also {
-                println("Building release $it")
-            }
+group = "org.jetbrains"
+version = when {
+    refType == "tag" && refName?.startsWith("release-") == true -> {
+        refName.removePrefix("release-").also {
+            println("Building release $it")
         }
-        else -> "1.0.0-SNAPSHOT"
     }
+    else -> "1.0.0-SNAPSHOT"
+}
+
+subprojects {
+    group = rootProject.group
+    version = rootProject.version
 
     // kotest problems
     tasks.withType<Test> {

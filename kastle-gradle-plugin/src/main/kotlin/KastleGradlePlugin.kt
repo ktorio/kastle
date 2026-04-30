@@ -4,7 +4,6 @@ import com.charleskorn.kaml.Yaml
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import io.ktor.server.plugins.di.*
-import io.ktor.server.util.url
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.buffered
@@ -96,14 +95,16 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
                         }
                         val versionAliases = gradleCatalog.versionAliases.associateWith { alias ->
                             gradleCatalog.findVersion(alias).get().requiredVersion
-                        }
+                        }.mapKeys { (key) -> key.replace('.', '-') }
+
                         val libraryAliases = gradleCatalog.libraryAliases.associateWith { alias ->
                             val dependency = gradleCatalog.findLibrary(alias).get().get()
                             CatalogArtifact(
                                 module = "${dependency.module.group}:${dependency.module.name}",
                                 version = dependency.versionConstraint.requiredVersion.let(CatalogVersion::Number),
                             )
-                        }
+                        }.mapKeys { (key) -> key.replace('.', '-') }
+
                         VersionsCatalog(
                             name = catalogName,
                             source = VersionsCatalogSource.EXTERNAL,

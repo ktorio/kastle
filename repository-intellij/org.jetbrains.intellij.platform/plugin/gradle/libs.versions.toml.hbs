@@ -1,17 +1,9 @@
 [versions]
-intellij-platform-gradle-plugin = "{{gradlePluginVersion}}"
 {{#each _project.versions.entries }}
 {{ key }} = "{{ value }}"
 {{/each}}
 
 [libraries]
 {{#each _project.libraries.entries }}
-{{ key }} = { module = "{{ value.module }}", version.ref = "{{ value.version.ref }}" }
-{{/each}}
-
-[plugins]
-intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform-gradle-plugin" }
-kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-{{#each _project.gradle.plugins}}
-{{ catalogKey }} = { id = "{{ id }}", version.ref = "{{ version.ref }}" }
+{{ key }} = { module = "{{ value.module }}", {{#if value.versionRef}}version.ref = "{{value.versionRef}}"{{else}}version = "{{value.version}}"{{/if}} }
 {{/each}}
