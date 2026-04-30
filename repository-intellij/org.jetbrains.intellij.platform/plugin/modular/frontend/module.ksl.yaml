@@ -16,3 +16,9 @@ sources:
   - path: sources/main/resources/*
     target: file:../../frontend/src/main/resources
     if: isModularEnabled && addSampleCode
+
+dependencies:
+  # These dependencies are inlined in frontend/build.gradle.kts as compileOnly,
+  # but we want to render them in version catalog without polluting libs.versions.toml.hbs with actual values.
+  - $libs.kotlin.serialization.core.jvm
+  - $libs.kotlin.serialization.json.jvm

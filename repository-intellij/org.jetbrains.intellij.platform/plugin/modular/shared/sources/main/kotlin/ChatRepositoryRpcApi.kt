@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.Flow
 @Rpc
 interface ChatRepositoryRpcApi : RemoteApi<Unit> {
     companion object {
-        suspend fun getInstanceAsync(): ChatRepositoryRpcApi {
+        suspend fun getInstance(): ChatRepositoryRpcApi {
             return RemoteApiProviderService.resolve(remoteApiDescriptor<ChatRepositoryRpcApi>())
         }
     }

@@ -29,7 +29,7 @@ class FrontendChatRepositoryModel(
 
     override val messagesFlow: StateFlow<List<ChatMessage>> = flow {
         durable {
-            ChatRepositoryRpcApi.getInstanceAsync().getMessagesFlow(project.projectId()).collect { valueFromBackend ->
+            ChatRepositoryRpcApi.getInstance().getMessagesFlow(project.projectId()).collect { valueFromBackend ->
                 val mappedValue = valueFromBackend.map { messageDto -> messageDto.toChatMessage() }
                 emit(mappedValue)
             }
@@ -37,6 +37,6 @@ class FrontendChatRepositoryModel(
     }.stateIn(coroutineScope, initialValue = emptyList(), started = SharingStarted.Lazily)
 
     override suspend fun sendMessage(messageContent: String) {
-        ChatRepositoryRpcApi.getInstanceAsync().sendMessage(project.projectId(), messageContent)
+        ChatRepositoryRpcApi.getInstance().sendMessage(project.projectId(), messageContent)
     }
 }

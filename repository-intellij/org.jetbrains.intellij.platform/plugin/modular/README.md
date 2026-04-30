@@ -19,9 +19,11 @@ The sample plugin adds a `ModularPlugin` tool window with a chat-style UI implem
 - `frontend` contains UI-only code and presentation logic: the tool window registration, Compose UI, view models, and the frontend adapter that talks to the backend via RPC.
 - `backend` contains project-level services and business logic: access to project, file system, and external processes, message creation, response generation, and the RPC implementation exposed to the frontend.
 
-## Split Mode Native Feature Architecture
+## Remote Development Ready Architecture
 
-The demo is intentionally split so that the UI stays frontend-only and the business logic stays backend-only.
+The demo is intentionally split so that the UI stays frontend-only and the business logic stays backend-only. 
+This ensures optimal UX in the remote development scenario where the IDE has separate frontend and backend processes. 
+This is what we call **Split Mode**.
 
 A high-level overview of the plugin structure:
 - a UI for a chat with an AI assistant natively rendered in the frontend IDE in split mode

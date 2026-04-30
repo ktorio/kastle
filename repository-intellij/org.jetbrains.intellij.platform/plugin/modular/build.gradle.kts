@@ -1,64 +1,52 @@
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
+
+// FIXME: move to gradle.properties
+group = "org.jetbrains.plugins.template"
+version = "1.0"
+
+val intellijPlatformVersion = providers.gradleProperty("intellijPlatformVersion").get()
 
 plugins {
-    id("java")
-    alias(libs.plugins.intellij.platform)
-
-    alias(libs.plugins.rpc) apply false
-    alias(libs.plugins.kotlin) apply false
-    alias(libs.plugins.kotlin.serialization) apply false
-    alias(libs.plugins.compose.compiler) apply false
+    application
+    id("org.jetbrains.intellij.platform")
+    id("org.jetbrains.kotlin.jvm")
+    id("rpc") apply false
+    id("org.jetbrains.kotlin.plugin.serialization") apply false
 }
-
-group = _project.group
-version = "1.0.0-SNAPSHOT"
 
 subprojects {
     apply(plugin = "org.jetbrains.intellij.platform.module")
-}
+    apply(plugin = "rpc")
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
-allprojects {
-    repositories {
-        mavenCentral()
+    dependencies {
         intellijPlatform {
-            defaultRepositories()
+            intellijIdea(intellijPlatformVersion)
         }
-        maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies/")
     }
 }
 
-// Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
     intellijPlatform {
-        intellijIdea(libs.versions.intellij.platform)
+        intellijIdea(intellijPlatformVersion)
 
         pluginModule(implementation(project(":shared")))
         pluginModule(implementation(project(":frontend")))
         pluginModule(implementation(project(":backend")))
-
         testFramework(TestFrameworkType.Platform)
     }
 }
 
 intellijPlatform {
-    pluginConfiguration {
-        ideaVersion {
-            sinceBuild = providers.gradleProperty("pluginSinceBuild")
-        }
-
-        changeNotes = """
-                Initial version
-            """.trimIndent()
-    }
-
     splitMode = true
-    splitModeTarget = SplitModeTarget.BOTH
+    pluginInstallationTarget = SplitModeAware.PluginInstallationTarget.BOTH
 
     pluginVerification {
         ides {
-            create(IntelliJPlatformType.IntellijIdeaUltimate, libs.versions.intellij.platform)
+            create(IntelliJPlatformType.IntellijIdeaUltimate, intellijPlatformVersion)
         }
     }
 }

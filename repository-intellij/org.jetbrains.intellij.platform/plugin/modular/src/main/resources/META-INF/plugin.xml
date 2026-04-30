@@ -1,4 +1,5 @@
 <idea-plugin>
+    <!-- FIXME: render actual project data -->
     <id>org.jetbrains.plugins.modular.template</id>
     <name>IntelliJ Modular Plugin Example</name>
     <vendor url="https://www.yourcompany.com">YourCompany</vendor>
