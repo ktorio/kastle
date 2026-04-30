@@ -13,6 +13,9 @@ sources:
     if: "!isModularEnabled"
 
   # README and friends
+  - path: CHANGELOG.md.hbs
+    target: file:../CHANGELOG.md
+    if: "!isModularEnabled"
   - path: README.md.hbs
     target: file:../README.md
     if: "!isModularEnabled"
@@ -25,7 +28,7 @@ sources:
     if: "!isModularEnabled"
 
   ## Code samples
-  - path: sources/main/kotlin/MyMessageBundle.kt
+  - path: sources/main/kotlin/MyMessageBundle.kt.hbs
     target: file:../src/main/kotlin/MyMessageBundle.kt
     if: "!isModularEnabled && addSampleCode"
   - path: sources/main/resources/messages/MyMessageBundle.properties
@@ -41,3 +44,10 @@ sources:
   - path: sources/main/kotlin/MyToolWindowFactory-compose.kt
     target: file:../src/main/kotlin/MyToolWindowFactory.kt
     if: "!isModularEnabled && addSampleCode && isComposeEnabled"
+
+testDependencies:
+  - $libs.junit
+gradle:
+  plugins:
+    - libs.plugin1-kotlin-jvm
+    - libs.plugin3-changelog
