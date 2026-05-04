@@ -9,7 +9,7 @@ sources:
     if: isModularEnabled
 
   # Files from the root folder
-  - path: ../build.gradle.kts
+  - path: ../build.gradle-template.kts
     target: file:../../build.gradle.kts
     if: isModularEnabled
   - path: ../gradle.properties.hbs
