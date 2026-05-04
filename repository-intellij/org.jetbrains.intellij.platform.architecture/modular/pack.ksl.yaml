@@ -3,7 +3,7 @@
 
 name: Split Mode (Remote Dev)
 description: Generates a modular plugin compatible with remote development workflows.
-icon: AllIcons.RunConfigurations.ApplicationRemote
+icon: AllIcons.RunConfigurations.Remote
 links:
   home: https://www.jetbrains.com/help/idea/remote-development-overview.html
   docs: https://plugins.jetbrains.com/docs/intellij/modular-plugins.html

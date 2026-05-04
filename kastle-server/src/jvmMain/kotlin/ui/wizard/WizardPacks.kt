@@ -157,6 +157,7 @@ private fun packIconSrc(pack: PackDescriptor): String {
     // TODO: it turned out that some icons don't have ExpUI icons; think about a better solution for this
     val icon = pack.icon?.substringAfterLast('/')
     return when (icon) {
+        "AllIcons.RunConfigurations.Remote" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/expui/runConfigurations/applicationRemote.svg"
         "AllIcons.Language.GO" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/go.svg"
         "AllIcons.Language.Kotlin" -> "https://intellij-icons.jetbrains.design/icons/KotlinBaseResourcesIcons/org/jetbrains/kotlin/idea/icons/expui/kotlin.svg"
         "AllIcons.Language.Python" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/python.svg"
