@@ -10,3 +10,11 @@ commonSources:
     #language=xml
     text: <depends>com.intellij.modules.lsp</depends>
     priority: 20
+
+  # Modular plugin
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: <module name="com.intellij.modules.lsp"/>
+    priority: 20
