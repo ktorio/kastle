@@ -1,23 +1,19 @@
 platform: jvm
 
+if: isModularEnabled
+
 sources:
   - path: main/resources/META-INF/plugin.xml
     target: file:../../src/main/resources/META-INF/plugin.xml
-    if: isModularEnabled
   - path: main/resources/META-INF/pluginIcon.svg
     target: file:../../src/main/resources/META-INF/pluginIcon.svg
-    if: isModularEnabled
 
   # Files from the root folder
   - path: ../build.gradle-template.kts
     target: file:../../build.gradle.kts
-    if: isModularEnabled
   - path: ../gradle.properties.hbs
     target: file:../../gradle.properties
-    if: isModularEnabled
   - path: ../settings.gradle.kts
     target: file:../../settings.gradle.kts
-    if: isModularEnabled
   - path: ../README.md
     target: file:../../README.md
-    if: isModularEnabled

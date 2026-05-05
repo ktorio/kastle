@@ -435,9 +435,13 @@ class LocalPackRepository(
             }
         }
 
+        val moduleCondition = moduleYaml.get<YamlScalar>("if")?.content?.let(expressionParser::parse)
+
         return SourceModule(
             manifest = manifest,
             sources = sources.dedupeFiles() + resources,
+            condition = moduleCondition,
+            conditionPackId = if (moduleCondition != null) packId else null,
         )
     }
 

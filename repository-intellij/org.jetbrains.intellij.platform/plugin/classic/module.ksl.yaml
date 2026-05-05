@@ -1,49 +1,45 @@
 platform: jvm
 
+if: "!isModularEnabled"
+
 sources:
   # Gradle build script
   - path: build.gradle-template.kts
     target: file:../build.gradle.kts
-    if: "!isModularEnabled"
   - path: gradle.properties.hbs
     target: file:../gradle.properties
-    if: "!isModularEnabled"
   - path: settings.gradle.kts
     target: file:../settings.gradle.kts
-    if: "!isModularEnabled"
 
   # README and friends
   - path: CHANGELOG.md.hbs
     target: file:../CHANGELOG.md
-    if: "!isModularEnabled"
   - path: README.md.hbs
     target: file:../README.md
-    if: "!isModularEnabled"
 
   # Production sources
 
   ## Plugin descriptor, etc.
   - path: sources/main/resources/META-INF/*
     target: file:../src/main/resources/META-INF
-    if: "!isModularEnabled"
 
   ## Code samples
   - path: sources/main/kotlin/MyMessageBundle.kt.hbs
     target: file:../src/main/kotlin/MyMessageBundle.kt
-    if: "!isModularEnabled && addSampleCode"
+    if: addSampleCode
   - path: sources/main/resources/messages/MyMessageBundle.properties
     target: file:../src/main/resources/messages/MyMessageBundle.properties
-    if: "!isModularEnabled && addSampleCode"
+    if: addSampleCode
 
   ### Swing UI
   - path: sources/main/kotlin/MyToolWindowFactory.kt
     target: file:../src/main/kotlin/MyToolWindowFactory.kt
-    if: "!isModularEnabled && addSampleCode && !isComposeEnabled"
+    if: "addSampleCode && !isComposeEnabled"
 
   ### Compose UI
   - path: sources/main/kotlin/MyToolWindowFactory-compose.kt
     target: file:../src/main/kotlin/MyToolWindowFactory.kt
-    if: "!isModularEnabled && addSampleCode && isComposeEnabled"
+    if: "addSampleCode && isComposeEnabled"
 
 testDependencies:
   - $libs.junit

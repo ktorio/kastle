@@ -4,8 +4,10 @@ import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.structure.BuildToolModules
 import org.jetbrains.kastle.utils.TreeMap
+import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.isFile
 import org.jetbrains.kastle.utils.isSlot
+import org.jetbrains.kastle.utils.isTruthy
 import org.jetbrains.kastle.utils.merge
 import kotlin.collections.groupBy
 
@@ -70,7 +72,11 @@ fun interface ProjectResolver {
             val projectCatalog = TreeMap<String, CatalogArtifact>()
             val gradlePlugins = TreeMap<String, GradlePlugin>()
 
+            val eagerVars = eagerVariables(properties)
+
             for (module in moduleSources.modules) {
+                if (!isModuleActive(module, eagerVars)) continue
+
                 for (catalogRef in module.gradlePlugins) {
                     val catalogKey = catalogRef.tomlKey
                     // ignore plugins outside libs
@@ -189,6 +195,38 @@ fun interface ProjectResolver {
                 is ProjectModules.Multi ->
                     copy(modules = modules + SourceModule(sources = rootSources))
             }
+
+        private fun isModuleActive(
+            module: SourceModule,
+            eagerVars: Variables,
+        ): Boolean {
+            val condition = module.condition ?: return true
+            val packId = module.conditionPackId ?: return true
+            return condition.evaluate(eagerVars.relativeTo(packId)).isTruthy()
+        }
+
+        /**
+         * Builds a [Variables] from resolved and simple value-assigned properties,
+         * sufficient for evaluating module-level conditions before full variable resolution.
+         */
+        private fun eagerVariables(
+            properties: Map<PropertyScope, Map<VariableId, PropertyInstance>>
+        ): Variables {
+            val rootMap = properties[PropertyScope.Root]
+                ?.entries
+                ?.mapNotNull { (variableId, instance) ->
+                    when (instance) {
+                        is ResolvedProperty -> variableId to instance.value
+                        is DynamicProperty -> {
+                            val assignment = instance.assignments.singleOrNull() as? ValueAssignment
+                                ?: return@mapNotNull null
+                            variableId to instance.descriptor.type.parse(assignment.value)
+                        }
+                        else -> null
+                    }
+                }?.toMap() ?: emptyMap()
+            return Variables(listOf(rootMap))
+        }
 
         private fun missingDependency(dependency: Dependency): Nothing =
             throw IllegalArgumentException("Missing dependency $dependency")

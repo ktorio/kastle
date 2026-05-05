@@ -1,21 +1,21 @@
 platform: jvm
 
+if: isModularEnabled
+
 sources:
   - path: build.gradle-template.kts
     target: file:../../frontend/build.gradle.kts
-    if: isModularEnabled
 
   - path: sources/main/resources/modular.plugin.frontend.xml.hbs
     target: file:../../frontend/src/main/resources/modular.plugin.frontend.xml
-    if: isModularEnabled
 
   ### Code samples
   - path: sources/main/kotlin/*
     target: file:../../frontend/src/main/kotlin
-    if: isModularEnabled && addSampleCode
+    if: addSampleCode
   - path: sources/main/resources/*
     target: file:../../frontend/src/main/resources
-    if: isModularEnabled && addSampleCode
+    if: addSampleCode
 
 dependencies:
   # These dependencies are inlined in frontend/build.gradle.kts as compileOnly,

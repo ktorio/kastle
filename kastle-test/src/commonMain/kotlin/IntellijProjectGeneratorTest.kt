@@ -147,6 +147,29 @@ fun IntellijProjectGeneratorTest(
         )
     }
 
+    "intellij-plugin-modular" {
+        generateAndValidateSnapshot(
+            "intellij-plugin-modular",
+            listOf(
+                "org.jetbrains.intellij.platform/plugin",
+                "org.jetbrains.intellij.platform.architecture/modular",
+            ),
+        )
+    }
+
+    "intellij-plugin-modular-with-samples" {
+        generateAndValidateSnapshot(
+            "intellij-plugin-modular-with-samples",
+            listOf(
+                "org.jetbrains.intellij.platform/plugin",
+                "org.jetbrains.intellij.platform.architecture/modular",
+            ),
+            properties = mapOf(
+                VariableId.parse("org.jetbrains.intellij.platform/plugin/addSampleCode") to "true",
+            ),
+        )
+    }
+
     "intellij-theme" {
         generateAndValidateSnapshot(
             "intellij-theme",

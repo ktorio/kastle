@@ -1,19 +1,19 @@
 platform: jvm
 
+if: isModularEnabled
+
 sources:
   - path: build.gradle-template.kts
     target: file:../../shared/build.gradle.kts
-    if: isModularEnabled
 
   - path: sources/main/resources/modular.plugin.shared.xml.hbs
     target: file:../../shared/src/main/resources/modular.plugin.shared.xml
-    if: isModularEnabled
 
   ### Code samples
   - path: sources/main/kotlin/*
     target: file:../../shared/src/main/kotlin
-    if: isModularEnabled && addSampleCode
+    if: addSampleCode
 
   - path: sources/main/resources/messages/ModularPluginSharedBundle.properties
     target: file:../../shared/src/main/resources/messages/ModularPluginSharedBundle.properties
-    if: isModularEnabled && addSampleCode
+    if: addSampleCode
