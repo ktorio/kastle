@@ -26,6 +26,7 @@ subprojects {
     }
 }
 
+// Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
     intellijPlatform {
         intellijIdea(intellijPlatformVersion)
@@ -33,6 +34,7 @@ dependencies {
         pluginModule(implementation(project(":shared")))
         pluginModule(implementation(project(":frontend")))
         pluginModule(implementation(project(":backend")))
+
         testFramework(TestFrameworkType.Platform)
     }
 }
