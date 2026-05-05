@@ -2,8 +2,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 
-val intellijPlatformVersion = providers.gradleProperty("intellijPlatformVersion").get()
-
 plugins {
     application
     id("org.jetbrains.intellij.platform")
@@ -11,6 +9,8 @@ plugins {
     id("rpc") apply false
     id("org.jetbrains.kotlin.plugin.serialization") apply false
 }
+
+val intellijPlatformVersion = "1.0.0"
 
 subprojects {
     apply(plugin = "org.jetbrains.intellij.platform.module")
