@@ -13,8 +13,11 @@ sources:
   - path: sources/main/kotlin/*
     target: file:../../frontend/src/main/kotlin
     if: addSampleCode
-  - path: sources/main/resources/*
-    target: file:../../frontend/src/main/resources
+  - path: sources/main/resources/icons/*
+    target: file:../../frontend/src/main/resources/icons
+    if: addSampleCode
+  - path: sources/main/resources/messages/*
+    target: file:../../frontend/src/main/resources/messages
     if: addSampleCode
 
 dependencies:
