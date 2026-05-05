@@ -1,0 +1,14 @@
+<idea-plugin>
+    <dependencies>
+        <module name="intellij.platform.backend"/>
+        <module name="intellij.platform.kernel.backend"/>
+        <module name="modular.plugin.shared"/>
+
+        <module name="intellij.java.frontback.psi"/>
+        <module name="intellij.java.frontback.impl"/>
+        <plugin id="org.jetbrains.kotlin"/>
+    </dependencies>
+
+    <extensions defaultExtensionNs="com.intellij">
+    </extensions>
+</idea-plugin>
