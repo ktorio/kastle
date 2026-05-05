@@ -3,7 +3,7 @@ platform: jvm
 if: isModularEnabled
 
 sources:
-  - path: main/resources/META-INF/plugin.xml
+  - path: main/resources/META-INF/plugin.xml.hbs
     target: file:../../src/main/resources/META-INF/plugin.xml
   - path: main/resources/META-INF/pluginIcon.svg
     target: file:../../src/main/resources/META-INF/pluginIcon.svg
