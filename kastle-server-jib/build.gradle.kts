@@ -11,6 +11,10 @@ tasks.register<GradleBuild>("exportPluginRepository") {
     startParameter.projectProperties["exportPath"] = exportDir.absolutePath
 }
 
+tasks.named("exportPluginRepository") {
+    dependsOn(":kastle-gradle-plugin:publishToMavenLocal")
+}
+
 tasks.jib {
     dependsOn("exportPluginRepository")
 }
