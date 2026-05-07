@@ -1,4 +1,4 @@
-# Properties Reference
+# Properties and Expressions Reference
 
 This document contains important reference materials for working with properties in your templates.
 

@@ -38,8 +38,30 @@
     },
     "requires": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "List of Pack IDs this pack depends on"
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "A Pack ID (format: group/id)"
+          },
+          {
+            "type": "object",
+            "description": "An object with a single key (the Pack ID) whose value is either a module name string or a map of module path to module name",
+            "minProperties": 1,
+            "maxProperties": 1,
+            "additionalProperties": {
+              "oneOf": [
+                { "type": "string" },
+                {
+                  "type": "object",
+                  "additionalProperties": { "type": "string" }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "description": "List of Pack requirements this pack depends on"
     },
     "propertyValues": {
       "type": "array",

@@ -321,6 +321,18 @@ fun ProjectGeneratorTest(
         )
     }
 
+    "ktor server rpc" {
+        generateAndValidateSnapshot(
+            "ktor-server-rpc",
+            listOf(
+                "org.gradle/gradle",
+                "io.ktor/server-core",
+                "io.ktor/server-netty",
+                "org.jetbrains/kotlinx-rpc",
+            )
+        )
+    }
+
     "compose multiplatform gradle" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-gradle", randomString())
         generate(

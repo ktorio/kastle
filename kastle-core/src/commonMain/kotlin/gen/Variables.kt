@@ -21,7 +21,6 @@ internal fun Project.resolvedVariables(modulePath: String?): Variables {
     return Variables(listOfNotNull(rootScope, moduleScope))
 }
 
-// TODO relativize dynamic variableIds
 internal fun Project.dynamicVariables(
     modulePath: String?,
     variables: LocalVariables,

@@ -1,8 +1,15 @@
 package org.jetbrains.kastle
 
+import com.charleskorn.kaml.YamlInput
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlScalar
+import com.charleskorn.kaml.yamlMap
+import com.charleskorn.kaml.yamlScalar
 import kotlinx.io.bytestring.ByteString
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -55,6 +62,7 @@ class PropertyTypeSerializer: CustomParserSerializer<PropertyType>(PropertyType:
 class SourceImportSerializer: CustomParserSerializer<SourceImport>(SourceImport::class, SourceImport::parse)
 class CatalogReferenceSerializer: CustomParserSerializer<CatalogReference>(CatalogReference::class, CatalogReference::parse)
 class PropertyScopeSerializer: CustomParserSerializer<PropertyScope>(PropertyScope::class, PropertyScope::parse)
+class PackRequirementStringSerializer: CustomParserSerializer<PackRequirement>(PackRequirement::class, PackRequirement::parse)
 
 /**
  * Handles both { module } and { group, name }.
@@ -173,3 +181,4 @@ class ByteStringSerializer : KSerializer<ByteString> {
         return ByteString(bytes)
     }
 }
+

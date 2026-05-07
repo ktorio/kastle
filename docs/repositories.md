@@ -25,7 +25,7 @@ repository
 └─ ...
 ```
 
-The best way to familiarize yourself with this is to look at the [example repository](/repository) in this project.
+The best way to familiarize yourself with this is to look at the [test repository](/testTemplates) in this project.
 
 You'll notice above that the packs are laid out similar to an Amper project, using `src` and `src@jvm`, etc. to keep things easier to navigate.  
 
@@ -39,9 +39,24 @@ There are two manifests that provide all the metadata for every pack:
  - `module.ksl.yaml` <br />
    This contains details for a particular source module.  This contains source dependencies, module-specific files, etc.
 
-The JSON schema files aren't currently available, but they will be in the future.
+You can find the relevant JSON schema files in the [schema](/schema) directory.
 
-### 2. As a Kotlin Project
+We'll go into greater details for each of these manifests and how to work with them.
+
+## 2. Pack Details and Manifests
+
+### General Information
+
+### Connecting Packs
+
+### Modules
+
+### Sources
+
+### Properties
+
+
+## 3. As a Kotlin Project
 
 Each repository can be compiled as a Kotlin project.  This allows you to use the compiler to validate your Kotlin template files.
 
@@ -83,7 +98,7 @@ With Gradle support, you can:
  - Build a test project using `kslRunProject` task. The options for this will be read from a project descriptor file (default, `test.yaml`)
  - Start up a test server with an interactive UI, using `kslRunServer` task.
 
-## 3. Calling it from Kotlin
+## 4. Calling it from Kotlin
 
 In the Kastle API, your repository is called a [LocalPackRepository](/kastle-local/src/main/kotlin/LocalPackRepository.kt).
 
