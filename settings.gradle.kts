@@ -36,6 +36,6 @@ include(
     "kastle-server-jib",
 )
 
-// Sample repository,
-//   Requires plugin to be published.  Uncomment for editing
-//includeBuild("testTemplates")
+// test templates are treated as a separate repository
+// it uses `kastle-gradle-plugin` for compiling / resolving templates
+includeBuild("testTemplates")

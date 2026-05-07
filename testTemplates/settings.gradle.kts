@@ -13,7 +13,18 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         mavenLocal()
-        maven("https://packages.jetbrains.team/maven/p/kastle/maven")
+    }
+    // Substitute the published Kastle Gradle plugin with the local module from the root project.
+    // This allows working on the plugin and testTemplates together without publishing snapshots.
+    //
+    // When this build is *included* by the root `kastle` build (via `includeBuild("testTemplates")`
+    // in the root `settings.gradle.kts`), the parent already provides the local
+    // `kastle-gradle-plugin`, so we must NOT call `includeBuild("..")` — that would create a
+    // circular composite and fail with "Expected vintage state ... transitioning to SettingsLoaded".
+    // Detect that case by checking whether this build has a parent (i.e. it is itself an included
+    // build) and skip the substitution.
+    if (gradle.parent == null) {
+        includeBuild("..")
     }
 }
 
@@ -32,7 +43,6 @@ dependencyResolutionManagement {
         }
         mavenCentral()
         mavenLocal()
-        maven("https://packages.jetbrains.team/maven/p/kastle/maven")
     }
 
     versionCatalogs {
