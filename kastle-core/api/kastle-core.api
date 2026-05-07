@@ -2000,14 +2000,18 @@ public final class org/jetbrains/kastle/SourceImports$Companion {
 public final class org/jetbrains/kastle/SourceModule : org/jetbrains/kastle/SourceModuleMetadata {
 	public static final field Companion Lorg/jetbrains/kastle/SourceModule$Companion;
 	public fun <init> ()V
-	public fun <init> (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;)V
-	public synthetic fun <init> (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;)V
+	public synthetic fun <init> (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/jetbrains/kastle/SourceModuleManifest;
 	public final fun component2 ()Ljava/util/List;
-	public final fun copy (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;)Lorg/jetbrains/kastle/SourceModule;
-	public static synthetic fun copy$default (Lorg/jetbrains/kastle/SourceModule;Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/kastle/SourceModule;
+	public final fun component3 ()Lorg/jetbrains/kastle/utils/Expression;
+	public final fun component4 ()Lorg/jetbrains/kastle/PackId;
+	public final fun copy (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;)Lorg/jetbrains/kastle/SourceModule;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/SourceModule;Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;ILjava/lang/Object;)Lorg/jetbrains/kastle/SourceModule;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getAmper ()Lorg/jetbrains/kastle/AmperSettings;
+	public final fun getCondition ()Lorg/jetbrains/kastle/utils/Expression;
+	public final fun getConditionPackId ()Lorg/jetbrains/kastle/PackId;
 	public fun getDependencies ()Ljava/util/Map;
 	public fun getGradle ()Lorg/jetbrains/kastle/GradleSettings;
 	public final fun getManifest ()Lorg/jetbrains/kastle/SourceModuleManifest;
