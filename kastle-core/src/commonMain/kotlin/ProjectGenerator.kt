@@ -85,7 +85,16 @@ class ProjectGenerator(
     }
 
     private suspend fun Project.forEachTemplate(action: suspend (SourceTemplateIR) -> Unit) {
+        val eagerVars = eagerVariables(properties)
         for (module in moduleSources.modules.sortedBy { it.path.ifEmpty { "zz-top" } }) {
+            val conditionPackId = module.conditionPackId
+            if (module.condition != null && conditionPackId != null) {
+                if (!module.condition.evaluate(eagerVars.relativeTo(conditionPackId)).isTruthy()) {
+                    log.debug { "Skipping module ${module.path}; condition ${module.condition} = false" }
+                    continue
+                }
+            }
+
             val moduleSources = buildList {
                 addAll((module.sources.filter { it.target.protocol == "file" }))
                 addAll(commonSources)

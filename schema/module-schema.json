@@ -3,6 +3,11 @@
   "title": "Kastle Module Configuration",
   "type": "object",
   "properties": {
+    "if": {
+      "type": "string",
+      "description": "Condition expression. When false, the entire module (sources and dependencies) is excluded. Only variables with a single, statically-assigned value are supported; variables derived from other expressions or assigned by multiple sources are not evaluated and treated as false.",
+      "x-intellij-language-injection": "kotlin"
+    },
     "platforms": {
       "type": "array",
       "items": {

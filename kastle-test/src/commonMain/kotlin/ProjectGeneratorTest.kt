@@ -189,6 +189,52 @@ fun ProjectGeneratorTest(
         )
     }
 
+    "module if - both conditions false" {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "module-if-excluded", randomString())
+        generate(outputDir, "module-if-excluded", packs = listOf("com.acme/module-if"), properties = mapOf(
+            "includeModule" to "false",
+            "includeDefault" to "false",
+        ).mapKeys { (key) -> VariableId.parse("com.acme/module-if/$key") })
+        assertFilesAreEqualWithSnapshot(
+            "$snapshots/module-if-excluded",
+            outputDir.toString()
+        )
+    }
+
+    "module if - user property condition true" {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "module-if-optional", randomString())
+        generate(outputDir, "module-if-optional", packs = listOf("com.acme/module-if"), properties = mapOf(
+            "includeModule" to "true",
+            "includeDefault" to "false",
+        ).mapKeys { (key) -> VariableId.parse("com.acme/module-if/$key") })
+        assertFilesAreEqualWithSnapshot(
+            "$snapshots/module-if-optional",
+            outputDir.toString()
+        )
+    }
+
+    "module if - default-value property condition true" {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "module-if-default", randomString())
+        generate(outputDir, "module-if-default", packs = listOf("com.acme/module-if"), properties = mapOf(
+            "includeModule" to "false",
+        ).mapKeys { (key) -> VariableId.parse("com.acme/module-if/$key") })
+        assertFilesAreEqualWithSnapshot(
+            "$snapshots/module-if-default",
+            outputDir.toString()
+        )
+    }
+
+    "module if - both conditions true" {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "module-if-both", randomString())
+        generate(outputDir, "module-if-both", packs = listOf("com.acme/module-if"), properties = mapOf(
+            "includeModule" to "true",
+        ).mapKeys { (key) -> VariableId.parse("com.acme/module-if/$key") })
+        assertFilesAreEqualWithSnapshot(
+            "$snapshots/module-if-both",
+            outputDir.toString()
+        )
+    }
+
     "ktor server" {
         generateAndValidateSnapshot(
             "ktor-server",
