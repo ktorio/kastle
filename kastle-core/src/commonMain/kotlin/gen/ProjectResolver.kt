@@ -179,8 +179,7 @@ fun interface ProjectResolver {
             eagerVars: Variables,
         ): Boolean {
             val condition = module.condition ?: return true
-            val packId = module.conditionPackId ?: return true
-            return condition.evaluate(eagerVars.relativeTo(packId)).isTruthy()
+            return condition.expression.evaluate(eagerVars.relativeTo(condition.packId)).isTruthy()
         }
 
         private operator fun ProjectModules.plus(rootSources: List<SourceFile>): ProjectModules =

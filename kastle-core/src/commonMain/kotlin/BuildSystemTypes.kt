@@ -244,11 +244,16 @@ fun SourceModuleMetadata.fullPath(packId: PackId) =
     if (path.isEmpty()) packId.toString() else "$packId/$path"
 
 @Serializable
+data class Condition(
+    val expression: Expression,
+    val packId: PackId,
+)
+
+@Serializable
 data class SourceModule(
     val manifest: SourceModuleManifest = SourceModuleManifest(),
     val sources: List<SourceFile> = emptyList(),
-    val condition: Expression? = null,
-    val conditionPackId: PackId? = null,
+    val condition: Condition? = null,
 ): SourceModuleMetadata by manifest
 
 typealias DependenciesMap = Map<Platform, Set<Dependency>>
@@ -351,7 +356,6 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
             manifest = manifest,
             sources = sources + other.sources,
             condition = condition ?: other.condition,
-            conditionPackId = conditionPackId ?: other.conditionPackId,
         )
     }
 }

@@ -432,8 +432,7 @@ class LocalPackRepository(
         return SourceModule(
             manifest = manifest,
             sources = sources.dedupeFiles() + resources,
-            condition = moduleCondition,
-            conditionPackId = if (moduleCondition != null) packId else null,
+            condition = moduleCondition?.let { Condition(it, packId) },
         )
     }
 

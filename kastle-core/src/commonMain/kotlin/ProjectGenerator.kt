@@ -87,10 +87,10 @@ class ProjectGenerator(
     private suspend fun Project.forEachTemplate(action: suspend (SourceTemplateIR) -> Unit) {
         val eagerVars = eagerVariables(properties)
         for (module in moduleSources.modules.sortedBy { it.path.ifEmpty { "zz-top" } }) {
-            val conditionPackId = module.conditionPackId
-            if (module.condition != null && conditionPackId != null) {
-                if (!module.condition.evaluate(eagerVars.relativeTo(conditionPackId)).isTruthy()) {
-                    log.debug { "Skipping module ${module.path}; condition ${module.condition} = false" }
+            val condition = module.condition
+            if (condition != null) {
+                if (!condition.expression.evaluate(eagerVars.relativeTo(condition.packId)).isTruthy()) {
+                    log.debug { "Skipping module ${module.path}; condition ${condition.expression} = false" }
                     continue
                 }
             }
@@ -110,14 +110,15 @@ class ProjectGenerator(
                 }
                 val variables = collectVariables(packId, module)
                 val path = getActualPath(source, module, variables)
-                if (source.condition != null && !source.condition?.evaluate(variables).isTruthy()) {
-                    log.debug { "Skipping ${source.target}; ${source.condition} = ${source.condition?.evaluate(variables)}" }
+                val conditionExpression = source.condition
+                if (conditionExpression != null && !conditionExpression.evaluate(variables).isTruthy()) {
+                    log.debug { "Skipping ${source.target}; $conditionExpression = ${conditionExpression.evaluate(variables)}" }
                     continue
                 } else if (!visitedPaths.add(path)) {
                     log.debug { "Skipping ${source.target}; duplicate path $path" }
                     continue
                 } else {
-                    log.trace { "Include ${source.target}; ${source.condition} = ${source.condition?.evaluate(variables)}" }
+                    log.trace { "Include ${source.target}; $conditionExpression = ${conditionExpression?.evaluate(variables)}" }
                 }
 
                 if (source !is SourceTemplate) {
