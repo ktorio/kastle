@@ -19,7 +19,7 @@ replay_pid*
 
 # ide / build files
 .kotlin
-.idea/*
+**/.idea/*
 !.idea/jsonSchemas.xml
 .editorconfig
 .DS_Store

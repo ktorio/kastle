@@ -36,6 +36,7 @@ include(
     "kastle-server-jib",
 )
 
-// Sample repository,
-//   Requires plugin to be published.  Uncomment for editing
-//includeBuild("testTemplates")
+// Due to certain limitations in gradle, including testTemplates
+// in this gradle project for IDE features is not possible.
+// To modify the test templates, it's best to open the testTemplates
+// folder as a separate project in Intellij.

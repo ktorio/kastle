@@ -13,8 +13,14 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         mavenLocal()
-        maven("https://packages.jetbrains.team/maven/p/kastle/maven")
     }
+    // Substitute the published `org.jetbrains.kastle` Gradle plugin with the
+    // local `kastle-gradle-plugin` module from the parent `kastle` build, so
+    // this build never depends on the plugin being published to mavenLocal
+    // or the plugin portal. Including the parent build also pulls in
+    // `kastle-core`, `kastle-local`, and `kastle-server` (the plugin's
+    // runtime dependencies) via composite-build dependency substitution.
+    includeBuild("..")
 }
 
 plugins {
@@ -32,7 +38,6 @@ dependencyResolutionManagement {
         }
         mavenCentral()
         mavenLocal()
-        maven("https://packages.jetbrains.team/maven/p/kastle/maven")
     }
 
     versionCatalogs {
