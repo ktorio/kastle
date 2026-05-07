@@ -91,23 +91,48 @@ internal fun Project.dynamicVariables(
 /**
  * Builds a [Variables] from resolved and simple value-assigned properties,
  * sufficient for evaluating module-level conditions before full variable resolution.
+ *
+ * Expression-assigned properties are also evaluated iteratively: if all variables
+ * referenced by an expression are resolvable from the eager set, the result is included.
+ * Expressions that cannot be resolved are silently skipped.
  */
 internal fun eagerVariables(
     properties: Map<PropertyScope, Map<VariableId, PropertyInstance>>
 ): Variables {
-    val rootMap = properties[PropertyScope.Root]
-        ?.entries
-        ?.mapNotNull { (variableId, instance) ->
-            when (instance) {
-                is ResolvedProperty -> variableId to instance.value
-                is DynamicProperty -> {
-                    val assignment = instance.assignments.singleOrNull() as? ValueAssignment
-                        ?: return@mapNotNull null
-                    variableId to instance.descriptor.type.parse(assignment.value)
-                }
-                else -> null
-            }
-        }?.toMap() ?: emptyMap()
-    return Variables(listOf(rootMap))
-}
+    val resolved = mutableMapOf<VariableId, Any?>()
+    val pending = mutableListOf<Triple<VariableId, PropertyDescriptor, ExpressionAssignment>>()
 
+    properties[PropertyScope.Root]?.forEach { (variableId, instance) ->
+        when (instance) {
+            is ResolvedProperty -> resolved[variableId] = instance.value
+            is DynamicProperty -> when (val assignment = instance.assignments.singleOrNull()) {
+                is ValueAssignment -> resolved[variableId] = instance.descriptor.type.parse(assignment.value)
+                is ExpressionAssignment -> pending.add(Triple(variableId, instance.descriptor, assignment))
+                else -> {}
+            }
+            else -> {}
+        }
+    }
+
+    var progress = true
+    while (pending.isNotEmpty() && progress) {
+        progress = false
+        val iterator = pending.listIterator()
+        while (iterator.hasNext()) {
+            val (variableId, descriptor, assignment) = iterator.next()
+            val result = try {
+                descriptor.type.cast(
+                    assignment.expression.evaluate(Variables(resolved).relativeTo(assignment.packId))
+                )
+            } catch (_: Exception) {
+                // skip silently
+                continue
+            }
+            resolved[variableId] = result
+            iterator.remove()
+            progress = true
+        }
+    }
+
+    return Variables(listOf(resolved))
+}
