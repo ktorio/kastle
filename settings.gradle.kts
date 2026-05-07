@@ -36,6 +36,7 @@ include(
     "kastle-server-jib",
 )
 
-// test templates are treated as a separate repository
-// it uses `kastle-gradle-plugin` for compiling / resolving templates
-includeBuild("testTemplates")
+// Due to certain limitations in gradle, including testTemplates
+// in this gradle project for IDE features is not possible.
+// To modify the test templates, it's best to open the testTemplates
+// folder as a separate project in Intellij.
