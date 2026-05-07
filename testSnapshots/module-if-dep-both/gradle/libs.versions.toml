@@ -1,0 +1,13 @@
+[versions]
+junit = "4.13.2"
+kotlin = "2.3.20-Beta2"
+logback = "1.5.29"
+
+[libraries]
+junit = { module = "junit:junit", version.ref = "junit" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

@@ -1,2 +1,7 @@
 if: includeModule
 platform: jvm
+dependencies:
+  - $libs.logback.classic
+gradle:
+  plugins:
+    - libs.plugins.kotlin-serialization

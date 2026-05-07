@@ -235,6 +235,41 @@ fun ProjectGeneratorTest(
         )
     }
 
+    "module if - with gradle: both optional modules excluded, no deps in catalog" {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "module-if-dep-excluded", randomString())
+        generate(outputDir, "module-if-dep-excluded",
+            packs = listOf("com.acme/module-if", "org.gradle/gradle"),
+            properties = mapOf(
+                "includeModule" to "false",
+                "includeDefault" to "false",
+            ).mapKeys { (key) -> VariableId.parse("com.acme/module-if/$key") }
+        )
+        assertFilesAreEqualWithSnapshot("$snapshots/module-if-dep-excluded", outputDir.toString())
+    }
+
+    "module if - with gradle: optional module included, its deps in catalog" {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "module-if-dep-optional", randomString())
+        generate(outputDir, "module-if-dep-optional",
+            packs = listOf("com.acme/module-if", "org.gradle/gradle"),
+            properties = mapOf(
+                "includeModule" to "true",
+                "includeDefault" to "false",
+            ).mapKeys { (key) -> VariableId.parse("com.acme/module-if/$key") }
+        )
+        assertFilesAreEqualWithSnapshot("$snapshots/module-if-dep-optional", outputDir.toString())
+    }
+
+    "module if - with gradle: both modules included, all deps in catalog" {
+        val outputDir = Path(SystemTemporaryDirectory, "generated", "module-if-dep-both", randomString())
+        generate(outputDir, "module-if-dep-both",
+            packs = listOf("com.acme/module-if", "org.gradle/gradle"),
+            properties = mapOf(
+                "includeModule" to "true",
+            ).mapKeys { (key) -> VariableId.parse("com.acme/module-if/$key") }
+        )
+        assertFilesAreEqualWithSnapshot("$snapshots/module-if-dep-both", outputDir.toString())
+    }
+
     "ktor server" {
         generateAndValidateSnapshot(
             "ktor-server",
