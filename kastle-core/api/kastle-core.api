@@ -856,7 +856,6 @@ public abstract interface class org/jetbrains/kastle/MutablePackRepository : org
 public final class org/jetbrains/kastle/MutablePackRepository$DefaultImpls {
 	public static fun files (Lorg/jetbrains/kastle/MutablePackRepository;)Lkotlinx/coroutines/flow/Flow;
 	public static fun getAll (Lorg/jetbrains/kastle/MutablePackRepository;)Lkotlinx/coroutines/flow/Flow;
-	public static fun getAllWithRequirements (Lorg/jetbrains/kastle/MutablePackRepository;Ljava/util/Collection;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static fun readAll (Lorg/jetbrains/kastle/MutablePackRepository;)Lkotlinx/coroutines/flow/Flow;
 	public static fun readAll (Lorg/jetbrains/kastle/MutablePackRepository;Ljava/util/Collection;)Lkotlinx/coroutines/flow/Flow;
 	public static fun slot (Lorg/jetbrains/kastle/MutablePackRepository;Lorg/jetbrains/kastle/SlotId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1092,42 +1091,12 @@ public final class org/jetbrains/kastle/PackReadException : java/lang/Exception 
 	public fun <init> (Lorg/jetbrains/kastle/PackId;Ljava/lang/Throwable;)V
 }
 
-public final class org/jetbrains/kastle/PackReference {
-	public static final field Companion Lorg/jetbrains/kastle/PackReference$Companion;
-	public fun <init> (Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/VersionRange;)V
-	public final fun component1 ()Lorg/jetbrains/kastle/PackId;
-	public final fun component2 ()Lorg/jetbrains/kastle/VersionRange;
-	public final fun copy (Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/VersionRange;)Lorg/jetbrains/kastle/PackReference;
-	public static synthetic fun copy$default (Lorg/jetbrains/kastle/PackReference;Lorg/jetbrains/kastle/PackId;Lorg/jetbrains/kastle/VersionRange;ILjava/lang/Object;)Lorg/jetbrains/kastle/PackReference;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getId ()Lorg/jetbrains/kastle/PackId;
-	public final fun getVersion ()Lorg/jetbrains/kastle/VersionRange;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class org/jetbrains/kastle/PackReference$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lorg/jetbrains/kastle/PackReference$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/kastle/PackReference;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/kastle/PackReference;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/kastle/PackReference$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public abstract interface class org/jetbrains/kastle/PackRepository {
 	public static final field Companion Lorg/jetbrains/kastle/PackRepository$Companion;
 	public abstract fun catalogs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun files ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun get (Lorg/jetbrains/kastle/PackId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getAll ()Lkotlinx/coroutines/flow/Flow;
-	public fun getAllWithRequirements (Ljava/util/Collection;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun groups ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun ids ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun read (Lorg/jetbrains/kastle/PackId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1145,7 +1114,6 @@ public final class org/jetbrains/kastle/PackRepository$Companion {
 public final class org/jetbrains/kastle/PackRepository$DefaultImpls {
 	public static fun files (Lorg/jetbrains/kastle/PackRepository;)Lkotlinx/coroutines/flow/Flow;
 	public static fun getAll (Lorg/jetbrains/kastle/PackRepository;)Lkotlinx/coroutines/flow/Flow;
-	public static fun getAllWithRequirements (Lorg/jetbrains/kastle/PackRepository;Ljava/util/Collection;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static fun readAll (Lorg/jetbrains/kastle/PackRepository;)Lkotlinx/coroutines/flow/Flow;
 	public static fun readAll (Lorg/jetbrains/kastle/PackRepository;Ljava/util/Collection;)Lkotlinx/coroutines/flow/Flow;
 	public static fun slot (Lorg/jetbrains/kastle/PackRepository;Lorg/jetbrains/kastle/SlotId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1154,6 +1122,30 @@ public final class org/jetbrains/kastle/PackRepository$DefaultImpls {
 
 public final class org/jetbrains/kastle/PackRepositoryKt {
 	public static final fun read (Lorg/jetbrains/kastle/PackRepository;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class org/jetbrains/kastle/PackRequirement {
+	public static final field Companion Lorg/jetbrains/kastle/PackRequirement$Companion;
+	public fun <init> (Lorg/jetbrains/kastle/PackId;Ljava/util/Map;)V
+	public synthetic fun <init> (Lorg/jetbrains/kastle/PackId;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/jetbrains/kastle/PackId;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (Lorg/jetbrains/kastle/PackId;Ljava/util/Map;)Lorg/jetbrains/kastle/PackRequirement;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/PackRequirement;Lorg/jetbrains/kastle/PackId;Ljava/util/Map;ILjava/lang/Object;)Lorg/jetbrains/kastle/PackRequirement;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getModules ()Ljava/util/Map;
+	public final fun getPackId ()Lorg/jetbrains/kastle/PackId;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/kastle/PackRequirement$Companion {
+	public final fun parse (Ljava/lang/String;)Lorg/jetbrains/kastle/PackRequirement;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/kastle/PackRequirementStringSerializer : org/jetbrains/kastle/CustomParserSerializer {
+	public fun <init> ()V
 }
 
 public final class org/jetbrains/kastle/PackSources {
@@ -2610,7 +2602,6 @@ public abstract class org/jetbrains/kastle/io/FileSystemPackRepository : org/jet
 	public fun files ()Lkotlinx/coroutines/flow/Flow;
 	public fun get (Lorg/jetbrains/kastle/PackId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getAll ()Lkotlinx/coroutines/flow/Flow;
-	public fun getAllWithRequirements (Ljava/util/Collection;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getExt ()Ljava/lang/String;
 	public final fun getFs ()Lkotlinx/io/files/FileSystem;
 	public final fun getRoot ()Lkotlinx/io/files/Path;

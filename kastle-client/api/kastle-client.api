@@ -5,7 +5,6 @@ public final class org/jetbrains/kastle/client/RemoteRepository : org/jetbrains/
 	public fun files ()Lkotlinx/coroutines/flow/Flow;
 	public fun get (Lorg/jetbrains/kastle/PackId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getAll ()Lkotlinx/coroutines/flow/Flow;
-	public fun getAllWithRequirements (Ljava/util/Collection;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun groups ()Lkotlinx/coroutines/flow/Flow;
 	public fun ids ()Lkotlinx/coroutines/flow/Flow;
 	public fun read (Lorg/jetbrains/kastle/PackId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
