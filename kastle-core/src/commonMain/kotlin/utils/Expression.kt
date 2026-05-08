@@ -225,6 +225,40 @@ sealed interface Expression {
                         else -> throw IllegalArgumentException("substring requires 1 or 2 arguments")
                     }
                 }
+                "substringBefore" -> {
+                    val delimiter = args.firstOrNull()?.toString()
+                        ?: throw IllegalArgumentException("substringBefore requires a delimiter argument")
+                    val missingDelimiterValue = args.getOrNull(1)?.toString() ?: receiver
+                    receiver.substringBefore(delimiter, missingDelimiterValue)
+                }
+                "substringAfter" -> {
+                    val delimiter = args.firstOrNull()?.toString()
+                        ?: throw IllegalArgumentException("substringAfter requires a delimiter argument")
+                    val missingDelimiterValue = args.getOrNull(1)?.toString() ?: receiver
+                    receiver.substringAfter(delimiter, missingDelimiterValue)
+                }
+                "substringBeforeLast" -> {
+                    val delimiter = args.firstOrNull()?.toString()
+                        ?: throw IllegalArgumentException("substringBeforeLast requires a delimiter argument")
+                    val missingDelimiterValue = args.getOrNull(1)?.toString() ?: receiver
+                    receiver.substringBeforeLast(delimiter, missingDelimiterValue)
+                }
+                "substringAfterLast" -> {
+                    val delimiter = args.firstOrNull()?.toString()
+                        ?: throw IllegalArgumentException("substringAfterLast requires a delimiter argument")
+                    val missingDelimiterValue = args.getOrNull(1)?.toString() ?: receiver
+                    receiver.substringAfterLast(delimiter, missingDelimiterValue)
+                }
+                "removePrefix" -> {
+                    val prefix = args.firstOrNull()?.toString()
+                        ?: throw IllegalArgumentException("removePrefix requires an argument")
+                    receiver.removePrefix(prefix)
+                }
+                "removeSuffix" -> {
+                    val suffix = args.firstOrNull()?.toString()
+                        ?: throw IllegalArgumentException("removeSuffix requires an argument")
+                    receiver.removeSuffix(suffix)
+                }
                 "replace" -> {
                     if (args.size != 2) throw IllegalArgumentException("replace requires 2 arguments")
                     receiver.replace(args[0].toString(), args[1].toString())

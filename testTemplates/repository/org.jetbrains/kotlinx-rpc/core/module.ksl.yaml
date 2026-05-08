@@ -1,0 +1,8 @@
+platforms: [jvm, android, ios, js, wasmJs]
+dependencies:
+  - $libs.kotlinx.rpc.serializationJson!
+  - $libs.kotlinx.rpc.core!
+gradle:
+  plugins:
+    - $libs.plugins.kotlinx.rpc
+    - $libs.plugins.kotlin.serialization

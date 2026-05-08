@@ -9,7 +9,6 @@ import kotlinx.io.files.FileSystem
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteString
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -24,6 +23,7 @@ import org.jetbrains.kastle.utils.extension
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kastle.utils.slotId
 import org.jetbrains.kastle.utils.takeIfSlot
+import org.jetbrains.kastle.yaml.PackRequirementYamlSerializer
 import org.jetbrains.kotlin.psi.KtFile
 import kotlin.collections.filterNot
 import kotlin.random.Random
@@ -43,12 +43,12 @@ class LocalPackRepository(
 ): PackRepository {
     private val handlebarsTemplateEngine = HandlebarsTemplateEngine(random)
     private val serializersModule = SerializersModule {
-        // TODO this doesn't work for some reason
         polymorphic(SourceFile::class) {
             defaultDeserializer { SourceTemplate.serializer() }
             subclass(StaticSource::class)
             subclass(SourceTemplate::class)
         }
+        contextual(PackRequirement::class, PackRequirementYamlSerializer())
     }
     private val yaml = Yaml(serializersModule)
 
@@ -109,7 +109,7 @@ class LocalPackRepository(
             val groupPath = projectPath.parent!!
             val manifestYaml = projectPath.resolve(PACK_YAML).readYamlNode()?.yamlMap ?: return null
             val filteredYaml = YamlMap(manifestYaml.entries.filterNot { it.key.content == PROPERTY_VALUES }, manifestYaml.path)
-            val manifest: PackManifest = Yaml.default.decodeFromYamlNode(filteredYaml) ?: return null
+            val manifest: PackManifest = yaml.decodeFromYamlNode(filteredYaml) ?: return null
             val properties = manifest.properties.toMutableList()
             val group = (manifest.group ?: projectPath.resolve("../$GROUP_YAML").readYaml() ?: Group()).let { group ->
                 group.copy(
@@ -427,9 +427,12 @@ class LocalPackRepository(
             }
         }
 
+        val moduleCondition = moduleYaml.get<YamlScalar>("if")?.content?.let(expressionParser::parse)
+
         return SourceModule(
             manifest = manifest,
             sources = sources.dedupeFiles() + resources,
+            condition = moduleCondition?.let { Condition(it, packId) },
         )
     }
 
@@ -542,9 +545,4 @@ class LocalPackRepository(
         if (packageDir.isEmpty()) return this
         return resolve(packageDir)
     }
-
-    @Serializable
-    data class BuiltInToml(
-        val libraries: Map<String, ArtifactDependency>,
-    )
 }

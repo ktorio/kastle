@@ -1,5 +1,6 @@
 package org.jetbrains.kastle
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.utils.StringExpression
 
@@ -15,7 +16,7 @@ sealed interface PackMetadata {
     val tags: List<String>
     val links: PackLinks?
     val documentation: String?
-    val requires: List<PackId>
+    val requires: List<PackRequirement>
     val properties: List<PropertyDescriptor>
     val repositories: List<MavenRepository>
     val pluginRepositories: List<MavenRepository>
@@ -24,7 +25,7 @@ sealed interface PackMetadata {
 
 @Serializable
 data class PackManifest(
-    override val id: PackId = PackId("", ""),
+    override val id: PackId = PackId.PLACEHOLDER,
     override val name: String,
     override val version: SemanticVersion = SemanticVersion(1, 0, 0),
     override val group: Group? = null,
@@ -34,7 +35,7 @@ data class PackManifest(
     override val description: String? = null,
     override val links: PackLinks? = null,
     override val documentation: String? = null,
-    override val requires: List<PackId> = emptyList(),
+    override val requires: List<@Contextual PackRequirement> = emptyList(),
     override val properties: List<PropertyDescriptor> = emptyList(),
     override val repositories: List<MavenRepository> = emptyList(),
     override val pluginRepositories: List<MavenRepository> = emptyList(),
@@ -110,13 +111,6 @@ data class Group(
     val email: String? = null,
 )
 
-// TODO use versioned requirements
-@Serializable
-data class PackReference(
-    val id: PackId,
-    val version: VersionRange
-)
-
 @Serializable
 data class PackLinks(
     val vcs: String? = null,
@@ -134,14 +128,63 @@ data class SlotDescriptor(
 @Serializable(PackIdSerializer::class)
 data class PackId(val group: String, val id: String) {
     companion object {
+        internal val ID_REGEX = Regex("""^[a-z0-9][a-z0-9-.]*[a-z0-9]$""")
+        // used during parsing
+        internal val PLACEHOLDER = PackId("null", "null")
+
         fun parse(text: String) = text.split('/', limit = 2).let { split ->
             require(split.size == 2) { "Invalid pack id: $text" }
             val (group, pack) = split
             PackId(group, pack)
         }
     }
+    init {
+        require(group.matches(ID_REGEX)) { "Invalid group id: $group" }
+        require(id.matches(ID_REGEX)) { "Invalid pack id: $id" }
+    }
+
     override fun toString(): String =
         "$group/$id"
+}
+
+
+@Serializable(PackRequirementStringSerializer::class)
+data class PackRequirement(
+    val packId: PackId,
+    val modules: Map<String, String> = emptyMap(),
+) {
+    companion object {
+        /**
+         * This format is not used in the manifests, only for later serialization.
+         */
+        fun parse(input: String): PackRequirement {
+            val split = input.split('|', limit = 2)
+            return when(split.size) {
+                1 -> PackRequirement(packId = PackId.parse(split[0].trim()))
+                2 -> {
+                    val (packIdString, modulesString) = split
+                    PackRequirement(
+                        packId = PackId.parse(packIdString.trim()),
+                        modules = modulesString.split(',').associate { term ->
+                            val (key, value) = term.split('=', limit = 2)
+                            key.trim() to value.trim()
+                        }
+                    )
+                }
+                else -> error("Invalid pack requirement: $input")
+            }
+        }
+    }
+
+    override fun toString(): String =
+        buildString {
+            append(packId)
+            if (modules.isNotEmpty()) {
+                append('|')
+                append(modules.entries.joinToString(",") { (key, value) -> "$key=$value" })
+            }
+        }
+
 }
 
 @Serializable(VariableIdSerializer::class)

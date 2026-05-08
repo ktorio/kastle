@@ -1,0 +1,4 @@
+if: includeDefault
+platform: jvm
+testDependencies:
+  - $libs.junit

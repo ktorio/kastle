@@ -4,21 +4,42 @@ import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.structure.BuildToolModules
 import org.jetbrains.kastle.utils.TreeMap
+import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.isFile
 import org.jetbrains.kastle.utils.isSlot
+import org.jetbrains.kastle.utils.isTruthy
 import org.jetbrains.kastle.utils.merge
 import kotlin.collections.groupBy
 
 fun interface ProjectResolver {
     companion object {
         val BaseImpl = ProjectResolver { descriptor, repository ->
-            val packs = repository.getAllWithRequirements(descriptor.packs)
-                .toList()
-                .distinctBy { it.id }
-            val moduleSources = packs.asSequence()
-                .map { it.sources.modules }
-                .reduceOrNull(ProjectModules::plus)
-                ?.flatten() ?: ProjectModules.Empty
+            val chosenPacks = repository.readAll(descriptor.packs).toList()
+            var moduleSources: ProjectModules = ProjectModules.Empty
+            val packs = chosenPacks.toMutableList()
+            val requirementsVisited = descriptor.packs
+                .map(::PackRequirement)
+                .toMutableSet()
+
+            // Collect all module sources
+            // This allows for remapping modules in requirements
+            for (pack in chosenPacks) {
+                moduleSources += pack.sources.modules
+                for (requirement in pack.requires) {
+                    if (!requirementsVisited.add(requirement))
+                        continue
+                    val requiredPack = repository.read(requirement.packId)
+                        ?: throw MissingPackException(requirement.packId)
+                    packs += requiredPack
+                    moduleSources += requiredPack.sources.modules.map { module ->
+                        val replacementPath = requirement.modules[module.path] ?: return@map module
+                        module.copy(manifest = module.manifest.copy(path = replacementPath),)
+                    }
+                }
+            }
+            // Remove empty intermediate modules
+            moduleSources = moduleSources.flatten()
+
             // TODO need to resolve target expression before grouping here
             val slotSources: SourcesByUrl = packs.asSequence()
                 .flatMap { it.commonAndRootSources }
@@ -70,7 +91,11 @@ fun interface ProjectResolver {
             val projectCatalog = TreeMap<String, CatalogArtifact>()
             val gradlePlugins = TreeMap<String, GradlePlugin>()
 
+            val eagerVars = eagerVariables(properties)
+
             for (module in moduleSources.modules) {
+                if (!isModuleActive(module, eagerVars)) continue
+
                 for (catalogRef in module.gradlePlugins) {
                     val catalogKey = catalogRef.tomlKey
                     // ignore plugins outside libs
@@ -178,6 +203,14 @@ fun interface ProjectResolver {
             } catch (e: Exception) {
                 throw IllegalArgumentException("Failed to read property $variableId: ${e.message}", e)
             }
+        }
+
+        private fun isModuleActive(
+            module: SourceModule,
+            eagerVars: Variables,
+        ): Boolean {
+            val condition = module.condition ?: return true
+            return condition.expression.evaluate(eagerVars.relativeTo(condition.packId)).isTruthy()
         }
 
         private operator fun ProjectModules.plus(rootSources: List<SourceFile>): ProjectModules =
