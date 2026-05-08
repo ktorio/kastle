@@ -22,7 +22,7 @@ fun Appendable.writeKotlinSourcePreamble(
     skipPackage: Boolean,
 ): Int {
     val dir = target.parentPath
-        .replace(Regex("^/?/?(?:src(?:@\\w+)?)?(?:/\\w*(?:main|test)/\\w+)?/?", RegexOption.IGNORE_CASE), "")
+        .replace(Regex("^/?/?(?:(?:src|test)(?:@\\w+)?)?(?:/\\w*(?:main|test)/\\w+)?/?", RegexOption.IGNORE_CASE), "")
         .replace('/', '.')
         .removePrefix(groupId) // when using nested structure
 
