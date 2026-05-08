@@ -167,6 +167,13 @@ fun ProjectGeneratorTest(
         )
     }
 
+    "wildcard sources with explicit target directory" {
+        generateAndValidateSnapshot(
+            "wildcard-target",
+            listOf("com.acme/wildcard-target"),
+        )
+    }
+
     "target expressions" {
         val outputDir = Path(SystemTemporaryDirectory, "generated", "target-expressions", randomString())
         generate(outputDir, "target-expressions", packs = listOf("com.acme/target-expressions"), properties = mapOf(
