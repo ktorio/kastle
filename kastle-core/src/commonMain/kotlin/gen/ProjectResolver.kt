@@ -223,15 +223,6 @@ fun interface ProjectResolver {
                     copy(modules = modules + SourceModule(sources = rootSources))
             }
 
-        private fun isModuleActive(
-            module: SourceModule,
-            eagerVars: Variables,
-        ): Boolean {
-            val condition = module.condition ?: return true
-            val packId = module.conditionPackId ?: return true
-            return condition.evaluate(eagerVars.relativeTo(packId)).isTruthy()
-        }
-
         /**
          * Builds a [Variables] from resolved and simple value-assigned properties,
          * sufficient for evaluating module-level conditions before full variable resolution.
