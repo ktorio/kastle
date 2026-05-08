@@ -21,7 +21,6 @@ internal fun Project.resolvedVariables(modulePath: String?): Variables {
     return Variables(listOfNotNull(rootScope, moduleScope))
 }
 
-// TODO relativize dynamic variableIds
 internal fun Project.dynamicVariables(
     modulePath: String?,
     variables: LocalVariables,
@@ -34,7 +33,6 @@ internal fun Project.dynamicVariables(
         if (propertyInstance !is DynamicProperty) return@mapNotNull null
         variableId to propertyInstance
     }.toMutableList()
-    var evaluationFailed = false
 
     fun DynamicProperty.evaluate(
         assignment: PropertyAssignment,
@@ -50,40 +48,92 @@ internal fun Project.dynamicVariables(
 
     // to allow resolution of other values in the current map,
     // keep trying to resolve properties until no progress is made
-    while (dynamicProperties.isNotEmpty()) {
-        val initialSize = dynamicProperties.size
-        val iterator = dynamicProperties.listIterator()
-        while (iterator.hasNext()) {
-            val (variableId, property) = iterator.next()
-            val evalResult = try {
-                // lists should accept multiple element assignments or a single list assignment
-                // TODO leverage the type system better here, this is messy
-                if (property.descriptor.type.isList()) {
-                    property.assignments.map { assignment ->
-                        property.evaluate(assignment, property.descriptor.type.elementType!!)
-                    }.let { result ->
-                        result.flatMap { elem ->
-                            when(elem) {
-                                is List<*> -> elem
-                                else -> listOf(elem)
-                            }
-                        }
-                    }
-                } else {
-                    property.evaluate(
-                        property.assignments.singleOrNull()
-                            ?: error("Multiple values supplied for property ${property.descriptor.key}")
-                    )
+    resolveIteratively(dynamicProperties, throwOnStuck = true) { (variableId, property) ->
+        // lists should accept multiple element assignments or a single list assignment
+        // TODO leverage the type system better here, this is messy
+        resolved[variableId] = if (property.descriptor.type.isList()) {
+            property.assignments.map { assignment ->
+                property.evaluate(assignment, property.descriptor.type.elementType!!)
+            }.flatMap { elem ->
+                when (elem) {
+                    is List<*> -> elem
+                    else -> listOf(elem)
                 }
-            } catch (e: Exception) {
-                if (evaluationFailed) throw e
-                continue
             }
-            resolved[variableId] = evalResult
-            iterator.remove()
+        } else {
+            property.evaluate(
+                property.assignments.singleOrNull()
+                    ?: error("Multiple values supplied for property ${property.descriptor.key}")
+            )
         }
-        evaluationFailed = initialSize == dynamicProperties.size
     }
 
     return resolved
+}
+
+/**
+ * Builds a [Variables] from resolved and simple value-assigned properties,
+ * sufficient for evaluating module-level conditions before full variable resolution.
+ *
+ * Expression-assigned properties are also evaluated iteratively: if all variables
+ * referenced by an expression are resolvable from the eager set, the result is included.
+ * Expressions that cannot be resolved are silently skipped.
+ */
+internal fun eagerVariables(
+    properties: Map<PropertyScope, Map<VariableId, PropertyInstance>>
+): Variables {
+    val resolved = mutableMapOf<VariableId, Any?>()
+    val pending = mutableListOf<Triple<VariableId, PropertyDescriptor, ExpressionAssignment>>()
+
+    properties[PropertyScope.Root]?.forEach { (variableId, instance) ->
+        when (instance) {
+            is ResolvedProperty -> resolved[variableId] = instance.value
+            is DynamicProperty -> when (val assignment = instance.assignments.singleOrNull()) {
+                is ValueAssignment -> resolved[variableId] = instance.descriptor.type.parse(assignment.value)
+                is ExpressionAssignment -> pending.add(Triple(variableId, instance.descriptor, assignment))
+                else -> {}
+            }
+            else -> {}
+        }
+    }
+
+    resolveIteratively(pending, throwOnStuck = false) { (variableId, descriptor, assignment) ->
+        resolved[variableId] = descriptor.type.cast(
+            assignment.expression.evaluate(Variables(resolved).relativeTo(assignment.packId))
+        )
+    }
+
+    return Variables(listOf(resolved))
+}
+
+/**
+ * Iterates over [pending] items, calling [tryOne] for each.
+ * Items for which [tryOne] succeeds (no exception) are removed from [pending].
+ * Repeats until [pending] is empty or a full pass makes no progress.
+ *
+ * When [throwOnStuck] is true, a no-progress pass arms an "evaluationFailed" flag,
+ * and any subsequent exception is re-thrown (mirrors dependency-resolution semantics).
+ * When [throwOnStuck] is false, the loop exits silently on no progress.
+ */
+private fun <T> resolveIteratively(
+    pending: MutableList<T>,
+    throwOnStuck: Boolean,
+    tryOne: (T) -> Unit,
+) {
+    var stuck = false
+    while (pending.isNotEmpty()) {
+        val initialSize = pending.size
+        val iterator = pending.listIterator()
+        while (iterator.hasNext()) {
+            val item = iterator.next()
+            try {
+                tryOne(item)
+                iterator.remove()
+            } catch (e: Exception) {
+                if (stuck && throwOnStuck) throw e
+            }
+        }
+        stuck = pending.size == initialSize
+        if (stuck && !throwOnStuck) break
+    }
 }

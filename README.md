@@ -45,7 +45,7 @@ Usage:
 | [kastle-local](kastle-local)         | Human-readable repository, designed for export                 |
 | [kastle-server](kastle-server)       | The HTTP server for building projects from various clients     |
 | [kastle-client](kastle-client)       | For making calls to the server from IDE's, websites, etc.      |
-| [repository](repository)             | Contains all sample PACKs for creating new projects.           |
+| [testTemplates](testTemplates)       | Contains all sample PACKs for creating new projects.           |
 
 ## Using as a Library
 

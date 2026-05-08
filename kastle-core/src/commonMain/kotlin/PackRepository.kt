@@ -101,23 +101,6 @@ interface PackRepository {
         packIds.asFlow().map { read(it) ?: throw MissingPackException(it) }
 
     /**
-     * Get full details of the selected packs AND all their dependencies.
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun getAllWithRequirements(packIds: Collection<PackId>): Flow<PackDescriptor> =
-        packIds.asFlow().flatMapConcat { packId ->
-            flow {
-                try {
-                    val pack = read(packId) ?: throw MissingPackException(packId)
-                    emit(pack)
-                    emitAll(getAllWithRequirements(pack.requires.filter { it !in packIds }))
-                } catch (cause: Throwable) {
-                    throw PackReadException(packId, cause)
-                }
-            }
-        }
-
-    /**
      * Get a slot by its ID.
      */
     suspend fun slot(slotId: SlotId): SlotDescriptor? =

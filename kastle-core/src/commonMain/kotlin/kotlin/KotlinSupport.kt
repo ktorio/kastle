@@ -21,7 +21,7 @@ fun Appendable.writeKotlinSourcePreamble(
     extraImports: List<SourceImport>,
     skipPackage: Boolean,
 ): Int {
-    val dir = Regex("(?:src(?:@\\w+)?/\\w*(?:main|test)/\\w+)/?", RegexOption.IGNORE_CASE)
+    val dir = Regex("(?:(?:src|test)(?:@\\w+)?/\\w*(?:main|test)/\\w+)/?", RegexOption.IGNORE_CASE)
         .find(target.parentPath)
         ?.let { target.parentPath.substring(it.range.last + 1) }
         .orEmpty()

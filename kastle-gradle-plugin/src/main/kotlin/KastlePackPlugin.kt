@@ -134,12 +134,12 @@ abstract class KastlePackPlugin : Plugin<Project> {
 
                             // Inter-pack dependencies
                             // We guess the correct module to require here based on the platforms.
-                            for (requiredPackId in pack.requires) {
+                            for (packRequirement in pack.requires) {
                                 project.addPackDependency(
                                     pack.id,
                                     module,
                                     apiConfigurationName,
-                                    repository.readPackBlocking(requiredPackId)
+                                    repository.readPackBlocking(packRequirement)
                                 )
                             }
 
@@ -234,12 +234,12 @@ abstract class KastlePackPlugin : Plugin<Project> {
             )
 
             // Inter-pack dependencies
-            for (requiredPackId in pack.requires) {
+            for (packRequirement in pack.requires) {
                 project.addPackDependency(
                     pack.id,
                     module,
                     "implementation",
-                    repository.readPackBlocking(requiredPackId)
+                    repository.readPackBlocking(packRequirement)
                 )
             }
 
@@ -254,8 +254,8 @@ abstract class KastlePackPlugin : Plugin<Project> {
         }
     }
 
-    private fun PackRepository.readPackBlocking(packId: PackId): PackDescriptor {
-        return runBlocking { read(packId) } ?: error("Pack $packId is missing")
+    private fun PackRepository.readPackBlocking(requirement: PackRequirement): PackDescriptor {
+        return runBlocking { read(requirement.packId) } ?: error("Pack ${requirement.packId} is missing")
     }
 
     private fun Project.addPackDependency(
@@ -264,7 +264,7 @@ abstract class KastlePackPlugin : Plugin<Project> {
         configurationName: String,
         requiredPack: PackDescriptor
     ) {
-        val requiredPackId = requiredPack.id
+        val packRequirement = requiredPack.id
         try {
             val requiredModule = when (val requiredPackModules = requiredPack.sources.modules) {
                 is ProjectModules.Single -> requiredPackModules.module.takeIf { it.platforms.containsAll(module.platforms) }
@@ -272,13 +272,13 @@ abstract class KastlePackPlugin : Plugin<Project> {
                 is ProjectModules.Empty -> null
             }
             if (requiredModule == null) {
-                logger.lifecycle("Skipping $requiredPackId for ${currentPackId}/${module.path}; no applicable module")
+                logger.lifecycle("Skipping $packRequirement for ${currentPackId}/${module.path}; no applicable module")
             } else {
-                val projectRef = requiredPackId.toProjectRef(requiredModule.path)
+                val projectRef = packRequirement.toProjectRef(requiredModule.path)
                 dependencies.add(configurationName, project.project(projectRef))
             }
         } catch (e: Exception) {
-            logger.error("Cannot resolve {} for $currentPackId", requiredPackId, e)
+            logger.error("Cannot resolve {} for $currentPackId", packRequirement, e)
         }
     }
 
@@ -327,12 +327,12 @@ abstract class KastlePackPlugin : Plugin<Project> {
                                 this
                             )
 
-                            for (requiredPackId in pack.requires) {
+                            for (packRequirement in pack.requires) {
                                 project.addPackDependency(
                                     pack.id,
                                     module,
                                     apiConfigurationName,
-                                    repository.readPackBlocking(requiredPackId)
+                                    repository.readPackBlocking(packRequirement)
                                 )
                             }
 
