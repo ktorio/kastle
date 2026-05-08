@@ -21,10 +21,15 @@ fun Appendable.writeKotlinSourcePreamble(
     extraImports: List<SourceImport>,
     skipPackage: Boolean,
 ): Int {
-    val dir = target.parentPath
-        .replace(Regex("^/?/?(?:(?:src|test)(?:@\\w+)?)?(?:/\\w*(?:main|test)/\\w+)?/?", RegexOption.IGNORE_CASE), "")
+    val dir = Regex("(?:(?:src|test)(?:@\\w+)?)?/\\w*(?:main|test)/\\w+/?", RegexOption.IGNORE_CASE)
+        // find a match in input (src/commonMain/kotlin in src/commonMain/kotlin/com/example):
+        .find(target.parentPath)
+        // delete the source root part (src/commonMain/kotlin/com/example → com/example):
+        ?.let { target.parentPath.substring(it.range.last + 1) }.orEmpty()
+        // convert to package notation (com/example → com.example):
         .replace('/', '.')
-        .removePrefix(groupId) // when using nested structure
+        // avoid duplicating groupId when the directory structure mirrors it (com.example → "" so pkg = groupId):
+        .removePrefix(groupId)
 
     val pkg = if (dir.isEmpty()) groupId else "${groupId}.$dir"
 
