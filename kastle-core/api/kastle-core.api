@@ -353,6 +353,35 @@ public final class org/jetbrains/kastle/CatalogVersionSerializer : kotlinx/seria
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/kastle/CatalogVersion;)V
 }
 
+public final class org/jetbrains/kastle/Condition {
+	public static final field Companion Lorg/jetbrains/kastle/Condition$Companion;
+	public fun <init> (Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;)V
+	public final fun component1 ()Lorg/jetbrains/kastle/utils/Expression;
+	public final fun component2 ()Lorg/jetbrains/kastle/PackId;
+	public final fun copy (Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;)Lorg/jetbrains/kastle/Condition;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/Condition;Lorg/jetbrains/kastle/utils/Expression;Lorg/jetbrains/kastle/PackId;ILjava/lang/Object;)Lorg/jetbrains/kastle/Condition;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExpression ()Lorg/jetbrains/kastle/utils/Expression;
+	public final fun getPackId ()Lorg/jetbrains/kastle/PackId;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class org/jetbrains/kastle/Condition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/kastle/Condition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/kastle/Condition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/kastle/Condition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/kastle/Condition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class org/jetbrains/kastle/ConditionalBlock : org/jetbrains/kastle/Block {
 	public static final field Companion Lorg/jetbrains/kastle/ConditionalBlock$Companion;
 	public fun <init> (Lorg/jetbrains/kastle/BlockPosition;)V
@@ -2000,14 +2029,16 @@ public final class org/jetbrains/kastle/SourceImports$Companion {
 public final class org/jetbrains/kastle/SourceModule : org/jetbrains/kastle/SourceModuleMetadata {
 	public static final field Companion Lorg/jetbrains/kastle/SourceModule$Companion;
 	public fun <init> ()V
-	public fun <init> (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;)V
-	public synthetic fun <init> (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;Lorg/jetbrains/kastle/Condition;)V
+	public synthetic fun <init> (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;Lorg/jetbrains/kastle/Condition;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/jetbrains/kastle/SourceModuleManifest;
 	public final fun component2 ()Ljava/util/List;
-	public final fun copy (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;)Lorg/jetbrains/kastle/SourceModule;
-	public static synthetic fun copy$default (Lorg/jetbrains/kastle/SourceModule;Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/kastle/SourceModule;
+	public final fun component3 ()Lorg/jetbrains/kastle/Condition;
+	public final fun copy (Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;Lorg/jetbrains/kastle/Condition;)Lorg/jetbrains/kastle/SourceModule;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/SourceModule;Lorg/jetbrains/kastle/SourceModuleManifest;Ljava/util/List;Lorg/jetbrains/kastle/Condition;ILjava/lang/Object;)Lorg/jetbrains/kastle/SourceModule;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getAmper ()Lorg/jetbrains/kastle/AmperSettings;
+	public final fun getCondition ()Lorg/jetbrains/kastle/Condition;
 	public fun getDependencies ()Ljava/util/Map;
 	public fun getGradle ()Lorg/jetbrains/kastle/GradleSettings;
 	public final fun getManifest ()Lorg/jetbrains/kastle/SourceModuleManifest;

@@ -4,8 +4,10 @@ import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.structure.BuildToolModules
 import org.jetbrains.kastle.utils.TreeMap
+import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kastle.utils.isFile
 import org.jetbrains.kastle.utils.isSlot
+import org.jetbrains.kastle.utils.isTruthy
 import org.jetbrains.kastle.utils.merge
 import kotlin.collections.groupBy
 
@@ -68,7 +70,11 @@ fun interface ProjectResolver {
             val projectCatalog = TreeMap<String, CatalogArtifact>()
             val gradlePlugins = TreeMap<String, GradlePlugin>()
 
+            val eagerVars = eagerVariables(properties)
+
             for (module in moduleSources.modules) {
+                if (!isModuleActive(module, eagerVars)) continue
+
                 for (catalogRef in module.gradlePlugins) {
                     val catalogKey = catalogRef.tomlKey
                     // ignore plugins outside libs
@@ -166,6 +172,14 @@ fun interface ProjectResolver {
             } catch (e: Exception) {
                 throw IllegalArgumentException("Failed to read property $variableId: ${e.message}", e)
             }
+        }
+
+        private fun isModuleActive(
+            module: SourceModule,
+            eagerVars: Variables,
+        ): Boolean {
+            val condition = module.condition ?: return true
+            return condition.expression.evaluate(eagerVars.relativeTo(condition.packId)).isTruthy()
         }
 
         private operator fun ProjectModules.plus(rootSources: List<SourceFile>): ProjectModules =

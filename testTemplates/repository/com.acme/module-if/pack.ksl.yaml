@@ -1,0 +1,13 @@
+name: Module If
+description: Test module-level if conditions
+properties:
+  - key: includeModule
+    type: boolean
+    default: false
+  - key: includeDefault
+    type: boolean
+    default: true
+    hidden: true
+rootSources:
+  - target: file:base.txt
+    text: "base"

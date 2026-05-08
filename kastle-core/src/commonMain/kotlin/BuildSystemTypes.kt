@@ -2,6 +2,7 @@ package org.jetbrains.kastle
 
 import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.ProjectModules.*
+import org.jetbrains.kastle.utils.Expression
 import org.jetbrains.kastle.utils.TreeMap.Companion.toTreeMap
 import org.jetbrains.kastle.utils.unwrapQuotes
 import org.jetbrains.kastle.utils.wrapQuotes
@@ -243,9 +244,16 @@ fun SourceModuleMetadata.fullPath(packId: PackId) =
     if (path.isEmpty()) packId.toString() else "$packId/$path"
 
 @Serializable
+data class Condition(
+    val expression: Expression,
+    val packId: PackId,
+)
+
+@Serializable
 data class SourceModule(
     val manifest: SourceModuleManifest = SourceModuleManifest(),
     val sources: List<SourceFile> = emptyList(),
+    val condition: Condition? = null,
 ): SourceModuleMetadata by manifest
 
 typealias DependenciesMap = Map<Platform, Set<Dependency>>
@@ -346,7 +354,8 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
     return manifest.tryMerge(other.manifest)?.let { manifest ->
         SourceModule(
             manifest = manifest,
-            sources = sources + other.sources
+            sources = sources + other.sources,
+            condition = condition ?: other.condition, // TODO: merge conditions with logical AND
         )
     }
 }
