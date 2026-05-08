@@ -355,7 +355,7 @@ fun SourceModule.tryMerge(other: SourceModule): SourceModule? {
         SourceModule(
             manifest = manifest,
             sources = sources + other.sources,
-            condition = condition ?: other.condition,
+            condition = condition ?: other.condition, // TODO: merge conditions with logical AND
         )
     }
 }
