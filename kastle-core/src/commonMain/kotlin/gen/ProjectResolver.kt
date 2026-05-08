@@ -223,29 +223,6 @@ fun interface ProjectResolver {
                     copy(modules = modules + SourceModule(sources = rootSources))
             }
 
-        /**
-         * Builds a [Variables] from resolved and simple value-assigned properties,
-         * sufficient for evaluating module-level conditions before full variable resolution.
-         */
-        private fun eagerVariables(
-            properties: Map<PropertyScope, Map<VariableId, PropertyInstance>>
-        ): Variables {
-            val rootMap = properties[PropertyScope.Root]
-                ?.entries
-                ?.mapNotNull { (variableId, instance) ->
-                    when (instance) {
-                        is ResolvedProperty -> variableId to instance.value
-                        is DynamicProperty -> {
-                            val assignment = instance.assignments.singleOrNull() as? ValueAssignment
-                                ?: return@mapNotNull null
-                            variableId to instance.descriptor.type.parse(assignment.value)
-                        }
-                        else -> null
-                    }
-                }?.toMap() ?: emptyMap()
-            return Variables(listOf(rootMap))
-        }
-
         private fun missingDependency(dependency: Dependency): Nothing =
             throw IllegalArgumentException("Missing dependency $dependency")
 
