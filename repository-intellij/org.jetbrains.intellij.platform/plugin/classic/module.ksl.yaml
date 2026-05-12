@@ -11,9 +11,7 @@ sources:
   - path: settings.gradle.kts
     target: file:../settings.gradle.kts
 
-  # README and friends
-  - path: CHANGELOG.md.hbs
-    target: file:../CHANGELOG.md
+  # README
   - path: README.md.hbs
     target: file:../README.md
 
