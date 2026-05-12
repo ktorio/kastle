@@ -140,14 +140,70 @@ data class TemplateBuildDependency(
     val version: String? = null,
     val versionRef: String? = null,
     val path: String? = null,
-    val reference: String? = null,
     val gradlePath: String? = null,
-    val typesafeProjectAccessor: String? = null,
     val key: String? = null,
     val functionName: String? = null,
     val args: List<String>? = null,
-    val scope: String = "implementation",
-)
+    @Deprecated("Use scope == \"api\" instead.", ReplaceWith("scope == \"api\""))
+    val exported: Boolean = false,
+    val reference: String? = null,
+    val typesafeProjectAccessor: String? = null,
+    val scope: String = if (exported) "api" else "implementation",
+) {
+    constructor(
+        type: String,
+        group: String? = null,
+        artifact: String? = null,
+        version: String? = null,
+        versionRef: String? = null,
+        path: String? = null,
+        gradlePath: String? = null,
+        key: String? = null,
+        functionName: String? = null,
+        args: List<String>? = null,
+        exported: Boolean = false,
+    ): this(
+        type = type,
+        group = group,
+        artifact = artifact,
+        version = version,
+        versionRef = versionRef,
+        path = path,
+        gradlePath = gradlePath,
+        key = key,
+        functionName = functionName,
+        args = args,
+        exported = exported,
+        scope = if (exported) "api" else "implementation",
+    )
+
+    @Suppress("DEPRECATION")
+    fun copy(
+        type: String = this.type,
+        group: String? = this.group,
+        artifact: String? = this.artifact,
+        version: String? = this.version,
+        versionRef: String? = this.versionRef,
+        path: String? = this.path,
+        gradlePath: String? = this.gradlePath,
+        key: String? = this.key,
+        functionName: String? = this.functionName,
+        args: List<String>? = this.args,
+        exported: Boolean = this.exported,
+    ): TemplateBuildDependency = TemplateBuildDependency(
+        type = type,
+        group = group,
+        artifact = artifact,
+        version = version,
+        versionRef = versionRef,
+        path = path,
+        gradlePath = gradlePath,
+        key = key,
+        functionName = functionName,
+        args = args,
+        exported = exported,
+    )
+}
 
 @Serializable
 data class TemplateGradlePlugin(

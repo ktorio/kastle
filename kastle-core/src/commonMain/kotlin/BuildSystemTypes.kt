@@ -412,26 +412,41 @@ sealed interface Dependency {
     }
 
     val scope: String
+
+    @Deprecated("Use scope == Dependency.EXPORTED_SCOPE instead.", ReplaceWith("scope == Dependency.EXPORTED_SCOPE"))
+    val exported: Boolean
 }
 
 context(dependency: Dependency)
 private fun StringBuilder.appendScope(): StringBuilder = when (val scope = dependency.scope) {
     DEFAULT_SCOPE -> ""
     EXPORTED_SCOPE -> "!"
-    else -> scope
+    else -> "!$scope"
 }.let(::append)
 
 @Serializable(CatalogReferenceSerializer::class)
 data class CatalogReference(
     val key: String,
-    override val scope: String,
+    @Deprecated("Use scope == Dependency.EXPORTED_SCOPE instead.", ReplaceWith("scope == Dependency.EXPORTED_SCOPE"))
+    override val exported: Boolean = false,
+    override val scope: String = if (exported) EXPORTED_SCOPE else DEFAULT_SCOPE,
 ): Dependency {
+    constructor(
+        key: String,
+        exported: Boolean = false,
+    ): this(
+        key = key,
+        exported = exported,
+        scope = if (exported) EXPORTED_SCOPE else DEFAULT_SCOPE,
+    )
+
     companion object {
         fun parse(text: String): CatalogReference {
             val scope = parseScope(text)
             val text = text.substringBefore('!')
             return CatalogReference(
                 key = text.trimStart('$'),
+                exported = scope == EXPORTED_SCOPE,
                 scope = scope,
             )
         }
@@ -440,6 +455,12 @@ data class CatalogReference(
     val catalog get() = key.substringBefore('.')
     val keyInCatalog get() = key.removePrefix("$catalog.").removePrefix("plugins.")
     val tomlKey: String get() = keyInCatalog.replace('.', '-')
+
+    @Suppress("DEPRECATION")
+    fun copy(
+        key: String = this.key,
+        exported: Boolean = this.exported,
+    ): CatalogReference = CatalogReference(key, exported)
 
     override fun toString(): String = buildString {
         append('$')
@@ -463,8 +484,23 @@ data class ArtifactDependency(
     val group: String,
     val artifact: String,
     val version: String,
-    override val scope: String,
+    @Deprecated("Use scope == Dependency.EXPORTED_SCOPE instead.", ReplaceWith("scope == Dependency.EXPORTED_SCOPE"))
+    override val exported: Boolean = false,
+    override val scope: String = if (exported) EXPORTED_SCOPE else DEFAULT_SCOPE,
 ): Dependency {
+    constructor(
+        group: String,
+        artifact: String,
+        version: String,
+        exported: Boolean = false,
+    ): this(
+        group = group,
+        artifact = artifact,
+        version = version,
+        exported = exported,
+        scope = if (exported) EXPORTED_SCOPE else DEFAULT_SCOPE,
+    )
+
     companion object {
         fun parse(text: String): ArtifactDependency {
             val scope = parseScope(text)
@@ -472,9 +508,17 @@ data class ArtifactDependency(
             val segments = text.split(':', limit = 3)
             require(segments.size == 3) { "Invalid dependency string: $text" }
             val (group, artifact, version) = segments
-            return ArtifactDependency(group, artifact, version, scope = scope)
+            return ArtifactDependency(group, artifact, version, exported = scope == EXPORTED_SCOPE, scope = scope)
         }
     }
+
+    @Suppress("DEPRECATION")
+    fun copy(
+        group: String = this.group,
+        artifact: String = this.artifact,
+        version: String = this.version,
+        exported: Boolean = this.exported,
+    ): ArtifactDependency = ArtifactDependency(group, artifact, version, exported)
 
     override fun toString(): String = buildString {
         append("$group:$artifact:$version")
@@ -486,8 +530,20 @@ data class ArtifactDependency(
 data class FunctionDependency(
     val functionName: String,
     val args: List<String> = emptyList(),
-    override val scope: String,
+    @Deprecated("Use scope == Dependency.EXPORTED_SCOPE instead.", ReplaceWith("scope == Dependency.EXPORTED_SCOPE"))
+    override val exported: Boolean = false,
+    override val scope: String = if (exported) EXPORTED_SCOPE else DEFAULT_SCOPE,
 ): Dependency {
+    constructor(
+        functionName: String,
+        args: List<String> = emptyList(),
+    ): this(
+        functionName = functionName,
+        args = args,
+        exported = false,
+        scope = DEFAULT_SCOPE,
+    )
+
     companion object {
         private val functionPattern = Regex("""^([a-zA-Z_]\w*)(?:\((.*)\))?$""")
 
@@ -499,10 +555,16 @@ data class FunctionDependency(
             return FunctionDependency(
                 functionName,
                 args.split(',').map { it.trim().unwrapQuotes() },
+                exported = scope == EXPORTED_SCOPE,
                 scope = scope
             )
         }
     }
+
+    fun copy(
+        functionName: String = this.functionName,
+        args: List<String> = this.args,
+    ): FunctionDependency = FunctionDependency(functionName, args)
 
     override fun toString(): String = buildString {
         append(functionName)
@@ -517,7 +579,9 @@ data class FunctionDependency(
 @Serializable
 data class ReferenceDependency(
     val reference: String,
-    override val scope: String,
+    @Deprecated("Use scope == Dependency.EXPORTED_SCOPE instead.", ReplaceWith("scope == Dependency.EXPORTED_SCOPE"))
+    override val exported: Boolean = false,
+    override val scope: String = if (exported) EXPORTED_SCOPE else DEFAULT_SCOPE,
 ): Dependency {
     companion object {
         private val referencePattern = Regex("""^([a-zA-Z_]\w*)(\.([a-zA-Z_]\w*))*$""")
@@ -526,7 +590,7 @@ data class ReferenceDependency(
             val scope = parseScope(text)
             val text = text.substringBefore('!')
             if (!referencePattern.matches(text)) return null
-            return ReferenceDependency(text, scope = scope)
+            return ReferenceDependency(text, exported = scope == EXPORTED_SCOPE, scope = scope)
         }
     }
 
@@ -539,18 +603,37 @@ data class ReferenceDependency(
 @Serializable
 data class ModuleDependency(
     val path: String,
-    override val scope: String,
+    @Deprecated("Use scope == Dependency.EXPORTED_SCOPE instead.", ReplaceWith("scope == Dependency.EXPORTED_SCOPE"))
+    override val exported: Boolean = false,
+    override val scope: String = if (exported) EXPORTED_SCOPE else DEFAULT_SCOPE,
 ): Dependency {
+    constructor(
+        path: String,
+        exported: Boolean,
+    ): this(
+        path = path,
+        exported = exported,
+        scope = if (exported) EXPORTED_SCOPE else DEFAULT_SCOPE,
+    )
+
     companion object {
         fun parse(text: String): ModuleDependency {
             val scope = parseScope(text)
             val text = text.substringBefore('!')
             return ModuleDependency(
                 path = text,
+                exported = scope == EXPORTED_SCOPE,
                 scope = scope,
             )
         }
     }
+
+    @Suppress("DEPRECATION")
+    fun copy(
+        path: String = this.path,
+        exported: Boolean = this.exported,
+    ): ModuleDependency = ModuleDependency(path, exported)
+
     override fun toString(): String = buildString {
         append(path)
         appendScope()

@@ -4,8 +4,8 @@ product:
   platforms: [android]
 
 dependencies:
-  - $libs.compose.uiTooling
   - $libs.androidx.activity.compose
+  - $libs.compose.uiTooling
   - $libs.compose.uiToolingPreview
   - ../shared
 

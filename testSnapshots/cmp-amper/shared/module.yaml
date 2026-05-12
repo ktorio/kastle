@@ -5,7 +5,6 @@ product:
 
 dependencies@android:
   - $libs.compose.uiToolingPreviewdependencies:
-  - $libs.compose.uiTooling
   - $libs.androidx.lifecycle.runtimeCompose
   - $libs.androidx.lifecycle.viewmodelCompose
   - $libs.compose.components.resources
@@ -13,6 +12,7 @@ dependencies@android:
   - $libs.compose.material3
   - $libs.compose.runtime
   - $libs.compose.ui
+  - $libs.compose.uiTooling
   - $libs.compose.uiToolingPreviewdependencies:
   - $libs.wrappers.browser
 
