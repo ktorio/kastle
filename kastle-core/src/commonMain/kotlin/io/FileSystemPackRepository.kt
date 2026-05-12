@@ -79,9 +79,9 @@ abstract class FileSystemPackRepository(
 
     override fun ids(): Flow<PackId> =
         fs.list(root).flatMap { groupPath ->
-            if (fs.isDirectory(groupPath)) {
-                fs.list(groupPath)
-            } else emptyList()
+            if (!fs.isDirectory(versionsDir)) return@flatMap emptyList()
+            if (groupPath == versionsDir) return@flatMap emptyList()
+            fs.list(groupPath)
         }.asFlow().mapNotNull(::idFromPath)
 
     protected fun idFromPath(path: Path): PackId? {

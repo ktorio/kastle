@@ -346,7 +346,7 @@ body {
 .wizard-file-tree {
     width: 250px;
     border-right: 1px solid var(--wizard-border);
-    overflow-y: auto;
+    overflow: auto;
     padding: 8px 0;
     font-size: 13px;
 }
@@ -356,13 +356,13 @@ body {
     padding: 0;
     list-style: none;
     display: block;
-    width: 100%;
+    min-width: 100%;
 }
 
 .wizard-file-tree li {
     padding: 0;
     display: block;
-    width: 100%;
+    min-width: 100%;
 }
 
 .wizard-file-tree label.tree-folder,
@@ -374,8 +374,7 @@ body {
     cursor: pointer;
     color: var(--wizard-text);
     transition: background-color 0.1s;
-    min-width: 0;
-    overflow: hidden;
+    white-space: nowrap;
 }
 
 .wizard-file-tree label.tree-folder:hover,
@@ -1094,10 +1093,6 @@ pre code.hljs {
     cursor: pointer;
     border-radius: 4px;
     transition: background-color 0.1s;
-    min-width: 0;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
