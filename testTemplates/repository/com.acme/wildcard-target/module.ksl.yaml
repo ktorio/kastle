@@ -1,0 +1,4 @@
+platform: jvm
+sources:
+  - path: files/*
+    target: file:output/

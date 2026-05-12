@@ -402,9 +402,17 @@ class LocalPackRepository(
                 require(path.endsWith("/*")) { "Wildcard must be at the end of the path: $path" }
                 val wildCardParent = modulePath.resolve(path.removeSuffix("/*"))
                 for (file in fs.walkFiles(wildCardParent)) {
+                    val fileTarget = if (targetUrl != null) {
+                        val normalizedTargetUrl = targetUrl
+                            .removeSuffix("/*") // in case implicit target copied from source path with /*
+                        val optionalPathSeparator = if (normalizedTargetUrl.endsWith('/')) "" else "/"
+                        "$normalizedTargetUrl$optionalPathSeparator${file.relativeTo(wildCardParent)}"
+                    } else {
+                        "file:${file.relativeTo(modulePath)}"
+                    }
                     sources += readModuleSource(
                         file,
-                        target = "file:${file.relativeTo(modulePath)}"
+                        target = fileTarget
                     ).copy(
                         condition = conditionExpression,
                         priority = priority
