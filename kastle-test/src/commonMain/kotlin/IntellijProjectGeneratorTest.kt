@@ -153,7 +153,6 @@ fun IntellijProjectGeneratorTest(
                 "org.jetbrains.intellij.platform.plugins/properties",
                 "org.jetbrains.intellij.platform.plugins/markdown",
                 "org.jetbrains.intellij.platform.plugins/database",
-                "org.jetbrains.intellij.platform.dependencies/compose",
                 "org.jetbrains.intellij.platform.dependencies/lsp",
                 "org.jetbrains.intellij.platform.vcs/git",
             ) + layout.extraPacks,

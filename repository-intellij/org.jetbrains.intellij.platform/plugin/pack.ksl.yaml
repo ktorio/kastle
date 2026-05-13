@@ -10,10 +10,6 @@ properties:
     type: boolean
     default: true
     hidden: true
-  - key: isComposeEnabled
-    type: boolean
-    default: false
-    hidden: true
   - key: isKotlinEnabled
     type: boolean
     default: false
@@ -33,7 +29,7 @@ properties:
 propertyValues:
   # Common versions management:
   - key: org.jetbrains.intellij.platform/plugin/platformVersion
-    value: "2025.3.4.1"
+    value: "2025.3.5"
 
   # Post-processed input properties:
   - key: pluginName
