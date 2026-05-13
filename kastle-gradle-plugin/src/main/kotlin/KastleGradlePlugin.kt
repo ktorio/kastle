@@ -37,6 +37,7 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
             }
             return
         }
+
         val repository = LocalPackRepository(repositoryDir.absolutePath)
         val modules2packs = mutableMapOf<String, Pair<PackMetadata, SourceModuleMetadata>>()
         val customPluginRepositories = mutableSetOf<MavenRepository>()
@@ -59,14 +60,31 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
                 }
             }
         }
+
         // include all plugin repositories
         settings.pluginManagement.repositories { repositories ->
+            repositories.gradlePluginPortal()
+            repositories.mavenCentral()
+            repositories.google()
+
             for (repository in customPluginRepositories) {
                 repositories.maven { it.url = URI(repository.url) }
             }
         }
 
         val versionsCatalog = runBlocking { repository.versions() }
+
+        val conventionPluginIds = generateKastleConventionBuild(
+            settings = settings,
+            modules2packs = modules2packs,
+            versionsCatalog = versionsCatalog,
+            customPluginRepositories = customPluginRepositories,
+        )
+
+        generateProjectBuildFiles(
+            settings = settings,
+            conventionPluginIds = conventionPluginIds,
+        )
 
         // Register top-level tasks on the root project
         settings.gradle.rootProject { project ->
@@ -212,28 +230,209 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
             project.extraProperties[VERSIONS_PROPERTY] = versionsCatalog
 
             project.pluginManager.apply(KastlePackPlugin::class.java)
-
-            project.buildscript.repositories.apply {
-                gradlePluginPortal()
-                mavenCentral()
-                google()
-                // Include all custom repositories
-                for (mavenRepo in pack.repositories)
-                    maven { it.url = URI(mavenRepo.url) }
-            }
-
-            // Add gradle plugins to buildscript classpath
-            // So that we can apply them later
-            for (catalogRef in module.gradlePlugins) {
-                val lookupKey = catalogRef.tomlKey
-                val (pluginId, version) = versionsCatalog.plugins[lookupKey] ?: continue
-                val versionNumber = when(version) {
-                    is CatalogVersion.Ref -> versionsCatalog.versions[version.ref]
-                    is CatalogVersion.Number -> version.number
-                }
-                val markerArtifact = "$pluginId:$pluginId.gradle.plugin:$versionNumber"
-                project.buildscript.dependencies.add("classpath", markerArtifact)
-            }
         }
     }
+
+    private fun generateKastleConventionBuild(
+        settings: Settings,
+        modules2packs: Map<String, Pair<PackMetadata, SourceModuleMetadata>>,
+        versionsCatalog: VersionsCatalog,
+        customPluginRepositories: Set<MavenRepository>,
+    ): Map<String, String> {
+        val conventionsDir = File(settings.rootDir, ".gradle/kastle-conventions")
+        val srcDir = File(conventionsDir, "src/main/kotlin/org/jetbrains/kastle/generated")
+        srcDir.mkdirs()
+
+        val projectPathToPluginId = mutableMapOf<String, String>()
+        val generatedPlugins = mutableListOf<GeneratedConventionPlugin>()
+
+        for ((projectPath, packAndModule) in modules2packs) {
+            val (_, module) = packAndModule
+            val pluginArtifacts = module.gradlePlugins.mapNotNull { catalogRef ->
+                val lookupKey = catalogRef.tomlKey.removePrefix("plugins-")
+                val plugin = versionsCatalog.plugins[lookupKey] ?: return@mapNotNull null
+                val pluginId = plugin.id
+                val versionNumber = when (val version = plugin.version) {
+                    is CatalogVersion.Ref -> versionsCatalog.versions[version.ref]
+                        ?: error("Missing plugin: ${plugin.id}")
+                    is CatalogVersion.Number -> version.number
+                }
+
+                GeneratedPluginArtifact(
+                    pluginId = pluginId,
+                    version = versionNumber,
+                    markerArtifact = "$pluginId:$pluginId.gradle.plugin:$versionNumber",
+                )
+            }
+
+            if (pluginArtifacts.isEmpty()) continue
+
+            val conventionPluginId = "org.jetbrains.kastle.generated.${projectPath.toConventionPluginSlug()}"
+            val implementationClass = "${projectPath.toConventionClassName()}ConventionPlugin"
+
+            projectPathToPluginId[projectPath] = conventionPluginId
+            generatedPlugins += GeneratedConventionPlugin(
+                id = conventionPluginId,
+                implementationClass = implementationClass,
+                pluginArtifacts = pluginArtifacts,
+            )
+
+            File(srcDir, "$implementationClass.kt").writeText(
+                buildString {
+                    appendLine("package org.jetbrains.kastle.generated")
+                    appendLine()
+                    appendLine("import org.gradle.api.Plugin")
+                    appendLine("import org.gradle.api.Project")
+                    appendLine()
+                    appendLine("class $implementationClass : Plugin<Project> {")
+                    appendLine("    override fun apply(project: Project) {")
+                    for (artifact in pluginArtifacts) {
+                        appendLine("        project.pluginManager.apply(${artifact.pluginId.quoteKotlinString()})")
+                    }
+                    appendLine("    }")
+                    appendLine("}")
+                }
+            )
+        }
+
+        File(conventionsDir, "settings.gradle.kts").writeText(
+            buildString {
+                appendLine("pluginManagement {")
+                appendLine("    repositories {")
+                appendLine("        gradlePluginPortal()")
+                appendLine("        mavenCentral()")
+                appendLine("        google()")
+                for (repository in customPluginRepositories) {
+                    appendLine("        maven { url = uri(${repository.url.quoteKotlinString()}) }")
+                }
+                appendLine("    }")
+                appendLine("}")
+                appendLine()
+                appendLine("dependencyResolutionManagement {")
+                appendLine("    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)")
+                appendLine("    repositories {")
+                appendLine("        gradlePluginPortal()")
+                appendLine("        mavenCentral()")
+                appendLine("        google()")
+                for (repository in customPluginRepositories) {
+                    appendLine("        maven { url = uri(${repository.url.quoteKotlinString()}) }")
+                }
+                appendLine("    }")
+                appendLine("}")
+                appendLine()
+                appendLine("rootProject.name = \"kastle-generated-conventions\"")
+            }
+        )
+
+        File(conventionsDir, "build.gradle.kts").writeText(
+            buildString {
+                appendLine("plugins {")
+                appendLine("    `kotlin-dsl`")
+                appendLine("}")
+                appendLine()
+                appendLine("dependencies {")
+
+                val markerArtifacts = generatedPlugins
+                    .flatMap { it.pluginArtifacts }
+                    .map { it.markerArtifact }
+                    .distinct()
+                    .sorted()
+
+                for (markerArtifact in markerArtifacts) {
+                    appendLine("    implementation(${markerArtifact.quoteKotlinString()})")
+                }
+
+                appendLine("}")
+                appendLine()
+                appendLine("gradlePlugin {")
+                appendLine("    plugins {")
+
+                for (plugin in generatedPlugins) {
+                    val registrationName = plugin.id.toRegistrationName()
+                    appendLine("        create(${registrationName.quoteKotlinString()}) {")
+                    appendLine("            id = ${plugin.id.quoteKotlinString()}")
+                    appendLine("            implementationClass = ${"org.jetbrains.kastle.generated.${plugin.implementationClass}".quoteKotlinString()}")
+                    appendLine("        }")
+                }
+
+                appendLine("    }")
+                appendLine("}")
+            }
+        )
+
+        if (generatedPlugins.isNotEmpty()) {
+            logger.lifecycle("Including generated Kastle conventions build at {}", conventionsDir)
+            settings.pluginManagement.includeBuild(conventionsDir.absolutePath)
+        }
+
+        return projectPathToPluginId
+    }
+
+    private fun generateProjectBuildFiles(
+        settings: Settings,
+        conventionPluginIds: Map<String, String>,
+    ) {
+        val generatedBuildScriptsDir = File(settings.rootDir, "build/kastle/generated-build-scripts")
+        generatedBuildScriptsDir.mkdirs()
+
+        for ((projectPath, conventionPluginId) in conventionPluginIds) {
+            val descriptor = settings.project(projectPath)
+
+            val generatedBuildFile = File(
+                generatedBuildScriptsDir,
+                "${projectPath.toConventionPluginSlug()}.gradle.kts"
+            )
+
+            generatedBuildFile.writeText(
+                buildString {
+                    appendLine("plugins {")
+                    appendLine("    id(${conventionPluginId.quoteKotlinString()})")
+                    appendLine("}")
+                    appendLine()
+                }
+            )
+
+            descriptor.buildFileName = descriptor.projectDir
+                .toPath()
+                .relativize(generatedBuildFile.toPath())
+                .toString()
+        }
+    }
+
+    private data class GeneratedConventionPlugin(
+        val id: String,
+        val implementationClass: String,
+        val pluginArtifacts: List<GeneratedPluginArtifact>,
+    )
+
+    private data class GeneratedPluginArtifact(
+        val pluginId: String,
+        val version: String,
+        val markerArtifact: String,
+    )
+
+    private fun String.toConventionPluginSlug(): String =
+        trim(':')
+            .replace(Regex("[^A-Za-z0-9]+"), ".")
+            .trim('.')
+            .lowercase()
+
+    private fun String.toConventionClassName(): String =
+        trim(':')
+            .split(Regex("[^A-Za-z0-9]+"))
+            .filter { it.isNotBlank() }
+            .joinToString("") { part ->
+                part.replaceFirstChar { char ->
+                    if (char.isLowerCase()) char.titlecase() else char.toString()
+                }
+            }
+            .ifBlank { "Root" }
+
+    private fun String.toRegistrationName(): String =
+        replace(Regex("[^A-Za-z0-9]+"), "_")
+            .trim('_')
+            .ifBlank { "generatedConventionPlugin" }
+
+    private fun String.quoteKotlinString(): String =
+        "\"" + replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 }
