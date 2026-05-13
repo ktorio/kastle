@@ -69,29 +69,6 @@ fun IntellijProjectGeneratorTest(
         )
     }
 
-    "intellij-plugin-compose" {
-        generateAndValidateSnapshot(
-            "intellij-plugin-compose",
-            listOf(
-                "org.jetbrains.intellij.platform/plugin",
-                "org.jetbrains.intellij.platform.dependencies/compose",
-            ),
-        )
-    }
-
-    "intellij-plugin-compose-with-samples" {
-        generateAndValidateSnapshot(
-            "intellij-plugin-compose-with-samples",
-            listOf(
-                "org.jetbrains.intellij.platform/plugin",
-                "org.jetbrains.intellij.platform.dependencies/compose",
-            ),
-            properties = mapOf(
-                VariableId.parse("org.jetbrains.intellij.platform/plugin/addSampleCode") to "true",
-            ),
-        )
-    }
-
     "intellij-plugin-kotlin-with-samples" {
         generateAndValidateSnapshot(
             "intellij-plugin-kotlin-with-samples",
@@ -140,7 +117,6 @@ fun IntellijProjectGeneratorTest(
                 "org.jetbrains.intellij.platform.plugins/properties",
                 "org.jetbrains.intellij.platform.plugins/markdown",
                 "org.jetbrains.intellij.platform.plugins/database",
-                "org.jetbrains.intellij.platform.dependencies/compose",
                 "org.jetbrains.intellij.platform.dependencies/lsp",
             ),
         )

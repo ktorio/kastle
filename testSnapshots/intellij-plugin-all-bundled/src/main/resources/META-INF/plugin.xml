@@ -28,7 +28,6 @@
     <depends>com.intellij.properties</depends>
     <depends>org.intellij.plugins.markdown</depends>
     <depends>com.intellij.database</depends>
-    <depends>com.intellij.modules.compose</depends>
     <depends>com.intellij.modules.lsp</depends>
 
 

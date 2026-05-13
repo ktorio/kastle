@@ -10,10 +10,6 @@ properties:
     type: boolean
     default: true
     hidden: true
-  - key: isComposeEnabled
-    type: boolean
-    default: false
-    hidden: true
   - key: isKotlinEnabled
     type: boolean
     default: false
@@ -80,16 +76,9 @@ rootSources:
   - path: classic/src/main/kotlin/MyMessageBundle.kt.hbs
     target: file:src/main/kotlin/MyMessageBundle.kt
     if: addSampleCode
+  - path: classic/src/main/kotlin/MyToolWindowFactory.kt
+    target: file:src/main/kotlin/MyToolWindowFactory.kt
+    if: addSampleCode
   - path: classic/src/main/resources/messages/MyMessageBundle.properties
     target: file:src/main/resources/messages/MyMessageBundle.properties
     if: addSampleCode
-
-  ### Swing UI
-  - path: classic/src/main/kotlin/MyToolWindowFactory.kt
-    target: file:src/main/kotlin/MyToolWindowFactory.kt
-    if: addSampleCode && !isComposeEnabled
-
-  ### Compose UI
-  - path: classic/src/main/kotlin/MyToolWindowFactory-compose.kt
-    target: file:src/main/kotlin/MyToolWindowFactory.kt
-    if: addSampleCode && isComposeEnabled

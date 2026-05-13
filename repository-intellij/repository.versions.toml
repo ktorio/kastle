@@ -12,5 +12,4 @@ junit = { module = "junit:junit", version.ref = "junit" }
 # 2. Naming convention: the "pluginX-" prefix allows sorting plugins in the build script and settings.
 [plugins]
 plugin1-kotlin-jvm  = { id = "org.jetbrains.kotlin.jvm", version = "2.2.20" }
-plugin2-compose = { id = "org.jetbrains.kotlin.plugin.compose", version = "2.2.20" }
-plugin3-changelog = { id = "org.jetbrains.changelog", version = "2.5.0" }
+plugin2-changelog = { id = "org.jetbrains.changelog", version = "2.5.0" }

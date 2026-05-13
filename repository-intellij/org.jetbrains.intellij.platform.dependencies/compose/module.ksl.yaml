@@ -1,3 +1,0 @@
-gradle:
-  plugins:
-    - libs.plugin2-compose

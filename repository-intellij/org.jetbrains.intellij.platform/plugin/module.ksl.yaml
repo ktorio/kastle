@@ -4,4 +4,4 @@ testDependencies:
 gradle:
   plugins:
     - libs.plugin1-kotlin-jvm
-    - libs.plugin3-changelog
+    - libs.plugin2-changelog
