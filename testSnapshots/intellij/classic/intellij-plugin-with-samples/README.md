@@ -1,9 +1,9 @@
-# IntelliJ Platform Plugin Template
+# Intellij-plugin-with-samples
 
 [![Twitter Follow](https://img.shields.io/badge/follow-%40JBPlatform-1DA1F2?logo=twitter)](https://twitter.com/JBPlatform)
 [![Developers Forum](https://img.shields.io/badge/JetBrains%20Platform-Join-blue)][jb:forum]
 
-## Plugin template structure
+## Plugin structure
 
 A generated project contains the following content structure:
 
@@ -39,7 +39,7 @@ It provides general information about the plugin, its dependencies, extensions, 
 
 You can read more about this file in the [Plugin Configuration File][docs:plugin.xml] section of our documentation.
 
-If you're still not quite sure what this is all about, read our introduction: [What is the IntelliJ Platform?][docs:intro]
+If you're still not quite sure what this is all about, read [Introduction to IntelliJ Platform][docs:intro].
 
 ## Predefined Run/Debug configurations
 
@@ -92,6 +92,5 @@ You can also upload the plugin to the [JetBrains Plugin Repository](https://plug
 [jb:forum]: https://platform.jetbrains.com/
 [jb:quality-guidelines]: https://plugins.jetbrains.com/docs/marketplace/quality-guidelines.html
 [jb:paid-plugins]: https://plugins.jetbrains.com/docs/marketplace/paid-plugins-marketplace.html
-[jb:quality-guidelines]: https://plugins.jetbrains.com/docs/marketplace/quality-guidelines.html
 [jb:ipe]: https://jb.gg/ipe
 [jb:ui-guidelines]: https://jetbrains.github.io/ui

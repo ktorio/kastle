@@ -15,5 +15,5 @@ sources:
     target: file:../../gradle.properties
   - path: ../settings.gradle.kts
     target: file:../../settings.gradle.kts
-  - path: ../README.md
+  - path: ../README.md.hbs
     target: file:../../README.md

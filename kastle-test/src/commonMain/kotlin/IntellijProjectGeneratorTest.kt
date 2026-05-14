@@ -13,6 +13,10 @@ private const val INTELLIJ_DEFAULT_GROUP = "com.acme"
 
 private val intellijTestScope = CoroutineScope(CoroutineName("intellij-generator-test"))
 
+private val IGNORED_FILES = setOf(
+    "gradle-wrapper.jar",
+)
+
 private enum class PluginLayout(val snapshotSubDir: String, val extraPacks: List<String>) {
     Classic("intellij/classic", emptyList()),
     Modular("intellij/modular", listOf("org.jetbrains.intellij.platform.architecture/modular")),
@@ -20,7 +24,7 @@ private enum class PluginLayout(val snapshotSubDir: String, val extraPacks: List
 
 fun IntellijProjectGeneratorTest(
     createRepository: suspend () -> PackRepository,
-) : StringSpec.() -> Unit = {
+): StringSpec.() -> Unit = {
     val snapshots = Path("../testSnapshots")
     val repository: Deferred<PackRepository> =
         intellijTestScope.async(start = CoroutineStart.LAZY) {
@@ -53,7 +57,7 @@ fun IntellijProjectGeneratorTest(
 
         val snapshotDir = if (snapshotSubDir != null) "$snapshots/$snapshotSubDir/$snapshotName"
         else "$snapshots/$snapshotName"
-        assertFilesAreEqualWithSnapshot(snapshotDir, outputDir.toString(),)
+        assertFilesAreEqualWithSnapshot(snapshotDir, outputDir.toString(), IGNORED_FILES)
     }
 
     suspend fun testPlugin(layout: PluginLayout) {
@@ -155,11 +159,31 @@ fun IntellijProjectGeneratorTest(
     "intellij-plugin-lsp (classic)" { testPluginLsp(PluginLayout.Classic) }
     "intellij-plugin-lsp (modular)" { testPluginLsp(PluginLayout.Modular) }
 
-    "intellij-plugin-all-packs-enabled (classic)" { testPluginAllPacksEnabled(PluginLayout.Classic, includeSamples = false) }
-    "intellij-plugin-all-packs-enabled (modular)" { testPluginAllPacksEnabled(PluginLayout.Modular, includeSamples = false) }
+    "intellij-plugin-all-packs-enabled (classic)" {
+        testPluginAllPacksEnabled(
+            PluginLayout.Classic,
+            includeSamples = false
+        )
+    }
+    "intellij-plugin-all-packs-enabled (modular)" {
+        testPluginAllPacksEnabled(
+            PluginLayout.Modular,
+            includeSamples = false
+        )
+    }
 
-    "intellij-plugin-with-samples-all-packs-enabled (classic)" { testPluginAllPacksEnabled(PluginLayout.Classic, includeSamples = true) }
-    "intellij-plugin-with-samples-all-packs-enabled (modular)" { testPluginAllPacksEnabled(PluginLayout.Modular, includeSamples = true) }
+    "intellij-plugin-with-samples-all-packs-enabled (classic)" {
+        testPluginAllPacksEnabled(
+            PluginLayout.Classic,
+            includeSamples = true
+        )
+    }
+    "intellij-plugin-with-samples-all-packs-enabled (modular)" {
+        testPluginAllPacksEnabled(
+            PluginLayout.Modular,
+            includeSamples = true
+        )
+    }
 
     "intellij-theme" {
         generateAndValidateSnapshot(
