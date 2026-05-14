@@ -14,13 +14,6 @@ It packages a single plugin out of separate `shared`, `frontend`, and `backend` 
 
 The sample plugin adds a `ModularPlugin` tool window with a chat-style UI implemented with the Compose framework.
 
-## Module Layout
-
-- `root project` assembles the final plugin, declares the main IntelliJ Platform dependency, enables split mode, and includes the `shared`, `frontend`, and `backend` plugin modules in the final distribution.
-- `shared` contains contracts that both sides must understand: RPC interfaces, DTOs, serializers, and shared model types. Put a cross-boundary API here.
-- `frontend` contains UI-only code and presentation logic: the tool window registration, Compose UI, view models, and the frontend adapter that talks to the backend via RPC.
-- `backend` contains project-level services and business logic: access to project, file system, and external processes, message creation, response generation, and the RPC implementation exposed to the frontend.
-
 ## Plugin structure
 
 A generated project contains the following content structure:
@@ -55,6 +48,13 @@ A generated project contains the following content structure:
 └── settings.gradle.kts
 ```
 
+### Module Layout
+
+- `root project` assembles the final plugin, declares the main IntelliJ Platform dependency, enables split mode, and includes the `shared`, `frontend`, and `backend` plugin modules in the final distribution.
+- `shared` contains contracts that both sides must understand: RPC interfaces, DTOs, serializers, and shared model types. Put a cross-boundary API here.
+- `frontend` contains UI-only code and presentation logic: the tool window registration, Compose UI, view models, and the frontend adapter that talks to the backend via RPC.
+- `backend` contains project-level services and business logic: access to project, file system, and external processes, message creation, response generation, and the RPC implementation exposed to the frontend.
+
 ## Plugin configuration files
 
 The root [plugin.xml][file:plugin.xml] file located in `src/main/resources/META-INF` provides general information about the plugin, its dependencies, and references the per-module plugin descriptors.
@@ -71,6 +71,7 @@ You can read more about plugin configuration files in the [Plugin Configuration 
 The demo is intentionally split so that the UI stays frontend-only and the business logic stays backend-only.
 This ensures optimal UX in the remote development scenario where the IDE has separate frontend and backend processes.
 This is what we call **Split Mode**.
+{{#if addSampleCode}}
 
 A high-level overview of the plugin structure:
 - a UI for a chat with an AI assistant natively rendered in the frontend IDE in split mode
@@ -85,6 +86,7 @@ A more detailed explanation of how it is implemented:
 5. The backend registers `BackendRpcApiProvider`, which exposes `BackendChatRepositoryRpcApi` as the RPC implementation.
 6. `BackendChatRepositoryRpcApi` resolves the backend project from `ProjectId` and delegates to `BackendChatRepositoryModel`.
 7. `BackendChatRepositoryModel` owns the mutable message list and the demo response generation logic.
+{{/if}}
 
 This separation keeps the frontend focused on rendering, local UI state, and interaction handling, while the backend owns project-scoped state and logic that should execute on the backend side in split mode.
 

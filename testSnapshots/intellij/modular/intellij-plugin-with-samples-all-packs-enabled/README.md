@@ -14,13 +14,6 @@ It packages a single plugin out of separate `shared`, `frontend`, and `backend` 
 
 The sample plugin adds a `ModularPlugin` tool window with a chat-style UI implemented with the Compose framework.
 
-## Module Layout
-
-- `root project` assembles the final plugin, declares the main IntelliJ Platform dependency, enables split mode, and includes the `shared`, `frontend`, and `backend` plugin modules in the final distribution.
-- `shared` contains contracts that both sides must understand: RPC interfaces, DTOs, serializers, and shared model types. Put a cross-boundary API here.
-- `frontend` contains UI-only code and presentation logic: the tool window registration, Compose UI, view models, and the frontend adapter that talks to the backend via RPC.
-- `backend` contains project-level services and business logic: access to project, file system, and external processes, message creation, response generation, and the RPC implementation exposed to the frontend.
-
 ## Plugin structure
 
 A generated project contains the following content structure:
@@ -54,6 +47,13 @@ A generated project contains the following content structure:
 ├── gradlew / gradlew.bat
 └── settings.gradle.kts
 ```
+
+### Module Layout
+
+- `root project` assembles the final plugin, declares the main IntelliJ Platform dependency, enables split mode, and includes the `shared`, `frontend`, and `backend` plugin modules in the final distribution.
+- `shared` contains contracts that both sides must understand: RPC interfaces, DTOs, serializers, and shared model types. Put a cross-boundary API here.
+- `frontend` contains UI-only code and presentation logic: the tool window registration, Compose UI, view models, and the frontend adapter that talks to the backend via RPC.
+- `backend` contains project-level services and business logic: access to project, file system, and external processes, message creation, response generation, and the RPC implementation exposed to the frontend.
 
 ## Plugin configuration files
 
