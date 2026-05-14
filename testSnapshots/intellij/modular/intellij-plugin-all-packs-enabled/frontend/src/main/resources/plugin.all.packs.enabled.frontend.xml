@@ -2,7 +2,7 @@
     <dependencies>
         <module name="intellij.platform.frontend"/>
         <module name="intellij.platform.compose"/>
-        <module name="modular.plugin.shared"/>
+        <module name="plugin.all.packs.enabled.shared"/>
 
         <plugin id="com.intellij.kotlin.frontend"/>
         <module name="intellij.javascript.frontend"/>

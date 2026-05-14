@@ -20,7 +20,8 @@ plugins {
     id("org.jetbrains.intellij.platform.settings") version "2.14.0"
 }
 
-rootProject.name = "modular.plugin"
+val pluginModuleName: String by _properties
+rootProject.name = pluginModuleName
 
 dependencyResolutionManagement {
     repositories {

@@ -21,6 +21,9 @@ properties:
   - key: pluginName
     type: string
     hidden: true
+  - key: pluginModuleName
+    type: string
+    hidden: true
   # Values are managed in propertyValues below:
   - key: platformVersion
     type: string
@@ -34,6 +37,8 @@ propertyValues:
   # Post-processed input properties:
   - key: pluginName
     expression: _project.name.capitalize()
+  - key: pluginModuleName
+    expression: toPluginModuleName(_project.name)
 
 rootSources:
 

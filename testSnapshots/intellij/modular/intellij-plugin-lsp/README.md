@@ -25,17 +25,17 @@ A generated project contains the following content structure:
 │   ├── build.gradle.kts
 │   └── src/main/
 │       ├── kotlin/         Kotlin production sources
-│       └── resources/      modular.plugin.backend.xml
+│       └── resources/      plugin.lsp.backend.xml
 ├── frontend/               Frontend module – UI and presentation
 │   ├── build.gradle.kts
 │   └── src/main/
 │       ├── kotlin/         Kotlin production sources
-│       └── resources/      modular.plugin.frontend.xml
+│       └── resources/      plugin.lsp.frontend.xml
 ├── shared/                 Shared module – cross-boundary contracts
 │   ├── build.gradle.kts
 │   └── src/main/
 │       ├── kotlin/         Kotlin production sources
-│       └── resources/      modular.plugin.shared.xml
+│       └── resources/      plugin.lsp.shared.xml
 ├── gradle/
 │   ├── wrapper/            Gradle Wrapper
 │   └── libs.versions.toml  Version catalog
@@ -60,9 +60,9 @@ A generated project contains the following content structure:
 The root [plugin.xml][file:plugin.xml] file located in `src/main/resources/META-INF` provides general information about the plugin, its dependencies, and references the per-module plugin descriptors.
 
 Each module ships its own plugin descriptor in its `src/main/resources/` directory:
-- `modular.plugin.backend.xml` – registers backend extensions and services
-- `modular.plugin.frontend.xml` – registers frontend extensions and tool windows
-- `modular.plugin.shared.xml` – registers shared extensions and interfaces
+- `plugin.lsp.backend.xml` – registers backend extensions and services
+- `plugin.lsp.frontend.xml` – registers frontend extensions and tool windows
+- `plugin.lsp.shared.xml` – registers shared extensions and interfaces
 
 You can read more about plugin configuration files in the [Plugin Configuration File][docs:plugin.xml] section of our documentation.
 

@@ -19,8 +19,8 @@
     ]]></description>
 
     <content>
-        <module name="modular.plugin.shared" loading="required"/>
-        <module name="modular.plugin.frontend"/>
-        <module name="modular.plugin.backend"/>
+        <module name="plugin.all.packs.enabled.shared" loading="required"/>
+        <module name="plugin.all.packs.enabled.frontend"/>
+        <module name="plugin.all.packs.enabled.backend"/>
     </content>
 </idea-plugin>

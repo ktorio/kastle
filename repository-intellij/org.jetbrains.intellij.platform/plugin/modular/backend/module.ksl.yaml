@@ -7,7 +7,7 @@ sources:
     target: file:../../backend/build.gradle.kts
 
   - path: sources/main/resources/modular.plugin.backend.xml.hbs
-    target: file:../../backend/src/main/resources/modular.plugin.backend.xml
+    target: file:../../backend/src/main/resources/${pluginModuleName}.backend.xml
 
   ### Code samples
   - path: sources/main/kotlin/*

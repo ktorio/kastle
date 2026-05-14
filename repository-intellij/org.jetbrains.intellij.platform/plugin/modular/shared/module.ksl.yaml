@@ -7,7 +7,7 @@ sources:
     target: file:../../shared/build.gradle.kts
 
   - path: sources/main/resources/modular.plugin.shared.xml.hbs
-    target: file:../../shared/src/main/resources/modular.plugin.shared.xml
+    target: file:../../shared/src/main/resources/${pluginModuleName}.shared.xml
 
   ### Code samples
   - path: sources/main/kotlin/*

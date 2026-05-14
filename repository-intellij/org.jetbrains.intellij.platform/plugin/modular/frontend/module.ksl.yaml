@@ -7,7 +7,7 @@ sources:
     target: file:../../frontend/build.gradle.kts
 
   - path: sources/main/resources/modular.plugin.frontend.xml.hbs
-    target: file:../../frontend/src/main/resources/modular.plugin.frontend.xml
+    target: file:../../frontend/src/main/resources/${pluginModuleName}.frontend.xml
 
   ### Code samples
   - path: sources/main/kotlin/*

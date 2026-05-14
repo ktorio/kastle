@@ -2,7 +2,9 @@
     <dependencies>
         <module name="intellij.platform.frontend"/>
         <module name="intellij.platform.compose"/>
-        <module name="modular.plugin.shared"/>
+        <module name="plugin.java.kotlin.shared"/>
+
+        <plugin id="com.intellij.kotlin.frontend"/>
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">

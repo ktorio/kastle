@@ -2,11 +2,12 @@
     <dependencies>
         <module name="intellij.platform.backend"/>
         <module name="intellij.platform.kernel.backend"/>
-        <module name="modular.plugin.shared"/>
+        <module name="plugin.with.samples.kotlin.shared"/>
 
-        <module name="com.intellij.modules.lsp"/>
+        <plugin id="org.jetbrains.kotlin"/>
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">
+        <platform.rpc.backend.remoteApiProvider implementation="com.acme.BackendRpcApiProvider"/>
     </extensions>
 </idea-plugin>

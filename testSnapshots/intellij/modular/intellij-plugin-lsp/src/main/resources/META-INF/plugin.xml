@@ -19,8 +19,8 @@
     ]]></description>
 
     <content>
-        <module name="modular.plugin.shared" loading="required"/>
-        <module name="modular.plugin.frontend"/>
-        <module name="modular.plugin.backend"/>
+        <module name="plugin.lsp.shared" loading="required"/>
+        <module name="plugin.lsp.frontend"/>
+        <module name="plugin.lsp.backend"/>
     </content>
 </idea-plugin>
