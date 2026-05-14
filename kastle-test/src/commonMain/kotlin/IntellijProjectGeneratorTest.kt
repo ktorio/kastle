@@ -33,7 +33,7 @@ fun IntellijProjectGeneratorTest(
 
     suspend fun generateAndValidateSnapshot(
         snapshotName: String,
-        snapshotSubDir: String,
+        snapshotSubDir: String?,
         packs: List<String>,
         properties: Map<VariableId, String> = emptyMap(),
     ) {
@@ -51,10 +51,9 @@ fun IntellijProjectGeneratorTest(
             )
         ).export(outputDir)
 
-        assertFilesAreEqualWithSnapshot(
-            "$snapshots/$snapshotSubDir/$snapshotName",
-            outputDir.toString(),
-        )
+        val snapshotDir = if (snapshotSubDir != null) "$snapshots/$snapshotSubDir/$snapshotName"
+        else "$snapshots/$snapshotName"
+        assertFilesAreEqualWithSnapshot(snapshotDir, outputDir.toString(),)
     }
 
     suspend fun testPlugin(layout: PluginLayout) {
@@ -76,34 +75,9 @@ fun IntellijProjectGeneratorTest(
         )
     }
 
-    suspend fun testPluginCompose(layout: PluginLayout) {
-        generateAndValidateSnapshot(
-            "intellij-plugin-compose",
-            layout.snapshotSubDir,
-            listOf(
-                "org.jetbrains.intellij.platform/plugin",
-                "org.jetbrains.intellij.platform.dependencies/compose",
-            ) + layout.extraPacks,
-        )
-    }
-
-    suspend fun testPluginComposeWithSamples(layout: PluginLayout) {
-        generateAndValidateSnapshot(
-            "intellij-plugin-compose-with-samples",
-            layout.snapshotSubDir,
-            listOf(
-                "org.jetbrains.intellij.platform/plugin",
-                "org.jetbrains.intellij.platform.dependencies/compose",
-            ) + layout.extraPacks,
-            properties = mapOf(
-                VariableId.parse("org.jetbrains.intellij.platform/plugin/addSampleCode") to "true",
-            ),
-        )
-    }
-
     suspend fun testPluginKotlinWithSamples(layout: PluginLayout) {
         generateAndValidateSnapshot(
-            "intellij-plugin-kotlin-with-samples",
+            "intellij-plugin-with-samples-kotlin",
             layout.snapshotSubDir,
             listOf(
                 "org.jetbrains.intellij.platform/plugin",
@@ -138,9 +112,15 @@ fun IntellijProjectGeneratorTest(
         )
     }
 
-    suspend fun testPluginAllPacksEnabled(layout: PluginLayout) {
+    suspend fun testPluginAllPacksEnabled(layout: PluginLayout, includeSamples: Boolean) {
+        val snapshotName = if (includeSamples) "intellij-plugin-with-samples-all-packs-enabled"
+        else "intellij-plugin-all-packs-enabled"
+        val properties = mutableMapOf<VariableId, String>()
+        if (includeSamples) {
+            properties[VariableId.parse("org.jetbrains.intellij.platform/plugin/addSampleCode")] = "true"
+        }
         generateAndValidateSnapshot(
-            "intellij-plugin-all-packs-enabled",
+            snapshotName,
             layout.snapshotSubDir,
             listOf(
                 "org.jetbrains.intellij.platform/plugin",
@@ -156,6 +136,7 @@ fun IntellijProjectGeneratorTest(
                 "org.jetbrains.intellij.platform.dependencies/lsp",
                 "org.jetbrains.intellij.platform.vcs/git",
             ) + layout.extraPacks,
+            properties,
         )
     }
 
@@ -165,14 +146,8 @@ fun IntellijProjectGeneratorTest(
     "intellij-plugin-with-samples (classic)" { testPluginWithSamples(PluginLayout.Classic) }
     "intellij-plugin-with-samples (modular)" { testPluginWithSamples(PluginLayout.Modular) }
 
-    "intellij-plugin-compose (classic)" { testPluginCompose(PluginLayout.Classic) }
-    "intellij-plugin-compose (modular)" { testPluginCompose(PluginLayout.Modular) }
-
-    "intellij-plugin-compose-with-samples (classic)" { testPluginComposeWithSamples(PluginLayout.Classic) }
-    "intellij-plugin-compose-with-samples (modular)" { testPluginComposeWithSamples(PluginLayout.Modular) }
-
-    "intellij-plugin-kotlin-with-samples (classic)" { testPluginKotlinWithSamples(PluginLayout.Classic) }
-    "intellij-plugin-kotlin-with-samples (modular)" { testPluginKotlinWithSamples(PluginLayout.Modular) }
+    "intellij-plugin-with-samples-kotlin (classic)" { testPluginKotlinWithSamples(PluginLayout.Classic) }
+    "intellij-plugin-with-samples-kotlin (modular)" { testPluginKotlinWithSamples(PluginLayout.Modular) }
 
     "intellij-plugin-java-kotlin (classic)" { testPluginJavaKotlin(PluginLayout.Classic) }
     "intellij-plugin-java-kotlin (modular)" { testPluginJavaKotlin(PluginLayout.Modular) }
@@ -180,7 +155,17 @@ fun IntellijProjectGeneratorTest(
     "intellij-plugin-lsp (classic)" { testPluginLsp(PluginLayout.Classic) }
     "intellij-plugin-lsp (modular)" { testPluginLsp(PluginLayout.Modular) }
 
-    "intellij-plugin-all-packs-enabled (classic)" { testPluginAllPacksEnabled(PluginLayout.Classic) }
-    "intellij-plugin-all-packs-enabled (modular)" { testPluginAllPacksEnabled(PluginLayout.Modular) }
+    "intellij-plugin-all-packs-enabled (classic)" { testPluginAllPacksEnabled(PluginLayout.Classic, includeSamples = false) }
+    "intellij-plugin-all-packs-enabled (modular)" { testPluginAllPacksEnabled(PluginLayout.Modular, includeSamples = false) }
 
+    "intellij-plugin-with-samples-all-packs-enabled (classic)" { testPluginAllPacksEnabled(PluginLayout.Classic, includeSamples = true) }
+    "intellij-plugin-with-samples-all-packs-enabled (modular)" { testPluginAllPacksEnabled(PluginLayout.Modular, includeSamples = true) }
+
+    "intellij-theme" {
+        generateAndValidateSnapshot(
+            snapshotName = "intellij-theme",
+            snapshotSubDir = "intellij/theme",
+            packs = listOf("org.jetbrains.intellij.platform/theme"),
+        )
+    }
 }

@@ -25,23 +25,16 @@ sources:
   - path: sources/main/kotlin/MyMessageBundle.kt.hbs
     target: file:../src/main/kotlin/MyMessageBundle.kt
     if: addSampleCode
+  - path: sources/main/kotlin/MyToolWindowFactory.kt
+    target: file:../src/main/kotlin/MyToolWindowFactory.kt
+    if: addSampleCode
   - path: sources/main/resources/messages/MyMessageBundle.properties
     target: file:../src/main/resources/messages/MyMessageBundle.properties
     if: addSampleCode
-
-  ### Swing UI
-  - path: sources/main/kotlin/MyToolWindowFactory.kt
-    target: file:../src/main/kotlin/MyToolWindowFactory.kt
-    if: "addSampleCode && !isComposeEnabled"
-
-  ### Compose UI
-  - path: sources/main/kotlin/MyToolWindowFactory-compose.kt
-    target: file:../src/main/kotlin/MyToolWindowFactory.kt
-    if: "addSampleCode && isComposeEnabled"
 
 testDependencies:
   - $libs.junit
 gradle:
   plugins:
     - libs.plugin1-kotlin-jvm
-    - libs.plugin3-changelog
+    - libs.plugin2-changelog

@@ -1,0 +1,26 @@
+<idea-plugin>
+    <dependencies>
+        <module name="intellij.platform.backend"/>
+        <module name="intellij.platform.kernel.backend"/>
+        <module name="modular.plugin.shared"/>
+
+        <module name="intellij.java.frontback.psi"/>
+        <module name="intellij.java.frontback.impl"/>
+        <plugin id="org.jetbrains.kotlin"/>
+        <module name="intellij.javascript.common"/>
+        <module name="intellij.json"/>
+        <module name="intellij.yaml"/>
+        <module name="intellij.xml.psi"/>
+        <module name="intellij.xml.psi.impl"/>
+        <module name="intellij.properties"/>
+        <module name="intellij.properties.psi"/>
+        <module name="intellij.markdown"/>
+        <module name="intellij.database.sql"/>
+        <module name="intellij.database.sql.core.impl"/>
+        <module name="com.intellij.modules.lsp"/>
+    </dependencies>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <platform.rpc.backend.remoteApiProvider implementation="com.acme.BackendRpcApiProvider"/>
+    </extensions>
+</idea-plugin>
