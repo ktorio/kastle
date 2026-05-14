@@ -19,8 +19,8 @@
     ]]></description>
 
     <content>
-        <module name="plugin.lsp.shared" loading="required"/>
-        <module name="plugin.lsp.frontend"/>
-        <module name="plugin.lsp.backend"/>
+        <module name="intellij.plugin.lsp.shared" loading="required"/>
+        <module name="intellij.plugin.lsp.frontend"/>
+        <module name="intellij.plugin.lsp.backend"/>
     </content>
 </idea-plugin>

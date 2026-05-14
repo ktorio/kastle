@@ -2,7 +2,7 @@
     <dependencies>
         <module name="intellij.platform.frontend"/>
         <module name="intellij.platform.compose"/>
-        <module name="plugin.lsp.shared"/>
+        <module name="intellij.plugin.lsp.shared"/>
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">

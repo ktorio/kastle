@@ -2,7 +2,7 @@
     <dependencies>
         <module name="intellij.platform.backend"/>
         <module name="intellij.platform.kernel.backend"/>
-        <module name="plugin.with.samples.shared"/>
+        <module name="intellij.plugin.with.samples.shared"/>
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">

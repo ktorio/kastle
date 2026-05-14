@@ -18,7 +18,7 @@ plugins {
     id("org.jetbrains.intellij.platform.settings") version "2.14.0"
 }
 
-rootProject.name = "plugin.lsp"
+rootProject.name = "intellij.plugin.lsp"
 
 dependencyResolutionManagement {
     repositories {

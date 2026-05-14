@@ -2,7 +2,7 @@
     <dependencies>
         <module name="intellij.platform.backend"/>
         <module name="intellij.platform.kernel.backend"/>
-        <module name="plugin.with.samples.all.packs.enabled.shared"/>
+        <module name="intellij.plugin.all.packs.enabled.shared"/>
 
         <module name="intellij.java.frontback.psi"/>
         <module name="intellij.java.frontback.impl"/>
@@ -21,6 +21,5 @@
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">
-        <platform.rpc.backend.remoteApiProvider implementation="com.acme.BackendRpcApiProvider"/>
     </extensions>
 </idea-plugin>

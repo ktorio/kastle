@@ -19,8 +19,8 @@
     ]]></description>
 
     <content>
-        <module name="plugin.with.samples.all.packs.enabled.shared" loading="required"/>
-        <module name="plugin.with.samples.all.packs.enabled.frontend"/>
-        <module name="plugin.with.samples.all.packs.enabled.backend"/>
+        <module name="intellij.plugin.with.samples.all.packs.enabled.shared" loading="required"/>
+        <module name="intellij.plugin.with.samples.all.packs.enabled.frontend"/>
+        <module name="intellij.plugin.with.samples.all.packs.enabled.backend"/>
     </content>
 </idea-plugin>

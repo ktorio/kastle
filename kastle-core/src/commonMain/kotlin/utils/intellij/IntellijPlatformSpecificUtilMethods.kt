@@ -24,7 +24,6 @@ object IntellijPlatformSpecificUtilMethods {
             arg.toString().replace("-", ".")
                 .replace(invalidPackageNameSymbolPattern, ".")
                 .replace(Regex("\\s"), "")
-                .removePrefix("intellij.") // intellij prefix is restricted for JetBrains only
         }
     )
 

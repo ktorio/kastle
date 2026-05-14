@@ -18,7 +18,7 @@ plugins {
     id("org.jetbrains.intellij.platform.settings") version "2.14.0"
 }
 
-rootProject.name = "plugin.java.kotlin"
+rootProject.name = "intellij.plugin.java.kotlin"
 
 dependencyResolutionManagement {
     repositories {

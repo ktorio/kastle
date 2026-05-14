@@ -18,7 +18,7 @@ plugins {
     id("org.jetbrains.intellij.platform.settings") version "2.14.0"
 }
 
-rootProject.name = "plugin.all.packs.enabled"
+rootProject.name = "intellij.plugin.all.packs.enabled"
 
 dependencyResolutionManagement {
     repositories {

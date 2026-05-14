@@ -19,8 +19,8 @@
     ]]></description>
 
     <content>
-        <module name="plugin.java.kotlin.shared" loading="required"/>
-        <module name="plugin.java.kotlin.frontend"/>
-        <module name="plugin.java.kotlin.backend"/>
+        <module name="intellij.plugin.java.kotlin.shared" loading="required"/>
+        <module name="intellij.plugin.java.kotlin.frontend"/>
+        <module name="intellij.plugin.java.kotlin.backend"/>
     </content>
 </idea-plugin>

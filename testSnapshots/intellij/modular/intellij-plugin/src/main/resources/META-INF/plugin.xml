@@ -19,8 +19,8 @@
     ]]></description>
 
     <content>
-        <module name="plugin.shared" loading="required"/>
-        <module name="plugin.frontend"/>
-        <module name="plugin.backend"/>
+        <module name="intellij.plugin.shared" loading="required"/>
+        <module name="intellij.plugin.frontend"/>
+        <module name="intellij.plugin.backend"/>
     </content>
 </idea-plugin>

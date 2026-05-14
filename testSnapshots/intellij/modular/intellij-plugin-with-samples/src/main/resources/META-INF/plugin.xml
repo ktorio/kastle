@@ -19,8 +19,8 @@
     ]]></description>
 
     <content>
-        <module name="plugin.with.samples.shared" loading="required"/>
-        <module name="plugin.with.samples.frontend"/>
-        <module name="plugin.with.samples.backend"/>
+        <module name="intellij.plugin.with.samples.shared" loading="required"/>
+        <module name="intellij.plugin.with.samples.frontend"/>
+        <module name="intellij.plugin.with.samples.backend"/>
     </content>
 </idea-plugin>
