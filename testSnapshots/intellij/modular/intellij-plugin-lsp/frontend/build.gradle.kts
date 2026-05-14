@@ -10,7 +10,6 @@ dependencies {
         compileOnly(libs.kotlin.serialization.json.jvm)
 
         composeUI()
-
     }
 
     implementation(project(":shared"))

@@ -10,8 +10,10 @@ dependencies {
         compileOnly(libs.kotlin.serialization.json.jvm)
 
         composeUI()
+        if (_slots.contains("frontendBuildScriptDependencies")) {
 
-        _slots("frontendBuildScriptDependencies")
+            _slots("frontendBuildScriptDependencies")
+        }
     }
 
     implementation(project(":shared"))
