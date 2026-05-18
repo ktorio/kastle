@@ -2810,6 +2810,10 @@ public final class org/jetbrains/kastle/structure/BuildToolModules {
 	public static final field INSTANCE Lorg/jetbrains/kastle/structure/BuildToolModules;
 }
 
+public final class org/jetbrains/kastle/structure/FlattenModuleDependenciesKt {
+	public static final fun getFlattenModuleDependencies ()Lorg/jetbrains/kastle/gen/ProjectMapping;
+}
+
 public final class org/jetbrains/kastle/structure/GradleSourceFileMappingKt {
 	public static final fun getGradleSourceMapping ()Lorg/jetbrains/kastle/gen/ProjectMapping;
 }

@@ -3622,6 +3622,8 @@ final val org.jetbrains.kastle.io/tomlModule // org.jetbrains.kastle.io/tomlModu
     final fun <get-tomlModule>(): kotlinx.serialization.modules/SerializersModule // org.jetbrains.kastle.io/tomlModule.<get-tomlModule>|<get-tomlModule>(){}[0]
 final val org.jetbrains.kastle.structure/AmperSourceMapping // org.jetbrains.kastle.structure/AmperSourceMapping|{}AmperSourceMapping[0]
     final fun <get-AmperSourceMapping>(): org.jetbrains.kastle.gen/ProjectMapping // org.jetbrains.kastle.structure/AmperSourceMapping.<get-AmperSourceMapping>|<get-AmperSourceMapping>(){}[0]
+final val org.jetbrains.kastle.structure/FlattenModuleDependencies // org.jetbrains.kastle.structure/FlattenModuleDependencies|{}FlattenModuleDependencies[0]
+    final fun <get-FlattenModuleDependencies>(): org.jetbrains.kastle.gen/ProjectMapping // org.jetbrains.kastle.structure/FlattenModuleDependencies.<get-FlattenModuleDependencies>|<get-FlattenModuleDependencies>(){}[0]
 final val org.jetbrains.kastle.structure/GradleSourceMapping // org.jetbrains.kastle.structure/GradleSourceMapping|{}GradleSourceMapping[0]
     final fun <get-GradleSourceMapping>(): org.jetbrains.kastle.gen/ProjectMapping // org.jetbrains.kastle.structure/GradleSourceMapping.<get-GradleSourceMapping>|<get-GradleSourceMapping>(){}[0]
 final val org.jetbrains.kastle.structure/MavenSourceMapping // org.jetbrains.kastle.structure/MavenSourceMapping|{}MavenSourceMapping[0]
