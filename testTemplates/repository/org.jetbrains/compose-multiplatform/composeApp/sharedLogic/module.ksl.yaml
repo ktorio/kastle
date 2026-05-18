@@ -1,0 +1,6 @@
+platforms: [ios, jvm, js, wasmJs, android]
+
+gradle:
+  plugins:
+    - $libs.plugins.kotlinMultiplatform
+    - $libs.plugins.androidMultiplatformLibrary
