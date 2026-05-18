@@ -1,0 +1,24 @@
+
+product:
+  type: lib
+  platforms: [ios, jvm, js, wasmJs, android]
+
+dependencies@android:
+  - $libs.compose.uiToolingPreviewdependencies:
+  - $libs.androidx.lifecycle.runtimeCompose
+  - $libs.androidx.lifecycle.viewmodelCompose
+  - $libs.compose.components.resources
+  - $libs.compose.foundation
+  - $libs.compose.material3
+  - $libs.compose.runtime
+  - $libs.compose.ui
+  - $libs.compose.uiTooling
+  - $libs.compose.uiToolingPreviewdependencies:
+  - $libs.wrappers.browser
+
+test-dependencies:
+- $libs.kotlin.test
+
+settings:
+  compose: enabled
+

@@ -9,6 +9,7 @@ dependencies:
   - $libs.logback.classic
 
 test-dependencies:
+- $libs.kotlin.test
 - $ktor.server.testHost
 
 settings:

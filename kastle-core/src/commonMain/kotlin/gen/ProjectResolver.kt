@@ -142,7 +142,12 @@ fun interface ProjectResolver {
             val gradleSettings = GradleProjectSettings(
                 repositories = packs.flatMap { it.repositories }.distinct(),
                 pluginRepositories = packs.flatMap { it.pluginRepositories }.distinct(),
-                plugins = gradlePlugins.values.toList(),
+                plugins = gradlePlugins.values.sortedWith(
+                    compareBy(
+                        { (it.version as? CatalogVersion.Ref)?.ref ?: "" },
+                        { it.catalogKey },
+                    )
+                ),
             )
 
             // TODO validate structure, check for collisions, etc.

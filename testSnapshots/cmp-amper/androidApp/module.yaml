@@ -4,10 +4,12 @@ product:
   platforms: [android]
 
 dependencies:
-  - ../sharedUI
   - $libs.androidx.activity.compose
+  - $libs.compose.uiTooling
+  - $libs.compose.uiToolingPreview
+  - ../shared
 
-test-dependencies:
+
 
 settings:
   compose: enabled

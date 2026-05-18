@@ -1,6 +1,6 @@
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
 }
@@ -19,8 +19,10 @@ kotlin {
 
     sourceSets {
         webMain.dependencies {
-            implementation(project(":sharedUI"))
+            implementation(libs.compose.ui)
+            implementation(projects.shared)
         }
 
     }
 }
+

@@ -74,21 +74,34 @@ private fun SourceModule.toTemplateType(): TemplateSourceModule =
         amper = amper.toTemplateType(),
         dependencies = dependencies.asSequence()
             .filter { it.value.isNotEmpty() }
+            .sortedBy { it.key.code }
             .associate { (platform, deps) ->
                 platform.code to deps.map {
                     it.toTemplateType(path)
                 }.sortedWith(
                     compareBy(
-                        { it.path ?: "zz" },
-                        { it.key },
+                        { it.scope },
+                        { it.type },
+                        { it.typesafeProjectAccessor ?: LAST_IN_ORDER },
+                        { it.gradlePath ?: LAST_IN_ORDER },
+                        { it.path ?: LAST_IN_ORDER },
+                        { it.reference ?: LAST_IN_ORDER },
+                        { it.functionName ?: LAST_IN_ORDER },
+                        { it.key ?: LAST_IN_ORDER },
+                        { it.group ?: LAST_IN_ORDER },
+                        { it.artifact ?: LAST_IN_ORDER },
                     )
                 )
             },
         testDependencies = testDependencies.asSequence()
+            .filter { it.value.isNotEmpty() }
+            .sortedBy { it.key.code }
             .associate { (platform, deps) ->
                 platform.code to deps.map { it.toTemplateType(path) }
             },
     )
+
+private const val LAST_IN_ORDER: String = "~"
 
 context(project: Project)
 private fun CatalogArtifact.toTemplateType(): TemplateCatalogArtifact =
@@ -103,7 +116,7 @@ private fun CatalogArtifact.toTemplateType(): TemplateCatalogArtifact =
 
 context(project: Project)
 private fun lookupVersion(version: CatalogVersion): String? =
-    when(version) {
+    when (version) {
         is CatalogVersion.Ref -> project.versions[version.ref]
         is CatalogVersion.Number -> version.number
     }
@@ -158,24 +171,30 @@ private fun AmperKotlinSettings.toTemplateType(): TemplateAmperKotlinSettings =
 
 context(project: Project)
 private fun Dependency.toTemplateType(modulePath: String): TemplateBuildDependency =
-    when(this) {
+    when (this) {
         is ArtifactDependency -> TemplateBuildDependency(
             type = "maven",
             group = group,
             artifact = artifact,
             version = version,
-            exported = exported,
+            exported = scope == Dependency.EXPORTED_SCOPE,
+            scope = scope,
         )
+
         is ModuleDependency -> TemplateBuildDependency(
             type = "project",
             path = path,
             gradlePath = gradlePath(modulePath),
-            exported = exported,
+            typesafeProjectAccessor = typesafeProjectAccessor(modulePath),
+            exported = scope == Dependency.EXPORTED_SCOPE,
+            scope = scope,
         )
+
         is CatalogReference -> TemplateBuildDependency(
             type = "catalog",
             key = key,
-            exported = exported,
+            exported = scope == Dependency.EXPORTED_SCOPE,
+            scope = scope,
         ) + project.libraries[tomlKey]?.toTemplateType()
 
         is FunctionDependency -> TemplateBuildDependency(
@@ -183,7 +202,15 @@ private fun Dependency.toTemplateType(modulePath: String): TemplateBuildDependen
             functionName = functionName,
             // TODO should use expressions
             args = args.map { it.wrapQuotes() },
-            exported = exported,
+            exported = scope == Dependency.EXPORTED_SCOPE,
+            scope = scope,
+        )
+
+        is ReferenceDependency -> TemplateBuildDependency(
+            type = "reference",
+            reference = reference,
+            exported = scope == Dependency.EXPORTED_SCOPE,
+            scope = scope,
         )
     }
 
@@ -194,6 +221,7 @@ private operator fun TemplateBuildDependency.plus(artifact: TemplateCatalogArtif
         artifact = artifact.artifact ?: this@plus.artifact,
         versionRef = artifact.versionRef ?: versionRef,
         version = artifact.version ?: version,
+        scope = scope,
     )
 
 context(project: Project)
@@ -215,10 +243,11 @@ internal fun SourceModule.slotsTemplateMap(packId: PackId): Map<String, Any?> =
     }
 
 // TODO support string templates
-val SourceModule.slotSources: SourcesByUrl get() =
-    sources
-        .filter { it.isSlot() }
-        .groupBy { it.target.toString() }
+val SourceModule.slotSources: SourcesByUrl
+    get() =
+        sources
+            .filter { it.isSlot() }
+            .groupBy { it.target.toString() }
 
 /**
  * Find the main class from either amper settings, gradle properties, or use the default main.kt file.
@@ -246,6 +275,19 @@ private fun ModuleDependency.gradlePath(modulePath: String): String = buildStrin
     val actualPath = Path(modulePath).resolve(path).normalize()
     append(':')
     append(actualPath.toString().replace('/', ':'))
+}
+
+private fun ModuleDependency.typesafeProjectAccessor(modulePath: String): String = buildString {
+    val actualPath = Path(modulePath).resolve(path).normalize()
+    append("projects")
+    for (segment in actualPath.toString().split('/')) {
+        append('.')
+        val parts = segment.split('-', '_')
+        append(parts.first())
+        for (part in parts.drop(1)) {
+            append(part.replaceFirstChar { it.titlecase() })
+        }
+    }
 }
 
 // TODO small hack for working with maven

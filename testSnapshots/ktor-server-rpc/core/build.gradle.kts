@@ -1,6 +1,5 @@
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlinx.rpc)
     alias(libs.plugins.kotlin.serialization)
 }
@@ -24,8 +23,6 @@ kotlin {
             api(libs.kotlinx.rpc.serializationJson)
         }
 
-        commonTest.dependencies {
-            kotlin("test")
-        }
     }
 }
+
