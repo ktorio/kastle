@@ -5,10 +5,9 @@ plugins {
 
 val exportDir = rootDir.resolve("export")
 
-tasks.register<GradleBuild>("exportSamples") {
-    dir = rootDir.resolve("testTemplates")
-    tasks = listOf("kslExportToCbor")
-    startParameter.projectProperties["exportPath"] = exportDir.absolutePath
+val exportSamples by tasks.registering(Exec::class) {
+    workingDir = rootDir.resolve("testTemplates")
+    commandLine("./gradlew", "kslExportToCbor", "-PexportPath=${exportDir.absolutePath}")
 }
 
 tasks.jib {
