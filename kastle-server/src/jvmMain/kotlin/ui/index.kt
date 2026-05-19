@@ -23,6 +23,21 @@ fun HTML.indexHtml(
         styleLink("$basePath/assets/a11y-light.min.css")
         styleLink("$basePath/assets/a11y-dark.min.css")
         link(rel = "stylesheet") { id = "highlight-style" }
+    }
+    body {
+        div {
+            id = "header"
+
+            h1 { +"♜" }
+            span("secondary small-caps spaced") {
+                +"Kotlin Application Source Templating and Layout Engine"
+            }
+            // header navigation
+        }
+        navigationPanel(basePath, packs)
+        mainPanel(view, basePath, previewContents)
+
+        // Scripts
         script(src = "$basePath/assets/htmx.min.js") {}
         script(src = "$basePath/assets/highlight.min.js") {}
         script {
@@ -34,156 +49,159 @@ fun HTML.indexHtml(
         }
         script(src = "$basePath/assets/kastle-server.js") {}
     }
-    body {
+}
+
+@OptIn(ExperimentalKtorApi::class)
+private fun BODY.navigationPanel(
+    basePath: String,
+    packs: List<PackDescriptor>
+) {
+    nav {
+        id = "packs"
+
+        form {
+            id = "pack-search"
+            onSubmit = "event.preventDefault();"
+
+            input(type = InputType.text) {
+                id = "pack-search-input"
+                placeholder = "Search"
+
+                attributes.hx {
+                    get = "$basePath/packs"
+                    trigger = "changed, keyup[key=='Enter']"
+                    target = "#packs-list"
+                    vals = "js:{search: event.target.value}"
+                }
+            }
+        }
+
+        ul {
+            id = "packs-list"
+            for (pack in packs)
+                packListItem(basePath, pack)
+        }
+    }
+}
+
+
+@OptIn(ExperimentalKtorApi::class)
+private fun BODY.mainPanel(
+    view: View,
+    basePath: String,
+    previewContents: FlowContent.() -> Unit
+) {
+    main {
         div {
-            id = "header"
-
-            h1 {
-                +"♜"
-            }
-            span("secondary small-caps spaced") {
-                +"Kotlin Application Sourcecode Templating and Layout Engine"
-            }
-            // header navigation
-        }
-        nav {
-            id = "packs"
-
-            form {
-                id = "pack-search"
-                onSubmit = "event.preventDefault();"
-
-                input(type = InputType.text) {
-                    id = "pack-search-input"
-                    placeholder = "Search"
-
-                    attributes.hx {
-                        get = "$basePath/packs"
-                        trigger = "changed, keyup[key=='Enter']"
-                        target = "#packs-list"
-                        vals = "js:{search: event.target.value}"
-                    }
-                }
-            }
-
-            ul {
-                id = "packs-list"
-                for (pack in packs)
-                    packListItem(basePath, pack)
+            id = "download-form"
+            div { id = "download-button-loader" }
+            div { id = "download-button-progress" }
+            button {
+                id = "download-button"
+                onClick = "downloadProject()"
+                +"Download ⤓"
             }
         }
-        main {
-            div {
-                id = "download-form"
-                div { id = "download-button-loader" }
-                div { id = "download-button-progress" }
-                button {
-                    id = "download-button"
-                    onClick = "downloadProject()"
-                    +"Download ⤓"
-                }
-            }
 
-            tabList("main-tabs") {
-                tab(
-                    id = "form-panel",
-                    icon = "&#9881;",
-                    title = "Settings",
-                    checked = view.tab == ViewTab.SETTINGS
-                ) {
-                    id = "form-panel-contents"
+        tabList("main-tabs") {
+            tab(
+                id = "form-panel",
+                icon = "&#9881;",
+                title = "Settings",
+                checked = view.tab == ViewTab.SETTINGS
+            ) {
+                id = "form-panel-contents"
 
-                    form {
-                        id = "project-form"
+                form {
+                    id = "project-form"
 
-                        div("properties") {
-                            h3 {
-                                +"Project"
+                    div("properties") {
+                        h3 {
+                            +"Project"
+                        }
+                        div("field") {
+                            label {
+                                htmlFor = "group-name"
+                                +"Group"
                             }
-                            div("field") {
-                                label {
-                                    htmlFor = "group-name"
-                                    +"Group"
-                                }
-                                input(type = InputType.text) {
-                                    id = "group-name"
-                                    name = "group"
-                                    placeholder = "com.example"
-                                    value = "com.example"
-                                }
-                            }
-                            div("field") {
-                                label {
-                                    htmlFor = "project-name"
-                                    +"Artifact"
-                                }
-                                input(type = InputType.text) {
-                                    id = "project-name"
-                                    name = "name"
-                                    placeholder = "generated"
-                                    value = "generated"
-                                }
-                            }
-                            div("field") {
-                                label {
-                                    htmlFor = "packaging"
-                                    +"Packaging"
-                                }
-                                select {
-                                    name = "packaging"
-                                    option {
-                                        selected = true
-                                        +"Flat"
-                                    }
-                                    option {
-                                        +"Nested"
-                                    }
-                                }
+                            input(type = InputType.text) {
+                                id = "group-name"
+                                name = "group"
+                                placeholder = "com.example"
+                                value = "com.example"
                             }
                         }
-                        div {
-                            id = "dynamic-properties"
+                        div("field") {
+                            label {
+                                htmlFor = "project-name"
+                                +"Artifact"
+                            }
+                            input(type = InputType.text) {
+                                id = "project-name"
+                                name = "name"
+                                placeholder = "generated"
+                                value = "generated"
+                            }
                         }
-                        div {
-                            id = "selected-packs-config"
+                        div("field") {
+                            label {
+                                htmlFor = "packaging"
+                                +"Packaging"
+                            }
+                            select {
+                                name = "packaging"
+                                option {
+                                    selected = true
+                                    +"Flat"
+                                }
+                                option {
+                                    +"Nested"
+                                }
+                            }
                         }
                     }
-                }
-                tab(
-                    id = "pack-details",
-                    icon = "&#8505;",
-                    title = "About",
-                    checked = view.tab == ViewTab.ABOUT,
-                ) {
-                    id = "pack-details-docs"
-
-                    attributes["data-tab"] = "pack-details-tab"
-                    attributes.hx {
-                        get = "$basePath/packs/docs"
-                        trigger = "load"
-                    }
-
-                    +"No details available."
-                }
-                tab(
-                    id = "preview-panel",
-                    icon = "&#9778;",
-                    title = "Preview",
-                    checked = view.tab == ViewTab.PREVIEW,
-                ) {
                     div {
-                        id = "preview-panel-container"
-                        div {
-                            id = "preview-panel-tree"
-                            attributes.hx {
-                                get = "$basePath/project/listing"
-                                trigger = "refreshPreview, load, change from:#project-form input"
-                            }
+                        id = "dynamic-properties"
+                    }
+                    div {
+                        id = "selected-packs-config"
+                    }
+                }
+            }
+            tab(
+                id = "pack-details",
+                icon = "&#8505;",
+                title = "About",
+                checked = view.tab == ViewTab.ABOUT,
+            ) {
+                id = "pack-details-docs"
+
+                attributes["data-tab"] = "pack-details-tab"
+                attributes.hx {
+                    get = "$basePath/packs/docs"
+                    trigger = "load"
+                }
+
+                +"No details available."
+            }
+            tab(
+                id = "preview-panel",
+                icon = "&#9778;",
+                title = "Preview",
+                checked = view.tab == ViewTab.PREVIEW,
+            ) {
+                div {
+                    id = "preview-panel-container"
+                    div {
+                        id = "preview-panel-tree"
+                        attributes.hx {
+                            get = "$basePath/project/listing"
+                            trigger = "refreshPreview, load, change from:#project-form input"
                         }
-                        div {
-                            id = "preview-panel-contents"
-                            previewContents()
-                        }
+                    }
+                    div {
+                        id = "preview-panel-contents"
+                        previewContents()
                     }
                 }
             }
