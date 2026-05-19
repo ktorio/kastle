@@ -46,3 +46,5 @@ dependencyResolutionManagement {
         }
     }
 }
+
+rootProject.name = "testTemplates"
