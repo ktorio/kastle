@@ -12,7 +12,10 @@ pluginManagement {
         id("rpc") version "2.3.20-RC2-0.1"
         id("org.jetbrains.kotlin.jvm") version "2.3.20"
         id("org.jetbrains.kotlin.plugin.serialization") version "2.3.20"
-        id("org.jetbrains.kotlin.plugin.compose") version "2.3.20"
+        val addSampleCode: String by _properties
+        if (addSampleCode) {
+            id("org.jetbrains.kotlin.plugin.compose") version "2.3.20"
+        }
     }
 }
 

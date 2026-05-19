@@ -9,10 +9,12 @@ This repository is a modular IntelliJ Platform plugin template. It introduces a 
 It also demonstrates how to use this concept to separate UI code from business logic. Not only does it help to keep the plugin code clean, but it also allows implementing features in a way they work natively in **split mode** just like in the ordinary monolithic IDE.
 
 It packages a single plugin out of separate `shared`, `frontend`, and `backend` modules and demonstrates how to keep UI code on the frontend side while delegating stateful logic to the backend side through RPC.
+{{#if addSampleCode}}
 
 ## Demo Functionality
 
 The sample plugin adds a `ModularPlugin` tool window with a chat-style UI implemented with the Compose framework.
+{{/if}}
 
 ## Plugin structure
 

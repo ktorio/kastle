@@ -1,7 +1,8 @@
 <idea-plugin>
     <dependencies>
         <module name="intellij.platform.frontend"/>
-        <module name="intellij.platform.compose"/>
+        {{#if addSampleCode}}
+        <module name="intellij.platform.compose"/>{{/if}}
         <module name="{{pluginModuleName}}.shared"/>
         {{#if _slots.frontendModuleDescriptorDependencies}}
 
