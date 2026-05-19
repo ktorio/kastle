@@ -1571,10 +1571,10 @@ hpack.js@^2.1.6:
     readable-stream "^2.0.1"
     wbuf "^1.1.0"
 
-htmx.org@2.0.8:
-  version "2.0.8"
-  resolved "https://registry.yarnpkg.com/htmx.org/-/htmx.org-2.0.8.tgz#8ac8ba87c141b7bfda7576117476062eeb4aceda"
-  integrity sha512-fm297iru0iWsNJlBrjvtN7V9zjaxd+69Oqjh4F/Vq9Wwi2kFisLcrLCiv5oBX0KLfOX/zG8AUo9ROMU5XUB44Q==
+htmx.org@2.0.10:
+  version "2.0.10"
+  resolved "https://registry.yarnpkg.com/htmx.org/-/htmx.org-2.0.10.tgz#62442b0e2952a885ae2e50a7654b8b20d0981134"
+  integrity sha512-kdeJe7ZVwaS6QMz/ebBIVtZdpwen6L0OQ5GOhPV9MKBb196TCZeZu4yA7ZIQsaLKv7EpXz+So7KSXNuHXhj7Cw==
 
 http-deceiver@^1.2.7:
   version "1.2.7"
