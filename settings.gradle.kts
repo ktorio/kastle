@@ -38,7 +38,4 @@ include(
     "kastle-analytics-fus",
 )
 
-// Due to certain limitations in gradle, including testTemplates
-// in this gradle project for IDE features is not possible.
-// To modify the test templates, it's best to open the testTemplates
-// folder as a separate project in Intellij.
+rootProject.name = "kastle"
