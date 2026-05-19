@@ -1,6 +1,9 @@
 platform: js
 dependencies:
   - npm(htmx.org, 2.0.8)
+gradle:
+  plugins:
+    - $libs.plugins.kotlinMultiplatform
 propertyValues:
   - key: org.gradle/gradle/isExecutable
     value: true

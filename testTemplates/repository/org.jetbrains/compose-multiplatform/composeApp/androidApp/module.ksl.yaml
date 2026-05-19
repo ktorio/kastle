@@ -1,8 +1,10 @@
 platform: android
 
 dependencies:
-  - ../sharedUI
+  - ../shared
   - $libs.androidx.activity.compose
+  - $libs.compose.uiToolingPreview
+  - $libs.compose.uiTooling!debugImplementation
 
 amper:
   compose: enabled
@@ -16,3 +18,8 @@ gradle:
 sources:
   - path: android.gradle.kts
     target: slot://org.gradle/gradle/buildRoot
+  - target: slot://org.gradle/gradle/kotlinRoot
+    text: |-
+      compilerOptions {
+          jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+      }

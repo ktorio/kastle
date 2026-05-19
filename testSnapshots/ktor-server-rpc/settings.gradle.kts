@@ -1,4 +1,5 @@
 rootProject.name = "ktor-server-rpc"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {

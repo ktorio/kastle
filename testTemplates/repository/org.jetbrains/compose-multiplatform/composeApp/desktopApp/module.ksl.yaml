@@ -1,12 +1,14 @@
 platform: jvm
 
 dependencies:
-  - ../sharedUI
-  - $composeLibs.desktop.currentOs
+  - ../shared
+  - compose.desktop.currentOs
   - $libs.kotlinx.coroutinesSwing
+  - $libs.compose.uiToolingPreview
 
 gradle:
   plugins:
+    - $libs.plugins.kotlinJvm
     - $libs.plugins.composeMultiplatform
     - $libs.plugins.composeCompiler
 

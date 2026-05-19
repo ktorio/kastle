@@ -1,4 +1,5 @@
 rootProject.name = "module-if-dep-optional"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {

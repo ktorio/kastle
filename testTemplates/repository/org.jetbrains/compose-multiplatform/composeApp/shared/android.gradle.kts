@@ -1,5 +1,5 @@
 androidLibrary {
-    namespace = "${_project.group}"
+    namespace = "${_project.group}.shared"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     minSdk = libs.versions.android.minSdk.get().toInt()
 

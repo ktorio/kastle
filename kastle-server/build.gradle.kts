@@ -36,7 +36,7 @@ kotlin {
 
         jsMain {
             dependencies {
-                implementation(npm("htmx.org", "2.0.8"))
+                implementation(npm("htmx.org", "2.0.10"))
             }
         }
 
@@ -87,7 +87,7 @@ kotlin {
 val copyJsDistribution by tasks.registering(Copy::class) {
     dependsOn("jsBrowserDistribution")
     from(layout.buildDirectory.dir("dist/js/productionExecutable"))
-    into(layout.buildDirectory.dir("processedResources/jvm/main/js"))
+    into(layout.buildDirectory.dir("processedResources/jvm/main/assets"))
 }
 
 tasks.named("jvmProcessResources") {

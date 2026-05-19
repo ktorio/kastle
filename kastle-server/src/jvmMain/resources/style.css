@@ -47,6 +47,7 @@ body {
     grid-template-areas:
         "header header"
         "nav main";
+    height: 100vh;
 }
 
 /* Styles for Dark Theme */
@@ -103,9 +104,10 @@ pre {
 
     > .tabs-content {
         border: 1px solid var(--secondary-text-color);
-        min-height: 100px;
         border-radius: 0 4px 4px 4px;
         background-color: var(--layer-background-color);
+        min-height: 100px;
+        overflow: auto;
     }
 
     .tab-content {
@@ -308,6 +310,8 @@ main {
     grid-area: main;
     padding: 12px 16px;
     max-width: calc(100vw - 280px);
+    min-height: 0;
+    display: flex;
 
     > section {
         background-color: var(--layer-background-color);
@@ -315,6 +319,9 @@ main {
 
     > .tabs {
         margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
     }
 }
 

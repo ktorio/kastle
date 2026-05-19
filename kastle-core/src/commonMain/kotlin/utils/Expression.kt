@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.kastle.VariableId
 import org.jetbrains.kastle.utils.Expression.Literal
 import org.jetbrains.kastle.utils.intellij.IntellijPlatformSpecificUtilMethods
+import kotlin.collections.map
 
 @Serializable
 sealed interface StringExpression: Expression {
@@ -170,7 +171,8 @@ sealed interface Expression {
                 is Map<*, *> -> evaluateMapMethod(receiverValue, methodName, evaluatedArgs)
                 is Number -> evaluateNumberMethod(receiverValue, methodName, evaluatedArgs)
                 is Boolean -> evaluateBooleanMethod(receiverValue, methodName, evaluatedArgs)
-                else -> throw IllegalArgumentException("Unsupported receiver type: ${receiverValue::class}, $receiverValue")
+                is Char -> evaluateCharMethod(receiverValue, methodName, evaluatedArgs)
+                else -> throw IllegalArgumentException("Unsupported receiver type: ${receiverValue::class}, $receiverValue, $methodName")
             }
         }
 
@@ -267,6 +269,19 @@ sealed interface Expression {
                 "toLowerCase", "lowercase" -> receiver.lowercase()
                 "capitalize" -> receiver.capitalizeFirst()
                 "trim" -> receiver.trim()
+                "replaceFirstChar" -> {
+                    val transform = args.singleOrNull()
+                        ?: throw IllegalArgumentException("replaceFirstChar requires a lambda argument")
+
+                    when (transform) {
+                        is Function1<*, *> -> {
+                            @Suppress("UNCHECKED_CAST")
+                            val typedTransform = transform as (Char) -> Char
+                            receiver.replaceFirstChar { typedTransform(it) }
+                        }
+                        else -> throw IllegalArgumentException("replaceFirstChar requires a lambda function argument, got ${transform::class.simpleName}")
+                    }
+                }
                 "split" -> {
                     val delimiter = args.firstOrNull()?.toString() ?: throw IllegalArgumentException("split requires a delimiter")
                     receiver.split(delimiter)
@@ -396,6 +411,14 @@ sealed interface Expression {
                 "toString" -> receiver.toString()
                 "not" -> !receiver
                 else -> throw IllegalArgumentException("Unsupported Boolean method: $methodName")
+            }
+        }
+
+        private fun evaluateCharMethod(receiver: Char, methodName: String, args: List<Any?>): Any? {
+            return when (methodName) {
+                "toString" -> receiver.toString()
+                "uppercaseChar" -> receiver.uppercaseChar()
+                else -> throw IllegalArgumentException("Unsupported Char method: $methodName")
             }
         }
     }

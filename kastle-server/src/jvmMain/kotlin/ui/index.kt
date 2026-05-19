@@ -30,9 +30,9 @@ fun HTML.indexHtml(
                 if (basePath.isNotEmpty()) {
                     +"window.BASE_PATH = '$basePath';\n"
                 }
-                +Resources.script
             }
         }
+        script(src = "$basePath/assets/kastle-server.js") {}
     }
     body {
         div {
