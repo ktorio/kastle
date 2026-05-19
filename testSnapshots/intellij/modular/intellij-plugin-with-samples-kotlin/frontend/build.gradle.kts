@@ -1,7 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
-
 dependencies {
     intellijPlatform {
         bundledModule("intellij.platform.frontend")

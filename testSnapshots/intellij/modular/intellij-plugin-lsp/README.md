@@ -10,10 +10,6 @@ It also demonstrates how to use this concept to separate UI code from business l
 
 It packages a single plugin out of separate `shared`, `frontend`, and `backend` modules and demonstrates how to keep UI code on the frontend side while delegating stateful logic to the backend side through RPC.
 
-## Demo Functionality
-
-The sample plugin adds a `ModularPlugin` tool window with a chat-style UI implemented with the Compose framework.
-
 ## Plugin structure
 
 A generated project contains the following content structure:
