@@ -10,7 +10,15 @@ updates:
         patterns:
           - "*"
     ignore:
+      # Gradle 9.5.x has a StackOverflowError regression in
+      # CompositeDomainObjectSet (gradle/gradle#37498).
+      # Re-enable once a fixed 9.5.x patch (or 9.6) ships.
+      - dependency-name: "gradle"
+        versions: [ ">=9.5, <9.6" ]
+      # Updating will cause compatibility issues with Ktor.
+      # We should wait for an update in Ktor.
       - dependency-name: "com.charleskorn.kaml:kaml"
       - dependency-name: "org.jetbrains.kotlinx:kotlinx-datetime"
+      # Something up with the Kotest gradle plugin that causes this to break
       - dependency-name: "io.kotest"
       - dependency-name: "io.kotest:*"
