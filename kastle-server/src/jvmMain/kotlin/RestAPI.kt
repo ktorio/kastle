@@ -11,6 +11,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.io.encodeToSink
 import org.jetbrains.kastle.*
@@ -66,6 +67,8 @@ fun Routing.backEnd(
                 call.respondBytesWriter(ContentType.Application.Json) {
                     writeJsonFlow(packs, json)
                 }
+            }.describe {
+                okResponseSchema<List<PackSchema>>("Basic pack information")
             }
             route("/{group}/{id}") {
                 /**
@@ -78,6 +81,8 @@ fun Routing.backEnd(
                         json.encodeToString(packDescriptor)
                     }
                 }
+            }.describe {
+                okResponseSchema<PackSchema>("Detailed pack information")
             }
         }
         route("/files") {
@@ -112,6 +117,15 @@ fun Routing.backEnd(
                     ?: ContentType.Application.OctetStream
 
                 call.respondSource(contents, contentType)
+            }.describe {
+                responses {
+                    HttpStatusCode.OK {
+                        description = "File contents"
+                    }
+                    HttpStatusCode.NotFound {
+                        description = "File not found"
+                    }
+                }
             }
         }
         route("/generate") {
@@ -142,6 +156,13 @@ fun Routing.backEnd(
                 val settings: ProjectDescriptor = call.receive()
                 val result: Flow<SourceFileEntry> = generator.generate(settings)
                 call.respondProjectDownload(settings.name, result)
+            }.describe {
+                responses {
+                    HttpStatusCode.OK {
+                        description = "ZIP file containing the project files"
+                        ContentType.Application.Zip {}
+                    }
+                }
             }
         }
     }.also { apiRoute ->
@@ -186,3 +207,22 @@ private suspend inline fun <reified E> ByteWriteChannel.writeJsonFlow(flow: Flow
     }
     buffer.writeByte(']'.code.toByte())
 }
+
+@Serializable
+data class PackSchema(
+    val id: PackId,
+    val name: String,
+    val version: SemanticVersion,
+    val icon: String?,
+    val description: String?,
+    val license: String?,
+    val group: Group?,
+    val tags: List<String>,
+    val links: PackLinks?,
+    val documentation: String?,
+    val requires: List<PackRequirement>,
+    val properties: List<PropertyDescriptor>,
+    val repositories: List<MavenRepository>,
+    val pluginRepositories: List<MavenRepository>,
+    val modules: List<SourceModuleManifest>
+)
