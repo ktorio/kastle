@@ -15,6 +15,8 @@ updates:
       # Re-enable once a fixed 9.5.x patch (or 9.6) ships.
       - dependency-name: "gradle"
         versions: [ ">=9.5, <9.6" ]
+      - dependency-name: "gradle-wrapper"
+        versions: [ ">=9.5, <9.6" ]
       # Updating will cause compatibility issues with Ktor.
       # We should wait for an update in Ktor.
       - dependency-name: "com.charleskorn.kaml:kaml"
