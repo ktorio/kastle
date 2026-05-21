@@ -15,8 +15,7 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
     #language=kotlin
     text: |
-      bundledModule("intellij.xml.psi")
-      bundledModule("intellij.xml.psi.impl")
+      bundledPlugin("com.intellij.modules.xml")
     priority: 80
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
     #language=xml
@@ -29,8 +28,7 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
     #language=kotlin
     text: |
-      bundledModule("intellij.xml.psi")
-      bundledModule("intellij.xml.psi.impl")
+      bundledPlugin("com.intellij.modules.xml")
     priority: 80
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
