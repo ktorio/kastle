@@ -50,11 +50,9 @@ commonSources:
     #language=kotlin
     text: |
       bundledModule("intellij.database.sql.frontend.core")
-      bundledModule("intellij.database.sql.frontend.impl")
     priority: 110
   - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
     #language=xml
     text: |
       <module name="intellij.database.sql.frontend.core"/>
-      <module name="intellij.database.sql.frontend.impl"/>
     priority: 110
