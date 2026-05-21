@@ -21,8 +21,7 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
     #language=kotlin
     text: |
-      bundledModule("intellij.properties")
-      bundledModule("intellij.properties.psi")
+      bundledModule("com.intellij.properties")
     priority: 90
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
     #language=xml
@@ -35,8 +34,7 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
     #language=kotlin
     text: |
-      bundledModule("intellij.properties")
-      bundledModule("intellij.properties.psi")
+      bundledModule("com.intellij.properties")
     priority: 90
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
