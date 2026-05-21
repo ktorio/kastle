@@ -20,7 +20,7 @@ commonSources:
   ## Shared
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
     #language=kotlin
-    text: bundledModule("intellij.markdown")
+    text: bundledModule("org.intellij.plugins.markdown")
     priority: 100
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
     #language=xml
@@ -30,7 +30,7 @@ commonSources:
   ## Backend
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
     #language=kotlin
-    text: bundledModule("intellij.markdown")
+    text: bundledModule("org.intellij.plugins.markdown")
     priority: 100
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
