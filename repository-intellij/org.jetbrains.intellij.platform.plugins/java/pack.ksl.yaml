@@ -21,26 +21,22 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
     #language=kotlin
     text: |
-      bundledModule("intellij.java.frontback.psi")
-      bundledModule("intellij.java.frontback.impl")
+      bundledPlugin("com.intellij.java")
     priority: 30
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
     #language=xml
     text: |
       <module name="intellij.java.frontback.psi"/>
-      <module name="intellij.java.frontback.impl"/>
     priority: 30
 
   ## Backend
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
     #language=kotlin
     text: |
-      bundledModule("intellij.java.frontback.psi")
-      bundledModule("intellij.java.frontback.impl")
+      bundledPlugin("com.intellij.java")
     priority: 30
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
     text: |
       <module name="intellij.java.frontback.psi"/>
-      <module name="intellij.java.frontback.impl"/>
     priority: 30
