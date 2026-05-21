@@ -20,7 +20,7 @@ commonSources:
   ## Shared
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
     #language=kotlin
-    text: bundledModule("intellij.yaml")
+    text: bundledModule("org.jetbrains.plugins.yaml")
     priority: 70
   - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
     #language=xml
@@ -30,7 +30,7 @@ commonSources:
   ## Backend
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
     #language=kotlin
-    text: bundledModule("intellij.yaml")
+    text: bundledModule("org.jetbrains.plugins.yaml")
     priority: 70
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
