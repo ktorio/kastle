@@ -34,7 +34,6 @@ ktoml = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
 commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
 
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
-
 testBalloon-framework-core = { module = "de.infix.testBalloon:testBalloon-framework-core", version.ref = "testballoon" }
 
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }

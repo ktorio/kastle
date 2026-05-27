@@ -1,5 +1,6 @@
 @file:OptIn(ExperimentalWasmDsl::class)
 
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
@@ -14,6 +15,17 @@ kotlin {
     @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
     abiValidation {
         enabled = true
+    }
+
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyDefaultHierarchyTemplate {
+        common {
+            group("nonJvm") {
+                withJs()
+                withWasmJs()
+                withIos()
+            }
+        }
     }
 
     jvm()
@@ -45,44 +57,6 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.testBalloon.framework.core)
             implementation(libs.kotest.assertions)
-        }
-
-
-        val nonJvmMain by creating {
-            dependsOn(commonMain.get())
-        }
-
-        val nonJvmTest by creating {
-            dependsOn(commonTest.get())
-        }
-
-        val jvmMain by getting
-        val jvmTest by getting
-
-        val iosArm64Main by getting {
-            dependsOn(nonJvmMain)
-        }
-        val iosSimulatorArm64Main by getting {
-            dependsOn(nonJvmMain)
-        }
-        val jsMain by getting {
-            dependsOn(nonJvmMain)
-        }
-        val wasmJsMain by getting {
-            dependsOn(nonJvmMain)
-        }
-
-        val iosArm64Test by getting {
-            dependsOn(nonJvmTest)
-        }
-        val iosSimulatorArm64Test by getting {
-            dependsOn(nonJvmTest)
-        }
-        val jsTest by getting {
-            dependsOn(nonJvmTest)
-        }
-        val wasmJsTest by getting {
-            dependsOn(nonJvmTest)
         }
 
         all {
