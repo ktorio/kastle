@@ -30,11 +30,3 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
     text: <module name="intellij.ruby.common"/>
-
-  ## Frontend
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
-    #language=kotlin
-    text: compatiblePlugin("org.jetbrains.plugins.ruby")
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
-    #language=xml
-    text: <module name="intellij.ruby.frontend"/>

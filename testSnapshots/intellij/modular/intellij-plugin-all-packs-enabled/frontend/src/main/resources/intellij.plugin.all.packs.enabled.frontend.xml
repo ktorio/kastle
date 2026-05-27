@@ -3,11 +3,7 @@
         <module name="intellij.platform.frontend"/>
         <module name="intellij.plugin.all.packs.enabled.shared"/>
 
-        <plugin id="com.intellij.kotlin.frontend"/>
-        <module name="intellij.javascript.frontend"/>
-        <module name="intellij.markdown.frontend"/>
         <module name="intellij.database.sql.frontend.core"/>
-        <module name="intellij.database.sql.frontend.impl"/>
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">

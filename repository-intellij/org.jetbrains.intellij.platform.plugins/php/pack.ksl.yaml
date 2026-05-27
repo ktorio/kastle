@@ -30,11 +30,3 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
     text: <module name="intellij.php.frontback.impl"/>
-
-  ## Frontend
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
-    #language=kotlin
-    text: compatiblePlugin("com.jetbrains.php")
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
-    #language=xml
-    text: <plugin id="com.intellij.php.frontend"/>

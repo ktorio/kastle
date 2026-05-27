@@ -9,8 +9,6 @@ dependencies {
         compileOnly(libs.kotlin.serialization.json.jvm)
 
         composeUI()
-
-        bundledPlugin("org.jetbrains.kotlin")
     }
 
     implementation(project(":shared"))

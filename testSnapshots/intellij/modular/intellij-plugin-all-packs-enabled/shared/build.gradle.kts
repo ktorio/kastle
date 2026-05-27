@@ -1,15 +1,12 @@
 dependencies {
     intellijPlatform {
-        bundledModule("intellij.java.frontback.psi")
-        bundledModule("intellij.java.frontback.impl")
-        bundledModule("intellij.javascript.common")
-        bundledModule("intellij.json")
-        bundledModule("intellij.yaml")
-        bundledModule("intellij.xml.psi")
-        bundledModule("intellij.xml.psi.impl")
-        bundledModule("intellij.properties")
-        bundledModule("intellij.properties.psi")
-        bundledModule("intellij.markdown")
+        bundledPlugin("com.intellij.java")
+        bundledModule("JavaScript")
+        bundledModule("com.intellij.modules.json")
+        bundledModule("org.jetbrains.plugins.yaml")
+        bundledPlugin("com.intellij.modules.xml")
+        bundledModule("com.intellij.properties")
+        bundledModule("org.intellij.plugins.markdown")
         bundledModule("intellij.database.sql")
         bundledModule("intellij.database.sql.core.impl")
     }

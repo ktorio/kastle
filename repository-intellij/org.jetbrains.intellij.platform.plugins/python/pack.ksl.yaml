@@ -34,11 +34,3 @@ commonSources:
     text: |
       <module name="intellij.python.psi"/>
       <module name="intellij.python.psi.impl"/>
-
-  ## Frontend
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
-    #language=kotlin
-    text: compatiblePlugin("PythonCore")
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
-    #language=xml
-    text: <module name="intellij.python.frontend"/>

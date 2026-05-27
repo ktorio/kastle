@@ -36,13 +36,3 @@ commonSources:
     #language=xml
     text: <plugin id="org.jetbrains.kotlin"/>
     priority: 40
-
-  ## Frontend
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
-    #language=kotlin
-    text: bundledPlugin("org.jetbrains.kotlin")
-    priority: 40
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
-    #language=xml
-    text: <plugin id="com.intellij.kotlin.frontend"/>
-    priority: 40

@@ -4,8 +4,7 @@ dependencies {
         bundledModule("intellij.platform.rpc.backend")
         bundledModule("intellij.platform.backend")
 
-        bundledModule("intellij.java.frontback.psi")
-        bundledModule("intellij.java.frontback.impl")
+        bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.kotlin")
     }
 

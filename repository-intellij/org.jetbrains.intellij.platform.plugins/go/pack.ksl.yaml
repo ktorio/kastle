@@ -32,11 +32,3 @@ commonSources:
     text: |
       <module name="intellij.go.frontback"/>
       <module name="intellij.go.impl"/>
-
-  ## Frontend
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
-    #language=kotlin
-    text: compatiblePlugin("org.jetbrains.plugins.go")
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
-    #language=xml
-    text: <module name="intellij.go.common.frontend"/>
