@@ -1,15 +1,15 @@
 package org.jetbrains.kastle.yaml
 
 import com.charleskorn.kaml.Yaml
-import io.kotest.core.spec.style.StringSpec
+import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.*
 import org.jetbrains.kastle.PackId
 import org.jetbrains.kastle.PackRequirement
 
-class PackRequirementSerializerTest : StringSpec({
+val PackRequirementSerializerTest by testSuite("Pack Requirements Serialization") {
     val yaml = Yaml.default
 
-    "deserializes a plain string as PackId" {
+    test("deserializes a plain string as PackId") {
         val text = "org.jetbrains/foo"
         val result = yaml.decodeFromString(PackRequirementYamlSerializer(), text)
         result shouldBe PackRequirement(
@@ -18,7 +18,7 @@ class PackRequirementSerializerTest : StringSpec({
         )
     }
 
-    "deserializes a single-key map with a string value as modules with empty key" {
+    test("deserializes a single-key map with a string value as modules with empty key") {
         val text = """
             org.jetbrains/foo: bar
         """.trimIndent()
@@ -29,7 +29,7 @@ class PackRequirementSerializerTest : StringSpec({
         )
     }
 
-    "deserializes a single-key map with a map value as modules" {
+    test("deserializes a single-key map with a map value as modules") {
         val text = """
             org.jetbrains/foo:
               moduleA: depA
@@ -42,7 +42,7 @@ class PackRequirementSerializerTest : StringSpec({
         )
     }
 
-    "serializes a requirement with no modules as a string" {
+    test("serializes a requirement with no modules as a string") {
         val value = PackRequirement(
             packId = PackId("org.jetbrains", "foo"),
             modules = emptyMap(),
@@ -50,4 +50,4 @@ class PackRequirementSerializerTest : StringSpec({
         val text = yaml.encodeToString(PackRequirementYamlSerializer(), value)
         text.trim() shouldBe "\"org.jetbrains/foo\""
     }
-})
+}

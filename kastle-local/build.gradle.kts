@@ -1,9 +1,7 @@
-import io.kotest.framework.gradle.tasks.KotestJvmTask
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.kotest)
+    alias(libs.plugins.testBalloon)
     `maven-publish`
 }
 
@@ -28,7 +26,6 @@ dependencies {
     testImplementation(libs.kotlin.compiler)
     testImplementation(project(":kastle-templates"))
     testImplementation(project(":kastle-test"))
-    testImplementation(libs.kotest.junit5)
     testImplementation(kotlin("test"))
 }
 
@@ -45,12 +42,12 @@ tasks {
             // Set system property that will be inherited by the jvmKotest task
             System.setProperty("UPDATE_GENERATOR_SNAPSHOTS", "true")
         }
-        doFirst {
-            // Configure the test task to pass the property
-            named<KotestJvmTask>("jvmKotest").configure {
-                systemProperty("UPDATE_GENERATOR_SNAPSHOTS", "true")
-            }
-        }
+//        doFirst {
+//            // Configure the test task to pass the property
+//            named<KotestJvmTask>("jvmKotest").configure {
+//                systemProperty("UPDATE_GENERATOR_SNAPSHOTS", "true")
+//            }
+//        }
 
         finalizedBy("jvmKotest")
     }

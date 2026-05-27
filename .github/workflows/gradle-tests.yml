@@ -36,12 +36,12 @@ jobs:
         run: ./gradlew --no-daemon checkKotlinAbi --stacktrace
 
       - name: Run tests
-        run: ./gradlew --no-daemon jvmKotest --stacktrace
+        run: ./gradlew --no-daemon jvmTest --stacktrace
 
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           files: |
-            **/build/test-results/jvmKotest/*.xml
+            **/build/test-results/jvmTest/*.xml
           check_name: Unit Test Results
           report_individual_runs: true

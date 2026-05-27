@@ -1,12 +1,12 @@
 package org.jetbrains.kastle.utils
 
-import io.kotest.core.spec.style.StringSpec
+import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.Serializable
 
-class MapEncoderTest : StringSpec({
+val MapEncoderTest by testSuite("MapEncoder") {
 
-    "encodes simple types" {
+    test("encodes simple types") {
         Address(
             streetNumber = 123,
             streetName = "Main Street",
@@ -22,7 +22,7 @@ class MapEncoderTest : StringSpec({
         )
     }
 
-    "encodes nested types" {
+    test("encodes nested types") {
         Person(
             name = "Ada",
             age = 37,
@@ -46,7 +46,7 @@ class MapEncoderTest : StringSpec({
         )
     }
 
-    "encodes lists of literals" {
+    test("encodes lists of literals") {
         Team(
             name = "Core",
             tags = listOf("backend", "kotlin", "serialization")
@@ -56,7 +56,7 @@ class MapEncoderTest : StringSpec({
         )
     }
 
-    "encodes lists of nested types" {
+    test("encodes lists of nested types") {
         Company(
             name = "Kastle",
             offices = listOf(
@@ -96,7 +96,7 @@ class MapEncoderTest : StringSpec({
         )
     }
 
-    "encodes maps of literals" {
+    test("encodes maps of literals") {
         ConfigHolder(
             config = mapOf(
                 "host" to "localhost",
@@ -112,7 +112,7 @@ class MapEncoderTest : StringSpec({
         )
     }
 
-    "encodes nullables and skips nulls" {
+    test("encodes nullables and skips nulls") {
         OptionalValues(
             title = null,
             count = 42,
@@ -122,7 +122,7 @@ class MapEncoderTest : StringSpec({
         )
     }
 
-    "encodes mixed literals" {
+    test("encodes mixed literals") {
         MixedLiterals(
             text = "hello",
             number = 7,
@@ -138,7 +138,7 @@ class MapEncoderTest : StringSpec({
         )
     }
 
-})
+}
 
 @Serializable
 data class Address(

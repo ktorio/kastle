@@ -1,25 +1,21 @@
 package org.jetbrains.kastle
 
-import io.kotest.core.spec.style.StringSpec
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.files.SystemTemporaryDirectory
 import kotlinx.serialization.ExperimentalSerializationApi
-import org.jetbrains.kastle.io.*
+import org.jetbrains.kastle.io.CborFilePackRepository
+import org.jetbrains.kastle.io.FileFormat
 import org.jetbrains.kastle.io.FileSystemPackRepository.Companion.export
-import kotlin.io.path.ExperimentalPathApi
+import org.jetbrains.kastle.io.deleteRecursively
 import kotlin.random.Random
 
-@OptIn(ExperimentalPathApi::class, ExperimentalSerializationApi::class)
-class CborProjectGeneratorTest: StringSpec(
-    ProjectGeneratorTest {
-        val local = LocalPackRepository(Path(TEST_TEMPLATES_ROOT), random = Random(42L))
-        val exportDir = Path(SystemTemporaryDirectory, "cbor_export")
-        SystemFileSystem.deleteRecursively(exportDir)
-        SystemFileSystem.createDirectories(exportDir)
-        local.export(exportDir, fileFormat = FileFormat.CBOR)
-        val byteSize = SystemFileSystem.calculateDirectorySize(exportDir)
-        println("Exported $byteSize bytes to $exportDir")
-        CborFilePackRepository(exportDir)
-    }
-)
+@OptIn(ExperimentalSerializationApi::class)
+val CborProjectGeneratorTest by ProjectGeneratorTest("CBOR") {
+    val local = LocalPackRepository(Path(TEST_TEMPLATES_ROOT), random = Random(42L))
+    val exportDir = Path(SystemTemporaryDirectory, "cbor_export")
+    SystemFileSystem.deleteRecursively(exportDir)
+    SystemFileSystem.createDirectories(exportDir)
+    local.export(exportDir, fileFormat = FileFormat.CBOR)
+    CborFilePackRepository(exportDir)
+}
