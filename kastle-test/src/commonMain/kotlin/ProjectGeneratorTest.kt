@@ -1,7 +1,6 @@
 package org.jetbrains.kastle
 
 import de.infix.testBalloon.framework.core.TestSuite
-import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.files.SystemTemporaryDirectory
@@ -15,14 +14,15 @@ private const val DEFAULT_GROUP = "com.acme"
 
 private val snapshots = Path("../testSnapshots")
 
-fun ProjectGeneratorTest(
-    variation: String,
+fun TestSuite.testProjectGenerator(
     tearDown: suspend () -> Unit = {},
     createRepository: suspend () -> PackRepository,
-): Lazy<TestSuite> = testSuite("Project Generator ($variation)") {
-
+) {
     testFixture {
-        ProjectGenerator(createRepository(), log = ConsoleLogger(LogLevel.INFO))
+        ProjectGenerator(
+            createRepository(),
+            log = ConsoleLogger(LogLevel.INFO)
+        )
     } closeWith {
         tearDown()
     } asParameterForEach {

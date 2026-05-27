@@ -1,10 +1,11 @@
 package org.jetbrains.kastle
 
+import de.infix.testBalloon.framework.core.TestSuite
 import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldNotBeNull
 
-fun PackRepositoryTest(name: String, repository: PackRepository) = testSuite("Pack Repository ($name)") {
+fun TestSuite.testPackRepository(repository: PackRepository) {
     test("get versions") {
         val catalog = repository.versions()
 

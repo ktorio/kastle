@@ -4,7 +4,7 @@ import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.Serializable
 
-val MapEncoderTest by testSuite("MapEncoder") {
+val MapEncoderTest by testSuite("Map encoder") {
 
     test("encodes simple types") {
         Address(

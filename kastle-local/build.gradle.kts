@@ -1,3 +1,5 @@
+import org.gradle.internal.classpath.Instrumented.systemProperty
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
@@ -30,26 +32,15 @@ dependencies {
 }
 
 tasks {
-    test {
-        useJUnitPlatform()
-    }
-
     val updateSnapshots by registering {
         description = "Run tests and update snapshots"
         group = "verification"
 
         doFirst {
-            // Set system property that will be inherited by the jvmKotest task
-            System.setProperty("UPDATE_GENERATOR_SNAPSHOTS", "true")
+            systemProperty("UPDATE_GENERATOR_SNAPSHOTS", "true")
         }
-//        doFirst {
-//            // Configure the test task to pass the property
-//            named<KotestJvmTask>("jvmKotest").configure {
-//                systemProperty("UPDATE_GENERATOR_SNAPSHOTS", "true")
-//            }
-//        }
 
-        finalizedBy("jvmKotest")
+        finalizedBy("test")
     }
 }
 

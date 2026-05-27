@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.client.asRepository
 import org.jetbrains.kastle.read
 
-val ClientServerTest by testSuite("Client/Server API Test") {
+val ClientServerTest by testSuite("Client/Server API") {
 
     test("get pack descriptor") {
         testApplication {
