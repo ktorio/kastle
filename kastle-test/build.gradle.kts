@@ -26,7 +26,7 @@ kotlin {
             implementation(project(":kastle-core"))
             api(libs.kotlinx.io.core)
             api(libs.testBalloon.framework.core)
-            api(libs.kotest.assertions)
+            api(libs.testBalloon.kotest.assertions)
         }
     }
 }

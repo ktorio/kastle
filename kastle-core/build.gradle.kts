@@ -56,7 +56,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.testBalloon.framework.core)
-            implementation(libs.kotest.assertions)
+            implementation(libs.testBalloon.kotest.assertions)
         }
 
         all {

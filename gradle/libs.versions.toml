@@ -9,7 +9,6 @@ kotlinx-io = "0.9.0"
 ktoml = "0.7.1"
 logback = "1.5.33"
 mcp-sdk = "0.12.0"
-kotest = "6.0.7"
 pluginPublish = "2.1.1"
 kastle = "1.0.0-SNAPSHOT"
 agp = "9.2.1"
@@ -33,7 +32,7 @@ mcp-sdk = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp-sd
 ktoml = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
 commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
 
-kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+testBalloon-kotest-assertions = { module = "de.infix.testBalloon:testBalloon-integration-kotest-assertions", version.ref = "testballoon" }
 testBalloon-framework-core = { module = "de.infix.testBalloon:testBalloon-framework-core", version.ref = "testballoon" }
 
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }

@@ -36,7 +36,7 @@ jobs:
         run: ./gradlew checkKotlinAbi --stacktrace
 
       - name: Run tests
-        run: ./gradlew test --stacktrace
+        run: ./gradlew allTests --stacktrace
 
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2

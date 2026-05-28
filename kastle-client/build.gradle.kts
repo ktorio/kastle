@@ -46,7 +46,7 @@ kotlin {
             implementation(project(":kastle-server"))
             implementation(project(":kastle-local"))
             implementation(libs.testBalloon.framework.core)
-            implementation(libs.kotest.assertions)
+            implementation(libs.testBalloon.kotest.assertions)
         }
     }
 }
