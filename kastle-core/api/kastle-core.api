@@ -3468,6 +3468,7 @@ public final class org/jetbrains/kastle/utils/StackKt {
 
 public abstract interface class org/jetbrains/kastle/utils/StringExpression : org/jetbrains/kastle/utils/Expression {
 	public static final field Companion Lorg/jetbrains/kastle/utils/StringExpression$Companion;
+	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public abstract fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/String;
 	public abstract fun removeExtension (Ljava/lang/String;)Lorg/jetbrains/kastle/utils/StringExpression;
 }
