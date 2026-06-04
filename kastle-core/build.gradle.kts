@@ -13,9 +13,7 @@ plugins {
 
 kotlin {
     @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
-    abiValidation {
-        enabled = true
-    }
+    abiValidation {}
 
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     applyDefaultHierarchyTemplate {
@@ -57,10 +55,6 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.testBalloon.framework.core)
             implementation(libs.testBalloon.kotest.assertions)
-        }
-
-        all {
-            languageSettings.enableLanguageFeature("ContextParameters")
         }
     }
 }

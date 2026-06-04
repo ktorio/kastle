@@ -74,10 +74,6 @@ kotlin {
                 implementation(ktorLibs.client.contentNegotiation)
             }
         }
-
-        all {
-            languageSettings.enableLanguageFeature("ContextParameters")
-        }
     }
 }
 

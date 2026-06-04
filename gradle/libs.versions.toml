@@ -1,6 +1,6 @@
 [versions]
 kaml = "0.79.0"
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 ksp-version = "2.3.9"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-serialization = "1.11.0"
