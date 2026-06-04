@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   test:
-    name: Run Gradle tests
+    name: Run tests and check ABI
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false || github.event_name != 'pull_request'
 
@@ -33,15 +33,15 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Check ABI
-        run: ./gradlew --no-daemon checkKotlinAbi --stacktrace
+        run: ./gradlew checkKotlinAbi --stacktrace
 
       - name: Run tests
-        run: ./gradlew --no-daemon jvmKotest --stacktrace
+        run: ./gradlew allTests --stacktrace
 
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           files: |
-            **/build/test-results/jvmKotest/*.xml
+            **/build/test-results/*/*.xml
           check_name: Unit Test Results
           report_individual_runs: true

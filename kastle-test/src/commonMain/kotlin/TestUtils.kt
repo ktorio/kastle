@@ -85,7 +85,7 @@ fun assertFilesAreEqual(
     if (!ignoreListing) {
         val actualListing = actualFiles.joinToString("\n")
         val expectedListing = expectedFiles.joinToString("\n")
-        actualListing.shouldBe(expectedListing, "File listing differs")
+        actualListing shouldBe expectedListing
     }
 
     for (relativePath in expectedFiles) {
@@ -95,7 +95,7 @@ fun assertFilesAreEqual(
         val expectedContents = readText(expectedFile, fs).normalize()
         val actualContents = readText(actualFile, fs).normalize()
 
-        actualContents.shouldBe(expectedContents, "File $relativePath differs")
+        actualContents shouldBe expectedContents
     }
 }
 

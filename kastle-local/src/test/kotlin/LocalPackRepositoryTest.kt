@@ -1,9 +1,9 @@
 package org.jetbrains.kastle
 
-import io.kotest.core.spec.style.StringSpec
+import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.io.files.Path
 import kotlin.random.Random
 
-class LocalPackRepositoryTest: StringSpec(
-    PackRepositoryTest(LocalPackRepository(Path(TEST_TEMPLATES_ROOT), random = Random(42L)))
-)
+val LocalPackRepositoryTest by testSuite {
+    testPackRepository(LocalPackRepository(Path(TEST_TEMPLATES_ROOT), random = Random(42L)))
+}

@@ -4,7 +4,7 @@ plugins {
     alias(ktorLibs.plugins.ktor)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.kotest)
+    alias(libs.plugins.testBalloon)
     alias(libs.plugins.ksp)
     `maven-publish`
 }

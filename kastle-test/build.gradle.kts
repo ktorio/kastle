@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotest)
+    alias(libs.plugins.testBalloon)
     alias(libs.plugins.ksp)
 }
 
@@ -25,8 +25,8 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":kastle-core"))
             api(libs.kotlinx.io.core)
-            api(libs.kotest.framework)
-            api(libs.kotest.assertions)
+            api(libs.testBalloon.framework.core)
+            api(libs.testBalloon.kotest.assertions)
         }
     }
 }

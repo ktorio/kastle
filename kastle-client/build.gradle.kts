@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.kotest)
+    alias(libs.plugins.testBalloon)
     alias(libs.plugins.ksp)
 }
 
@@ -45,7 +45,8 @@ kotlin {
             implementation(project(":kastle-test"))
             implementation(project(":kastle-server"))
             implementation(project(":kastle-local"))
-            implementation(libs.kotest.junit5)
+            implementation(libs.testBalloon.framework.core)
+            implementation(libs.testBalloon.kotest.assertions)
         }
     }
 }

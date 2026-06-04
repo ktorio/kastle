@@ -9,12 +9,12 @@ kotlinx-io = "0.9.0"
 ktoml = "0.7.1"
 logback = "1.5.33"
 mcp-sdk = "0.12.0"
-kotest = "6.0.7"
 pluginPublish = "2.1.1"
 kastle = "1.0.0-SNAPSHOT"
 agp = "9.2.1"
 composeMultiplatform = "1.12.0-alpha01"
 commonmark = "0.28.0"
+testballoon = "1.0.0-K2.3.20"
 
 [libraries]
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
@@ -25,15 +25,15 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotest-framework = { module = "io.kotest:kotest-framework-engine", version.ref = "kotest" }
-kotest-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
-kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
 kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "kotlin" }
 kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }
 mcp-sdk = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp-sdk" }
 ktoml = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
 commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
+
+testBalloon-kotest-assertions = { module = "de.infix.testBalloon:testBalloon-integration-kotest-assertions", version.ref = "testballoon" }
+testBalloon-framework-core = { module = "de.infix.testBalloon:testBalloon-framework-core", version.ref = "testballoon" }
 
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 gradlePlugin-androidApplication = { module = "com.android.application:com.android.application.gradle.plugin", version.ref = "agp" }
@@ -42,7 +42,7 @@ gradlePlugin-composeCompiler = { module = "org.jetbrains.kotlin:compose-compiler
 gradlePlugin-composeMultiplatform = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "composeMultiplatform" }
 
 [plugins]
-kotest = { id = "io.kotest", version.ref = "kotest" }
+testBalloon = { id = "de.infix.testBalloon", version.ref = "testballoon" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

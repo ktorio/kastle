@@ -1,6 +1,6 @@
 package org.jetbrains.kastle.server
 
-import io.kotest.core.spec.style.StringSpec
+import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.ktor.server.testing.*
@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.client.asRepository
 import org.jetbrains.kastle.read
 
-class ClientServerTest : StringSpec({
+val ClientServerTest by testSuite("Client/Server API") {
 
-    "get pack descriptor" {
+    test("get pack descriptor") {
         testApplication {
             configure("application.conf")
 
@@ -23,7 +23,7 @@ class ClientServerTest : StringSpec({
         }
     }
 
-    "get files" {
+    test("get files") {
         testApplication {
             configure("application.conf")
 
@@ -39,4 +39,4 @@ class ClientServerTest : StringSpec({
         }
     }
 
-})
+}

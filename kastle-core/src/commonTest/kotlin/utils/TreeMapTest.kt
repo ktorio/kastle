@@ -1,8 +1,8 @@
 
 package org.jetbrains.kastle.utils
 
+import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -10,7 +10,7 @@ import io.kotest.matchers.maps.shouldNotContainKey
 import io.kotest.matchers.shouldBe
 import org.jetbrains.kastle.utils.TreeMap.Companion.toTreeMap
 
-class TreeMapTest : FunSpec({
+val TreeMapTest by testSuite("TreeMap") {
 
     test("empty map should have size 0 and be empty") {
         val map = TreeMap<String, Int>()
@@ -268,18 +268,6 @@ class TreeMapTest : FunSpec({
         }
     }
 
-    // TODO
-    xtest("entry setValue should update the value") {
-        val map = TreeMap<String, Int>()
-        map["apple"] = 1
-
-        val entry = map.entries.first()
-        val oldValue = entry.setValue(10)
-
-        oldValue shouldBe 1
-        map["apple"] shouldBe 10
-    }
-
     test("should work with different comparable types") {
         val intMap = TreeMap<Int, String>()
         intMap[3] = "three"
@@ -395,4 +383,4 @@ class TreeMapTest : FunSpec({
         values shouldContain 3
         values shouldHaveSize 3
     }
-})
+}

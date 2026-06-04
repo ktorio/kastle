@@ -1,11 +1,11 @@
 package org.jetbrains.kastle.utils
 
-import io.kotest.core.spec.style.StringSpec
+import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.shouldBe
 
-class SourceFileWriterTest : StringSpec({
+val SourceFileWriterTest by testSuite("SourceFileWriter") {
 
-    "append with level" {
+    test("append with level") {
         val testString = """
             
             }
@@ -20,4 +20,4 @@ class SourceFileWriterTest : StringSpec({
             .toString()
     }
 
-})
+}

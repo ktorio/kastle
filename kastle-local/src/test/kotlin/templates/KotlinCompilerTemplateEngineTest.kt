@@ -1,16 +1,15 @@
 package org.jetbrains.kastle.templates
 
-import io.kotest.core.spec.style.StringSpec
+import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.shouldBe
 import org.jetbrains.kastle.PackId
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.TemplateEvaluator.Companion.toString
 import org.jetbrains.kastle.utils.LocalVariables
-import org.jetbrains.kastle.utils.Variables
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.LanguageFeature
 
-class KotlinCompilerTemplateEngineTest : StringSpec({
+val KotlinCompilerTemplateEngineTest by testSuite("Compiler Template Engine") {
 
     val engine = KotlinCompilerTemplateEngine()
     val packId = PackId("com.acme", "test")
@@ -21,7 +20,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
     fun template(text: String): SourceTemplate =
         engine.read(text = text)
 
-    "uses K2 compiler front-end configuration" {
+    test("uses K2 compiler front-end configuration") {
         engine.environment.configuration.get(CommonConfigurationKeys.USE_FIR) shouldBe true
         engine.environment.configuration.get(CommonConfigurationKeys.USE_LIGHT_TREE) shouldBe false
         engine.environment.configuration
@@ -31,7 +30,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
             .usesK2 shouldBe true
     }
 
-    "literals" {
+    test("literals") {
         val template = template("""
             val title: String by _properties
             val html = html {
@@ -46,7 +45,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         ) shouldBe "\nval html = html {\n    h1 {\n        +\"Hello, World!\"\n    }\n}"
     }
 
-    "context parameter syntax" {
+    test("context parameter syntax") {
         val template = template("""
             val title: String by _properties
             context(_: String)
@@ -60,7 +59,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         ) shouldBe "\ncontext(_: String)\nfun render() {\n    println(\"Hello, K2!\")\n}"
     }
 
-    "string interpolation" {
+    test("string interpolation") {
         val template = template($$"""
             val someProperty: String by _properties
             fun main() {
@@ -73,7 +72,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         ) shouldBe "\nfun main() {\n    println(\"Hello, World!\")\n}"
     }
 
-    "if and else" {
+    test("if and else") {
         val template = template("""
             val condition: Boolean by _properties
             val result = if (condition) "on" else "off"
@@ -88,7 +87,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         ) shouldBe "\nval result = \"off\""
     }
 
-    "for each" {
+    test("for each") {
         val template = template("""
             val names: List<String> by _properties
             fun readNames(callback: (String) -> Unit) {
@@ -110,7 +109,7 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         """.trimIndent()
     }
 
-    "operator expressions" {
+    test("operator expressions") {
         val template = template("""
             val number: Int by _properties
             fun main() {
@@ -141,4 +140,4 @@ class KotlinCompilerTemplateEngineTest : StringSpec({
         """.trimIndent()
     }
 
-})
+}

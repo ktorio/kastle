@@ -1,15 +1,14 @@
 package org.jetbrains.kastle.templates
 
-import io.kotest.core.spec.style.StringSpec
+import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.shouldBe
 import org.jetbrains.kastle.PackId
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.TemplateEvaluator.Companion.toString
 import org.jetbrains.kastle.utils.LocalVariables
 import org.jetbrains.kastle.utils.StringLiteral
-import org.jetbrains.kastle.utils.Variables
 
-class HandlebarsTemplateEngineTest : StringSpec({
+val HandlebarsTemplateEngineTest by testSuite("Handlebars Template Engine") {
 
     val engine = HandlebarsTemplateEngine()
     val target = StringLiteral("file://templates/test.txt")
@@ -21,14 +20,14 @@ class HandlebarsTemplateEngineTest : StringSpec({
     fun template(text: String): SourceTemplate =
         engine.read(target, text)
 
-    "literals" {
+    test("literals") {
         val actual = template("Hello, {{ someProperty }}!").toString(
             variables = localVars("someProperty" to "World")
         )
         actual shouldBe "Hello, World!"
     }
 
-    "if and else" {
+    test("if and else") {
         val template = template("{{#if someProperty}}Hello!{{else}}Goodbye!{{/if}}")
 
         template.toString(
@@ -40,7 +39,7 @@ class HandlebarsTemplateEngineTest : StringSpec({
         ) shouldBe "Goodbye!"
     }
 
-    "unless" {
+    test("unless") {
         val template = template("{{#unless someProperty}}Hello!{{else}}Goodbye!{{/unless}}")
 
         template.toString(
@@ -52,7 +51,7 @@ class HandlebarsTemplateEngineTest : StringSpec({
         ) shouldBe "Hello!"
     }
 
-    "when" {
+    test("when") {
         val template = template("{{#when name}}{{\"Bob\"}}Hi{{\"Joe\"}}Hello{{else}}Up yours{{/when}}, {{name}}!")
 
         template.toString(
@@ -69,7 +68,7 @@ class HandlebarsTemplateEngineTest : StringSpec({
     }
 
     // TODO extra newline?
-    "each" {
+    test("each") {
         template("""
             {{#each names}}
             - {{this}}
@@ -84,7 +83,7 @@ class HandlebarsTemplateEngineTest : StringSpec({
         """.trimIndent()
     }
 
-    "slot" {
+    test("slot") {
         template("Hello, {{slot someSlot}}!").toString(
             slots = mapOf(
                 "slot:someSlot" to listOf(template("you slot"))
@@ -92,7 +91,7 @@ class HandlebarsTemplateEngineTest : StringSpec({
         ) shouldBe "Hello, you slot!"
     }
 
-    "repeatingSlot" {
+    test("repeatingSlot") {
         template("""
             Hello, these slots:
             {{slots someSlot}}
@@ -112,7 +111,7 @@ class HandlebarsTemplateEngineTest : StringSpec({
         """.trimIndent()
     }
 
-    "escapedBraces" {
+    test("escapedBraces") {
         template("""
             This is a normal template: {{ someProperty }}
             These are escaped: \{{notAProperty}}\{{notAProperty}} \{{notAProperty}}
@@ -130,10 +129,10 @@ class HandlebarsTemplateEngineTest : StringSpec({
         """.trimIndent()
     }
 
-    "nested braces" {
+    test("nested braces") {
         template($$"${{{library}}Version}").toString(
             variables = localVars("library" to "kotlin")
         ) shouldBe $$"${kotlinVersion}"
     }
 
-})
+}

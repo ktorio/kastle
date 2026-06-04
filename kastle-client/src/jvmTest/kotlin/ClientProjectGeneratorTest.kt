@@ -1,6 +1,5 @@
 package org.jetbrains.kastle.client
 
-import io.kotest.core.spec.style.StringSpec
 import io.ktor.client.HttpClient
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.testing.runTestApplication
@@ -12,8 +11,9 @@ import kotlin.random.Random
 
 val testServer by lazy { TestServer() }
 
+// TODO
 @OptIn(DelicateCoroutinesApi::class)
-class ClientProjectGeneratorTest : StringSpec(
+//val ClientProjectGeneratorTest by ProjectGeneratorTest("Client/Server") {}
     // TODO
 //    ProjectGeneratorTest(
 //        tearDown = { testServer.stop() }
@@ -24,7 +24,7 @@ class ClientProjectGeneratorTest : StringSpec(
 //        }
 //        testServer.deferredClient.await().asRepository()
 //    }
-)
+// )
 
 class TestServer {
     val deferredClient = CompletableDeferred<HttpClient>()

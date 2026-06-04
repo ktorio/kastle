@@ -1,11 +1,11 @@
 package org.jetbrains.kastle
 
-import io.kotest.core.spec.style.StringSpec
+import de.infix.testBalloon.framework.core.testSuite
 import kotlinx.io.files.Path
 import kotlin.random.Random
 
-class LocalProjectGeneratorTest: StringSpec(
-    ProjectGeneratorTest {
+val LocalProjectGeneratorTest by testSuite("Project generator (Local)") {
+    testProjectGenerator {
         LocalPackRepository(Path(TEST_TEMPLATES_ROOT), random = Random(42L))
     }
-)
+}
