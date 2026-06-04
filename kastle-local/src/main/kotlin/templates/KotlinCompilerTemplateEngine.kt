@@ -18,6 +18,7 @@ import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.utils.*
 import org.jetbrains.kastle.utils.protocol
 import org.jetbrains.kotlin.K1Deprecation
+import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
@@ -30,6 +31,7 @@ import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.config.LanguageVersion
 import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
+import org.jetbrains.kotlin.diagnostics.impl.DiagnosticsCollectorImpl
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.lexer.KtSingleValueToken
 import org.jetbrains.kotlin.psi.KtElement
@@ -64,8 +66,10 @@ internal class KotlinCompilerTemplateEngine(
     init {
         val verbose = false
         val stderrMessages = PrintingMessageCollector(System.err, MessageRenderer.PLAIN_RELATIVE_PATHS, verbose)
+        @OptIn(org.jetbrains.kotlin.config.CompilerConfiguration.Internals::class)
         val configuration = CompilerConfiguration().apply {
             put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, stderrMessages)
+            put(CLIConfigurationKeys.DIAGNOSTICS_COLLECTOR, DiagnosticsCollectorImpl())
             path?.parent?.name?.let { put(CommonConfigurationKeys.MODULE_NAME, it) }
             put(CommonConfigurationKeys.ALLOW_ANY_SCRIPTS_IN_SOURCE_ROOTS, true)
             put(CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS, k2LanguageVersionSettings())
@@ -79,7 +83,6 @@ internal class KotlinCompilerTemplateEngine(
         environment = K2JVMCompiler.createCoreEnvironment(
             Disposer.newDisposable(),
             configuration,
-            stderrMessages,
             configuration.get(CommonConfigurationKeys.MODULE_NAME) ?: "kastle-template"
         ) ?: error("Failed to create K2 Kotlin compiler environment")
         psiFileFactory = PsiFileFactory.getInstance(environment.project)

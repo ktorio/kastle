@@ -2,6 +2,7 @@ package org.jetbrains.kastle.gen
 
 import kotlinx.coroutines.flow.toList
 import org.jetbrains.kastle.*
+import org.jetbrains.kastle.VersionsCatalog
 import org.jetbrains.kastle.structure.BuildToolModules
 import org.jetbrains.kastle.utils.TreeMap
 import org.jetbrains.kastle.utils.Variables
@@ -81,7 +82,8 @@ fun interface ProjectResolver {
             val repositoryLibsCatalog = when {
                 BuildToolModules.MAVEN_PACK_ID in descriptor.packs ->
                     repository.catalogs().reduce { acc, catalog -> acc + catalog }
-                else -> repository.versions()
+                else -> repository.catalogs().firstOrNull { it.name == VersionsCatalog.DEFAULT_NAME }
+                    ?: VersionsCatalog.Empty
             }
             val versions = TreeMap<String, String>().also { versions ->
                 versions["kotlin"] = repositoryLibsCatalog.versions["kotlin"] ?: missingVersion("kotlin")

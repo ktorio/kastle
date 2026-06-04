@@ -133,6 +133,10 @@ abstract class FileSystemPackRepository(
         fs.delete(root.resolve("$id.$ext"))
     }
 
+    @Deprecated(
+        "Use catalogs() instead",
+        replaceWith = ReplaceWith("catalogs().firstOrNull { it.name == VersionsCatalog.DEFAULT_NAME } ?: VersionsCatalog.Empty")
+    )
     override suspend fun versions(): VersionsCatalog =
         readVersions(versionsDir.resolve("${VersionsCatalog.DEFAULT_NAME}.$versionsExt"))
 

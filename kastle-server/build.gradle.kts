@@ -11,7 +11,8 @@ plugins {
 
 ktor {
     openApi {
-        enabled = true
+        // Kotlin 2.4.0 breaking change
+        enabled = false
     }
 }
 
