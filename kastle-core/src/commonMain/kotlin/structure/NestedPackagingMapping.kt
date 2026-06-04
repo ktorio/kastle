@@ -4,7 +4,6 @@ import org.jetbrains.kastle.PackagingStyle
 import org.jetbrains.kastle.SourceTemplate
 import org.jetbrains.kastle.StaticSource
 import org.jetbrains.kastle.gen.ProjectMapping
-import org.jetbrains.kastle.map
 import org.jetbrains.kastle.utils.StringLiteral
 import org.jetbrains.kastle.utils.protocol
 

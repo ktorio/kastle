@@ -1,6 +1,7 @@
 platforms: [ios, jvm, js, wasmJs, android]
 
 dependencies:
+  - ../sharedLogic
   - $libs.compose.runtime
   - $libs.compose.foundation
   - $libs.compose.material3
