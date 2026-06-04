@@ -263,8 +263,9 @@ data class ConditionalBlock(
 data class IfBlock(
     override val expression: Expression,
     override var position: BlockPosition,
+    val negate: Boolean = false,
 ): ExpressionBlock, StructuralBlock {
-    override fun toString(): String = "if(\"$expression\")"
+    override fun toString(): String = if (negate) "unless(\"$expression\")" else "if(\"$expression\")"
 }
 
 // Used in both if/when, evaluated from context

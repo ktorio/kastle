@@ -2261,10 +2261,12 @@ final class org.jetbrains.kastle/Group { // org.jetbrains.kastle/Group|null[0]
 }
 
 final class org.jetbrains.kastle/IfBlock : org.jetbrains.kastle/ExpressionBlock, org.jetbrains.kastle/StructuralBlock { // org.jetbrains.kastle/IfBlock|null[0]
-    constructor <init>(org.jetbrains.kastle.utils/Expression, org.jetbrains.kastle/BlockPosition) // org.jetbrains.kastle/IfBlock.<init>|<init>(org.jetbrains.kastle.utils.Expression;org.jetbrains.kastle.BlockPosition){}[0]
+    constructor <init>(org.jetbrains.kastle.utils/Expression, org.jetbrains.kastle/BlockPosition, kotlin/Boolean = ...) // org.jetbrains.kastle/IfBlock.<init>|<init>(org.jetbrains.kastle.utils.Expression;org.jetbrains.kastle.BlockPosition;kotlin.Boolean){}[0]
 
     final val expression // org.jetbrains.kastle/IfBlock.expression|{}expression[0]
         final fun <get-expression>(): org.jetbrains.kastle.utils/Expression // org.jetbrains.kastle/IfBlock.expression.<get-expression>|<get-expression>(){}[0]
+    final val negate // org.jetbrains.kastle/IfBlock.negate|{}negate[0]
+        final fun <get-negate>(): kotlin/Boolean // org.jetbrains.kastle/IfBlock.negate.<get-negate>|<get-negate>(){}[0]
 
     final var position // org.jetbrains.kastle/IfBlock.position|{}position[0]
         final fun <get-position>(): org.jetbrains.kastle/BlockPosition // org.jetbrains.kastle/IfBlock.position.<get-position>|<get-position>(){}[0]
@@ -2272,7 +2274,8 @@ final class org.jetbrains.kastle/IfBlock : org.jetbrains.kastle/ExpressionBlock,
 
     final fun component1(): org.jetbrains.kastle.utils/Expression // org.jetbrains.kastle/IfBlock.component1|component1(){}[0]
     final fun component2(): org.jetbrains.kastle/BlockPosition // org.jetbrains.kastle/IfBlock.component2|component2(){}[0]
-    final fun copy(org.jetbrains.kastle.utils/Expression = ..., org.jetbrains.kastle/BlockPosition = ...): org.jetbrains.kastle/IfBlock // org.jetbrains.kastle/IfBlock.copy|copy(org.jetbrains.kastle.utils.Expression;org.jetbrains.kastle.BlockPosition){}[0]
+    final fun component3(): kotlin/Boolean // org.jetbrains.kastle/IfBlock.component3|component3(){}[0]
+    final fun copy(org.jetbrains.kastle.utils/Expression = ..., org.jetbrains.kastle/BlockPosition = ..., kotlin/Boolean = ...): org.jetbrains.kastle/IfBlock // org.jetbrains.kastle/IfBlock.copy|copy(org.jetbrains.kastle.utils.Expression;org.jetbrains.kastle.BlockPosition;kotlin.Boolean){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/IfBlock.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/IfBlock.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/IfBlock.toString|toString(){}[0]

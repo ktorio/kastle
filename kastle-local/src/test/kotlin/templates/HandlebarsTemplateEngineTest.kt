@@ -30,24 +30,100 @@ val HandlebarsTemplateEngineTest by testSuite("Handlebars Template Engine") {
     test("if and else") {
         val template = template("{{#if someProperty}}Hello!{{else}}Goodbye!{{/if}}")
 
+        // Truthy values
         template.toString(
             variables = localVars("someProperty" to true)
         ) shouldBe "Hello!"
 
         template.toString(
+            variables = localVars("someProperty" to 1)
+        ) shouldBe "Hello!"
+
+        template.toString(
+            variables = localVars("someProperty" to "non-empty")
+        ) shouldBe "Hello!"
+
+        template.toString(
+            variables = localVars("someProperty" to listOf("a"))
+        ) shouldBe "Hello!"
+
+        template.toString(
+            variables = localVars("someProperty" to mapOf("a" to 1))
+        ) shouldBe "Hello!"
+
+        // Falsy values
+        template.toString(
             variables = localVars("someProperty" to false)
+        ) shouldBe "Goodbye!"
+
+        template.toString(
+            variables = localVars("someProperty" to 0)
+        ) shouldBe "Goodbye!"
+
+        template.toString(
+            variables = localVars("someProperty" to "")
+        ) shouldBe "Goodbye!"
+
+        template.toString(
+            variables = localVars("someProperty" to emptyList<String>())
+        ) shouldBe "Goodbye!"
+
+        template.toString(
+            variables = localVars("someProperty" to emptyMap<String, Any?>())
+        ) shouldBe "Goodbye!"
+
+        template.toString(
+            variables = localVars("someProperty" to null)
         ) shouldBe "Goodbye!"
     }
 
     test("unless") {
         val template = template("{{#unless someProperty}}Hello!{{else}}Goodbye!{{/unless}}")
 
+        // Truthy values
         template.toString(
             variables = localVars("someProperty" to true)
         ) shouldBe "Goodbye!"
 
         template.toString(
+            variables = localVars("someProperty" to 1)
+        ) shouldBe "Goodbye!"
+
+        template.toString(
+            variables = localVars("someProperty" to "non-empty")
+        ) shouldBe "Goodbye!"
+
+        template.toString(
+            variables = localVars("someProperty" to listOf("a"))
+        ) shouldBe "Goodbye!"
+
+        template.toString(
+            variables = localVars("someProperty" to mapOf("a" to 1))
+        ) shouldBe "Goodbye!"
+
+        // Falsy values
+        template.toString(
             variables = localVars("someProperty" to false)
+        ) shouldBe "Hello!"
+
+        template.toString(
+            variables = localVars("someProperty" to 0)
+        ) shouldBe "Hello!"
+
+        template.toString(
+            variables = localVars("someProperty" to "")
+        ) shouldBe "Hello!"
+
+        template.toString(
+            variables = localVars("someProperty" to emptyList<String>())
+        ) shouldBe "Hello!"
+
+        template.toString(
+            variables = localVars("someProperty" to emptyMap<String, Any?>())
+        ) shouldBe "Hello!"
+
+        template.toString(
+            variables = localVars("someProperty" to null)
         ) shouldBe "Hello!"
     }
 
