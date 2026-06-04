@@ -249,10 +249,9 @@ class HandlebarsTemplateEngine(
                     position = position(endMatch, inclusive),
                 )
                 UNLESS -> IfBlock(
-                    expression = expression?.let {
-                        Expression.PrefixOp(PrefixOperator.NOT, VariableRef(it))
-                    } ?: throw IllegalArgumentException("Missing property name in if block: ${match.value}"),
+                    expression = expression?.let(::VariableRef) ?: throw IllegalArgumentException("Missing property name in unless block: ${match.value}"),
                     position = position(endMatch, inclusive),
+                    negate = true,
                 )
                 ELSE -> ElseBlock(
                     position = position(endMatch, inclusive),
