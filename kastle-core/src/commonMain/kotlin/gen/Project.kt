@@ -46,7 +46,9 @@ internal fun Project.asTemplateMap(): Map<String, Any?> =
         group = group,
         modules = moduleSources.modules.sortedBy { it.path }.map { it.toTemplateType() },
         versions = versions,
-        buildSystem = packs.firstOrNull { it.tags.contains("build-system") }?.id?.toString(),
+        buildSystem = packs.firstOrNull {
+            it.tags.contains("build-system")
+        }?.id?.toString(),
         libraries = libraries.mapValues { (_, value) -> value.toTemplateType() },
         gradle = gradle.toTemplateType(),
         packs = packs.map {

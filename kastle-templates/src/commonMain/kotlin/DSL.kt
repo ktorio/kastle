@@ -64,7 +64,7 @@ data class TemplateProject(
     val buildSystem: String? = null,
     val gradle: TemplateGradleProjectSettings = TemplateGradleProjectSettings()
 ) {
-    val module: TemplateSourceModule? get() = modules.singleOrNull()
+    val module: TemplateSourceModule? = modules.singleOrNull()
 }
 
 @Serializable

@@ -16,16 +16,8 @@ Here's a list of features included in this project:
 | [Content Negotiation](https://start.ktor.io/p/io.ktor/server-content-negotiation) | Provides automatic content conversion according to Content-Type and Accept headers |
 | [kotlinx.serialization](https://start.ktor.io/p/io.ktor/server-kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library |
 
-## Structure
-This project includes the following modules:
-
-| Path | Description |
-|------|-------------|
-|  | null |
-
 ## Building & Running
 To build or run the project, use one of the following tasks:
-
 
 | Task | Description |
 |------|-------------|
