@@ -1,4 +1,4 @@
-# ktor-server-amper
+# ktor-server-toolchain
 
 This project was created using the [Ktor Project Generator](https://start.ktor.io).
 
@@ -16,16 +16,11 @@ Here's a list of features included in this project:
 | [Content Negotiation](https://start.ktor.io/p/io.ktor/server-content-negotiation) | Provides automatic content conversion according to Content-Type and Accept headers |
 | [kotlinx.serialization](https://start.ktor.io/p/io.ktor/server-kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library |
 
-
 ## Building & Running
 To build or run the project, use one of the following tasks:
 
-
 | Task | Description |
 |------|-------------|
-| `./amper test`    | Run the tests     |
-| `./amper build`   | Build the project |
-| `./amper run`     | Run the server    |
 
 If the server starts successfully, you'll see the following output:
 ```

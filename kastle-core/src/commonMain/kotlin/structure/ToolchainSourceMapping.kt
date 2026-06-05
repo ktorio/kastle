@@ -8,19 +8,22 @@ import org.jetbrains.kastle.gen.ProjectMapping
 import org.jetbrains.kastle.gradlePlugins
 import kotlin.collections.mapValues
 
-val AmperSourceMapping = ProjectMapping { project ->
-    if (project.packs.none { it.id == BuildToolModules.AMPER_PACK_ID })
+@Deprecated("use ToolchainSourceMapping", ReplaceWith("ToolchainSourceMapping"))
+val AmperSourceMapping get() = ToolchainSourceMapping
+
+val ToolchainSourceMapping = ProjectMapping { project ->
+    if (project.packs.none { it.id == BuildToolModules.TOOLCHAIN_PACK_ID })
         return@ProjectMapping project
 
     for (module in project.moduleSources.modules) {
         // we assume that when amper is configured, then gradle plugins won't cause trouble
-        if (module.amper.isNotEmpty())
+        if (module.toolchain.isNotEmpty())
             continue
         require(module.gradlePlugins.isEmpty()) {
             "Project has plugins that require the Gradle build system"
         }
         require(module.dependencies.values.flatten().none { it is FunctionDependency }) {
-            "Project has dependencies not supported by Amper"
+            "Project has dependencies not supported by Kotlin Toolchain"
         }
     }
 

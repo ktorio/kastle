@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		1ACCEF394020BF67CA3FABE7 /* cmp-amper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cmp-amper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1ACCEF394020BF67CA3FABE7 /* cmp-toolchain.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cmp-toolchain.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -87,7 +87,7 @@
 			packageProductDependencies = (
 			);
 			productName = iosApp;
-			productReference = 1ACCEF394020BF67CA3FABE7 /* cmp-amper.app */;
+			productReference = 1ACCEF394020BF67CA3FABE7 /* cmp-toolchain.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

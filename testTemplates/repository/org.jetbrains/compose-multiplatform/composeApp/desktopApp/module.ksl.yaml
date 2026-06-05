@@ -12,7 +12,7 @@ gradle:
     - $libs.plugins.composeMultiplatform
     - $libs.plugins.composeCompiler
 
-amper:
+toolchain:
   compose: enabled
 
 sources:

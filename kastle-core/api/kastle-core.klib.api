@@ -1223,8 +1223,6 @@ sealed interface org.jetbrains.kastle/SourceImport { // org.jetbrains.kastle/Sou
 }
 
 sealed interface org.jetbrains.kastle/SourceModuleMetadata { // org.jetbrains.kastle/SourceModuleMetadata|null[0]
-    abstract val amper // org.jetbrains.kastle/SourceModuleMetadata.amper|{}amper[0]
-        abstract fun <get-amper>(): org.jetbrains.kastle/AmperSettings // org.jetbrains.kastle/SourceModuleMetadata.amper.<get-amper>|<get-amper>(){}[0]
     abstract val dependencies // org.jetbrains.kastle/SourceModuleMetadata.dependencies|{}dependencies[0]
         abstract fun <get-dependencies>(): kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> // org.jetbrains.kastle/SourceModuleMetadata.dependencies.<get-dependencies>|<get-dependencies>(){}[0]
     abstract val gradle // org.jetbrains.kastle/SourceModuleMetadata.gradle|{}gradle[0]
@@ -1237,6 +1235,10 @@ sealed interface org.jetbrains.kastle/SourceModuleMetadata { // org.jetbrains.ka
         abstract fun <get-platforms>(): kotlin.collections/Set<org.jetbrains.kastle/Platform> // org.jetbrains.kastle/SourceModuleMetadata.platforms.<get-platforms>|<get-platforms>(){}[0]
     abstract val testDependencies // org.jetbrains.kastle/SourceModuleMetadata.testDependencies|{}testDependencies[0]
         abstract fun <get-testDependencies>(): kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> // org.jetbrains.kastle/SourceModuleMetadata.testDependencies.<get-testDependencies>|<get-testDependencies>(){}[0]
+    abstract val toolchain // org.jetbrains.kastle/SourceModuleMetadata.toolchain|{}toolchain[0]
+        abstract fun <get-toolchain>(): org.jetbrains.kastle/ToolchainSettings // org.jetbrains.kastle/SourceModuleMetadata.toolchain.<get-toolchain>|<get-toolchain>(){}[0]
+    open val amper // org.jetbrains.kastle/SourceModuleMetadata.amper|{}amper[0]
+        open fun <get-amper>(): org.jetbrains.kastle/ToolchainSettings // org.jetbrains.kastle/SourceModuleMetadata.amper.<get-amper>|<get-amper>(){}[0]
 
     final object Companion : kotlinx.serialization.internal/SerializerFactory { // org.jetbrains.kastle/SourceModuleMetadata.Companion|null[0]
         final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/SourceModuleMetadata> // org.jetbrains.kastle/SourceModuleMetadata.Companion.serializer|serializer(){}[0]
@@ -1613,95 +1615,6 @@ final class org.jetbrains.kastle.utils/StringTemplate : org.jetbrains.kastle.uti
         final val $childSerializers // org.jetbrains.kastle.utils/StringTemplate.Companion.$childSerializers|{}$childSerializers[0]
 
         final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle.utils/StringTemplate> // org.jetbrains.kastle.utils/StringTemplate.Companion.serializer|serializer(){}[0]
-    }
-}
-
-final class org.jetbrains.kastle/AmperApplicationSettings { // org.jetbrains.kastle/AmperApplicationSettings|null[0]
-    constructor <init>(kotlin/String? = ...) // org.jetbrains.kastle/AmperApplicationSettings.<init>|<init>(kotlin.String?){}[0]
-
-    final val mainClass // org.jetbrains.kastle/AmperApplicationSettings.mainClass|{}mainClass[0]
-        final fun <get-mainClass>(): kotlin/String? // org.jetbrains.kastle/AmperApplicationSettings.mainClass.<get-mainClass>|<get-mainClass>(){}[0]
-
-    final fun component1(): kotlin/String? // org.jetbrains.kastle/AmperApplicationSettings.component1|component1(){}[0]
-    final fun copy(kotlin/String? = ...): org.jetbrains.kastle/AmperApplicationSettings // org.jetbrains.kastle/AmperApplicationSettings.copy|copy(kotlin.String?){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/AmperApplicationSettings.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // org.jetbrains.kastle/AmperApplicationSettings.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // org.jetbrains.kastle/AmperApplicationSettings.toString|toString(){}[0]
-
-    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<org.jetbrains.kastle/AmperApplicationSettings> { // org.jetbrains.kastle/AmperApplicationSettings.$serializer|null[0]
-        final val descriptor // org.jetbrains.kastle/AmperApplicationSettings.$serializer.descriptor|{}descriptor[0]
-            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // org.jetbrains.kastle/AmperApplicationSettings.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
-
-        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // org.jetbrains.kastle/AmperApplicationSettings.$serializer.childSerializers|childSerializers(){}[0]
-        final fun deserialize(kotlinx.serialization.encoding/Decoder): org.jetbrains.kastle/AmperApplicationSettings // org.jetbrains.kastle/AmperApplicationSettings.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
-        final fun serialize(kotlinx.serialization.encoding/Encoder, org.jetbrains.kastle/AmperApplicationSettings) // org.jetbrains.kastle/AmperApplicationSettings.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;org.jetbrains.kastle.AmperApplicationSettings){}[0]
-    }
-
-    final object Companion { // org.jetbrains.kastle/AmperApplicationSettings.Companion|null[0]
-        final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/AmperApplicationSettings> // org.jetbrains.kastle/AmperApplicationSettings.Companion.serializer|serializer(){}[0]
-    }
-}
-
-final class org.jetbrains.kastle/AmperKotlinSettings { // org.jetbrains.kastle/AmperKotlinSettings|null[0]
-    constructor <init>(kotlin/String? = ...) // org.jetbrains.kastle/AmperKotlinSettings.<init>|<init>(kotlin.String?){}[0]
-
-    final val serialization // org.jetbrains.kastle/AmperKotlinSettings.serialization|{}serialization[0]
-        final fun <get-serialization>(): kotlin/String? // org.jetbrains.kastle/AmperKotlinSettings.serialization.<get-serialization>|<get-serialization>(){}[0]
-
-    final fun component1(): kotlin/String? // org.jetbrains.kastle/AmperKotlinSettings.component1|component1(){}[0]
-    final fun copy(kotlin/String? = ...): org.jetbrains.kastle/AmperKotlinSettings // org.jetbrains.kastle/AmperKotlinSettings.copy|copy(kotlin.String?){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/AmperKotlinSettings.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // org.jetbrains.kastle/AmperKotlinSettings.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // org.jetbrains.kastle/AmperKotlinSettings.toString|toString(){}[0]
-
-    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<org.jetbrains.kastle/AmperKotlinSettings> { // org.jetbrains.kastle/AmperKotlinSettings.$serializer|null[0]
-        final val descriptor // org.jetbrains.kastle/AmperKotlinSettings.$serializer.descriptor|{}descriptor[0]
-            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // org.jetbrains.kastle/AmperKotlinSettings.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
-
-        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // org.jetbrains.kastle/AmperKotlinSettings.$serializer.childSerializers|childSerializers(){}[0]
-        final fun deserialize(kotlinx.serialization.encoding/Decoder): org.jetbrains.kastle/AmperKotlinSettings // org.jetbrains.kastle/AmperKotlinSettings.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
-        final fun serialize(kotlinx.serialization.encoding/Encoder, org.jetbrains.kastle/AmperKotlinSettings) // org.jetbrains.kastle/AmperKotlinSettings.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;org.jetbrains.kastle.AmperKotlinSettings){}[0]
-    }
-
-    final object Companion { // org.jetbrains.kastle/AmperKotlinSettings.Companion|null[0]
-        final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/AmperKotlinSettings> // org.jetbrains.kastle/AmperKotlinSettings.Companion.serializer|serializer(){}[0]
-    }
-}
-
-final class org.jetbrains.kastle/AmperSettings { // org.jetbrains.kastle/AmperSettings|null[0]
-    constructor <init>(kotlin/String? = ..., kotlin/String? = ..., org.jetbrains.kastle/AmperApplicationSettings? = ..., org.jetbrains.kastle/AmperKotlinSettings? = ...) // org.jetbrains.kastle/AmperSettings.<init>|<init>(kotlin.String?;kotlin.String?;org.jetbrains.kastle.AmperApplicationSettings?;org.jetbrains.kastle.AmperKotlinSettings?){}[0]
-
-    final val application // org.jetbrains.kastle/AmperSettings.application|{}application[0]
-        final fun <get-application>(): org.jetbrains.kastle/AmperApplicationSettings? // org.jetbrains.kastle/AmperSettings.application.<get-application>|<get-application>(){}[0]
-    final val compose // org.jetbrains.kastle/AmperSettings.compose|{}compose[0]
-        final fun <get-compose>(): kotlin/String? // org.jetbrains.kastle/AmperSettings.compose.<get-compose>|<get-compose>(){}[0]
-    final val kotlin // org.jetbrains.kastle/AmperSettings.kotlin|{}kotlin[0]
-        final fun <get-kotlin>(): org.jetbrains.kastle/AmperKotlinSettings? // org.jetbrains.kastle/AmperSettings.kotlin.<get-kotlin>|<get-kotlin>(){}[0]
-    final val ktor // org.jetbrains.kastle/AmperSettings.ktor|{}ktor[0]
-        final fun <get-ktor>(): kotlin/String? // org.jetbrains.kastle/AmperSettings.ktor.<get-ktor>|<get-ktor>(){}[0]
-
-    final fun component1(): kotlin/String? // org.jetbrains.kastle/AmperSettings.component1|component1(){}[0]
-    final fun component2(): kotlin/String? // org.jetbrains.kastle/AmperSettings.component2|component2(){}[0]
-    final fun component3(): org.jetbrains.kastle/AmperApplicationSettings? // org.jetbrains.kastle/AmperSettings.component3|component3(){}[0]
-    final fun component4(): org.jetbrains.kastle/AmperKotlinSettings? // org.jetbrains.kastle/AmperSettings.component4|component4(){}[0]
-    final fun copy(kotlin/String? = ..., kotlin/String? = ..., org.jetbrains.kastle/AmperApplicationSettings? = ..., org.jetbrains.kastle/AmperKotlinSettings? = ...): org.jetbrains.kastle/AmperSettings // org.jetbrains.kastle/AmperSettings.copy|copy(kotlin.String?;kotlin.String?;org.jetbrains.kastle.AmperApplicationSettings?;org.jetbrains.kastle.AmperKotlinSettings?){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/AmperSettings.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // org.jetbrains.kastle/AmperSettings.hashCode|hashCode(){}[0]
-    final fun isEmpty(): kotlin/Boolean // org.jetbrains.kastle/AmperSettings.isEmpty|isEmpty(){}[0]
-    final fun isNotEmpty(): kotlin/Boolean // org.jetbrains.kastle/AmperSettings.isNotEmpty|isNotEmpty(){}[0]
-    final fun toString(): kotlin/String // org.jetbrains.kastle/AmperSettings.toString|toString(){}[0]
-
-    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<org.jetbrains.kastle/AmperSettings> { // org.jetbrains.kastle/AmperSettings.$serializer|null[0]
-        final val descriptor // org.jetbrains.kastle/AmperSettings.$serializer.descriptor|{}descriptor[0]
-            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // org.jetbrains.kastle/AmperSettings.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
-
-        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // org.jetbrains.kastle/AmperSettings.$serializer.childSerializers|childSerializers(){}[0]
-        final fun deserialize(kotlinx.serialization.encoding/Decoder): org.jetbrains.kastle/AmperSettings // org.jetbrains.kastle/AmperSettings.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
-        final fun serialize(kotlinx.serialization.encoding/Encoder, org.jetbrains.kastle/AmperSettings) // org.jetbrains.kastle/AmperSettings.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;org.jetbrains.kastle.AmperSettings){}[0]
-    }
-
-    final object Companion { // org.jetbrains.kastle/AmperSettings.Companion|null[0]
-        final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/AmperSettings> // org.jetbrains.kastle/AmperSettings.Companion.serializer|serializer(){}[0]
     }
 }
 
@@ -3159,7 +3072,7 @@ final class org.jetbrains.kastle/SourceModule : org.jetbrains.kastle/SourceModul
     constructor <init>(org.jetbrains.kastle/SourceModuleManifest = ..., kotlin.collections/List<org.jetbrains.kastle/SourceFile> = ..., org.jetbrains.kastle/Condition? = ...) // org.jetbrains.kastle/SourceModule.<init>|<init>(org.jetbrains.kastle.SourceModuleManifest;kotlin.collections.List<org.jetbrains.kastle.SourceFile>;org.jetbrains.kastle.Condition?){}[0]
 
     final val amper // org.jetbrains.kastle/SourceModule.amper|{}amper[0]
-        final fun <get-amper>(): org.jetbrains.kastle/AmperSettings // org.jetbrains.kastle/SourceModule.amper.<get-amper>|<get-amper>(){}[0]
+        final fun <get-amper>(): org.jetbrains.kastle/ToolchainSettings // org.jetbrains.kastle/SourceModule.amper.<get-amper>|<get-amper>(){}[0]
     final val condition // org.jetbrains.kastle/SourceModule.condition|{}condition[0]
         final fun <get-condition>(): org.jetbrains.kastle/Condition? // org.jetbrains.kastle/SourceModule.condition.<get-condition>|<get-condition>(){}[0]
     final val dependencies // org.jetbrains.kastle/SourceModule.dependencies|{}dependencies[0]
@@ -3178,6 +3091,8 @@ final class org.jetbrains.kastle/SourceModule : org.jetbrains.kastle/SourceModul
         final fun <get-sources>(): kotlin.collections/List<org.jetbrains.kastle/SourceFile> // org.jetbrains.kastle/SourceModule.sources.<get-sources>|<get-sources>(){}[0]
     final val testDependencies // org.jetbrains.kastle/SourceModule.testDependencies|{}testDependencies[0]
         final fun <get-testDependencies>(): kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> // org.jetbrains.kastle/SourceModule.testDependencies.<get-testDependencies>|<get-testDependencies>(){}[0]
+    final val toolchain // org.jetbrains.kastle/SourceModule.toolchain|{}toolchain[0]
+        final fun <get-toolchain>(): org.jetbrains.kastle/ToolchainSettings // org.jetbrains.kastle/SourceModule.toolchain.<get-toolchain>|<get-toolchain>(){}[0]
 
     final fun component1(): org.jetbrains.kastle/SourceModuleManifest // org.jetbrains.kastle/SourceModule.component1|component1(){}[0]
     final fun component2(): kotlin.collections/List<org.jetbrains.kastle/SourceFile> // org.jetbrains.kastle/SourceModule.component2|component2(){}[0]
@@ -3204,10 +3119,8 @@ final class org.jetbrains.kastle/SourceModule : org.jetbrains.kastle/SourceModul
 }
 
 final class org.jetbrains.kastle/SourceModuleManifest : org.jetbrains.kastle/SourceModuleMetadata { // org.jetbrains.kastle/SourceModuleManifest|null[0]
-    constructor <init>(kotlin/String = ..., kotlin/String = ..., kotlin.collections/Set<org.jetbrains.kastle/Platform> = ..., kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> = ..., kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> = ..., org.jetbrains.kastle/GradleSettings = ..., org.jetbrains.kastle/AmperSettings = ...) // org.jetbrains.kastle/SourceModuleManifest.<init>|<init>(kotlin.String;kotlin.String;kotlin.collections.Set<org.jetbrains.kastle.Platform>;kotlin.collections.Map<org.jetbrains.kastle.Platform,kotlin.collections.Set<org.jetbrains.kastle.Dependency>>;kotlin.collections.Map<org.jetbrains.kastle.Platform,kotlin.collections.Set<org.jetbrains.kastle.Dependency>>;org.jetbrains.kastle.GradleSettings;org.jetbrains.kastle.AmperSettings){}[0]
+    constructor <init>(kotlin/String = ..., kotlin/String = ..., kotlin.collections/Set<org.jetbrains.kastle/Platform> = ..., kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> = ..., kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> = ..., org.jetbrains.kastle/GradleSettings = ..., org.jetbrains.kastle/ToolchainSettings = ...) // org.jetbrains.kastle/SourceModuleManifest.<init>|<init>(kotlin.String;kotlin.String;kotlin.collections.Set<org.jetbrains.kastle.Platform>;kotlin.collections.Map<org.jetbrains.kastle.Platform,kotlin.collections.Set<org.jetbrains.kastle.Dependency>>;kotlin.collections.Map<org.jetbrains.kastle.Platform,kotlin.collections.Set<org.jetbrains.kastle.Dependency>>;org.jetbrains.kastle.GradleSettings;org.jetbrains.kastle.ToolchainSettings){}[0]
 
-    final val amper // org.jetbrains.kastle/SourceModuleManifest.amper|{}amper[0]
-        final fun <get-amper>(): org.jetbrains.kastle/AmperSettings // org.jetbrains.kastle/SourceModuleManifest.amper.<get-amper>|<get-amper>(){}[0]
     final val dependencies // org.jetbrains.kastle/SourceModuleManifest.dependencies|{}dependencies[0]
         final fun <get-dependencies>(): kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> // org.jetbrains.kastle/SourceModuleManifest.dependencies.<get-dependencies>|<get-dependencies>(){}[0]
     final val gradle // org.jetbrains.kastle/SourceModuleManifest.gradle|{}gradle[0]
@@ -3220,6 +3133,8 @@ final class org.jetbrains.kastle/SourceModuleManifest : org.jetbrains.kastle/Sou
         final fun <get-platforms>(): kotlin.collections/Set<org.jetbrains.kastle/Platform> // org.jetbrains.kastle/SourceModuleManifest.platforms.<get-platforms>|<get-platforms>(){}[0]
     final val testDependencies // org.jetbrains.kastle/SourceModuleManifest.testDependencies|{}testDependencies[0]
         final fun <get-testDependencies>(): kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> // org.jetbrains.kastle/SourceModuleManifest.testDependencies.<get-testDependencies>|<get-testDependencies>(){}[0]
+    final val toolchain // org.jetbrains.kastle/SourceModuleManifest.toolchain|{}toolchain[0]
+        final fun <get-toolchain>(): org.jetbrains.kastle/ToolchainSettings // org.jetbrains.kastle/SourceModuleManifest.toolchain.<get-toolchain>|<get-toolchain>(){}[0]
 
     final fun component1(): kotlin/String // org.jetbrains.kastle/SourceModuleManifest.component1|component1(){}[0]
     final fun component2(): kotlin/String // org.jetbrains.kastle/SourceModuleManifest.component2|component2(){}[0]
@@ -3227,8 +3142,8 @@ final class org.jetbrains.kastle/SourceModuleManifest : org.jetbrains.kastle/Sou
     final fun component4(): kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> // org.jetbrains.kastle/SourceModuleManifest.component4|component4(){}[0]
     final fun component5(): kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> // org.jetbrains.kastle/SourceModuleManifest.component5|component5(){}[0]
     final fun component6(): org.jetbrains.kastle/GradleSettings // org.jetbrains.kastle/SourceModuleManifest.component6|component6(){}[0]
-    final fun component7(): org.jetbrains.kastle/AmperSettings // org.jetbrains.kastle/SourceModuleManifest.component7|component7(){}[0]
-    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin.collections/Set<org.jetbrains.kastle/Platform> = ..., kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> = ..., kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> = ..., org.jetbrains.kastle/GradleSettings = ..., org.jetbrains.kastle/AmperSettings = ...): org.jetbrains.kastle/SourceModuleManifest // org.jetbrains.kastle/SourceModuleManifest.copy|copy(kotlin.String;kotlin.String;kotlin.collections.Set<org.jetbrains.kastle.Platform>;kotlin.collections.Map<org.jetbrains.kastle.Platform,kotlin.collections.Set<org.jetbrains.kastle.Dependency>>;kotlin.collections.Map<org.jetbrains.kastle.Platform,kotlin.collections.Set<org.jetbrains.kastle.Dependency>>;org.jetbrains.kastle.GradleSettings;org.jetbrains.kastle.AmperSettings){}[0]
+    final fun component7(): org.jetbrains.kastle/ToolchainSettings // org.jetbrains.kastle/SourceModuleManifest.component7|component7(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin.collections/Set<org.jetbrains.kastle/Platform> = ..., kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> = ..., kotlin.collections/Map<org.jetbrains.kastle/Platform, kotlin.collections/Set<org.jetbrains.kastle/Dependency>> = ..., org.jetbrains.kastle/GradleSettings = ..., org.jetbrains.kastle/ToolchainSettings = ...): org.jetbrains.kastle/SourceModuleManifest // org.jetbrains.kastle/SourceModuleManifest.copy|copy(kotlin.String;kotlin.String;kotlin.collections.Set<org.jetbrains.kastle.Platform>;kotlin.collections.Map<org.jetbrains.kastle.Platform,kotlin.collections.Set<org.jetbrains.kastle.Dependency>>;kotlin.collections.Map<org.jetbrains.kastle.Platform,kotlin.collections.Set<org.jetbrains.kastle.Dependency>>;org.jetbrains.kastle.GradleSettings;org.jetbrains.kastle.ToolchainSettings){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/SourceModuleManifest.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/SourceModuleManifest.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/SourceModuleManifest.toString|toString(){}[0]
@@ -3342,6 +3257,95 @@ final class org.jetbrains.kastle/TemplateEvaluator { // org.jetbrains.kastle/Tem
 
     final object Companion { // org.jetbrains.kastle/TemplateEvaluator.Companion|null[0]
         final fun (org.jetbrains.kastle/SourceTemplate).toString(org.jetbrains.kastle/TemplateEvaluator = ..., kotlin/String = ..., org.jetbrains.kastle/PackId = ..., org.jetbrains.kastle.utils/LocalVariables = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/List<org.jetbrains.kastle/SourceFile>> = ...): kotlin/String // org.jetbrains.kastle/TemplateEvaluator.Companion.toString|toString@org.jetbrains.kastle.SourceTemplate(org.jetbrains.kastle.TemplateEvaluator;kotlin.String;org.jetbrains.kastle.PackId;org.jetbrains.kastle.utils.LocalVariables;kotlin.collections.Map<kotlin.String,kotlin.collections.List<org.jetbrains.kastle.SourceFile>>){}[0]
+    }
+}
+
+final class org.jetbrains.kastle/ToolchainApplicationSettings { // org.jetbrains.kastle/ToolchainApplicationSettings|null[0]
+    constructor <init>(kotlin/String? = ...) // org.jetbrains.kastle/ToolchainApplicationSettings.<init>|<init>(kotlin.String?){}[0]
+
+    final val mainClass // org.jetbrains.kastle/ToolchainApplicationSettings.mainClass|{}mainClass[0]
+        final fun <get-mainClass>(): kotlin/String? // org.jetbrains.kastle/ToolchainApplicationSettings.mainClass.<get-mainClass>|<get-mainClass>(){}[0]
+
+    final fun component1(): kotlin/String? // org.jetbrains.kastle/ToolchainApplicationSettings.component1|component1(){}[0]
+    final fun copy(kotlin/String? = ...): org.jetbrains.kastle/ToolchainApplicationSettings // org.jetbrains.kastle/ToolchainApplicationSettings.copy|copy(kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/ToolchainApplicationSettings.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.jetbrains.kastle/ToolchainApplicationSettings.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.jetbrains.kastle/ToolchainApplicationSettings.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<org.jetbrains.kastle/ToolchainApplicationSettings> { // org.jetbrains.kastle/ToolchainApplicationSettings.$serializer|null[0]
+        final val descriptor // org.jetbrains.kastle/ToolchainApplicationSettings.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // org.jetbrains.kastle/ToolchainApplicationSettings.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // org.jetbrains.kastle/ToolchainApplicationSettings.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): org.jetbrains.kastle/ToolchainApplicationSettings // org.jetbrains.kastle/ToolchainApplicationSettings.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, org.jetbrains.kastle/ToolchainApplicationSettings) // org.jetbrains.kastle/ToolchainApplicationSettings.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;org.jetbrains.kastle.ToolchainApplicationSettings){}[0]
+    }
+
+    final object Companion { // org.jetbrains.kastle/ToolchainApplicationSettings.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/ToolchainApplicationSettings> // org.jetbrains.kastle/ToolchainApplicationSettings.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class org.jetbrains.kastle/ToolchainKotlinSettings { // org.jetbrains.kastle/ToolchainKotlinSettings|null[0]
+    constructor <init>(kotlin/String? = ...) // org.jetbrains.kastle/ToolchainKotlinSettings.<init>|<init>(kotlin.String?){}[0]
+
+    final val serialization // org.jetbrains.kastle/ToolchainKotlinSettings.serialization|{}serialization[0]
+        final fun <get-serialization>(): kotlin/String? // org.jetbrains.kastle/ToolchainKotlinSettings.serialization.<get-serialization>|<get-serialization>(){}[0]
+
+    final fun component1(): kotlin/String? // org.jetbrains.kastle/ToolchainKotlinSettings.component1|component1(){}[0]
+    final fun copy(kotlin/String? = ...): org.jetbrains.kastle/ToolchainKotlinSettings // org.jetbrains.kastle/ToolchainKotlinSettings.copy|copy(kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/ToolchainKotlinSettings.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.jetbrains.kastle/ToolchainKotlinSettings.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.jetbrains.kastle/ToolchainKotlinSettings.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<org.jetbrains.kastle/ToolchainKotlinSettings> { // org.jetbrains.kastle/ToolchainKotlinSettings.$serializer|null[0]
+        final val descriptor // org.jetbrains.kastle/ToolchainKotlinSettings.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // org.jetbrains.kastle/ToolchainKotlinSettings.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // org.jetbrains.kastle/ToolchainKotlinSettings.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): org.jetbrains.kastle/ToolchainKotlinSettings // org.jetbrains.kastle/ToolchainKotlinSettings.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, org.jetbrains.kastle/ToolchainKotlinSettings) // org.jetbrains.kastle/ToolchainKotlinSettings.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;org.jetbrains.kastle.ToolchainKotlinSettings){}[0]
+    }
+
+    final object Companion { // org.jetbrains.kastle/ToolchainKotlinSettings.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/ToolchainKotlinSettings> // org.jetbrains.kastle/ToolchainKotlinSettings.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class org.jetbrains.kastle/ToolchainSettings { // org.jetbrains.kastle/ToolchainSettings|null[0]
+    constructor <init>(kotlin/String? = ..., kotlin/String? = ..., org.jetbrains.kastle/ToolchainApplicationSettings? = ..., org.jetbrains.kastle/ToolchainKotlinSettings? = ...) // org.jetbrains.kastle/ToolchainSettings.<init>|<init>(kotlin.String?;kotlin.String?;org.jetbrains.kastle.ToolchainApplicationSettings?;org.jetbrains.kastle.ToolchainKotlinSettings?){}[0]
+
+    final val application // org.jetbrains.kastle/ToolchainSettings.application|{}application[0]
+        final fun <get-application>(): org.jetbrains.kastle/ToolchainApplicationSettings? // org.jetbrains.kastle/ToolchainSettings.application.<get-application>|<get-application>(){}[0]
+    final val compose // org.jetbrains.kastle/ToolchainSettings.compose|{}compose[0]
+        final fun <get-compose>(): kotlin/String? // org.jetbrains.kastle/ToolchainSettings.compose.<get-compose>|<get-compose>(){}[0]
+    final val kotlin // org.jetbrains.kastle/ToolchainSettings.kotlin|{}kotlin[0]
+        final fun <get-kotlin>(): org.jetbrains.kastle/ToolchainKotlinSettings? // org.jetbrains.kastle/ToolchainSettings.kotlin.<get-kotlin>|<get-kotlin>(){}[0]
+    final val ktor // org.jetbrains.kastle/ToolchainSettings.ktor|{}ktor[0]
+        final fun <get-ktor>(): kotlin/String? // org.jetbrains.kastle/ToolchainSettings.ktor.<get-ktor>|<get-ktor>(){}[0]
+
+    final fun component1(): kotlin/String? // org.jetbrains.kastle/ToolchainSettings.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // org.jetbrains.kastle/ToolchainSettings.component2|component2(){}[0]
+    final fun component3(): org.jetbrains.kastle/ToolchainApplicationSettings? // org.jetbrains.kastle/ToolchainSettings.component3|component3(){}[0]
+    final fun component4(): org.jetbrains.kastle/ToolchainKotlinSettings? // org.jetbrains.kastle/ToolchainSettings.component4|component4(){}[0]
+    final fun copy(kotlin/String? = ..., kotlin/String? = ..., org.jetbrains.kastle/ToolchainApplicationSettings? = ..., org.jetbrains.kastle/ToolchainKotlinSettings? = ...): org.jetbrains.kastle/ToolchainSettings // org.jetbrains.kastle/ToolchainSettings.copy|copy(kotlin.String?;kotlin.String?;org.jetbrains.kastle.ToolchainApplicationSettings?;org.jetbrains.kastle.ToolchainKotlinSettings?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/ToolchainSettings.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.jetbrains.kastle/ToolchainSettings.hashCode|hashCode(){}[0]
+    final fun isEmpty(): kotlin/Boolean // org.jetbrains.kastle/ToolchainSettings.isEmpty|isEmpty(){}[0]
+    final fun isNotEmpty(): kotlin/Boolean // org.jetbrains.kastle/ToolchainSettings.isNotEmpty|isNotEmpty(){}[0]
+    final fun toString(): kotlin/String // org.jetbrains.kastle/ToolchainSettings.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<org.jetbrains.kastle/ToolchainSettings> { // org.jetbrains.kastle/ToolchainSettings.$serializer|null[0]
+        final val descriptor // org.jetbrains.kastle/ToolchainSettings.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // org.jetbrains.kastle/ToolchainSettings.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // org.jetbrains.kastle/ToolchainSettings.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): org.jetbrains.kastle/ToolchainSettings // org.jetbrains.kastle/ToolchainSettings.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, org.jetbrains.kastle/ToolchainSettings) // org.jetbrains.kastle/ToolchainSettings.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;org.jetbrains.kastle.ToolchainSettings){}[0]
+    }
+
+    final object Companion { // org.jetbrains.kastle/ToolchainSettings.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/ToolchainSettings> // org.jetbrains.kastle/ToolchainSettings.Companion.serializer|serializer(){}[0]
     }
 }
 
@@ -3630,6 +3634,8 @@ final val org.jetbrains.kastle.structure/MavenSourceMapping // org.jetbrains.kas
     final fun <get-MavenSourceMapping>(): org.jetbrains.kastle.gen/ProjectMapping // org.jetbrains.kastle.structure/MavenSourceMapping.<get-MavenSourceMapping>|<get-MavenSourceMapping>(){}[0]
 final val org.jetbrains.kastle.structure/NestedPackagingMapping // org.jetbrains.kastle.structure/NestedPackagingMapping|{}NestedPackagingMapping[0]
     final fun <get-NestedPackagingMapping>(): org.jetbrains.kastle.gen/ProjectMapping // org.jetbrains.kastle.structure/NestedPackagingMapping.<get-NestedPackagingMapping>|<get-NestedPackagingMapping>(){}[0]
+final val org.jetbrains.kastle.structure/ToolchainSourceMapping // org.jetbrains.kastle.structure/ToolchainSourceMapping|{}ToolchainSourceMapping[0]
+    final fun <get-ToolchainSourceMapping>(): org.jetbrains.kastle.gen/ProjectMapping // org.jetbrains.kastle.structure/ToolchainSourceMapping.<get-ToolchainSourceMapping>|<get-ToolchainSourceMapping>(){}[0]
 final val org.jetbrains.kastle.utils/afterProtocol // org.jetbrains.kastle.utils/afterProtocol|@org.jetbrains.kastle.utils.StringExpression{}afterProtocol[0]
     final fun (org.jetbrains.kastle.utils/StringExpression).<get-afterProtocol>(): kotlin/String // org.jetbrains.kastle.utils/afterProtocol.<get-afterProtocol>|<get-afterProtocol>@org.jetbrains.kastle.utils.StringExpression(){}[0]
 final val org.jetbrains.kastle.utils/body // org.jetbrains.kastle.utils/body|@org.jetbrains.kastle.Block{}body[0]

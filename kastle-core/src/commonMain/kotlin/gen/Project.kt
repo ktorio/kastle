@@ -1,8 +1,7 @@
 package org.jetbrains.kastle.gen
 
-import kastle.TemplateAmperApplicationSettings
-import kastle.TemplateAmperKotlinSettings
-import kastle.TemplateAmperModuleSettings
+import kastle.TemplateToolchainApplicationSettings
+import kastle.TemplateToolchainKotlinSettings
 import kastle.TemplateBuildDependency
 import kastle.TemplateCatalogArtifact
 import kastle.TemplateGradleModuleSettings
@@ -12,6 +11,7 @@ import kastle.TemplateMavenRepository
 import kastle.TemplatePack
 import kastle.TemplateProject
 import kastle.TemplateSourceModule
+import kastle.TemplateToolchainModuleSettings
 import kotlinx.io.files.Path
 import org.jetbrains.kastle.*
 import org.jetbrains.kastle.io.resolve
@@ -46,7 +46,9 @@ internal fun Project.asTemplateMap(): Map<String, Any?> =
         group = group,
         modules = moduleSources.modules.sortedBy { it.path }.map { it.toTemplateType() },
         versions = versions,
-        buildSystem = packs.firstOrNull { it.tags.contains("build-system") }?.id?.toString(),
+        buildSystem = packs.firstOrNull {
+            it.tags.contains("build-system")
+        }?.id?.toString(),
         libraries = libraries.mapValues { (_, value) -> value.toTemplateType() },
         gradle = gradle.toTemplateType(),
         packs = packs.map {
@@ -71,7 +73,7 @@ private fun SourceModule.toTemplateType(): TemplateSourceModule =
         type = if (mainClass() != null && platforms.size == 1) "${platforms.single()}/app" else "lib",
         platforms = platforms.map { it.code },
         gradle = gradle.toTemplateType(),
-        amper = amper.toTemplateType(),
+        toolchain = toolchain.toTemplateType(),
         dependencies = dependencies.asSequence()
             .filter { it.value.isNotEmpty() }
             .sortedBy { it.key.code }
@@ -151,21 +153,21 @@ private fun GradleSettings.toTemplateType(): TemplateGradleModuleSettings =
         plugins = plugins.map { it.key },
     )
 
-private fun AmperSettings.toTemplateType(): TemplateAmperModuleSettings =
-    TemplateAmperModuleSettings(
+private fun ToolchainSettings.toTemplateType(): TemplateToolchainModuleSettings =
+    TemplateToolchainModuleSettings(
         compose = compose,
         ktor = ktor,
         application = application?.toTemplateType(),
         kotlin = kotlin?.toTemplateType(),
     )
 
-private fun AmperApplicationSettings.toTemplateType(): TemplateAmperApplicationSettings =
-    TemplateAmperApplicationSettings(
+private fun ToolchainApplicationSettings.toTemplateType(): TemplateToolchainApplicationSettings =
+    TemplateToolchainApplicationSettings(
         mainClass = mainClass,
     )
 
-private fun AmperKotlinSettings.toTemplateType(): TemplateAmperKotlinSettings =
-    TemplateAmperKotlinSettings(
+private fun ToolchainKotlinSettings.toTemplateType(): TemplateToolchainKotlinSettings =
+    TemplateToolchainKotlinSettings(
         serialization = serialization,
     )
 
@@ -254,8 +256,8 @@ val SourceModule.slotSources: SourcesByUrl
  */
 context(project: Project)
 internal fun SourceModule.mainClass(): String? {
-    amper.application?.mainClass?.let { amperMain ->
-        return amperMain
+    toolchain.application?.mainClass?.let { toolchainMain ->
+        return toolchainMain
     }
     val moduleProperties = project.properties[PropertyScope.Module(originalPath)]
         ?: return null
