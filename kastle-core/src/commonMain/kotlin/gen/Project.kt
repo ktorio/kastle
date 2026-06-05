@@ -181,6 +181,7 @@ private fun Dependency.toTemplateType(modulePath: String): TemplateBuildDependen
             version = version,
             exported = scope == Dependency.EXPORTED_SCOPE,
             scope = scope,
+            kmp = isKmp(group, artifact)
         )
 
         is ModuleDependency -> TemplateBuildDependency(
@@ -224,6 +225,7 @@ private operator fun TemplateBuildDependency.plus(artifact: TemplateCatalogArtif
         versionRef = artifact.versionRef ?: versionRef,
         version = artifact.version ?: version,
         scope = scope,
+        kmp = artifact.kmp
     )
 
 context(project: Project)
