@@ -8,99 +8,6 @@ public final class kastle/DSLKt {
 	public static final fun get_slots ()Lkastle/TemplateSlots;
 }
 
-public final class kastle/TemplateAmperApplicationSettings {
-	public static final field Companion Lkastle/TemplateAmperApplicationSettings$Companion;
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lkastle/TemplateAmperApplicationSettings;
-	public static synthetic fun copy$default (Lkastle/TemplateAmperApplicationSettings;Ljava/lang/String;ILjava/lang/Object;)Lkastle/TemplateAmperApplicationSettings;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getMainClass ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class kastle/TemplateAmperApplicationSettings$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lkastle/TemplateAmperApplicationSettings$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lkastle/TemplateAmperApplicationSettings;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lkastle/TemplateAmperApplicationSettings;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class kastle/TemplateAmperApplicationSettings$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class kastle/TemplateAmperKotlinSettings {
-	public static final field Companion Lkastle/TemplateAmperKotlinSettings$Companion;
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lkastle/TemplateAmperKotlinSettings;
-	public static synthetic fun copy$default (Lkastle/TemplateAmperKotlinSettings;Ljava/lang/String;ILjava/lang/Object;)Lkastle/TemplateAmperKotlinSettings;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getSerialization ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class kastle/TemplateAmperKotlinSettings$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lkastle/TemplateAmperKotlinSettings$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lkastle/TemplateAmperKotlinSettings;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lkastle/TemplateAmperKotlinSettings;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class kastle/TemplateAmperKotlinSettings$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class kastle/TemplateAmperModuleSettings {
-	public static final field Companion Lkastle/TemplateAmperModuleSettings$Companion;
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkastle/TemplateAmperApplicationSettings;Lkastle/TemplateAmperKotlinSettings;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkastle/TemplateAmperApplicationSettings;Lkastle/TemplateAmperKotlinSettings;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Lkastle/TemplateAmperApplicationSettings;
-	public final fun component4 ()Lkastle/TemplateAmperKotlinSettings;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkastle/TemplateAmperApplicationSettings;Lkastle/TemplateAmperKotlinSettings;)Lkastle/TemplateAmperModuleSettings;
-	public static synthetic fun copy$default (Lkastle/TemplateAmperModuleSettings;Ljava/lang/String;Ljava/lang/String;Lkastle/TemplateAmperApplicationSettings;Lkastle/TemplateAmperKotlinSettings;ILjava/lang/Object;)Lkastle/TemplateAmperModuleSettings;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getApplication ()Lkastle/TemplateAmperApplicationSettings;
-	public final fun getCompose ()Ljava/lang/String;
-	public final fun getKotlin ()Lkastle/TemplateAmperKotlinSettings;
-	public final fun getKtor ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class kastle/TemplateAmperModuleSettings$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lkastle/TemplateAmperModuleSettings$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lkastle/TemplateAmperModuleSettings;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lkastle/TemplateAmperModuleSettings;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class kastle/TemplateAmperModuleSettings$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public final class kastle/TemplateBuildDependency {
 	public static final field Companion Lkastle/TemplateBuildDependency$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Z)V
@@ -434,19 +341,19 @@ public abstract interface class kastle/TemplateSlots : java/util/Map, kotlin/jvm
 public final class kastle/TemplateSourceModule {
 	public static final field Companion Lkastle/TemplateSourceModule$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkastle/TemplateGradleModuleSettings;Lkastle/TemplateAmperModuleSettings;Ljava/util/Map;Ljava/util/Map;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkastle/TemplateGradleModuleSettings;Lkastle/TemplateAmperModuleSettings;Ljava/util/Map;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkastle/TemplateGradleModuleSettings;Lkastle/TemplateToolchainModuleSettings;Ljava/util/Map;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkastle/TemplateGradleModuleSettings;Lkastle/TemplateToolchainModuleSettings;Ljava/util/Map;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/util/List;
 	public final fun component4 ()Lkastle/TemplateGradleModuleSettings;
-	public final fun component5 ()Lkastle/TemplateAmperModuleSettings;
+	public final fun component5 ()Lkastle/TemplateToolchainModuleSettings;
 	public final fun component6 ()Ljava/util/Map;
 	public final fun component7 ()Ljava/util/Map;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkastle/TemplateGradleModuleSettings;Lkastle/TemplateAmperModuleSettings;Ljava/util/Map;Ljava/util/Map;)Lkastle/TemplateSourceModule;
-	public static synthetic fun copy$default (Lkastle/TemplateSourceModule;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkastle/TemplateGradleModuleSettings;Lkastle/TemplateAmperModuleSettings;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lkastle/TemplateSourceModule;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkastle/TemplateGradleModuleSettings;Lkastle/TemplateToolchainModuleSettings;Ljava/util/Map;Ljava/util/Map;)Lkastle/TemplateSourceModule;
+	public static synthetic fun copy$default (Lkastle/TemplateSourceModule;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkastle/TemplateGradleModuleSettings;Lkastle/TemplateToolchainModuleSettings;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lkastle/TemplateSourceModule;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAmper ()Lkastle/TemplateAmperModuleSettings;
+	public final fun getAmper ()Lkastle/TemplateToolchainModuleSettings;
 	public final fun getDependencies ()Ljava/util/Map;
 	public final fun getGradle ()Lkastle/TemplateGradleModuleSettings;
 	public final fun getParent ()Ljava/lang/String;
@@ -454,6 +361,7 @@ public final class kastle/TemplateSourceModule {
 	public final fun getPlatform ()Ljava/lang/String;
 	public final fun getPlatforms ()Ljava/util/List;
 	public final fun getTestDependencies ()Ljava/util/Map;
+	public final fun getToolchain ()Lkastle/TemplateToolchainModuleSettings;
 	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -471,6 +379,99 @@ public final synthetic class kastle/TemplateSourceModule$$serializer : kotlinx/s
 }
 
 public final class kastle/TemplateSourceModule$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class kastle/TemplateToolchainApplicationSettings {
+	public static final field Companion Lkastle/TemplateToolchainApplicationSettings$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lkastle/TemplateToolchainApplicationSettings;
+	public static synthetic fun copy$default (Lkastle/TemplateToolchainApplicationSettings;Ljava/lang/String;ILjava/lang/Object;)Lkastle/TemplateToolchainApplicationSettings;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMainClass ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class kastle/TemplateToolchainApplicationSettings$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lkastle/TemplateToolchainApplicationSettings$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lkastle/TemplateToolchainApplicationSettings;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lkastle/TemplateToolchainApplicationSettings;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class kastle/TemplateToolchainApplicationSettings$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class kastle/TemplateToolchainKotlinSettings {
+	public static final field Companion Lkastle/TemplateToolchainKotlinSettings$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lkastle/TemplateToolchainKotlinSettings;
+	public static synthetic fun copy$default (Lkastle/TemplateToolchainKotlinSettings;Ljava/lang/String;ILjava/lang/Object;)Lkastle/TemplateToolchainKotlinSettings;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSerialization ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class kastle/TemplateToolchainKotlinSettings$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lkastle/TemplateToolchainKotlinSettings$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lkastle/TemplateToolchainKotlinSettings;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lkastle/TemplateToolchainKotlinSettings;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class kastle/TemplateToolchainKotlinSettings$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class kastle/TemplateToolchainModuleSettings {
+	public static final field Companion Lkastle/TemplateToolchainModuleSettings$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkastle/TemplateToolchainApplicationSettings;Lkastle/TemplateToolchainKotlinSettings;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkastle/TemplateToolchainApplicationSettings;Lkastle/TemplateToolchainKotlinSettings;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkastle/TemplateToolchainApplicationSettings;
+	public final fun component4 ()Lkastle/TemplateToolchainKotlinSettings;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkastle/TemplateToolchainApplicationSettings;Lkastle/TemplateToolchainKotlinSettings;)Lkastle/TemplateToolchainModuleSettings;
+	public static synthetic fun copy$default (Lkastle/TemplateToolchainModuleSettings;Ljava/lang/String;Ljava/lang/String;Lkastle/TemplateToolchainApplicationSettings;Lkastle/TemplateToolchainKotlinSettings;ILjava/lang/Object;)Lkastle/TemplateToolchainModuleSettings;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApplication ()Lkastle/TemplateToolchainApplicationSettings;
+	public final fun getCompose ()Ljava/lang/String;
+	public final fun getKotlin ()Lkastle/TemplateToolchainKotlinSettings;
+	public final fun getKtor ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class kastle/TemplateToolchainModuleSettings$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lkastle/TemplateToolchainModuleSettings$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lkastle/TemplateToolchainModuleSettings;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lkastle/TemplateToolchainModuleSettings;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class kastle/TemplateToolchainModuleSettings$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 

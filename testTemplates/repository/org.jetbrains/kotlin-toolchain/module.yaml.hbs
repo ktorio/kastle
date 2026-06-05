@@ -14,11 +14,11 @@ product: {{ _module.type }}
 {{#each value}}
 {{#when type}}
 {{ "maven" }}
-  - {{ group }}:{{ artifact }}:{{ version }}{{#when scope}}{{ "api" }}: exported{{/when}}
+  - {{ group }}:{{ artifact }}:{{ version }}{{#if exported}}: exported{{/if}}
 {{ "project" }}
-  - {{ path }}{{#when scope}}{{ "api" }}: exported{{/when}}
+  - {{ path }}{{#if exported}}: exported{{/if}}
 {{ "catalog" }}
-  - ${{ key }}{{#when scope}}{{ "api" }}: exported{{/when}}
+  - ${{ key }}{{#if exported}}: exported{{/if}}
 {{/when}}
 {{/each}}
 {{/each}}
@@ -29,11 +29,11 @@ product: {{ _module.type }}
 {{#each value}}
 {{#when type}}
 {{ "maven" }}
-- {{ group }}:{{ artifact }}:{{ version }}
+  - {{ group }}:{{ artifact }}:{{ version }}
 {{ "project" }}
-- {{ path }}
+  - {{ path }}
 {{ "catalog" }}
-- ${{ key }}
+  - ${{ key }}
 {{/when}}
 {{/each}}
 {{/each}}

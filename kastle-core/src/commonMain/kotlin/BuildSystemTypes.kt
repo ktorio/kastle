@@ -223,7 +223,13 @@ sealed interface SourceModuleMetadata {
     /**
      * Amper-specific settings.
      */
-    val amper: AmperSettings
+    @Deprecated("use toolchain", ReplaceWith("toolchain"))
+    val amper: AmperSettings get() = toolchain
+
+    /**
+     * Amper-specific settings.
+     */
+    val toolchain: AmperSettings
 }
 
 @Serializable
@@ -234,7 +240,7 @@ data class SourceModuleManifest(
     override val dependencies: DependenciesMap = emptyMap(),
     override val testDependencies: DependenciesMap = emptyMap(),
     override val gradle: GradleSettings = GradleSettings(),
-    override val amper: AmperSettings = AmperSettings(),
+    override val toolchain: ToolchainSettings = ToolchainSettings(),
 ): SourceModuleMetadata
 
 val SourceModuleMetadata.allDependencies: Set<Dependency> get() =
@@ -297,24 +303,27 @@ val Platform.resourcesDir get() = when(this) {
     else -> "resources@$code"
 }
 
+@Deprecated("use ToolchainSettings", ReplaceWith("ToolchainSettings"))
+typealias AmperSettings = ToolchainSettings
+
 @Serializable
-data class AmperSettings(
+data class ToolchainSettings(
     val compose: String? = null,
     val ktor: String? = null,
-    val application: AmperApplicationSettings? = null,
-    val kotlin: AmperKotlinSettings? = null,
+    val application: ToolchainApplicationSettings? = null,
+    val kotlin: ToolchainKotlinSettings? = null,
 ) {
     fun isEmpty() = compose == null && ktor == null && application == null && kotlin == null
     fun isNotEmpty() = !isEmpty()
 }
 
 @Serializable
-data class AmperApplicationSettings(
+data class ToolchainApplicationSettings(
     val mainClass: String? = null,
 )
 
 @Serializable
-data class AmperKotlinSettings(
+data class ToolchainKotlinSettings(
     val serialization: String? = null,
 )
 
@@ -374,11 +383,11 @@ fun SourceModuleManifest.tryMerge(other: SourceModuleManifest): SourceModuleMani
         dependencies = dependencies.merge(other.dependencies),
         testDependencies = testDependencies.merge(other.testDependencies),
         gradle = GradleSettings((gradle.plugins + other.gradle.plugins).distinct()),
-        amper = AmperSettings(
-            amper.compose ?: other.amper.compose,
-            amper.ktor ?: other.amper.ktor,
-            amper.application ?: other.amper.application,
-            amper.kotlin ?: other.amper.kotlin,
+        toolchain = AmperSettings(
+            toolchain.compose ?: other.toolchain.compose,
+            toolchain.ktor ?: other.toolchain.ktor,
+            toolchain.application ?: other.toolchain.application,
+            toolchain.kotlin ?: other.toolchain.kotlin,
         ),
     )
 }

@@ -7,7 +7,7 @@ import org.jetbrains.kastle.gen.*
 import org.jetbrains.kastle.structure.GradleSourceMapping
 import org.jetbrains.kastle.logging.ConsoleLogger
 import org.jetbrains.kastle.logging.Logger
-import org.jetbrains.kastle.structure.AmperSourceMapping
+import org.jetbrains.kastle.structure.ToolchainSourceMapping
 import org.jetbrains.kastle.structure.FlattenModuleDependencies
 import org.jetbrains.kastle.structure.MavenSourceMapping
 import org.jetbrains.kastle.structure.NestedPackagingMapping
@@ -27,7 +27,7 @@ class ProjectGenerator(
                 FlattenModuleDependencies +
                 NestedPackagingMapping +
                 GradleSourceMapping +
-                AmperSourceMapping +
+                ToolchainSourceMapping +
                 MavenSourceMapping
     }
 

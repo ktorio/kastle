@@ -303,7 +303,7 @@ class LocalPackRepository(
             dependencies = dependencies,
             testDependencies = testDependencies,
             gradle = gradleSettings ?: GradleSettings(),
-            amper = amperSettings ?: AmperSettings(),
+            toolchain = amperSettings ?: AmperSettings(),
         )
     }
 

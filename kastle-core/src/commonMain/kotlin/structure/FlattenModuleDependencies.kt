@@ -105,11 +105,11 @@ private fun mergeLibInto(dependent: SourceModule, lib: SourceModule): SourceModu
         gradle = dependent.gradle.copy(
             plugins = (dependent.gradle.plugins + lib.gradle.plugins).distinct(),
         ),
-        amper = dependent.amper.copy(
-            compose = dependent.amper.compose ?: lib.amper.compose,
-            ktor = dependent.amper.ktor ?: lib.amper.ktor,
-            application = dependent.amper.application ?: lib.amper.application,
-            kotlin = dependent.amper.kotlin ?: lib.amper.kotlin,
+        toolchain = dependent.toolchain.copy(
+            compose = dependent.toolchain.compose ?: lib.toolchain.compose,
+            ktor = dependent.toolchain.ktor ?: lib.toolchain.ktor,
+            application = dependent.toolchain.application ?: lib.toolchain.application,
+            kotlin = dependent.toolchain.kotlin ?: lib.toolchain.kotlin,
         ),
     )
 

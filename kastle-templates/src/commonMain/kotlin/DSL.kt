@@ -82,10 +82,12 @@ data class TemplateSourceModule(
     val type: String = "lib", // amper-style module type (lib, app/jvm, etc.)
     val platforms: List<String> = emptyList(), // jvm, android, wasm, etc.
     val gradle: TemplateGradleModuleSettings = TemplateGradleModuleSettings(),
-    val amper: TemplateAmperModuleSettings = TemplateAmperModuleSettings(),
+    val toolchain: TemplateAmperModuleSettings = TemplateAmperModuleSettings(),
     val dependencies: Map<String, List<TemplateBuildDependency>> = emptyMap(),
     val testDependencies: Map<String, List<TemplateBuildDependency>> = emptyMap(),
 ) {
+    @Deprecated("use toolchain", ReplaceWith("toolchain"))
+    val amper: TemplateAmperModuleSettings get() = toolchain
     val parent: String? get() = path.substringBeforeLast('/').takeIf { it.isNotEmpty() }
     val platform: String? = platforms.singleOrNull()
 }
@@ -102,21 +104,24 @@ data class TemplateGradleModuleSettings(
     val plugins: List<String> = emptyList(),
 )
 
+@Deprecated("use TemplateToolchainModuleSettings", ReplaceWith("TemplateToolchainModuleSettings"))
+typealias TemplateAmperModuleSettings = TemplateToolchainModuleSettings
+
 @Serializable
-data class TemplateAmperModuleSettings(
+data class TemplateToolchainModuleSettings(
     val compose: String? = null,
     val ktor: String? = null,
-    val application: TemplateAmperApplicationSettings? = null,
-    val kotlin: TemplateAmperKotlinSettings? = null,
+    val application: TemplateToolchainApplicationSettings? = null,
+    val kotlin: TemplateToolchainKotlinSettings? = null,
 )
 
 @Serializable
-data class TemplateAmperApplicationSettings(
+data class TemplateToolchainApplicationSettings(
     val mainClass: String? = null,
 )
 
 @Serializable
-data class TemplateAmperKotlinSettings(
+data class TemplateToolchainKotlinSettings(
     val serialization: String? = null,
 )
 
