@@ -229,7 +229,7 @@ sealed interface SourceModuleMetadata {
     /**
      * Amper-specific settings.
      */
-    val toolchain: AmperSettings
+    val toolchain: ToolchainSettings
 }
 
 @Serializable

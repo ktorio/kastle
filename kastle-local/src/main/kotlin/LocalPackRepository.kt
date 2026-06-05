@@ -282,8 +282,10 @@ class LocalPackRepository(
     ): SourceModuleManifest {
         val platforms = moduleYaml.readPlatforms()
 
-        val amperSettings = moduleYaml.get<YamlMap>("amper")?.let { node ->
-            yaml.decodeFromYamlNode<AmperSettings>(node)
+        val toolchainSettings = moduleYaml.get<YamlMap>("toolchain")?.let { node ->
+            yaml.decodeFromYamlNode<ToolchainSettings>(node)
+        } ?: moduleYaml.get<YamlMap>("amper")?.let { node ->
+            yaml.decodeFromYamlNode<ToolchainSettings>(node)
         }
         val gradleSettings = moduleYaml.get<YamlMap>("gradle")?.let { node ->
             yaml.decodeFromYamlNode<GradleSettings>(node)
@@ -303,7 +305,7 @@ class LocalPackRepository(
             dependencies = dependencies,
             testDependencies = testDependencies,
             gradle = gradleSettings ?: GradleSettings(),
-            toolchain = amperSettings ?: AmperSettings(),
+            toolchain = toolchainSettings ?: ToolchainSettings(),
         )
     }
 

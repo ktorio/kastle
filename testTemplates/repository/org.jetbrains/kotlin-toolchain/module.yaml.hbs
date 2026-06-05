@@ -38,9 +38,9 @@ product: {{ _module.type }}
 {{/each}}
 {{/each}}
 {{!-- Settings --}}
-{{#if _module.amper}}
+{{#if _module.toolchain}}
 settings:
-  {{#each _module.amper.entries}}
+  {{#each _module.toolchain.entries}}
   {{#when key}}
   {{"kotlin"}}
   kotlin:

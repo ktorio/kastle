@@ -6,7 +6,7 @@ dependencies:
   - $libs.compose.uiToolingPreview
   - $libs.compose.uiTooling!debugImplementation
 
-amper:
+toolchain:
   compose: enabled
 
 gradle:

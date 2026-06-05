@@ -23,7 +23,7 @@ val ToolchainSourceMapping = ProjectMapping { project ->
             "Project has plugins that require the Gradle build system"
         }
         require(module.dependencies.values.flatten().none { it is FunctionDependency }) {
-            "Project has dependencies not supported by Amper"
+            "Project has dependencies not supported by Kotlin Toolchain"
         }
     }
 

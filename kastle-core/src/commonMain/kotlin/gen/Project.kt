@@ -254,8 +254,8 @@ val SourceModule.slotSources: SourcesByUrl
  */
 context(project: Project)
 internal fun SourceModule.mainClass(): String? {
-    toolchain.application?.mainClass?.let { amperMain ->
-        return amperMain
+    toolchain.application?.mainClass?.let { toolchainMain ->
+        return toolchainMain
     }
     val moduleProperties = project.properties[PropertyScope.Module(originalPath)]
         ?: return null
