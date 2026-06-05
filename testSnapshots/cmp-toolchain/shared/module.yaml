@@ -17,8 +17,6 @@ dependencies@android:
   - $libs.wrappers.browser
 
 test-dependencies:
-- $libs.kotlin.test
+  - $libs.kotlin.test
 
-settings:
-  compose: enabled
 

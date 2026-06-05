@@ -257,11 +257,11 @@ fun TestSuite.testProjectGenerator(
             )
         }
 
-        test("ktor server amper") { gen ->
+        test("ktor server kotlin toolchain") { gen ->
             gen.generateAndValidateSnapshot(
-                "ktor-server-amper",
+                "ktor-server-toolchain",
                 listOf(
-                    "org.jetbrains/amper",
+                    "org.jetbrains/kotlin-toolchain",
                     "io.ktor/server-core",
                     "io.ktor/server-netty",
                     "io.ktor/server-content-negotiation",
@@ -326,16 +326,16 @@ fun TestSuite.testProjectGenerator(
             )
         }
 
-        test("compose multiplatform amper") { gen ->
-            val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-amper", randomString())
+        test("compose multiplatform toolchain") { gen ->
+            val outputDir = Path(SystemTemporaryDirectory, "generated", "cmp-toolchain", randomString())
             gen.generateWithPacks(
                 outputDir,
-                "cmp-amper",
-                "org.jetbrains/amper",
+                "cmp-toolchain",
+                "org.jetbrains/kotlin-toolchain",
                 "org.jetbrains/compose-multiplatform",
             )
             assertFilesAreEqualWithSnapshot(
-                "$snapshots/cmp-amper",
+                "$snapshots/cmp-toolchain",
                 outputDir.toString(),
             )
         }
