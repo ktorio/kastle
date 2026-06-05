@@ -1,6 +1,7 @@
 package org.jetbrains.kastle
 
 import com.charleskorn.kaml.*
+import com.intellij.ide.plugins.PluginManagerCore.logger
 import kotlinx.coroutines.flow.*
 import kotlinx.io.Source
 import kotlinx.io.buffered
@@ -17,6 +18,8 @@ import org.jetbrains.kastle.VersionsCatalog.Companion.orEmpty
 import org.jetbrains.kastle.io.*
 import org.jetbrains.kastle.kotlin.KT_EXTENSION
 import org.jetbrains.kastle.kotlin.KT_SCRIPT_EXTENSION
+import org.jetbrains.kastle.logging.ConsoleLogger
+import org.jetbrains.kastle.logging.Logger
 import org.jetbrains.kastle.templates.*
 import org.jetbrains.kastle.utils.StringExpression
 import org.jetbrains.kastle.utils.extension
@@ -40,6 +43,7 @@ class LocalPackRepository(
     private val fs: FileSystem = SystemFileSystem,
     random: Random = Random(System.currentTimeMillis()),
     remoteRepository: PackRepository = PackRepository.EMPTY,
+    private val logger: Logger = ConsoleLogger()
 ): PackRepository {
     private val handlebarsTemplateEngine = HandlebarsTemplateEngine(random)
     private val serializersModule = SerializersModule {
@@ -500,18 +504,19 @@ class LocalPackRepository(
     }
 
     override suspend fun catalogs(): List<VersionsCatalog> {
-        val defaultLibs = loadVersionCatalog(DEFAULT_VERSION_CATALOG)
-        val repositoryLibs = loadVersionCatalog(REPOSITORY_VERSION_CATALOG)
+        val defaultLibs = loadVersionCatalog(root.resolve(DEFAULT_VERSION_CATALOG))
+        val repositoryLibs = loadVersionCatalog(root.resolve(REPOSITORY_VERSION_CATALOG))
 
-        val externalCatalogs = fs.list(root).filter {
+        val externalCatalogs = root.parent?.let(fs::list)?.filter {
             it.name.endsWith(".versions.toml") && it.name != REPOSITORY_VERSION_CATALOG
-        }
+        }.orEmpty()
+
         return buildList {
             add(defaultLibs.orEmpty() + repositoryLibs.orEmpty())
 
             // We consider other catalog files as stand-ins for external files
             for (catalogFile in externalCatalogs) {
-                val catalog = loadVersionCatalog(catalogFile.toString()) ?: continue
+                val catalog = loadVersionCatalog(catalogFile) ?: continue
                 add(
                     catalog.copy(
                         name = catalogFile.name.substringBefore('.'),
@@ -522,10 +527,15 @@ class LocalPackRepository(
         }
     }
 
-    private fun loadVersionCatalog(catalogPath: String): VersionsCatalog? {
-        return runCatching {
-            root.resolve(catalogPath).readToml<VersionsCatalog>(fs)
-        }.getOrNull()
+    private fun loadVersionCatalog(catalogPath: Path): VersionsCatalog? {
+        return try {
+            catalogPath.readToml<VersionsCatalog>(fs)
+        } catch (e: Exception) {
+            logger.warn(e) {
+                "Failed to load version catalog at $catalogPath: ${e.message}"
+            }
+            null
+        }
     }
 
     private suspend fun StringExpression.getExtensionFromSlot(): TemplateFormat {

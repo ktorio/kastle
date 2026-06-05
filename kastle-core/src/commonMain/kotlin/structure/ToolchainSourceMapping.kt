@@ -57,9 +57,6 @@ private fun mapKtorLibraryReference(key: String): String {
     val result = when(val library = key.removePrefix("ktorLibs.")) {
         "server.config.yaml" -> "server.configYaml"
         "websockets.serialization" -> "websocket.serialization"
-        "client.jetty" -> "client.jetty.jakarta"
-        "server.jetty" -> "server.jetty.jakarta"
-        "server.tomcat" -> "server.tomcat.jakarta"
         else -> library
     }
     return "ktor.$result"

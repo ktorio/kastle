@@ -9,29 +9,30 @@
     <properties>
         <kotlin.code.style>official</kotlin.code.style>
         <kotlin_version>2.3.20-Beta2</kotlin_version>
+        <ktor_version>3.4.2</ktor_version>
         <logback_version>1.5.29</logback_version>
         
     </properties>
     <dependencies>
         <dependency>
-            <groupId>null</groupId>
-            <artifactId>null</artifactId>
-            <version>null</version>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-serialization-kotlinx-json-jvm</artifactId>
+            <version>${ktor_version}</version>
         </dependency>
         <dependency>
-            <groupId>null</groupId>
-            <artifactId>null</artifactId>
-            <version>null</version>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-content-negotiation-jvm</artifactId>
+            <version>${ktor_version}</version>
         </dependency>
         <dependency>
-            <groupId>null</groupId>
-            <artifactId>null</artifactId>
-            <version>null</version>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-core-jvm</artifactId>
+            <version>${ktor_version}</version>
         </dependency>
         <dependency>
-            <groupId>null</groupId>
-            <artifactId>null</artifactId>
-            <version>null</version>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-netty-jvm</artifactId>
+            <version>${ktor_version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -45,9 +46,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>null</groupId>
-            <artifactId>null</artifactId>
-            <version>null</version>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-test-host-jvm</artifactId>
+            <version>${ktor_version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -154,6 +154,7 @@ data class TemplateBuildDependency(
     val reference: String? = null,
     val typesafeProjectAccessor: String? = null,
     val scope: String = if (exported) "api" else "implementation",
+    val kmp: Boolean = false,
 ) {
     constructor(
         type: String,
