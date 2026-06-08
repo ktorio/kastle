@@ -54,10 +54,5 @@ private fun SourceModule.mapDependencies(mapping: (Dependency) -> Dependency) =
 
 private fun mapKtorLibraryReference(key: String): String {
     if (!key.startsWith("ktorLibs")) return key
-    val result = when(val library = key.removePrefix("ktorLibs.")) {
-        "server.config.yaml" -> "server.configYaml"
-        "websockets.serialization" -> "websocket.serialization"
-        else -> library
-    }
-    return "ktor.$result"
+    return "ktor.${key.removePrefix("ktorLibs.")}"
 }
