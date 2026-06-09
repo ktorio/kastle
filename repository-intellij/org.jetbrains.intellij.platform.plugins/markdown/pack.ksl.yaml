@@ -17,16 +17,6 @@ commonSources:
 
   # Modular plugin
 
-  ## Shared
-  - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
-    #language=kotlin
-    text: bundledModule("org.intellij.plugins.markdown")
-    priority: 100
-  - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
-    #language=xml
-    text: <module name="intellij.markdown"/>
-    priority: 100
-
   ## Backend
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
     #language=kotlin

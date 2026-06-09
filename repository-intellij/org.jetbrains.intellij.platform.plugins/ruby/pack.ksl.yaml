@@ -15,14 +15,6 @@ commonSources:
 
   # Modular plugin
 
-  ## Shared
-  - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
-    #language=kotlin
-    text: compatiblePlugin("org.jetbrains.plugins.ruby")
-  - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
-    #language=xml
-    text: <module name="intellij.ruby.common"/>
-
   ## Backend
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
     #language=kotlin

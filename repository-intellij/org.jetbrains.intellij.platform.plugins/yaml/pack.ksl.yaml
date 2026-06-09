@@ -17,16 +17,6 @@ commonSources:
 
   # Modular plugin
 
-  ## Shared
-  - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
-    #language=kotlin
-    text: bundledModule("org.jetbrains.plugins.yaml")
-    priority: 70
-  - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
-    #language=xml
-    text: <module name="intellij.yaml"/>
-    priority: 70
-
   ## Backend
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
     #language=kotlin

@@ -15,16 +15,6 @@ commonSources:
 
   # Modular plugin
 
-  ## Shared
-  - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
-    #language=kotlin
-    text: compatiblePlugin("PythonCore")
-  - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
-    #language=xml
-    text: |
-      <module name="intellij.python.psi"/>
-      <module name="intellij.python.psi.impl"/>
-
   ## Backend
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
     #language=kotlin

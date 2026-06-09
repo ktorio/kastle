@@ -17,20 +17,6 @@ commonSources:
 
   # Modular plugin
 
-  ## Shared
-  - target: slot://org.jetbrains.intellij.platform/plugin/sharedBuildScriptDependencies
-    #language=kotlin
-    text: |
-      bundledModule("intellij.database.sql")
-      bundledModule("intellij.database.sql.core.impl")
-    priority: 110
-  - target: slot://org.jetbrains.intellij.platform/plugin/sharedModuleDescriptorDependencies
-    #language=xml
-    text: |
-      <module name="intellij.database.sql"/>
-      <module name="intellij.database.sql.core.impl"/>
-    priority: 110
-
   ## Backend
   - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
     #language=kotlin
@@ -43,16 +29,4 @@ commonSources:
     text: |
       <module name="intellij.database.sql"/>
       <module name="intellij.database.sql.core.impl"/>
-    priority: 110
-
-  ## Frontend
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendBuildScriptDependencies
-    #language=kotlin
-    text: |
-      bundledModule("intellij.database.sql.frontend.core")
-    priority: 110
-  - target: slot://org.jetbrains.intellij.platform/plugin/frontendModuleDescriptorDependencies
-    #language=xml
-    text: |
-      <module name="intellij.database.sql.frontend.core"/>
     priority: 110

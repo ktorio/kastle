@@ -9,8 +9,6 @@ dependencies {
         compileOnly(libs.kotlin.serialization.json.jvm)
 
         composeUI()
-
-        bundledModule("intellij.database.sql.frontend.core")
     }
 
     implementation(project(":shared"))

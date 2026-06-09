@@ -3,8 +3,6 @@
         <module name="intellij.platform.frontend"/>
         <module name="intellij.platform.compose"/>
         <module name="intellij.plugin.with.samples.all.packs.enabled.shared"/>
-
-        <module name="intellij.database.sql.frontend.core"/>
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">
