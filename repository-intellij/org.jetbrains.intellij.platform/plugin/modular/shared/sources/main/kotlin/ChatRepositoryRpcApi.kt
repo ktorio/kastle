@@ -34,4 +34,3 @@ interface ChatRepositoryRpcApi : RemoteApi<Unit> {
      */
     suspend fun sendMessage(projectId: ProjectId, messageContent: String)
 }
-

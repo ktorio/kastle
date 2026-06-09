@@ -4,7 +4,6 @@ import kastle.ChatMessage
 
 import java.time.LocalDateTime
 
-
 /**
  * Factory class responsible for creating instances of `ChatMessage`.
  *
