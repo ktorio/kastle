@@ -10,8 +10,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") apply false
 }
 
-val platformVersion: String by _properties
-val intellijPlatformVersion = platformVersion
+val platformVersionModular: String by _properties
+val intellijPlatformVersion = platformVersionModular
 
 subprojects {
     apply(plugin = "org.jetbrains.intellij.platform.module")

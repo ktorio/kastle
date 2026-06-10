@@ -24,16 +24,18 @@ properties:
   - key: pluginModuleName
     type: string
     hidden: true
-  # Values are managed in propertyValues below:
+
+  # Fixed values:
   - key: platformVersion
     type: string
     hidden: true
+    default: "2025.3.5"
+  - key: platformVersionModular
+    type: string
+    hidden: true
+    default: "2026.1.3"
 
 propertyValues:
-  # Common versions management:
-  - key: org.jetbrains.intellij.platform/plugin/platformVersion
-    value: "2025.3.5"
-
   # Post-processed input properties:
   - key: pluginName
     expression: _project.name.capitalize()
