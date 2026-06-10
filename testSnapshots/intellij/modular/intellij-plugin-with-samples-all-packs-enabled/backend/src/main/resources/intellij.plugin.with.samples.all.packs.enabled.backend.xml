@@ -16,7 +16,7 @@
         <module name="intellij.markdown"/>
         <module name="intellij.database.sql"/>
         <module name="intellij.database.sql.core.impl"/>
-        <module name="com.intellij.modules.lsp"/>
+        <module name="intellij.platform.lsp"/>
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">

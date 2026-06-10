@@ -16,5 +16,5 @@ commonSources:
   ## Backend
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
-    text: <module name="com.intellij.modules.lsp"/>
+    text: <module name="intellij.platform.lsp"/>
     priority: 20

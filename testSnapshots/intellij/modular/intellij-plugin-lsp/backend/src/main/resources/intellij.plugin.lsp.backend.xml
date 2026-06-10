@@ -4,7 +4,7 @@
         <module name="intellij.platform.kernel.backend"/>
         <module name="intellij.plugin.lsp.shared"/>
 
-        <module name="com.intellij.modules.lsp"/>
+        <module name="intellij.platform.lsp"/>
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">
