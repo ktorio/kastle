@@ -44,11 +44,6 @@ rootSources:
 
   # Files common for classic and modular plugins
 
-  # Run configurations
-  - path: .run/Run Plugin.run.xml
-  - path: .run/Run Tests.run.xml
-  - path: .run/Run Verifications.run.xml
-
   # CHANGELOG
   - path: CHANGELOG.md.hbs
     target: file:CHANGELOG.md

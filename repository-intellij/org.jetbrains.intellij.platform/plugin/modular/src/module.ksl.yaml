@@ -9,6 +9,11 @@ sources:
     target: file:../../src/main/resources/META-INF/pluginIcon.svg
 
   # Files from the root folder
+
+  # Run configurations
+  - path: ../.run/*
+    target: file:../../.run
+
   - path: ../build.gradle-template.kts
     target: file:../../build.gradle.kts
   - path: ../gradle.properties.hbs

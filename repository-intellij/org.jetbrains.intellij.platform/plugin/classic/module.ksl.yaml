@@ -3,6 +3,10 @@ platform: jvm
 if: "!isModularEnabled"
 
 sources:
+  # Run configurations
+  - path: .run/*
+    target: file:../.run
+
   # Gradle build script
   - path: build.gradle-template.kts
     target: file:../build.gradle.kts
