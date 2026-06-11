@@ -1,7 +1,6 @@
 <idea-plugin>
     <dependencies>
         <module name="intellij.platform.frontend"/>
-        <module name="intellij.platform.compose"/>
         <module name="intellij.plugin.with.samples.all.packs.enabled.shared"/>
     </dependencies>
 

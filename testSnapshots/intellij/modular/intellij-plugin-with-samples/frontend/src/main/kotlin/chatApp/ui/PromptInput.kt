@@ -1,160 +1,200 @@
 package com.acme.chatApp.ui
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.key.*
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.distinctUntilChanged
-import org.jetbrains.jewel.foundation.theme.JewelTheme
-import org.jetbrains.jewel.ui.component.*
-import org.jetbrains.jewel.ui.theme.iconButtonStyle
-import com.acme.chatApp.ChatAppColors
-import com.acme.chatApp.ChatAppIcons
+import com.intellij.icons.AllIcons
+import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.JBTextArea
+import com.intellij.util.ui.JBUI
+import com.acme.ModularPluginFrontendBundle
+import com.acme.chatApp.ui.utils.ButtonUtils
+import com.acme.chatApp.ui.utils.ChatAppColors
+import com.acme.chatApp.ui.utils.ChatAppIcons
+import com.acme.chatApp.ui.utils.ChatUIConstants
 import com.acme.chatApp.viewmodel.MessageInputState
-import com.acme.chatApp.viewmodel.isSending
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.event.ActionEvent
+import java.awt.event.InputEvent
+import java.awt.event.KeyEvent
+import javax.swing.AbstractAction
+import javax.swing.Icon
+import javax.swing.JButton
+import javax.swing.JComponent
+import javax.swing.JPanel
+import javax.swing.JScrollPane
+import javax.swing.KeyStroke
+import javax.swing.border.CompoundBorder
+import javax.swing.border.LineBorder
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 
-@Composable
-fun PromptInput(
-    modifier: Modifier = Modifier,
-    promptInputState: MessageInputState = MessageInputState.Disabled,
-    textFieldState: TextFieldState = rememberTextFieldState(),
-    hint: String = "Whats on your mind...",
-    onInputChanged: (String) -> Unit = {},
-    onSend: (String) -> Unit = {},
-    onStop: (String) -> Unit = {}
-) {
-    val isSending = promptInputState.isSending
-    var skipInputChangeUpdate by remember { mutableStateOf(false) }
+class PromptInput(
+    private val onInputChanged: (String) -> Unit,
+    private val onSend: (String) -> Unit,
+    private val onStop: (String) -> Unit
+) : JPanel() {
 
-    LaunchedEffect(Unit) {
-        snapshotFlow { textFieldState.text }
-            .distinctUntilChanged()
-            .collect { inputText ->
-                if (skipInputChangeUpdate) {
-                    skipInputChangeUpdate = false
-                    return@collect
-                }
+    private val textArea: JBTextArea
+    private val scrollPane: JBScrollPane
+    private val sendButton: JButton
 
-                onInputChanged(inputText.toString())
-            }
+    private var currentState: MessageInputState = MessageInputState.Enabled("")
+    private var skipInputChangeUpdate = false
+
+    init {
+        setupAppearance()
+
+        textArea = createTextArea()
+        scrollPane = createScrollPane(textArea)
+        sendButton = createSendButton()
+
+        add(scrollPane, BorderLayout.CENTER)
+        add(sendButton, BorderLayout.EAST)
+
+        setupKeyBindings()
     }
 
-    Column(
-        modifier
-            .border(1.dp, ChatAppColors.Prompt.border, RoundedCornerShape(8.dp))
-            .clip(RoundedCornerShape(8.dp))
-            .padding(8.dp),
-    ) {
-        TextArea(
-            state = textFieldState,
-            modifier = Modifier
-                .weight(0.75f)
-                .fillMaxWidth()
-                .padding(bottom = 4.dp)
-                .onPreviewKeyEvent { keyEvent ->
-                    if (keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyDown) {
-                        if (keyEvent.isShiftPressed) {
-                            // Shift+Enter for new line - let default behavior handle it
-                            skipInputChangeUpdate = true
-                            textFieldState.setTextAndPlaceCursorAtEnd("${textFieldState.text}\n")
-                            false
-                        } else {
-                            // Enter to send/update message
-                            val message = textFieldState.text
-                            if (message.isNotBlank()) {
-                                if (isSending) {
-                                    onStop(message.toString())
-                                } else {
-                                    onSend(message.toString())
-                                    skipInputChangeUpdate = true
-                                    textFieldState.setTextAndPlaceCursorAtEnd("")
-                                }
-                            }
-                            true
-                        }
-                    } else {
-                        false
-                    }
-                },
-            placeholder = { Text(hint) },
+    private fun setupAppearance() {
+        layout = BorderLayout(ChatUIConstants.Spacing.MEDIUM, 0)
+        border = CompoundBorder(
+            LineBorder(ChatAppColors.Prompt.border, ChatUIConstants.Input.BORDER_THICKNESS, true),
+            JBUI.Borders.empty(ChatUIConstants.Spacing.MEDIUM, ChatUIConstants.Spacing.NORMAL)
+        )
+        background = ChatAppColors.Panel.background
+    }
+
+    private fun createTextArea() = JBTextArea().apply {
+        lineWrap = true
+        wrapStyleWord = true
+        rows = 1
+        border = JBUI.Borders.empty(
+            ChatUIConstants.Input.TEXT_AREA_PAD_VERTICAL,
+            ChatUIConstants.Input.TEXT_AREA_PAD_HORIZONTAL
         )
 
-        Row(
-            modifier = Modifier
-                .weight(0.25f)
-                .fillMaxWidth()
-                .padding(top = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.End
-        ) {
+        document.addDocumentListener(object : DocumentListener {
+            override fun insertUpdate(e: DocumentEvent?) = handleTextChange()
+            override fun removeUpdate(e: DocumentEvent?) = handleTextChange()
+            override fun changedUpdate(e: DocumentEvent?) = handleTextChange()
+        })
+    }
 
-            when (promptInputState) {
-                MessageInputState.Disabled,
-                is MessageInputState.Enabled,
-                is MessageInputState.SendFailed,
-                is MessageInputState.Sent -> {
-                    DefaultButton(
-                        modifier = Modifier.wrapContentSize(),
-                        enabled = promptInputState != MessageInputState.Disabled,
-                        onClick = {
-                            onSend(textFieldState.text.toString())
-                            skipInputChangeUpdate = true
-                            textFieldState.setTextAndPlaceCursorAtEnd("")
-                        },
-                        content = {
-                            Row(
-                                Modifier.padding(4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
+    private fun createScrollPane(content: JComponent) = object : JBScrollPane(content) {
+        override fun getPreferredSize(): Dimension {
+            val base = super.getPreferredSize()
+            val capped = base.height.coerceIn(
+                ChatUIConstants.Input.MIN_HEIGHT,
+                ChatUIConstants.Input.MAX_HEIGHT
+            )
+            return Dimension(base.width, capped)
+        }
+    }.apply {
+        verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+        horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        border = LineBorder(
+            JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground(),
+            ChatUIConstants.Input.BORDER_THICKNESS
+        )
+        minimumSize = Dimension(ChatUIConstants.Input.MIN_WIDTH, ChatUIConstants.Input.MIN_HEIGHT)
+    }
 
-                                Text("Send")
+    private fun createSendButton() = JButton().apply {
+        icon = ChatAppIcons.Prompt.send
+        isEnabled = false
+        preferredSize = ChatUIConstants.Button.SEND_BUTTON_SIZE
+        toolTipText = ModularPluginFrontendBundle.message("chat.prompt.send.tooltip")
+        isFocusable = false
+        isBorderPainted = false
+        isContentAreaFilled = false
+        addActionListener { handleButtonClick() }
+        ButtonUtils.applyHoverEffect(this)
+    }
 
-                                Icon(
-                                    modifier = Modifier.size(JewelTheme.iconButtonStyle.metrics.minSize.height),
-                                    key = ChatAppIcons.Prompt.send,
-                                    contentDescription = "Send",
-                                    tint = if (promptInputState != MessageInputState.Disabled) ChatAppColors.Icon.enabledIconTint else ChatAppColors.Icon.disabledIconTint
-                                )
-                            }
-                        }
-                    )
-                }
+    private fun handleTextChange() {
+        if (skipInputChangeUpdate) {
+            skipInputChangeUpdate = false
+            return
+        }
 
-                is MessageInputState.Sending -> {
-                    OutlinedButton(
-                        modifier = Modifier.wrapContentSize(),
-                        onClick = {
-                            onStop(textFieldState.text.toString())
-                        },
-                        content = {
-                            Row(
-                                Modifier.padding(4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
+        val text = textArea.text
+        onInputChanged(text)
 
-                                Text("Stop")
+        sendButton.isEnabled = currentState != MessageInputState.Disabled && text.isNotBlank()
+    }
 
-                                Icon(
-                                    modifier = Modifier.size(JewelTheme.iconButtonStyle.metrics.minSize.height),
-                                    key = ChatAppIcons.Prompt.stop,
-                                    contentDescription = "Stop sending",
-                                    tint = ChatAppColors.Icon.stopIconTint
-                                )
-                            }
-                        }
-                    )
+    private fun setupKeyBindings() {
+        val inputMap = textArea.getInputMap(JComponent.WHEN_FOCUSED)
+        val actionMap = textArea.actionMap
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "send")
+        actionMap.put("send", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent?) {
+                val text = textArea.text.trim()
+                if (text.isEmpty()) return
+                when (currentState) {
+                    is MessageInputState.Sending -> onStop(text)
+                    else -> handleSend()
                 }
             }
+        })
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK), "newline")
+        actionMap.put("newline", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent?) {
+                skipInputChangeUpdate = true
+                textArea.insert("\n", textArea.caretPosition)
+            }
+        })
+    }
+
+    fun updateState(state: MessageInputState) {
+        currentState = state
+
+        when (state) {
+            MessageInputState.Disabled -> applySendButtonStyle(SendButtonStyle.Idle, textAreaEnabled = true, forceEnabled = false)
+            is MessageInputState.Enabled,
+            is MessageInputState.Sent,
+            is MessageInputState.SendFailed -> applySendButtonStyle(SendButtonStyle.Ready, textAreaEnabled = true, forceEnabled = false)
+            is MessageInputState.Sending -> applySendButtonStyle(SendButtonStyle.Stop, textAreaEnabled = false, forceEnabled = true)
+        }
+    }
+
+    private fun applySendButtonStyle(style: SendButtonStyle, textAreaEnabled: Boolean, forceEnabled: Boolean) {
+        val hasText = textArea.text.isNotBlank()
+        sendButton.icon = style.iconFor(hasText)
+        sendButton.toolTipText = ModularPluginFrontendBundle.message(style.tooltipKey)
+        sendButton.isEnabled = forceEnabled || (style.allowsSend && hasText)
+        textArea.isEnabled = textAreaEnabled
+    }
+
+    private fun handleButtonClick() {
+        when (currentState) {
+            is MessageInputState.Sending -> handleStop()
+            else -> handleSend()
+        }
+    }
+
+    private fun handleSend() {
+        val text = textArea.text.trim()
+        if (text.isEmpty()) return
+
+        onSend(text)
+        skipInputChangeUpdate = true
+        textArea.text = ""
+    }
+
+    private fun handleStop() {
+        onStop(textArea.text.trim())
+    }
+
+    private enum class SendButtonStyle(val tooltipKey: String, val allowsSend: Boolean) {
+        Idle("chat.prompt.send.tooltip", allowsSend = false),
+        Ready("chat.prompt.send.tooltip", allowsSend = true),
+        Stop("chat.prompt.stop.tooltip", allowsSend = false);
+
+        fun iconFor(hasText: Boolean): Icon = when (this) {
+            Idle -> ChatAppIcons.Prompt.send
+            Ready -> if (hasText) AllIcons.Actions.Execute else ChatAppIcons.Prompt.send
+            Stop -> ChatAppIcons.Prompt.stop
         }
     }
 }

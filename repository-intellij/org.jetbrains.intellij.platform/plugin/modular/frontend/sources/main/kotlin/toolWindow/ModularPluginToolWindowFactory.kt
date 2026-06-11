@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
-import org.jetbrains.jewel.bridge.addComposeTab
+import com.intellij.ui.content.ContentFactory
 import kastle.CoroutineScopeHolder
 import kastle.chatApp.ChatAppSample
 import kastle.chatApp.viewmodel.ChatViewModel
@@ -25,8 +25,8 @@ class ModularPluginToolWindowFactory : ToolWindowFactory, DumbAware {
         )
         Disposer.register(toolWindow.disposable, viewModel)
 
-        toolWindow.addComposeTab("Chat App") {
-            ChatAppSample(viewModel)
-        }
+        val chatPanel = ChatAppSample(viewModel, project)
+        val content = ContentFactory.getInstance().createContent(chatPanel, "Chat App", false)
+        toolWindow.contentManager.addContent(content)
     }
 }

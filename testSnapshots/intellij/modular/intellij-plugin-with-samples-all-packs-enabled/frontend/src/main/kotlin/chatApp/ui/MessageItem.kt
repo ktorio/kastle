@@ -1,127 +1,164 @@
 package com.acme.chatApp.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import org.jetbrains.jewel.foundation.theme.JewelTheme
-import org.jetbrains.jewel.ui.component.Text
+import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBTextArea
+import com.intellij.util.ui.JBFont
+import com.intellij.util.ui.JBUI
 import com.acme.ChatMessage
-import com.acme.chatApp.ChatAppColors
-import com.acme.components.PulsingText
+import com.acme.ModularPluginFrontendBundle
+import com.acme.chatApp.ui.utils.ChatAppColors
+import com.acme.chatApp.ui.utils.ChatUIConstants
+import java.awt.*
+import java.awt.geom.RoundRectangle2D
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JPanel
 
-@Composable
-fun MessageBubble(
-    message: ChatMessage,
-    modifier: Modifier = Modifier,
-    isMatchingSearch: Boolean = false,
-    isHighlightedInSearch: Boolean = false
-) {
-    val isMyMessage = message.isMyMessage
-    val messageShape = RoundedCornerShape(
-        topStart = 16.dp,
-        topEnd = 16.dp,
-        bottomStart = if (isMyMessage) 16.dp else 6.dp,
-        bottomEnd = if (isMyMessage) 6.dp else 16.dp
-    )
-    val messageBackgroundColor = when {
-        isHighlightedInSearch && isMyMessage -> ChatAppColors.MessageBubble.mySearchHighlightedBackground
-        isHighlightedInSearch && !isMyMessage -> ChatAppColors.MessageBubble.othersSearchHighlightedBackground
-        isMyMessage -> ChatAppColors.MessageBubble.myBackground
-        else -> ChatAppColors.MessageBubble.othersBackground
-    }
+class MessageBubble(
+    private val message: ChatMessage,
+    private var isMatchingSearch: Boolean = false,
+    private var isHighlightedInSearch: Boolean = false
+) : JPanel() {
 
-    Row(
-        modifier = modifier
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        horizontalArrangement = if (isMyMessage) Arrangement.End else Arrangement.Start
-    ) {
-        Column(
-            modifier = Modifier
-                .widthIn(min = 120.dp, max = 420.dp)
-                .wrapContentSize()
-                .background(messageBackgroundColor, messageShape)
-                .messageBorder(messageShape, isMyMessage, isHighlightedInSearch, isMatchingSearch)
-                .padding(16.dp)
-        ) {
-            AuthorName(message)
+    private val isMyMessage = message.isMyMessage
 
-            if (message.isTextMessage()) {
-                MessageContent(message)
+    init {
+        setupAppearance()
 
-                TimeStampLabel(message)
-            } else if (message.isAIThinkingMessage()) {
-                PulsingText(message.content, isLoading = true)
-            } else {
-                Unit
+        add(AuthorName(message))
+        add(Box.createVerticalStrut(JBUI.scale(ChatUIConstants.Spacing.MEDIUM)))
+
+        when {
+            message.isTextMessage() -> {
+                add(MessageContent(message))
+                add(Box.createVerticalStrut(JBUI.scale(ChatUIConstants.Spacing.NORMAL)))
+                add(TimeStampLabel(message))
             }
+            message.isAIThinkingMessage() -> add(ThinkingIndicator())
         }
     }
-}
 
-@Composable
-private fun TimeStampLabel(message: ChatMessage) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = message.formattedTime(),
-            style = JewelTheme.editorTextStyle.copy(fontSize = 12.sp),
-            color = ChatAppColors.Text.timestamp
+    private fun setupAppearance() {
+        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        isOpaque = false
+
+        border = JBUI.Borders.compound(
+            JBUI.Borders.empty(
+                ChatUIConstants.MessageBubble.VERTICAL_MARGIN,
+                ChatUIConstants.MessageBubble.HORIZONTAL_MARGIN
+            ),
+            JBUI.Borders.empty(ChatUIConstants.MessageBubble.INNER_PADDING)
         )
+
+        minimumSize = Dimension(JBUI.scale(ChatUIConstants.MessageBubble.MIN_WIDTH), 0)
+        maximumSize = Dimension(JBUI.scale(ChatUIConstants.MessageBubble.MAX_WIDTH), Int.MAX_VALUE)
+    }
+
+    override fun paintComponent(g: Graphics) {
+        super.paintComponent(g)
+
+        val g2d = g.create() as Graphics2D
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+
+        val margin = JBUI.scale(ChatUIConstants.MessageBubble.VERTICAL_MARGIN)
+        val marginH = JBUI.scale(ChatUIConstants.MessageBubble.HORIZONTAL_MARGIN)
+        val cornerRadius = JBUI.scale(ChatUIConstants.MessageBubble.CORNER_RADIUS)
+
+        val shape = RoundRectangle2D.Float(
+            marginH.toFloat(),
+            margin.toFloat(),
+            (width - 2 * marginH).toFloat(),
+            (height - 2 * margin).toFloat(),
+            cornerRadius.toFloat(),
+            cornerRadius.toFloat()
+        )
+
+        g2d.color = getMessageBackground()
+        g2d.fill(shape)
+
+        g2d.color = getBorderColor()
+        g2d.stroke = BasicStroke(JBUI.scale(1).toFloat())
+        g2d.draw(shape)
+
+        g2d.dispose()
+    }
+
+    private fun getMessageBackground(): Color {
+        return when {
+            isHighlightedInSearch && isMyMessage -> ChatAppColors.MessageBubble.mySearchHighlightedBackground
+            isHighlightedInSearch && !isMyMessage -> ChatAppColors.MessageBubble.othersSearchHighlightedBackground
+            isMyMessage -> ChatAppColors.MessageBubble.myBackground
+            else -> ChatAppColors.MessageBubble.othersBackground
+        }
+    }
+
+    private fun getBorderColor(): Color {
+        return when {
+            isHighlightedInSearch -> ChatAppColors.MessageBubble.searchHighlightedBackgroundBorder
+            isMatchingSearch && isMyMessage -> ChatAppColors.MessageBubble.matchingMyBorder
+            isMatchingSearch && !isMyMessage -> ChatAppColors.MessageBubble.matchingOthersBorder
+            isMyMessage -> ChatAppColors.MessageBubble.myBackgroundBorder
+            else -> ChatAppColors.MessageBubble.othersBackgroundBorder
+        }
+    }
+
+    fun updateSearchState(matching: Boolean, highlighted: Boolean) {
+        isMatchingSearch = matching
+        isHighlightedInSearch = highlighted
+        repaint()
     }
 }
 
-@Composable
-private fun MessageContent(message: ChatMessage) {
-    Text(
-        text = message.content,
-        style = JewelTheme.defaultTextStyle.copy(
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Normal,
-            color = ChatAppColors.Text.normal,
-            lineHeight = 20.sp
-        ),
-        modifier = Modifier.padding(bottom = 8.dp)
-    )
+private class AuthorName(message: ChatMessage) : JBLabel() {
+    init {
+        text = if (message.isMyMessage) {
+            ModularPluginFrontendBundle.message("chat.message.author.me")
+        } else {
+            message.author
+        }
+
+        font = JBFont.small().asBold()
+        foreground = ChatAppColors.Text.authorName
+        alignmentX = LEFT_ALIGNMENT
+    }
 }
 
-@Composable
-private fun AuthorName(message: ChatMessage) {
-    Text(
-        text = if (message.isMyMessage) "Me" else message.author,
-        style = JewelTheme.defaultTextStyle.copy(
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
-            color = ChatAppColors.Text.authorName
-        ),
-        modifier = Modifier.padding(bottom = 6.dp)
-    )
+private class MessageContent(message: ChatMessage) : JBTextArea() {
+    init {
+        text = message.content
+        font = JBFont.regular()
+        alignmentX = LEFT_ALIGNMENT
+
+        isEditable = false
+        isFocusable = false
+        isOpaque = false
+        lineWrap = true
+        wrapStyleWord = true
+        border = null
+
+        size = Dimension(JBUI.scale(ChatUIConstants.MessageBubble.CONTENT_WRAP_WIDTH), Short.MAX_VALUE.toInt())
+    }
+
+    override fun getPreferredSize(): Dimension {
+        val width = JBUI.scale(ChatUIConstants.MessageBubble.CONTENT_WRAP_WIDTH)
+        size = Dimension(width, Short.MAX_VALUE.toInt())
+        return Dimension(width, super.getPreferredSize().height)
+    }
+
+    override fun getMaximumSize(): Dimension = preferredSize
 }
 
-@Composable
-private fun Modifier.messageBorder(
-    shape: Shape,
-    isMyMessage: Boolean,
-    isHighlightedInSearch: Boolean,
-    isMatchingSearch: Boolean
-) = border(
-    width = if (isMyMessage) 0.dp else 1.dp,
-    color = when {
-        isHighlightedInSearch -> ChatAppColors.MessageBubble.searchHighlightedBackgroundBorder
-        isMatchingSearch && isMyMessage -> ChatAppColors.MessageBubble.matchingMyBorder
-        isMatchingSearch && !isMyMessage -> ChatAppColors.MessageBubble.matchingOthersBorder
-        isMyMessage -> ChatAppColors.MessageBubble.myBackgroundBorder
-        else -> ChatAppColors.MessageBubble.othersBackgroundBorder
-    },
-    shape = shape
-)
+private class TimeStampLabel(message: ChatMessage) : JPanel() {
+    init {
+        layout = BoxLayout(this, BoxLayout.X_AXIS)
+        isOpaque = false
+        alignmentX = LEFT_ALIGNMENT
+
+        val label = JBLabel(message.formattedTime()).apply {
+            font = JBFont.small()
+            foreground = ChatAppColors.Text.timestamp
+        }
+        add(Box.createHorizontalGlue())
+        add(label)
+    }
+}

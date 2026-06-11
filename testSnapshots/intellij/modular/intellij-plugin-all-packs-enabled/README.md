@@ -48,7 +48,7 @@ A generated project contains the following content structure:
 
 - `root project` assembles the final plugin, declares the main IntelliJ Platform dependency, enables split mode, and includes the `shared`, `frontend`, and `backend` plugin modules in the final distribution.
 - `shared` contains contracts that both sides must understand: RPC interfaces, DTOs, serializers, and shared model types. Put a cross-boundary API here.
-- `frontend` contains UI-only code and presentation logic: the tool window registration, Compose UI, view models, and the frontend adapter that talks to the backend via RPC.
+- `frontend` contains UI-only code and presentation logic: the tool window registration, Swing UI, view models, and the frontend adapter that talks to the backend via RPC.
 - `backend` contains project-level services and business logic: access to project, file system, and external processes, message creation, response generation, and the RPC implementation exposed to the frontend.
 
 ## Plugin configuration files
