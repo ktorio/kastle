@@ -16,7 +16,8 @@ pluginManagement {
 }
 
 plugins {
-    id("org.jetbrains.intellij.platform.settings") version "2.16.0"
+    val intellijPlatformGradlePluginVersion: String by _properties
+    id("org.jetbrains.intellij.platform.settings") version intellijPlatformGradlePluginVersion
 }
 
 val pluginModuleName: String by _properties
