@@ -21,4 +21,4 @@ commonSources:
     text: compatiblePlugin("com.jetbrains.php")
   - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
     #language=xml
-    text: <module name="intellij.php.frontback.impl"/>
+    text: <plugin id="com.jetbrains.php"/>
