@@ -10,25 +10,17 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") apply false
 }
 
-val intellijPlatformVersion = "1.0.0"
-
 subprojects {
     apply(plugin = "org.jetbrains.intellij.platform.module")
     apply(plugin = "rpc")
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
-
-    dependencies {
-        intellijPlatform {
-            intellijIdea(intellijPlatformVersion)
-        }
-    }
 }
 
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
     intellijPlatform {
-        intellijIdea(intellijPlatformVersion)
+        intellijIdea("1.0.0")
 
         pluginModule(implementation(project(":shared")))
         pluginModule(implementation(project(":frontend")))
