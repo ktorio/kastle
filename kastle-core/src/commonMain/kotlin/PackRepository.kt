@@ -24,6 +24,10 @@ interface PackRepository {
             override suspend fun read(packId: PackId): PackDescriptor? = null
             override suspend fun readFile(path: String): Source? = null
             override suspend fun slot(slotId: SlotId): SlotDescriptor? = null
+            @Deprecated(
+                "Use catalogs() instead",
+                replaceWith = ReplaceWith("catalogs().firstOrNull { it.name == VersionsCatalog.DEFAULT_NAME } ?: VersionsCatalog.Empty")
+            )
             override suspend fun versions(): VersionsCatalog = VersionsCatalog.Empty
             override suspend fun catalogs(): List<VersionsCatalog> = emptyList()
         }

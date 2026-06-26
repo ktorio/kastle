@@ -478,16 +478,6 @@ data class CatalogReference(
     }
 }
 
-fun CatalogReference.gradleFormat(versionsCatalog: VersionsCatalog): String? {
-    val artifact = versionsCatalog.libraries[tomlKey] ?: return null
-    val versionNumber = when (artifact.version) {
-        is CatalogVersion.Ref -> versionsCatalog.versions[artifact.version.ref] ?: return null
-        is CatalogVersion.Number -> artifact.version.number
-    }
-    return "${artifact.group}:${artifact.name}:$versionNumber"
-}
-
-
 @Serializable(ArtifactDependencySerializer::class)
 data class ArtifactDependency(
     val group: String,

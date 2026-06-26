@@ -113,7 +113,6 @@ public final class org/jetbrains/kastle/BuildSystemTypesKt {
 	public static final fun getGradlePlugins (Lorg/jetbrains/kastle/SourceModuleMetadata;)Ljava/util/List;
 	public static final fun getResourcesDir (Lorg/jetbrains/kastle/Platform;)Ljava/lang/String;
 	public static final fun getSrcDir (Lorg/jetbrains/kastle/Platform;)Ljava/lang/String;
-	public static final fun gradleFormat (Lorg/jetbrains/kastle/CatalogReference;Lorg/jetbrains/kastle/VersionsCatalog;)Ljava/lang/String;
 	public static final fun map (Lorg/jetbrains/kastle/ProjectModules;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/kastle/ProjectModules;
 	public static final fun merge (Ljava/util/Map;Ljava/util/Map;)Ljava/util/Map;
 	public static final fun plus (Lorg/jetbrains/kastle/ProjectModules;Lorg/jetbrains/kastle/ProjectModules;)Lorg/jetbrains/kastle/ProjectModules;
@@ -3468,6 +3467,7 @@ public final class org/jetbrains/kastle/utils/StackKt {
 
 public abstract interface class org/jetbrains/kastle/utils/StringExpression : org/jetbrains/kastle/utils/Expression {
 	public static final field Companion Lorg/jetbrains/kastle/utils/StringExpression$Companion;
+	public synthetic fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/Object;
 	public abstract fun evaluate (Lorg/jetbrains/kastle/utils/LocalVariables;)Ljava/lang/String;
 	public abstract fun removeExtension (Ljava/lang/String;)Lorg/jetbrains/kastle/utils/StringExpression;
 }

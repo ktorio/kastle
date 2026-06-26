@@ -15,5 +15,5 @@ val StringExpression.slotId: SlotId get() = afterProtocol.split('/')
     .filter { it.isNotEmpty() }
     .let { (group, pack, slot) -> SlotId(PackId(group, pack), slot) }
 val StringExpression.extension: String get() = toString().extension
-val String.extension: String get() = toString().substringAfterLast('.', "").lowercase()
+val String.extension: String get() = substringAfterLast('.', "").lowercase()
 fun StringExpression.takeIfSlot() = takeIf { it.protocol == "slot" }
