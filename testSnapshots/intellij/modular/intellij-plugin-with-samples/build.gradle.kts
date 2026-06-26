@@ -33,10 +33,4 @@ dependencies {
 intellijPlatform {
     splitMode = true
     pluginInstallationTarget = SplitModeAware.PluginInstallationTarget.BOTH
-
-    pluginVerification {
-        ides {
-            create(IntelliJPlatformType.IntellijIdeaUltimate, intellijPlatformVersion)
-        }
-    }
 }
