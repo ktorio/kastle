@@ -66,7 +66,7 @@ internal class KotlinCompilerTemplateEngine(
     init {
         val verbose = false
         val stderrMessages = PrintingMessageCollector(System.err, MessageRenderer.PLAIN_RELATIVE_PATHS, verbose)
-        @OptIn(org.jetbrains.kotlin.config.CompilerConfiguration.Internals::class)
+        @OptIn(CompilerConfiguration.Internals::class)
         val configuration = CompilerConfiguration().apply {
             put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, stderrMessages)
             put(CLIConfigurationKeys.DIAGNOSTICS_COLLECTOR, DiagnosticsCollectorImpl())
@@ -75,7 +75,7 @@ internal class KotlinCompilerTemplateEngine(
             put(CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS, k2LanguageVersionSettings())
             put(CommonConfigurationKeys.USE_FIR, true)
             put(CommonConfigurationKeys.USE_LIGHT_TREE, false)
-            put(JVMConfigurationKeys.JDK_HOME, File(System.getenv("JAVA_HOME")))
+            put(JVMConfigurationKeys.JDK_HOME, resolveJdkHome())
 
             path?.let { addKotlinSourceRoot(path.toString()) }
         }
@@ -263,6 +263,36 @@ internal class KotlinCompilerTemplateEngine(
         return allBlocks
     }
 
+}
+
+/**
+ * Resolves the JDK home directory, using JAVA_HOME env var if set, otherwise
+ * falling back to the java.home system property (always available in a running JVM).
+ */
+private fun resolveJdkHome(): File {
+    val javaHomeEnv = System.getenv("JAVA_HOME")
+    if (javaHomeEnv != null) {
+        val dir = File(javaHomeEnv)
+        if (dir.isDirectory) return dir
+    }
+
+    val javaHomeProp = System.getProperty("java.home")
+    if (javaHomeProp != null) {
+        val dir = File(javaHomeProp)
+        if (dir.isDirectory) {
+            // On JDK 8, java.home points to the jre/ subdirectory inside the JDK root
+            val parent = dir.parentFile
+            if (parent != null && File(parent, "bin/javac").let { it.exists() || File(parent, "bin/javac.exe").exists() }) {
+                return parent
+            }
+            return dir
+        }
+    }
+
+    error(
+        "Could not determine JDK home directory. " +
+        "Please set the JAVA_HOME environment variable to point to your JDK installation."
+    )
 }
 
 /**
