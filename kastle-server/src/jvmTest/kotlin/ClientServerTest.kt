@@ -15,15 +15,16 @@ class ClientServerTest : StringSpec({
             configure("application.conf")
 
             val repository = client.asRepository()
-            val pack = repository.read("com.acme/empty")
+            val pack = repository.read("org.jetbrains.intellij.platform/plugin")
             pack.shouldNotBeNull()
-            pack.name shouldBe "Empty Feature"
+            pack.name shouldBe "IDE Plugin"
             pack.version.toString() shouldBe "1.0.0"
-            pack.group?.id shouldBe "com.acme"
+            pack.group?.id shouldBe "org.jetbrains.intellij.platform"
         }
     }
 
-    "get files" {
+    // we don't have supplementary files in repository-intellij
+    /*"get files" {
         testApplication {
             configure("application.conf")
 
@@ -37,6 +38,6 @@ class ClientServerTest : StringSpec({
 
             fileList shouldBe expected
         }
-    }
+    }*/
 
 })
