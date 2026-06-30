@@ -2577,6 +2577,68 @@ public final class org/jetbrains/kastle/WhenClauseBlock$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public abstract interface class org/jetbrains/kastle/analytics/AnalyticsRepository : java/lang/AutoCloseable {
+	public fun getRequestMappings ()Lorg/jetbrains/kastle/analytics/RequestMappings;
+	public abstract fun record (Lorg/jetbrains/kastle/analytics/GenerationEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class org/jetbrains/kastle/analytics/AnalyticsRepository$DefaultImpls {
+	public static fun getRequestMappings (Lorg/jetbrains/kastle/analytics/AnalyticsRepository;)Lorg/jetbrains/kastle/analytics/RequestMappings;
+}
+
+public final class org/jetbrains/kastle/analytics/GenerationEvent {
+	public static final field Companion Lorg/jetbrains/kastle/analytics/GenerationEvent$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/kastle/PackagingStyle;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/kastle/PackagingStyle;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lorg/jetbrains/kastle/PackagingStyle;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Ljava/util/Map;
+	public final fun component6 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/kastle/PackagingStyle;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;)Lorg/jetbrains/kastle/analytics/GenerationEvent;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/analytics/GenerationEvent;Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/kastle/PackagingStyle;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lorg/jetbrains/kastle/analytics/GenerationEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdditionalParameters ()Ljava/util/Map;
+	public final fun getPackaging ()Lorg/jetbrains/kastle/PackagingStyle;
+	public final fun getPacks ()Ljava/util/List;
+	public final fun getProjectGroup ()Ljava/lang/String;
+	public final fun getProjectName ()Ljava/lang/String;
+	public final fun getProperties ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/kastle/analytics/GenerationEvent$Companion {
+	public final fun from (Lorg/jetbrains/kastle/ProjectDescriptor;Ljava/util/Map;)Lorg/jetbrains/kastle/analytics/GenerationEvent;
+	public static synthetic fun from$default (Lorg/jetbrains/kastle/analytics/GenerationEvent$Companion;Lorg/jetbrains/kastle/ProjectDescriptor;Ljava/util/Map;ILjava/lang/Object;)Lorg/jetbrains/kastle/analytics/GenerationEvent;
+}
+
+public final class org/jetbrains/kastle/analytics/NoOpAnalyticsRepository : org/jetbrains/kastle/analytics/AnalyticsRepository {
+	public static final field INSTANCE Lorg/jetbrains/kastle/analytics/NoOpAnalyticsRepository;
+	public fun close ()V
+	public fun getRequestMappings ()Lorg/jetbrains/kastle/analytics/RequestMappings;
+	public fun record (Lorg/jetbrains/kastle/analytics/GenerationEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class org/jetbrains/kastle/analytics/RequestMappings {
+	public static final field Companion Lorg/jetbrains/kastle/analytics/RequestMappings$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lorg/jetbrains/kastle/analytics/RequestMappings;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/analytics/RequestMappings;Ljava/util/Map;ILjava/lang/Object;)Lorg/jetbrains/kastle/analytics/RequestMappings;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeaderMappings ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/kastle/analytics/RequestMappings$Companion {
+	public final fun getEMPTY ()Lorg/jetbrains/kastle/analytics/RequestMappings;
+}
+
 public final class org/jetbrains/kastle/gen/Project {
 	public fun <init> (Lorg/jetbrains/kastle/ProjectDescriptor;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lorg/jetbrains/kastle/ProjectModules;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lorg/jetbrains/kastle/GradleProjectSettings;Lorg/jetbrains/kastle/PackagingStyle;)V
 	public final fun component1 ()Lorg/jetbrains/kastle/ProjectDescriptor;
@@ -3415,6 +3477,7 @@ public final class org/jetbrains/kastle/utils/Queue$DefaultImpls {
 }
 
 public final class org/jetbrains/kastle/utils/RandomKt {
+	public static final fun generateRandomHash ()Ljava/lang/String;
 	public static final fun nextStringId (Lkotlin/random/Random;I)Ljava/lang/String;
 	public static synthetic fun nextStringId$default (Lkotlin/random/Random;IILjava/lang/Object;)Ljava/lang/String;
 }

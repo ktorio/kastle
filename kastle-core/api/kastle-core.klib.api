@@ -237,6 +237,13 @@ abstract interface <#A: kotlin/Any?> org.jetbrains.kastle.utils/Stack : kotlin.c
     }
 }
 
+abstract interface org.jetbrains.kastle.analytics/AnalyticsRepository : kotlin/AutoCloseable { // org.jetbrains.kastle.analytics/AnalyticsRepository|null[0]
+    open val requestMappings // org.jetbrains.kastle.analytics/AnalyticsRepository.requestMappings|{}requestMappings[0]
+        open fun <get-requestMappings>(): org.jetbrains.kastle.analytics/RequestMappings // org.jetbrains.kastle.analytics/AnalyticsRepository.requestMappings.<get-requestMappings>|<get-requestMappings>(){}[0]
+
+    abstract suspend fun record(org.jetbrains.kastle.analytics/GenerationEvent) // org.jetbrains.kastle.analytics/AnalyticsRepository.record|record(org.jetbrains.kastle.analytics.GenerationEvent){}[0]
+}
+
 abstract interface org.jetbrains.kastle.logging/Logger { // org.jetbrains.kastle.logging/Logger|null[0]
     abstract var level // org.jetbrains.kastle.logging/Logger.level|{}level[0]
         abstract fun <get-level>(): org.jetbrains.kastle.logging/LogLevel // org.jetbrains.kastle.logging/Logger.level.<get-level>|<get-level>(){}[0]
@@ -1392,6 +1399,56 @@ final class <#A: kotlin/Comparable<#A>, #B: kotlin/Any?> org.jetbrains.kastle.ut
 
     final object Companion { // org.jetbrains.kastle.utils/TreeMap.Companion|null[0]
         final fun <#A2: kotlin/Comparable<#A2>, #B2: kotlin/Any?> (kotlin.collections/Map<#A2, #B2>).toTreeMap(): org.jetbrains.kastle.utils/TreeMap<#A2, #B2> // org.jetbrains.kastle.utils/TreeMap.Companion.toTreeMap|toTreeMap@kotlin.collections.Map<0:0,0:1>(){0§<kotlin.Comparable<0:0>>;1§<kotlin.Any?>}[0]
+    }
+}
+
+final class org.jetbrains.kastle.analytics/GenerationEvent { // org.jetbrains.kastle.analytics/GenerationEvent|null[0]
+    constructor <init>(kotlin/String, kotlin/String, org.jetbrains.kastle/PackagingStyle, kotlin.collections/List<org.jetbrains.kastle/PackId>, kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String>, kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // org.jetbrains.kastle.analytics/GenerationEvent.<init>|<init>(kotlin.String;kotlin.String;org.jetbrains.kastle.PackagingStyle;kotlin.collections.List<org.jetbrains.kastle.PackId>;kotlin.collections.Map<org.jetbrains.kastle.VariableId,kotlin.String>;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+
+    final val additionalParameters // org.jetbrains.kastle.analytics/GenerationEvent.additionalParameters|{}additionalParameters[0]
+        final fun <get-additionalParameters>(): kotlin.collections/Map<kotlin/String, kotlin/String> // org.jetbrains.kastle.analytics/GenerationEvent.additionalParameters.<get-additionalParameters>|<get-additionalParameters>(){}[0]
+    final val packaging // org.jetbrains.kastle.analytics/GenerationEvent.packaging|{}packaging[0]
+        final fun <get-packaging>(): org.jetbrains.kastle/PackagingStyle // org.jetbrains.kastle.analytics/GenerationEvent.packaging.<get-packaging>|<get-packaging>(){}[0]
+    final val packs // org.jetbrains.kastle.analytics/GenerationEvent.packs|{}packs[0]
+        final fun <get-packs>(): kotlin.collections/List<org.jetbrains.kastle/PackId> // org.jetbrains.kastle.analytics/GenerationEvent.packs.<get-packs>|<get-packs>(){}[0]
+    final val projectGroup // org.jetbrains.kastle.analytics/GenerationEvent.projectGroup|{}projectGroup[0]
+        final fun <get-projectGroup>(): kotlin/String // org.jetbrains.kastle.analytics/GenerationEvent.projectGroup.<get-projectGroup>|<get-projectGroup>(){}[0]
+    final val projectName // org.jetbrains.kastle.analytics/GenerationEvent.projectName|{}projectName[0]
+        final fun <get-projectName>(): kotlin/String // org.jetbrains.kastle.analytics/GenerationEvent.projectName.<get-projectName>|<get-projectName>(){}[0]
+    final val properties // org.jetbrains.kastle.analytics/GenerationEvent.properties|{}properties[0]
+        final fun <get-properties>(): kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> // org.jetbrains.kastle.analytics/GenerationEvent.properties.<get-properties>|<get-properties>(){}[0]
+
+    final fun component1(): kotlin/String // org.jetbrains.kastle.analytics/GenerationEvent.component1|component1(){}[0]
+    final fun component2(): kotlin/String // org.jetbrains.kastle.analytics/GenerationEvent.component2|component2(){}[0]
+    final fun component3(): org.jetbrains.kastle/PackagingStyle // org.jetbrains.kastle.analytics/GenerationEvent.component3|component3(){}[0]
+    final fun component4(): kotlin.collections/List<org.jetbrains.kastle/PackId> // org.jetbrains.kastle.analytics/GenerationEvent.component4|component4(){}[0]
+    final fun component5(): kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> // org.jetbrains.kastle.analytics/GenerationEvent.component5|component5(){}[0]
+    final fun component6(): kotlin.collections/Map<kotlin/String, kotlin/String> // org.jetbrains.kastle.analytics/GenerationEvent.component6|component6(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., org.jetbrains.kastle/PackagingStyle = ..., kotlin.collections/List<org.jetbrains.kastle/PackId> = ..., kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ...): org.jetbrains.kastle.analytics/GenerationEvent // org.jetbrains.kastle.analytics/GenerationEvent.copy|copy(kotlin.String;kotlin.String;org.jetbrains.kastle.PackagingStyle;kotlin.collections.List<org.jetbrains.kastle.PackId>;kotlin.collections.Map<org.jetbrains.kastle.VariableId,kotlin.String>;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle.analytics/GenerationEvent.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.jetbrains.kastle.analytics/GenerationEvent.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.jetbrains.kastle.analytics/GenerationEvent.toString|toString(){}[0]
+
+    final object Companion { // org.jetbrains.kastle.analytics/GenerationEvent.Companion|null[0]
+        final fun from(org.jetbrains.kastle/ProjectDescriptor, kotlin.collections/Map<kotlin/String, kotlin/String> = ...): org.jetbrains.kastle.analytics/GenerationEvent // org.jetbrains.kastle.analytics/GenerationEvent.Companion.from|from(org.jetbrains.kastle.ProjectDescriptor;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    }
+}
+
+final class org.jetbrains.kastle.analytics/RequestMappings { // org.jetbrains.kastle.analytics/RequestMappings|null[0]
+    constructor <init>(kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // org.jetbrains.kastle.analytics/RequestMappings.<init>|<init>(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+
+    final val headerMappings // org.jetbrains.kastle.analytics/RequestMappings.headerMappings|{}headerMappings[0]
+        final fun <get-headerMappings>(): kotlin.collections/Map<kotlin/String, kotlin/String> // org.jetbrains.kastle.analytics/RequestMappings.headerMappings.<get-headerMappings>|<get-headerMappings>(){}[0]
+
+    final fun component1(): kotlin.collections/Map<kotlin/String, kotlin/String> // org.jetbrains.kastle.analytics/RequestMappings.component1|component1(){}[0]
+    final fun copy(kotlin.collections/Map<kotlin/String, kotlin/String> = ...): org.jetbrains.kastle.analytics/RequestMappings // org.jetbrains.kastle.analytics/RequestMappings.copy|copy(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle.analytics/RequestMappings.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.jetbrains.kastle.analytics/RequestMappings.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.jetbrains.kastle.analytics/RequestMappings.toString|toString(){}[0]
+
+    final object Companion { // org.jetbrains.kastle.analytics/RequestMappings.Companion|null[0]
+        final val EMPTY // org.jetbrains.kastle.analytics/RequestMappings.Companion.EMPTY|{}EMPTY[0]
+            final fun <get-EMPTY>(): org.jetbrains.kastle.analytics/RequestMappings // org.jetbrains.kastle.analytics/RequestMappings.Companion.EMPTY.<get-EMPTY>|<get-EMPTY>(){}[0]
     }
 }
 
@@ -3600,6 +3657,11 @@ open class <#A: kotlin/Any> org.jetbrains.kastle/CustomParserSerializer : kotlin
     open fun serialize(kotlinx.serialization.encoding/Encoder, #A) // org.jetbrains.kastle/CustomParserSerializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;1:0){}[0]
 }
 
+final object org.jetbrains.kastle.analytics/NoOpAnalyticsRepository : org.jetbrains.kastle.analytics/AnalyticsRepository { // org.jetbrains.kastle.analytics/NoOpAnalyticsRepository|null[0]
+    final fun close() // org.jetbrains.kastle.analytics/NoOpAnalyticsRepository.close|close(){}[0]
+    final suspend fun record(org.jetbrains.kastle.analytics/GenerationEvent) // org.jetbrains.kastle.analytics/NoOpAnalyticsRepository.record|record(org.jetbrains.kastle.analytics.GenerationEvent){}[0]
+}
+
 final object org.jetbrains.kastle.structure/BuildToolModules // org.jetbrains.kastle.structure/BuildToolModules|null[0]
 
 final object org.jetbrains.kastle.utils/DevNull : kotlin.text/Appendable { // org.jetbrains.kastle.utils/DevNull|null[0]
@@ -3739,6 +3801,7 @@ final fun org.jetbrains.kastle.utils/Variables(kotlin.collections/Iterable<kotli
 final fun org.jetbrains.kastle.utils/Variables(kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/Any?>): org.jetbrains.kastle.utils/Variables // org.jetbrains.kastle.utils/Variables|Variables(kotlin.collections.Map<org.jetbrains.kastle.VariableId,kotlin.Any?>){}[0]
 final fun org.jetbrains.kastle.utils/Variables(kotlin/Array<out kotlin/Pair<org.jetbrains.kastle/VariableId, kotlin/Any?>>...): org.jetbrains.kastle.utils/Variables // org.jetbrains.kastle.utils/Variables|Variables(kotlin.Array<out|kotlin.Pair<org.jetbrains.kastle.VariableId,kotlin.Any?>>...){}[0]
 final fun org.jetbrains.kastle.utils/encodeToMap(kotlinx.serialization.modules/SerializersModule, kotlin.reflect/KType, kotlin/Any): kotlin.collections/Map<kotlin/String, kotlin/Any?> // org.jetbrains.kastle.utils/encodeToMap|encodeToMap(kotlinx.serialization.modules.SerializersModule;kotlin.reflect.KType;kotlin.Any){}[0]
+final fun org.jetbrains.kastle.utils/generateRandomHash(): kotlin/String // org.jetbrains.kastle.utils/generateRandomHash|generateRandomHash(){}[0]
 final fun org.jetbrains.kastle.utils/requireValidRelativePath(kotlin/String, kotlin/Boolean = ...): kotlin/String // org.jetbrains.kastle.utils/requireValidRelativePath|requireValidRelativePath(kotlin.String;kotlin.Boolean){}[0]
 final fun org.jetbrains.kastle.utils/sumOfNotNull(kotlin/Array<out kotlin/Int?>...): kotlin/Int // org.jetbrains.kastle.utils/sumOfNotNull|sumOfNotNull(kotlin.Array<out|kotlin.Int?>...){}[0]
 final inline fun <#A: kotlin/Any?> (org.jetbrains.kastle.utils/Stack<#A>).org.jetbrains.kastle.utils/popUntil(kotlin/Function1<#A, kotlin/Boolean>, kotlin/Function1<#A, kotlin/Unit> = ...): #A? // org.jetbrains.kastle.utils/popUntil|popUntil@org.jetbrains.kastle.utils.Stack<0:0>(kotlin.Function1<0:0,kotlin.Boolean>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]

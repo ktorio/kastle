@@ -4,7 +4,7 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
-object IntellijPlatformSpecificUtilMethods {
+internal object IntellijPlatformSpecificUtilMethods {
 
     val invalidPackageNameSymbolPattern = Regex("^\\d|[^a-zA-Z\\d_.]")
 
