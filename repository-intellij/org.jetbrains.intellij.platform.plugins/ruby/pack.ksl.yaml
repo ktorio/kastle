@@ -5,9 +5,20 @@ links:
   home: https://plugins.jetbrains.com/plugin/1293-ruby
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     #language=kotlin
     text: compatiblePlugin("org.jetbrains.plugins.ruby")
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     #language=xml
     text: <depends>org.jetbrains.plugins.ruby</depends>
+
+  # Modular plugin
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: compatiblePlugin("org.jetbrains.plugins.ruby")
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: <module name="intellij.ruby.common"/>

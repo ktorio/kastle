@@ -1,0 +1,44 @@
+platform: jvm
+
+if: "!isModularEnabled"
+
+sources:
+  # Run configurations
+  - path: .run/*
+    target: file:../.run
+
+  # Gradle build script
+  - path: build.gradle-template.kts
+    target: file:../build.gradle.kts
+  - path: gradle.properties.hbs
+    target: file:../gradle.properties
+  - path: settings.gradle.kts
+    target: file:../settings.gradle.kts
+
+  # README
+  - path: README.md.hbs
+    target: file:../README.md
+
+  # Production sources
+
+  ## Plugin descriptor, etc.
+  - path: sources/main/resources/META-INF/*
+    target: file:../src/main/resources/META-INF
+
+  ## Code samples
+  - path: sources/main/kotlin/MyMessageBundle.kt.hbs
+    target: file:../src/main/kotlin/MyMessageBundle.kt
+    if: addSampleCode
+  - path: sources/main/kotlin/MyToolWindowFactory.kt
+    target: file:../src/main/kotlin/MyToolWindowFactory.kt
+    if: addSampleCode
+  - path: sources/main/resources/messages/MyMessageBundle.properties
+    target: file:../src/main/resources/messages/MyMessageBundle.properties
+    if: addSampleCode
+
+testDependencies:
+  - $libs.junit
+gradle:
+  plugins:
+    - libs.plugin1-kotlin-jvm
+    - libs.plugin2-changelog

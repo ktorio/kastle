@@ -5,6 +5,7 @@ links:
   home: https://plugins.jetbrains.com/plugin/7793-markdown
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     #language=kotlin
     text: bundledPlugin("org.intellij.plugins.markdown")
@@ -12,4 +13,16 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     #language=xml
     text: <depends>org.intellij.plugins.markdown</depends>
+    priority: 100
+
+  # Modular plugin
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: bundledModule("org.intellij.plugins.markdown")
+    priority: 100
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: <module name="intellij.markdown"/>
     priority: 100

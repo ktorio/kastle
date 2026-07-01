@@ -41,8 +41,8 @@ val GradleSourceMapping = ProjectMapping { project ->
                             when (val target = match.groups[2]?.value) {
                                 null -> when(val platform = module.platforms.singleOrNull()) {
                                     null -> "src/common${mainOrTest.capitalizeFirst()}/$fileCategory"
-                                    // only when using the kotlin jvm plugin
-                                    Platform.JVM -> "src/$mainOrTest/$fileCategory"
+                                    // only when using the kotlin jvm plugin or the android application plugin
+                                    Platform.JVM, Platform.ANDROID -> "src/$mainOrTest/$fileCategory"
                                     else -> "src/${platform.code}${mainOrTest.capitalizeFirst()}/$fileCategory"
                                 }
                                 else -> "src/$target${mainOrTest.capitalizeFirst()}/$fileCategory"

@@ -9,6 +9,7 @@ propertyValues:
     value: true
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     #language=kotlin
     text: bundledPlugin("org.jetbrains.kotlin")
@@ -23,3 +24,15 @@ commonSources:
       <extensions defaultExtensionNs="org.jetbrains.kotlin">
           <supportsKotlinPluginMode supportsK2="true" />
       </extensions>
+
+  # Modular plugin
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: bundledPlugin("org.jetbrains.kotlin")
+    priority: 40
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: <plugin id="org.jetbrains.kotlin"/>
+    priority: 40

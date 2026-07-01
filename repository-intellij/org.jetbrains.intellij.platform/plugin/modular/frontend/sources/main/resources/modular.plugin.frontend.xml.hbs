@@ -1,0 +1,18 @@
+<idea-plugin>
+    <dependencies>
+        <module name="intellij.platform.frontend"/>
+        <module name="{{pluginModuleName}}.shared"/>
+        {{#if _slots.frontendModuleDescriptorDependencies}}
+
+        {{slots frontendModuleDescriptorDependencies}}
+        {{/if}}
+    </dependencies>
+
+    <extensions defaultExtensionNs="com.intellij">
+        {{#if addSampleCode}}
+        <toolWindow
+                id="ModularPlugin"
+                factoryClass="{{_project.group}}.toolWindow.ModularPluginToolWindowFactory"
+                icon="{{_project.group}}.ModularPluginIcons.ToolWindow"/>{{/if}}
+    </extensions>
+</idea-plugin>

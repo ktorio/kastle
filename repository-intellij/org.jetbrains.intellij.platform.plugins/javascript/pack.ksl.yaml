@@ -5,6 +5,7 @@ links:
   home: https://plugins.jetbrains.com/plugin/22069-javascript-and-typescript
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     #language=kotlin
     text: bundledPlugin("JavaScript")
@@ -12,4 +13,16 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     #language=xml
     text: <depends>JavaScript</depends>
+    priority: 50
+
+  # Modular plugin
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: bundledModule("JavaScript")
+    priority: 50
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: <module name="intellij.javascript.common"/>
     priority: 50

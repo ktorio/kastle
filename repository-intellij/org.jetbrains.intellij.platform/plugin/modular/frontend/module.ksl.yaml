@@ -1,0 +1,27 @@
+platform: jvm
+
+if: isModularEnabled
+
+sources:
+  - path: build.gradle-template.kts
+    target: file:../../frontend/build.gradle.kts
+
+  - path: sources/main/resources/modular.plugin.frontend.xml.hbs
+    target: file:../../frontend/src/main/resources/${pluginModuleName}.frontend.xml
+
+  ### Code samples
+  - path: sources/main/kotlin/*
+    target: file:../../frontend/src/main/kotlin
+    if: addSampleCode
+  - path: sources/main/resources/icons/*
+    target: file:../../frontend/src/main/resources/icons
+    if: addSampleCode
+  - path: sources/main/resources/messages/*
+    target: file:../../frontend/src/main/resources/messages
+    if: addSampleCode
+
+dependencies:
+  # These dependencies are inlined in frontend/build.gradle.kts as compileOnly,
+  # but we want to render them in version catalog without polluting libs.versions.toml.hbs with actual values.
+  - $libs.kotlin.serialization.core.jvm
+  - $libs.kotlin.serialization.json.jvm

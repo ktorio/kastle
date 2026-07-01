@@ -1,11 +1,22 @@
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
 }
 
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+    }
+}
+dependencies {
+    debugImplementation(libs.compose.uiTooling)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.compose.uiToolingPreview)
+    implementation(projects.shared)
+}
 
 android {
     namespace = "com.acme"
@@ -31,16 +42,5 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-}
-
-kotlin {
-
-    sourceSets {
-        androidMain.dependencies {
-            implementation(project(":sharedUI"))
-            implementation(libs.androidx.activity.compose)
-        }
-
     }
 }

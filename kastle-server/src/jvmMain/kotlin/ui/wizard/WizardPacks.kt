@@ -64,6 +64,7 @@ fun FlowContent.wizardPacksGrid(
                 h3("wizard-pack-group-title") {
                     // TODO group names are not parsed, see https://github.com/ktorio/kastle/issues/73
                     +when (group.id) {
+                        "org.jetbrains.intellij.platform.architecture" -> "Architecture"
                         "org.jetbrains.intellij.platform.dependencies" -> "Platform dependencies"
                         "org.jetbrains.intellij.platform.plugins" -> "Plugin dependencies"
                         else -> group.name ?: group.id
@@ -156,6 +157,7 @@ private fun packIconSrc(pack: PackDescriptor): String {
     // TODO: it turned out that some icons don't have ExpUI icons; think about a better solution for this
     val icon = pack.icon?.substringAfterLast('/')
     return when (icon) {
+        "AllIcons.RunConfigurations.Remote" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/expui/runConfigurations/applicationRemote.svg"
         "AllIcons.Language.GO" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/go.svg"
         "AllIcons.Language.Kotlin" -> "https://intellij-icons.jetbrains.design/icons/KotlinBaseResourcesIcons/org/jetbrains/kotlin/idea/icons/expui/kotlin.svg"
         "AllIcons.Language.Python" -> "https://intellij-icons.jetbrains.design/icons/AllIcons/language/python.svg"

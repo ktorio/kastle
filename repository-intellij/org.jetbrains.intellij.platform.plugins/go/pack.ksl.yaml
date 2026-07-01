@@ -5,9 +5,22 @@ links:
   home: https://plugins.jetbrains.com/plugin/9568-go
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     #language=kotlin
     text: compatiblePlugin("org.jetbrains.plugins.go")
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     #language=xml
     text: <depends>org.jetbrains.plugins.go</depends>
+
+  # Modular plugin
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: compatiblePlugin("org.jetbrains.plugins.go")
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: |
+      <module name="intellij.go.frontback"/>
+      <module name="intellij.go.impl"/>

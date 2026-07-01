@@ -1,4 +1,5 @@
 rootProject.name = "ktor-server-htmx"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {

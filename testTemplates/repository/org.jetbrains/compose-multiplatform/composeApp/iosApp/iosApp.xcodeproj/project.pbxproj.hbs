@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		{{pbxId 0}} /* {{iosAppPath}} */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = {{iosAppPath}}; sourceTree = BUILT_PRODUCTS_DIR; };
+		{{pbxId 0}} /* {{_project.name}}.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = {{_project.name}}.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -87,7 +87,7 @@
 			packageProductDependencies = (
 			);
 			productName = iosApp;
-			productReference = {{pbxId 0}} /* {{iosAppPath}} */;
+			productReference = {{pbxId 0}} /* {{_project.name}}.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -152,7 +152,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\n{{#if _project.modules.composeApp}}cd \"$SRCROOT/../..\"\n./gradlew :composeApp:sharedUI:embedAndSignAppleFrameworkForXcode{{else}}cd \"$SRCROOT/..\"\n./gradlew :sharedUI:embedAndSignAppleFrameworkForXcode{{/if}}\n";
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\n{{#if _project.modules.composeApp}}cd \"$SRCROOT/../..\"\n./gradlew :composeApp:shared:embedAndSignAppleFrameworkForXcode{{else}}cd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode{{/if}}\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

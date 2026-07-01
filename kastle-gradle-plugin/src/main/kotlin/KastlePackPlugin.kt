@@ -6,6 +6,7 @@ import kotlinx.coroutines.runBlocking
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.jetbrains.compose.ComposePlugin
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
@@ -33,67 +34,55 @@ abstract class KastlePackPlugin : Plugin<Project> {
 
         project.logger.lifecycle("Pack: ${pack.name}")
 
-        when(module.buildStrategy) {
+        when (module.buildStrategy) {
             ModuleBuildStrategy.JVM -> {
                 configureKotlinJvm(project, module, pack, repository)
-                applyCustomPlugins(module, project, pack, versions)
+                configureCustomPlugins(module, project, pack, versions)
             }
+
             ModuleBuildStrategy.ANDROID_APP -> {
                 configureAndroidApp(project, module, pack, repository)
-                applyCustomPlugins(module, project, pack, versions)
+                configureCustomPlugins(module, project, pack, versions)
             }
+
             ModuleBuildStrategy.KMP -> {
-                // IMPORTANT: apply Android/KMP-related plugins BEFORE configuring KMP targets.
-                // This prevents "compileSdk version is not set" when using com.android.kotlin.multiplatform.library
                 configureKotlinMultiplatform(project, module, pack, repository)
-                applyCustomPlugins(module, project, pack, versions)
+                configureCustomPlugins(module, project, pack, versions)
             }
         }
     }
 
-    private fun applyCustomPlugins(
+    private fun configureCustomPlugins(
         module: SourceModuleMetadata,
         project: Project,
         pack: PackMetadata,
         versionsCatalog: VersionsCatalog,
     ) {
         for (pluginAlias in module.gradlePlugins) {
-            try {
-                val lookupKey = pluginAlias.tomlKey.removePrefix("plugins-")
-                val (pluginId, _) = versionsCatalog.plugins[lookupKey] ?: continue
-                when (pluginId) {
-                    // TODO get sdk versions from catalog
-                    "com.android.application" -> {
-                        project.plugins.apply(pluginId)
+            val lookupKey = pluginAlias.tomlKey.removePrefix("plugins-")
+            val (pluginId, _) = versionsCatalog.plugins[lookupKey] ?: continue
+
+            when (pluginId) {
+                "com.android.application" -> {
+                    project.pluginManager.withPlugin(pluginId) {
                         project.extensions.configure(ApplicationExtension::class.java) { app ->
                             app.namespace = pack.id.toString().replace(Regex("\\W+"), ".")
                             app.compileSdk { version = release(36) }
                         }
                     }
+                }
 
-                    "com.android.kotlin.multiplatform.library" -> {
-                        project.plugins.apply(pluginId)
-
-                        // Configure the SDK where the plugin actually expects it: kotlin { android { ... } }
-                        project.pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
-                            project.extensions.configure(KotlinMultiplatformExtension::class.java) { kotlinExt ->
-                                kotlinExt.extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("androidLibrary") { target ->
-                                    target.namespace = pack.id.toString().replace(Regex("\\W+"), ".")
-                                    target.compileSdk { version = release(36) }
-                                    target.minSdk = 21
-                                }
+                "com.android.kotlin.multiplatform.library" -> {
+                    project.pluginManager.withPlugin(pluginId) {
+                        project.extensions.configure(KotlinMultiplatformExtension::class.java) { kotlinExt ->
+                            kotlinExt.extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("androidLibrary") { target ->
+                                target.namespace = pack.id.toString().replace(Regex("\\W+"), ".")
+                                target.compileSdk { version = release(36) }
+                                target.minSdk = 21
                             }
                         }
                     }
-
-                    else -> {
-                        if (!project.plugins.hasPlugin(pluginId)) {
-                            project.plugins.apply(pluginId)
-                        }
-                    }
                 }
-            } catch (e: Exception) {
-                project.logger.warn("Cannot apply {} in {}", pluginAlias, project.path, e)
             }
         }
     }
@@ -448,6 +437,14 @@ abstract class KastlePackPlugin : Plugin<Project> {
             is FunctionDependency -> {
                 error("Unsupported function dependency ${dependency.functionName} for JVM module")
             }
+
+            is ReferenceDependency -> {
+                val artifact = when (dependency.reference) {
+                    "compose.desktop.currentOs" -> ComposePlugin.Dependencies(project).desktop.currentOs
+                    else -> error("Unsupported reference dependency ${dependency.reference}")
+                }
+                dependencies.add(configurationName, artifact)
+            }
         }
     }
 
@@ -487,6 +484,14 @@ abstract class KastlePackPlugin : Plugin<Project> {
 
                     else -> error("Unsupported function dependency ${dependency.functionName}")
                 }
+            }
+
+            is ReferenceDependency -> {
+                val artifact = when (dependency.reference) {
+                    "compose.desktop.currentOs" -> ComposePlugin.Dependencies(project).desktop.currentOs
+                    else -> error("Unsupported reference dependency ${dependency.reference}")
+                }
+                dependencies.add(sourceSet.apiConfigurationName, artifact)
             }
         }
     }

@@ -1,0 +1,26 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>com.acme.intellij-plugin-with-samples</id>
+
+    <!-- Public plugin name should be written in Title Case.
+     Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
+    <name>Intellij-plugin-with-samples</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor url="https://www.yourcompany.com">YourCompany</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-description -->
+    <description><![CDATA[
+        Example of a plugin that is ready to work in a distributed environment.<br>
+        <em>Plugin is supposed to be installed into both frontend and backend IDE,
+        the set of features to be available is determined by their registration in either backend or frontend-specific XML descriptor files</em>
+    ]]></description>
+
+    <content>
+        <module name="intellij.plugin.with.samples.shared" loading="required"/>
+        <module name="intellij.plugin.with.samples.frontend"/>
+        <module name="intellij.plugin.with.samples.backend"/>
+    </content>
+</idea-plugin>

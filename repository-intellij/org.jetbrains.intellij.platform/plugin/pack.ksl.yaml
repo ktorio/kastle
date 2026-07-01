@@ -14,28 +14,45 @@ properties:
     type: boolean
     default: false
     hidden: true
+  - key: isModularEnabled
+    type: boolean
+    default: false
+    hidden: true
   - key: pluginName
     type: string
     hidden: true
-  # Values are managed in propertyValues below:
+  - key: pluginModuleName
+    type: string
+    hidden: true
+
+  # Fixed values:
   - key: platformVersion
     type: string
     hidden: true
+    default: "2025.3.5"
+  - key: platformVersionModular
+    type: string
+    hidden: true
+    default: "2026.1.3"
+  - key: intellijPlatformGradlePluginVersion
+    type: string
+    hidden: true
+    default: "2.17.0"
 
 propertyValues:
-  # Common versions management:
-  - key: org.jetbrains.intellij.platform/plugin/platformVersion
-    value: "2025.3.5"
-
   # Post-processed input properties:
   - key: pluginName
     expression: _project.name.capitalize()
+  - key: pluginModuleName
+    expression: toPluginModuleName(_project.name)
 
 rootSources:
-  # Run configurations
-  - path: .run/Run Plugin.run.xml
-  - path: .run/Run Tests.run.xml
-  - path: .run/Run Verifications.run.xml
+
+  # Files common for classic and modular plugins
+
+  # CHANGELOG
+  - path: CHANGELOG.md.hbs
+    target: file:CHANGELOG.md
 
   # Gradle
   - path: gradle/libs.versions.toml.hbs
@@ -46,39 +63,10 @@ rootSources:
   - path: gradlew
   - path: gradlew.bat
 
-  # Gradle build script
-  - path: classic/build.gradle-template.kts
-    target: file:build.gradle.kts
-  - path: classic/gradle.properties.hbs
-    target: file:gradle.properties
-  - path: classic/settings.gradle.kts
-    target: file:settings.gradle.kts
-
-  # README and friends
-  - path: classic/CHANGELOG.md.hbs
-    target: file:CHANGELOG.md
-  - path: classic/README.md.hbs
-    target: file:README.md
-
-  # Git
+  # Git (because slots can't be targeted from module sources)
   - path: classic/gitignoreItems.hbs
     target: slot://org.jetbrains.intellij.platform.vcs/git/ignoredItems
-
-  # Production sources
-
-  ## Plugin descriptor, etc.
-  - path: classic/src/main/resources/META-INF/plugin.xml.hbs
-    target: file:src/main/resources/META-INF/plugin.xml
-  - path: classic/src/main/resources/META-INF/pluginIcon.svg
-    target: file:src/main/resources/META-INF/pluginIcon.svg
-
-  ## Code samples
-  - path: classic/src/main/kotlin/MyMessageBundle.kt.hbs
-    target: file:src/main/kotlin/MyMessageBundle.kt
-    if: addSampleCode
-  - path: classic/src/main/kotlin/MyToolWindowFactory.kt
-    target: file:src/main/kotlin/MyToolWindowFactory.kt
-    if: addSampleCode
-  - path: classic/src/main/resources/messages/MyMessageBundle.properties
-    target: file:src/main/resources/messages/MyMessageBundle.properties
-    if: addSampleCode
+    if: "!isModularEnabled"
+  - path: modular/gitignoreItems.hbs
+    target: slot://org.jetbrains.intellij.platform.vcs/git/ignoredItems
+    if: "isModularEnabled"

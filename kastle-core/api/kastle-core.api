@@ -97,16 +97,22 @@ public final class org/jetbrains/kastle/ArtifactDependency : org/jetbrains/kastl
 	public static final field Companion Lorg/jetbrains/kastle/ArtifactDependency$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Z
+	public final fun component5 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lorg/jetbrains/kastle/ArtifactDependency;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;)Lorg/jetbrains/kastle/ArtifactDependency;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/ArtifactDependency;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lorg/jetbrains/kastle/ArtifactDependency;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/ArtifactDependency;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kastle/ArtifactDependency;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getArtifact ()Ljava/lang/String;
 	public fun getExported ()Z
 	public final fun getGroup ()Ljava/lang/String;
+	public fun getScope ()Ljava/lang/String;
 	public final fun getVersion ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -255,15 +261,21 @@ public final class org/jetbrains/kastle/CatalogReference : org/jetbrains/kastle/
 	public static final field Companion Lorg/jetbrains/kastle/CatalogReference$Companion;
 	public fun <init> (Ljava/lang/String;Z)V
 	public synthetic fun <init> (Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Z)Lorg/jetbrains/kastle/CatalogReference;
+	public final fun copy (Ljava/lang/String;ZLjava/lang/String;)Lorg/jetbrains/kastle/CatalogReference;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/CatalogReference;Ljava/lang/String;ZILjava/lang/Object;)Lorg/jetbrains/kastle/CatalogReference;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/CatalogReference;Ljava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kastle/CatalogReference;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCatalog ()Ljava/lang/String;
 	public fun getExported ()Z
 	public final fun getKey ()Ljava/lang/String;
 	public final fun getKeyInCatalog ()Ljava/lang/String;
+	public fun getScope ()Ljava/lang/String;
 	public final fun getTomlKey ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -429,11 +441,17 @@ public final class org/jetbrains/kastle/DeclaringBlock$Companion {
 
 public abstract interface class org/jetbrains/kastle/Dependency {
 	public static final field Companion Lorg/jetbrains/kastle/Dependency$Companion;
+	public static final field DEFAULT_SCOPE Ljava/lang/String;
+	public static final field EXPORTED_SCOPE Ljava/lang/String;
 	public abstract fun getExported ()Z
+	public abstract fun getScope ()Ljava/lang/String;
 }
 
 public final class org/jetbrains/kastle/Dependency$Companion {
+	public static final field DEFAULT_SCOPE Ljava/lang/String;
+	public static final field EXPORTED_SCOPE Ljava/lang/String;
 	public final fun parse (Ljava/lang/String;)Lorg/jetbrains/kastle/Dependency;
+	public final fun parseScope (Ljava/lang/String;)Ljava/lang/String;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -558,14 +576,21 @@ public final class org/jetbrains/kastle/FunctionDependency : org/jetbrains/kastl
 	public static final field Companion Lorg/jetbrains/kastle/FunctionDependency$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Z
+	public final fun component4 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lorg/jetbrains/kastle/FunctionDependency;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;ZLjava/lang/String;)Lorg/jetbrains/kastle/FunctionDependency;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/FunctionDependency;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/kastle/FunctionDependency;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/FunctionDependency;Ljava/lang/String;Ljava/util/List;ZLjava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kastle/FunctionDependency;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getArgs ()Ljava/util/List;
 	public fun getExported ()Z
 	public final fun getFunctionName ()Ljava/lang/String;
+	public fun getScope ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -820,13 +845,19 @@ public final class org/jetbrains/kastle/MissingPackException : java/lang/Excepti
 public final class org/jetbrains/kastle/ModuleDependency : org/jetbrains/kastle/Dependency {
 	public static final field Companion Lorg/jetbrains/kastle/ModuleDependency$Companion;
 	public fun <init> (Ljava/lang/String;Z)V
+	public fun <init> (Ljava/lang/String;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Z)Lorg/jetbrains/kastle/ModuleDependency;
+	public final fun copy (Ljava/lang/String;ZLjava/lang/String;)Lorg/jetbrains/kastle/ModuleDependency;
 	public static synthetic fun copy$default (Lorg/jetbrains/kastle/ModuleDependency;Ljava/lang/String;ZILjava/lang/Object;)Lorg/jetbrains/kastle/ModuleDependency;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/ModuleDependency;Ljava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kastle/ModuleDependency;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getExported ()Z
 	public final fun getPath ()Ljava/lang/String;
+	public fun getScope ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -843,6 +874,7 @@ public final synthetic class org/jetbrains/kastle/ModuleDependency$$serializer :
 }
 
 public final class org/jetbrains/kastle/ModuleDependency$Companion {
+	public final fun parse (Ljava/lang/String;)Lorg/jetbrains/kastle/ModuleDependency;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -1638,6 +1670,39 @@ public final class org/jetbrains/kastle/PropertyType$String : org/jetbrains/kast
 
 public final class org/jetbrains/kastle/PropertyTypeSerializer : org/jetbrains/kastle/CustomParserSerializer {
 	public fun <init> ()V
+}
+
+public final class org/jetbrains/kastle/ReferenceDependency : org/jetbrains/kastle/Dependency {
+	public static final field Companion Lorg/jetbrains/kastle/ReferenceDependency$Companion;
+	public fun <init> (Ljava/lang/String;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;ZLjava/lang/String;)Lorg/jetbrains/kastle/ReferenceDependency;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/ReferenceDependency;Ljava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kastle/ReferenceDependency;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getExported ()Z
+	public final fun getReference ()Ljava/lang/String;
+	public fun getScope ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class org/jetbrains/kastle/ReferenceDependency$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/kastle/ReferenceDependency$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/kastle/ReferenceDependency;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/kastle/ReferenceDependency;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/kastle/ReferenceDependency$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+	public final fun tryParse (Ljava/lang/String;)Lorg/jetbrains/kastle/ReferenceDependency;
 }
 
 public final class org/jetbrains/kastle/RepeatingSlot : org/jetbrains/kastle/Slot {
@@ -2512,6 +2577,68 @@ public final class org/jetbrains/kastle/WhenClauseBlock$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public abstract interface class org/jetbrains/kastle/analytics/AnalyticsRepository : java/lang/AutoCloseable {
+	public fun getRequestMappings ()Lorg/jetbrains/kastle/analytics/RequestMappings;
+	public abstract fun record (Lorg/jetbrains/kastle/analytics/GenerationEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class org/jetbrains/kastle/analytics/AnalyticsRepository$DefaultImpls {
+	public static fun getRequestMappings (Lorg/jetbrains/kastle/analytics/AnalyticsRepository;)Lorg/jetbrains/kastle/analytics/RequestMappings;
+}
+
+public final class org/jetbrains/kastle/analytics/GenerationEvent {
+	public static final field Companion Lorg/jetbrains/kastle/analytics/GenerationEvent$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/kastle/PackagingStyle;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/kastle/PackagingStyle;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lorg/jetbrains/kastle/PackagingStyle;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Ljava/util/Map;
+	public final fun component6 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/kastle/PackagingStyle;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;)Lorg/jetbrains/kastle/analytics/GenerationEvent;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/analytics/GenerationEvent;Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/kastle/PackagingStyle;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lorg/jetbrains/kastle/analytics/GenerationEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdditionalParameters ()Ljava/util/Map;
+	public final fun getPackaging ()Lorg/jetbrains/kastle/PackagingStyle;
+	public final fun getPacks ()Ljava/util/List;
+	public final fun getProjectGroup ()Ljava/lang/String;
+	public final fun getProjectName ()Ljava/lang/String;
+	public final fun getProperties ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/kastle/analytics/GenerationEvent$Companion {
+	public final fun from (Lorg/jetbrains/kastle/ProjectDescriptor;Ljava/util/Map;)Lorg/jetbrains/kastle/analytics/GenerationEvent;
+	public static synthetic fun from$default (Lorg/jetbrains/kastle/analytics/GenerationEvent$Companion;Lorg/jetbrains/kastle/ProjectDescriptor;Ljava/util/Map;ILjava/lang/Object;)Lorg/jetbrains/kastle/analytics/GenerationEvent;
+}
+
+public final class org/jetbrains/kastle/analytics/NoOpAnalyticsRepository : org/jetbrains/kastle/analytics/AnalyticsRepository {
+	public static final field INSTANCE Lorg/jetbrains/kastle/analytics/NoOpAnalyticsRepository;
+	public fun close ()V
+	public fun getRequestMappings ()Lorg/jetbrains/kastle/analytics/RequestMappings;
+	public fun record (Lorg/jetbrains/kastle/analytics/GenerationEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class org/jetbrains/kastle/analytics/RequestMappings {
+	public static final field Companion Lorg/jetbrains/kastle/analytics/RequestMappings$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lorg/jetbrains/kastle/analytics/RequestMappings;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/analytics/RequestMappings;Ljava/util/Map;ILjava/lang/Object;)Lorg/jetbrains/kastle/analytics/RequestMappings;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeaderMappings ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/kastle/analytics/RequestMappings$Companion {
+	public final fun getEMPTY ()Lorg/jetbrains/kastle/analytics/RequestMappings;
+}
+
 public final class org/jetbrains/kastle/gen/Project {
 	public fun <init> (Lorg/jetbrains/kastle/ProjectDescriptor;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lorg/jetbrains/kastle/ProjectModules;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lorg/jetbrains/kastle/GradleProjectSettings;Lorg/jetbrains/kastle/PackagingStyle;)V
 	public final fun component1 ()Lorg/jetbrains/kastle/ProjectDescriptor;
@@ -3350,6 +3477,7 @@ public final class org/jetbrains/kastle/utils/Queue$DefaultImpls {
 }
 
 public final class org/jetbrains/kastle/utils/RandomKt {
+	public static final fun generateRandomHash ()Ljava/lang/String;
 	public static final fun nextStringId (Lkotlin/random/Random;I)Ljava/lang/String;
 	public static synthetic fun nextStringId$default (Lkotlin/random/Random;IILjava/lang/Object;)Ljava/lang/String;
 }

@@ -5,6 +5,7 @@ links:
   home: https://plugins.jetbrains.com/plugin/13126-yaml
 
 commonSources:
+  # Classic plugin
   - target: slot://org.jetbrains.intellij.platform/plugin/buildScriptDependencies
     #language=kotlin
     text: bundledPlugin("org.jetbrains.plugins.yaml")
@@ -12,4 +13,16 @@ commonSources:
   - target: slot://org.jetbrains.intellij.platform/plugin/pluginDescriptorDepends
     #language=xml
     text: <depends>org.jetbrains.plugins.yaml</depends>
+    priority: 70
+
+  # Modular plugin
+
+  ## Backend
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendBuildScriptDependencies
+    #language=kotlin
+    text: bundledModule("org.jetbrains.plugins.yaml")
+    priority: 70
+  - target: slot://org.jetbrains.intellij.platform/plugin/backendModuleDescriptorDependencies
+    #language=xml
+    text: <module name="intellij.yaml"/>
     priority: 70

@@ -40,7 +40,7 @@ fun ProjectGeneratorTest(
 
         ProjectGenerator(
             repository = repository.await(),
-            log = ConsoleLogger(LogLevel.TRACE),
+            log = ConsoleLogger(LogLevel.INFO),
         ).generate(
             ProjectDescriptor(
                 name = name,

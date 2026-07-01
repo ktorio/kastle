@@ -1,15 +1,18 @@
 [versions]
+kotlin-serialization = "1.9.0"
 junit = "4.13.2"
 
 [libraries]
+kotlin-serialization-core-jvm = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm", version.ref = "kotlin-serialization" }
+kotlin-serialization-json-jvm = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm", version.ref = "kotlin-serialization" }
 junit = { module = "junit:junit", version.ref = "junit" }
 
 # We don't render [plugins] in the project's version catalog (libs.versions.toml) - we render them in settings.gradle.kts.
-# They are defined here to enable usage via KASTLE's model.
+# They are defined here only to enable usage via KASTLE's model.
 #
 # NOTES:
 # 1. Do not use version.ref if the version is not intended to be rendered under the [versions] section.
 # 2. Naming convention: the "pluginX-" prefix allows sorting plugins in the build script and settings.
 [plugins]
-plugin1-kotlin-jvm  = { id = "org.jetbrains.kotlin.jvm", version = "2.2.20" }
+plugin1-kotlin-jvm  = { id = "org.jetbrains.kotlin.jvm", version = "2.3.20" }
 plugin2-changelog = { id = "org.jetbrains.changelog", version = "2.5.0" }

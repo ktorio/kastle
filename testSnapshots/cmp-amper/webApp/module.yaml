@@ -2,9 +2,10 @@
 product: web/app
 
 dependencies:
-  - ../sharedUI
+  - $libs.compose.ui
+  - ../shared
 
-test-dependencies:
+
 
 settings:
   compose: enabled

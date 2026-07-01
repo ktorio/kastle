@@ -1,6 +1,5 @@
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlinx.rpc)
 }
 
@@ -19,13 +18,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":core"))
             implementation(ktorLibs.client.core)
             implementation(libs.kotlinx.rpc.client)
+            implementation(projects.core)
         }
 
-        commonTest.dependencies {
-            kotlin("test")
-        }
     }
 }
+

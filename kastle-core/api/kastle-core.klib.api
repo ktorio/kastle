@@ -237,6 +237,13 @@ abstract interface <#A: kotlin/Any?> org.jetbrains.kastle.utils/Stack : kotlin.c
     }
 }
 
+abstract interface org.jetbrains.kastle.analytics/AnalyticsRepository : kotlin/AutoCloseable { // org.jetbrains.kastle.analytics/AnalyticsRepository|null[0]
+    open val requestMappings // org.jetbrains.kastle.analytics/AnalyticsRepository.requestMappings|{}requestMappings[0]
+        open fun <get-requestMappings>(): org.jetbrains.kastle.analytics/RequestMappings // org.jetbrains.kastle.analytics/AnalyticsRepository.requestMappings.<get-requestMappings>|<get-requestMappings>(){}[0]
+
+    abstract suspend fun record(org.jetbrains.kastle.analytics/GenerationEvent) // org.jetbrains.kastle.analytics/AnalyticsRepository.record|record(org.jetbrains.kastle.analytics.GenerationEvent){}[0]
+}
+
 abstract interface org.jetbrains.kastle.logging/Logger { // org.jetbrains.kastle.logging/Logger|null[0]
     abstract var level // org.jetbrains.kastle.logging/Logger.level|{}level[0]
         abstract fun <get-level>(): org.jetbrains.kastle.logging/LogLevel // org.jetbrains.kastle.logging/Logger.level.<get-level>|<get-level>(){}[0]
@@ -802,9 +809,17 @@ sealed interface org.jetbrains.kastle/DeclaringBlock : org.jetbrains.kastle/Bloc
 sealed interface org.jetbrains.kastle/Dependency { // org.jetbrains.kastle/Dependency|null[0]
     abstract val exported // org.jetbrains.kastle/Dependency.exported|{}exported[0]
         abstract fun <get-exported>(): kotlin/Boolean // org.jetbrains.kastle/Dependency.exported.<get-exported>|<get-exported>(){}[0]
+    abstract val scope // org.jetbrains.kastle/Dependency.scope|{}scope[0]
+        abstract fun <get-scope>(): kotlin/String // org.jetbrains.kastle/Dependency.scope.<get-scope>|<get-scope>(){}[0]
 
     final object Companion : kotlinx.serialization.internal/SerializerFactory { // org.jetbrains.kastle/Dependency.Companion|null[0]
+        final const val DEFAULT_SCOPE // org.jetbrains.kastle/Dependency.Companion.DEFAULT_SCOPE|{}DEFAULT_SCOPE[0]
+            final fun <get-DEFAULT_SCOPE>(): kotlin/String // org.jetbrains.kastle/Dependency.Companion.DEFAULT_SCOPE.<get-DEFAULT_SCOPE>|<get-DEFAULT_SCOPE>(){}[0]
+        final const val EXPORTED_SCOPE // org.jetbrains.kastle/Dependency.Companion.EXPORTED_SCOPE|{}EXPORTED_SCOPE[0]
+            final fun <get-EXPORTED_SCOPE>(): kotlin/String // org.jetbrains.kastle/Dependency.Companion.EXPORTED_SCOPE.<get-EXPORTED_SCOPE>|<get-EXPORTED_SCOPE>(){}[0]
+
         final fun parse(kotlin/String): org.jetbrains.kastle/Dependency // org.jetbrains.kastle/Dependency.Companion.parse|parse(kotlin.String){}[0]
+        final fun parseScope(kotlin/String): kotlin/String // org.jetbrains.kastle/Dependency.Companion.parseScope|parseScope(kotlin.String){}[0]
         final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/Dependency> // org.jetbrains.kastle/Dependency.Companion.serializer|serializer(){}[0]
         final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // org.jetbrains.kastle/Dependency.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
     }
@@ -1387,6 +1402,56 @@ final class <#A: kotlin/Comparable<#A>, #B: kotlin/Any?> org.jetbrains.kastle.ut
     }
 }
 
+final class org.jetbrains.kastle.analytics/GenerationEvent { // org.jetbrains.kastle.analytics/GenerationEvent|null[0]
+    constructor <init>(kotlin/String, kotlin/String, org.jetbrains.kastle/PackagingStyle, kotlin.collections/List<org.jetbrains.kastle/PackId>, kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String>, kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // org.jetbrains.kastle.analytics/GenerationEvent.<init>|<init>(kotlin.String;kotlin.String;org.jetbrains.kastle.PackagingStyle;kotlin.collections.List<org.jetbrains.kastle.PackId>;kotlin.collections.Map<org.jetbrains.kastle.VariableId,kotlin.String>;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+
+    final val additionalParameters // org.jetbrains.kastle.analytics/GenerationEvent.additionalParameters|{}additionalParameters[0]
+        final fun <get-additionalParameters>(): kotlin.collections/Map<kotlin/String, kotlin/String> // org.jetbrains.kastle.analytics/GenerationEvent.additionalParameters.<get-additionalParameters>|<get-additionalParameters>(){}[0]
+    final val packaging // org.jetbrains.kastle.analytics/GenerationEvent.packaging|{}packaging[0]
+        final fun <get-packaging>(): org.jetbrains.kastle/PackagingStyle // org.jetbrains.kastle.analytics/GenerationEvent.packaging.<get-packaging>|<get-packaging>(){}[0]
+    final val packs // org.jetbrains.kastle.analytics/GenerationEvent.packs|{}packs[0]
+        final fun <get-packs>(): kotlin.collections/List<org.jetbrains.kastle/PackId> // org.jetbrains.kastle.analytics/GenerationEvent.packs.<get-packs>|<get-packs>(){}[0]
+    final val projectGroup // org.jetbrains.kastle.analytics/GenerationEvent.projectGroup|{}projectGroup[0]
+        final fun <get-projectGroup>(): kotlin/String // org.jetbrains.kastle.analytics/GenerationEvent.projectGroup.<get-projectGroup>|<get-projectGroup>(){}[0]
+    final val projectName // org.jetbrains.kastle.analytics/GenerationEvent.projectName|{}projectName[0]
+        final fun <get-projectName>(): kotlin/String // org.jetbrains.kastle.analytics/GenerationEvent.projectName.<get-projectName>|<get-projectName>(){}[0]
+    final val properties // org.jetbrains.kastle.analytics/GenerationEvent.properties|{}properties[0]
+        final fun <get-properties>(): kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> // org.jetbrains.kastle.analytics/GenerationEvent.properties.<get-properties>|<get-properties>(){}[0]
+
+    final fun component1(): kotlin/String // org.jetbrains.kastle.analytics/GenerationEvent.component1|component1(){}[0]
+    final fun component2(): kotlin/String // org.jetbrains.kastle.analytics/GenerationEvent.component2|component2(){}[0]
+    final fun component3(): org.jetbrains.kastle/PackagingStyle // org.jetbrains.kastle.analytics/GenerationEvent.component3|component3(){}[0]
+    final fun component4(): kotlin.collections/List<org.jetbrains.kastle/PackId> // org.jetbrains.kastle.analytics/GenerationEvent.component4|component4(){}[0]
+    final fun component5(): kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> // org.jetbrains.kastle.analytics/GenerationEvent.component5|component5(){}[0]
+    final fun component6(): kotlin.collections/Map<kotlin/String, kotlin/String> // org.jetbrains.kastle.analytics/GenerationEvent.component6|component6(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., org.jetbrains.kastle/PackagingStyle = ..., kotlin.collections/List<org.jetbrains.kastle/PackId> = ..., kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ...): org.jetbrains.kastle.analytics/GenerationEvent // org.jetbrains.kastle.analytics/GenerationEvent.copy|copy(kotlin.String;kotlin.String;org.jetbrains.kastle.PackagingStyle;kotlin.collections.List<org.jetbrains.kastle.PackId>;kotlin.collections.Map<org.jetbrains.kastle.VariableId,kotlin.String>;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle.analytics/GenerationEvent.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.jetbrains.kastle.analytics/GenerationEvent.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.jetbrains.kastle.analytics/GenerationEvent.toString|toString(){}[0]
+
+    final object Companion { // org.jetbrains.kastle.analytics/GenerationEvent.Companion|null[0]
+        final fun from(org.jetbrains.kastle/ProjectDescriptor, kotlin.collections/Map<kotlin/String, kotlin/String> = ...): org.jetbrains.kastle.analytics/GenerationEvent // org.jetbrains.kastle.analytics/GenerationEvent.Companion.from|from(org.jetbrains.kastle.ProjectDescriptor;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    }
+}
+
+final class org.jetbrains.kastle.analytics/RequestMappings { // org.jetbrains.kastle.analytics/RequestMappings|null[0]
+    constructor <init>(kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // org.jetbrains.kastle.analytics/RequestMappings.<init>|<init>(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+
+    final val headerMappings // org.jetbrains.kastle.analytics/RequestMappings.headerMappings|{}headerMappings[0]
+        final fun <get-headerMappings>(): kotlin.collections/Map<kotlin/String, kotlin/String> // org.jetbrains.kastle.analytics/RequestMappings.headerMappings.<get-headerMappings>|<get-headerMappings>(){}[0]
+
+    final fun component1(): kotlin.collections/Map<kotlin/String, kotlin/String> // org.jetbrains.kastle.analytics/RequestMappings.component1|component1(){}[0]
+    final fun copy(kotlin.collections/Map<kotlin/String, kotlin/String> = ...): org.jetbrains.kastle.analytics/RequestMappings // org.jetbrains.kastle.analytics/RequestMappings.copy|copy(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle.analytics/RequestMappings.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.jetbrains.kastle.analytics/RequestMappings.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.jetbrains.kastle.analytics/RequestMappings.toString|toString(){}[0]
+
+    final object Companion { // org.jetbrains.kastle.analytics/RequestMappings.Companion|null[0]
+        final val EMPTY // org.jetbrains.kastle.analytics/RequestMappings.Companion.EMPTY|{}EMPTY[0]
+            final fun <get-EMPTY>(): org.jetbrains.kastle.analytics/RequestMappings // org.jetbrains.kastle.analytics/RequestMappings.Companion.EMPTY.<get-EMPTY>|<get-EMPTY>(){}[0]
+    }
+}
+
 final class org.jetbrains.kastle.gen/Project { // org.jetbrains.kastle.gen/Project|null[0]
     constructor <init>(org.jetbrains.kastle/ProjectDescriptor, kotlin.collections/List<org.jetbrains.kastle/PackDescriptor>, kotlin.collections/Map<org.jetbrains.kastle/PropertyScope, kotlin.collections/Map<org.jetbrains.kastle/VariableId, org.jetbrains.kastle/PropertyInstance>>, kotlin.collections/Map<kotlin/String, kotlin.collections/List<org.jetbrains.kastle/SourceFile>>, org.jetbrains.kastle/ProjectModules, kotlin.collections/List<org.jetbrains.kastle/SourceFile>, kotlin.collections/Map<kotlin/String, kotlin/String>, kotlin.collections/Map<kotlin/String, org.jetbrains.kastle/CatalogArtifact>, org.jetbrains.kastle/GradleProjectSettings, org.jetbrains.kastle/PackagingStyle) // org.jetbrains.kastle.gen/Project.<init>|<init>(org.jetbrains.kastle.ProjectDescriptor;kotlin.collections.List<org.jetbrains.kastle.PackDescriptor>;kotlin.collections.Map<org.jetbrains.kastle.PropertyScope,kotlin.collections.Map<org.jetbrains.kastle.VariableId,org.jetbrains.kastle.PropertyInstance>>;kotlin.collections.Map<kotlin.String,kotlin.collections.List<org.jetbrains.kastle.SourceFile>>;org.jetbrains.kastle.ProjectModules;kotlin.collections.List<org.jetbrains.kastle.SourceFile>;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.collections.Map<kotlin.String,org.jetbrains.kastle.CatalogArtifact>;org.jetbrains.kastle.GradleProjectSettings;org.jetbrains.kastle.PackagingStyle){}[0]
 
@@ -1699,6 +1764,7 @@ final class org.jetbrains.kastle/AmperSettings { // org.jetbrains.kastle/AmperSe
 
 final class org.jetbrains.kastle/ArtifactDependency : org.jetbrains.kastle/Dependency { // org.jetbrains.kastle/ArtifactDependency|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String, kotlin/Boolean = ...) // org.jetbrains.kastle/ArtifactDependency.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String, kotlin/Boolean = ..., kotlin/String = ...) // org.jetbrains.kastle/ArtifactDependency.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.Boolean;kotlin.String){}[0]
 
     final val artifact // org.jetbrains.kastle/ArtifactDependency.artifact|{}artifact[0]
         final fun <get-artifact>(): kotlin/String // org.jetbrains.kastle/ArtifactDependency.artifact.<get-artifact>|<get-artifact>(){}[0]
@@ -1706,6 +1772,8 @@ final class org.jetbrains.kastle/ArtifactDependency : org.jetbrains.kastle/Depen
         final fun <get-exported>(): kotlin/Boolean // org.jetbrains.kastle/ArtifactDependency.exported.<get-exported>|<get-exported>(){}[0]
     final val group // org.jetbrains.kastle/ArtifactDependency.group|{}group[0]
         final fun <get-group>(): kotlin/String // org.jetbrains.kastle/ArtifactDependency.group.<get-group>|<get-group>(){}[0]
+    final val scope // org.jetbrains.kastle/ArtifactDependency.scope|{}scope[0]
+        final fun <get-scope>(): kotlin/String // org.jetbrains.kastle/ArtifactDependency.scope.<get-scope>|<get-scope>(){}[0]
     final val version // org.jetbrains.kastle/ArtifactDependency.version|{}version[0]
         final fun <get-version>(): kotlin/String // org.jetbrains.kastle/ArtifactDependency.version.<get-version>|<get-version>(){}[0]
 
@@ -1713,7 +1781,9 @@ final class org.jetbrains.kastle/ArtifactDependency : org.jetbrains.kastle/Depen
     final fun component2(): kotlin/String // org.jetbrains.kastle/ArtifactDependency.component2|component2(){}[0]
     final fun component3(): kotlin/String // org.jetbrains.kastle/ArtifactDependency.component3|component3(){}[0]
     final fun component4(): kotlin/Boolean // org.jetbrains.kastle/ArtifactDependency.component4|component4(){}[0]
+    final fun component5(): kotlin/String // org.jetbrains.kastle/ArtifactDependency.component5|component5(){}[0]
     final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/Boolean = ...): org.jetbrains.kastle/ArtifactDependency // org.jetbrains.kastle/ArtifactDependency.copy|copy(kotlin.String;kotlin.String;kotlin.String;kotlin.Boolean){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/Boolean = ..., kotlin/String = ...): org.jetbrains.kastle/ArtifactDependency // org.jetbrains.kastle/ArtifactDependency.copy|copy(kotlin.String;kotlin.String;kotlin.String;kotlin.Boolean;kotlin.String){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/ArtifactDependency.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/ArtifactDependency.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/ArtifactDependency.toString|toString(){}[0]
@@ -1847,6 +1917,7 @@ final class org.jetbrains.kastle/CatalogArtifactSerializer : kotlinx.serializati
 
 final class org.jetbrains.kastle/CatalogReference : org.jetbrains.kastle/Dependency { // org.jetbrains.kastle/CatalogReference|null[0]
     constructor <init>(kotlin/String, kotlin/Boolean = ...) // org.jetbrains.kastle/CatalogReference.<init>|<init>(kotlin.String;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/String, kotlin/Boolean = ..., kotlin/String = ...) // org.jetbrains.kastle/CatalogReference.<init>|<init>(kotlin.String;kotlin.Boolean;kotlin.String){}[0]
 
     final val catalog // org.jetbrains.kastle/CatalogReference.catalog|{}catalog[0]
         final fun <get-catalog>(): kotlin/String // org.jetbrains.kastle/CatalogReference.catalog.<get-catalog>|<get-catalog>(){}[0]
@@ -1856,12 +1927,16 @@ final class org.jetbrains.kastle/CatalogReference : org.jetbrains.kastle/Depende
         final fun <get-key>(): kotlin/String // org.jetbrains.kastle/CatalogReference.key.<get-key>|<get-key>(){}[0]
     final val keyInCatalog // org.jetbrains.kastle/CatalogReference.keyInCatalog|{}keyInCatalog[0]
         final fun <get-keyInCatalog>(): kotlin/String // org.jetbrains.kastle/CatalogReference.keyInCatalog.<get-keyInCatalog>|<get-keyInCatalog>(){}[0]
+    final val scope // org.jetbrains.kastle/CatalogReference.scope|{}scope[0]
+        final fun <get-scope>(): kotlin/String // org.jetbrains.kastle/CatalogReference.scope.<get-scope>|<get-scope>(){}[0]
     final val tomlKey // org.jetbrains.kastle/CatalogReference.tomlKey|{}tomlKey[0]
         final fun <get-tomlKey>(): kotlin/String // org.jetbrains.kastle/CatalogReference.tomlKey.<get-tomlKey>|<get-tomlKey>(){}[0]
 
     final fun component1(): kotlin/String // org.jetbrains.kastle/CatalogReference.component1|component1(){}[0]
     final fun component2(): kotlin/Boolean // org.jetbrains.kastle/CatalogReference.component2|component2(){}[0]
+    final fun component3(): kotlin/String // org.jetbrains.kastle/CatalogReference.component3|component3(){}[0]
     final fun copy(kotlin/String = ..., kotlin/Boolean = ...): org.jetbrains.kastle/CatalogReference // org.jetbrains.kastle/CatalogReference.copy|copy(kotlin.String;kotlin.Boolean){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Boolean = ..., kotlin/String = ...): org.jetbrains.kastle/CatalogReference // org.jetbrains.kastle/CatalogReference.copy|copy(kotlin.String;kotlin.Boolean;kotlin.String){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/CatalogReference.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/CatalogReference.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/CatalogReference.toString|toString(){}[0]
@@ -2067,6 +2142,7 @@ final class org.jetbrains.kastle/ForEachBlock : org.jetbrains.kastle/DeclaringBl
 
 final class org.jetbrains.kastle/FunctionDependency : org.jetbrains.kastle/Dependency { // org.jetbrains.kastle/FunctionDependency|null[0]
     constructor <init>(kotlin/String, kotlin.collections/List<kotlin/String> = ...) // org.jetbrains.kastle/FunctionDependency.<init>|<init>(kotlin.String;kotlin.collections.List<kotlin.String>){}[0]
+    constructor <init>(kotlin/String, kotlin.collections/List<kotlin/String> = ..., kotlin/Boolean = ..., kotlin/String = ...) // org.jetbrains.kastle/FunctionDependency.<init>|<init>(kotlin.String;kotlin.collections.List<kotlin.String>;kotlin.Boolean;kotlin.String){}[0]
 
     final val args // org.jetbrains.kastle/FunctionDependency.args|{}args[0]
         final fun <get-args>(): kotlin.collections/List<kotlin/String> // org.jetbrains.kastle/FunctionDependency.args.<get-args>|<get-args>(){}[0]
@@ -2074,10 +2150,15 @@ final class org.jetbrains.kastle/FunctionDependency : org.jetbrains.kastle/Depen
         final fun <get-exported>(): kotlin/Boolean // org.jetbrains.kastle/FunctionDependency.exported.<get-exported>|<get-exported>(){}[0]
     final val functionName // org.jetbrains.kastle/FunctionDependency.functionName|{}functionName[0]
         final fun <get-functionName>(): kotlin/String // org.jetbrains.kastle/FunctionDependency.functionName.<get-functionName>|<get-functionName>(){}[0]
+    final val scope // org.jetbrains.kastle/FunctionDependency.scope|{}scope[0]
+        final fun <get-scope>(): kotlin/String // org.jetbrains.kastle/FunctionDependency.scope.<get-scope>|<get-scope>(){}[0]
 
     final fun component1(): kotlin/String // org.jetbrains.kastle/FunctionDependency.component1|component1(){}[0]
     final fun component2(): kotlin.collections/List<kotlin/String> // org.jetbrains.kastle/FunctionDependency.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // org.jetbrains.kastle/FunctionDependency.component3|component3(){}[0]
+    final fun component4(): kotlin/String // org.jetbrains.kastle/FunctionDependency.component4|component4(){}[0]
     final fun copy(kotlin/String = ..., kotlin.collections/List<kotlin/String> = ...): org.jetbrains.kastle/FunctionDependency // org.jetbrains.kastle/FunctionDependency.copy|copy(kotlin.String;kotlin.collections.List<kotlin.String>){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/Boolean = ..., kotlin/String = ...): org.jetbrains.kastle/FunctionDependency // org.jetbrains.kastle/FunctionDependency.copy|copy(kotlin.String;kotlin.collections.List<kotlin.String>;kotlin.Boolean;kotlin.String){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/FunctionDependency.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/FunctionDependency.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/FunctionDependency.toString|toString(){}[0]
@@ -2342,16 +2423,21 @@ final class org.jetbrains.kastle/MissingPackException : kotlin/Exception { // or
 }
 
 final class org.jetbrains.kastle/ModuleDependency : org.jetbrains.kastle/Dependency { // org.jetbrains.kastle/ModuleDependency|null[0]
+    constructor <init>(kotlin/String, kotlin/Boolean = ..., kotlin/String = ...) // org.jetbrains.kastle/ModuleDependency.<init>|<init>(kotlin.String;kotlin.Boolean;kotlin.String){}[0]
     constructor <init>(kotlin/String, kotlin/Boolean) // org.jetbrains.kastle/ModuleDependency.<init>|<init>(kotlin.String;kotlin.Boolean){}[0]
 
     final val exported // org.jetbrains.kastle/ModuleDependency.exported|{}exported[0]
         final fun <get-exported>(): kotlin/Boolean // org.jetbrains.kastle/ModuleDependency.exported.<get-exported>|<get-exported>(){}[0]
     final val path // org.jetbrains.kastle/ModuleDependency.path|{}path[0]
         final fun <get-path>(): kotlin/String // org.jetbrains.kastle/ModuleDependency.path.<get-path>|<get-path>(){}[0]
+    final val scope // org.jetbrains.kastle/ModuleDependency.scope|{}scope[0]
+        final fun <get-scope>(): kotlin/String // org.jetbrains.kastle/ModuleDependency.scope.<get-scope>|<get-scope>(){}[0]
 
     final fun component1(): kotlin/String // org.jetbrains.kastle/ModuleDependency.component1|component1(){}[0]
     final fun component2(): kotlin/Boolean // org.jetbrains.kastle/ModuleDependency.component2|component2(){}[0]
+    final fun component3(): kotlin/String // org.jetbrains.kastle/ModuleDependency.component3|component3(){}[0]
     final fun copy(kotlin/String = ..., kotlin/Boolean = ...): org.jetbrains.kastle/ModuleDependency // org.jetbrains.kastle/ModuleDependency.copy|copy(kotlin.String;kotlin.Boolean){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Boolean = ..., kotlin/String = ...): org.jetbrains.kastle/ModuleDependency // org.jetbrains.kastle/ModuleDependency.copy|copy(kotlin.String;kotlin.Boolean;kotlin.String){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/ModuleDependency.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/ModuleDependency.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/ModuleDependency.toString|toString(){}[0]
@@ -2366,6 +2452,7 @@ final class org.jetbrains.kastle/ModuleDependency : org.jetbrains.kastle/Depende
     }
 
     final object Companion { // org.jetbrains.kastle/ModuleDependency.Companion|null[0]
+        final fun parse(kotlin/String): org.jetbrains.kastle/ModuleDependency // org.jetbrains.kastle/ModuleDependency.Companion.parse|parse(kotlin.String){}[0]
         final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/ModuleDependency> // org.jetbrains.kastle/ModuleDependency.Companion.serializer|serializer(){}[0]
     }
 }
@@ -2808,6 +2895,39 @@ final class org.jetbrains.kastle/PropertyScopeSerializer : org.jetbrains.kastle/
 
 final class org.jetbrains.kastle/PropertyTypeSerializer : org.jetbrains.kastle/CustomParserSerializer<org.jetbrains.kastle/PropertyType> { // org.jetbrains.kastle/PropertyTypeSerializer|null[0]
     constructor <init>() // org.jetbrains.kastle/PropertyTypeSerializer.<init>|<init>(){}[0]
+}
+
+final class org.jetbrains.kastle/ReferenceDependency : org.jetbrains.kastle/Dependency { // org.jetbrains.kastle/ReferenceDependency|null[0]
+    constructor <init>(kotlin/String, kotlin/Boolean = ..., kotlin/String = ...) // org.jetbrains.kastle/ReferenceDependency.<init>|<init>(kotlin.String;kotlin.Boolean;kotlin.String){}[0]
+
+    final val exported // org.jetbrains.kastle/ReferenceDependency.exported|{}exported[0]
+        final fun <get-exported>(): kotlin/Boolean // org.jetbrains.kastle/ReferenceDependency.exported.<get-exported>|<get-exported>(){}[0]
+    final val reference // org.jetbrains.kastle/ReferenceDependency.reference|{}reference[0]
+        final fun <get-reference>(): kotlin/String // org.jetbrains.kastle/ReferenceDependency.reference.<get-reference>|<get-reference>(){}[0]
+    final val scope // org.jetbrains.kastle/ReferenceDependency.scope|{}scope[0]
+        final fun <get-scope>(): kotlin/String // org.jetbrains.kastle/ReferenceDependency.scope.<get-scope>|<get-scope>(){}[0]
+
+    final fun component1(): kotlin/String // org.jetbrains.kastle/ReferenceDependency.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // org.jetbrains.kastle/ReferenceDependency.component2|component2(){}[0]
+    final fun component3(): kotlin/String // org.jetbrains.kastle/ReferenceDependency.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Boolean = ..., kotlin/String = ...): org.jetbrains.kastle/ReferenceDependency // org.jetbrains.kastle/ReferenceDependency.copy|copy(kotlin.String;kotlin.Boolean;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/ReferenceDependency.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.jetbrains.kastle/ReferenceDependency.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.jetbrains.kastle/ReferenceDependency.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<org.jetbrains.kastle/ReferenceDependency> { // org.jetbrains.kastle/ReferenceDependency.$serializer|null[0]
+        final val descriptor // org.jetbrains.kastle/ReferenceDependency.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // org.jetbrains.kastle/ReferenceDependency.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // org.jetbrains.kastle/ReferenceDependency.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): org.jetbrains.kastle/ReferenceDependency // org.jetbrains.kastle/ReferenceDependency.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, org.jetbrains.kastle/ReferenceDependency) // org.jetbrains.kastle/ReferenceDependency.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;org.jetbrains.kastle.ReferenceDependency){}[0]
+    }
+
+    final object Companion { // org.jetbrains.kastle/ReferenceDependency.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/ReferenceDependency> // org.jetbrains.kastle/ReferenceDependency.Companion.serializer|serializer(){}[0]
+        final fun tryParse(kotlin/String): org.jetbrains.kastle/ReferenceDependency? // org.jetbrains.kastle/ReferenceDependency.Companion.tryParse|tryParse(kotlin.String){}[0]
+    }
 }
 
 final class org.jetbrains.kastle/RepeatingSlot : org.jetbrains.kastle/Slot { // org.jetbrains.kastle/RepeatingSlot|null[0]
@@ -3537,6 +3657,11 @@ open class <#A: kotlin/Any> org.jetbrains.kastle/CustomParserSerializer : kotlin
     open fun serialize(kotlinx.serialization.encoding/Encoder, #A) // org.jetbrains.kastle/CustomParserSerializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;1:0){}[0]
 }
 
+final object org.jetbrains.kastle.analytics/NoOpAnalyticsRepository : org.jetbrains.kastle.analytics/AnalyticsRepository { // org.jetbrains.kastle.analytics/NoOpAnalyticsRepository|null[0]
+    final fun close() // org.jetbrains.kastle.analytics/NoOpAnalyticsRepository.close|close(){}[0]
+    final suspend fun record(org.jetbrains.kastle.analytics/GenerationEvent) // org.jetbrains.kastle.analytics/NoOpAnalyticsRepository.record|record(org.jetbrains.kastle.analytics.GenerationEvent){}[0]
+}
+
 final object org.jetbrains.kastle.structure/BuildToolModules // org.jetbrains.kastle.structure/BuildToolModules|null[0]
 
 final object org.jetbrains.kastle.utils/DevNull : kotlin.text/Appendable { // org.jetbrains.kastle.utils/DevNull|null[0]
@@ -3676,6 +3801,7 @@ final fun org.jetbrains.kastle.utils/Variables(kotlin.collections/Iterable<kotli
 final fun org.jetbrains.kastle.utils/Variables(kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/Any?>): org.jetbrains.kastle.utils/Variables // org.jetbrains.kastle.utils/Variables|Variables(kotlin.collections.Map<org.jetbrains.kastle.VariableId,kotlin.Any?>){}[0]
 final fun org.jetbrains.kastle.utils/Variables(kotlin/Array<out kotlin/Pair<org.jetbrains.kastle/VariableId, kotlin/Any?>>...): org.jetbrains.kastle.utils/Variables // org.jetbrains.kastle.utils/Variables|Variables(kotlin.Array<out|kotlin.Pair<org.jetbrains.kastle.VariableId,kotlin.Any?>>...){}[0]
 final fun org.jetbrains.kastle.utils/encodeToMap(kotlinx.serialization.modules/SerializersModule, kotlin.reflect/KType, kotlin/Any): kotlin.collections/Map<kotlin/String, kotlin/Any?> // org.jetbrains.kastle.utils/encodeToMap|encodeToMap(kotlinx.serialization.modules.SerializersModule;kotlin.reflect.KType;kotlin.Any){}[0]
+final fun org.jetbrains.kastle.utils/generateRandomHash(): kotlin/String // org.jetbrains.kastle.utils/generateRandomHash|generateRandomHash(){}[0]
 final fun org.jetbrains.kastle.utils/requireValidRelativePath(kotlin/String, kotlin/Boolean = ...): kotlin/String // org.jetbrains.kastle.utils/requireValidRelativePath|requireValidRelativePath(kotlin.String;kotlin.Boolean){}[0]
 final fun org.jetbrains.kastle.utils/sumOfNotNull(kotlin/Array<out kotlin/Int?>...): kotlin/Int // org.jetbrains.kastle.utils/sumOfNotNull|sumOfNotNull(kotlin.Array<out|kotlin.Int?>...){}[0]
 final inline fun <#A: kotlin/Any?> (org.jetbrains.kastle.utils/Stack<#A>).org.jetbrains.kastle.utils/popUntil(kotlin/Function1<#A, kotlin/Boolean>, kotlin/Function1<#A, kotlin/Unit> = ...): #A? // org.jetbrains.kastle.utils/popUntil|popUntil@org.jetbrains.kastle.utils.Stack<0:0>(kotlin.Function1<0:0,kotlin.Boolean>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]

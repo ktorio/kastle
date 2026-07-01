@@ -1,0 +1,48 @@
+platforms: [ios, jvm, js, wasmJs, android]
+
+dependencies:
+  - $libs.compose.runtime
+  - $libs.compose.foundation
+  - $libs.compose.material3
+  - $libs.compose.ui
+  - $libs.compose.uiTooling!androidRuntimeClasspath
+  - $libs.compose.uiToolingPreview
+  - $libs.compose.components.resources
+  - $libs.androidx.lifecycle.viewmodelCompose
+  - $libs.androidx.lifecycle.runtimeCompose
+
+dependencies@android:
+  - $libs.compose.uiToolingPreview
+
+dependencies@js:
+  - $libs.wrappers.browser
+
+testDependencies:
+  - $libs.kotlin.test
+
+gradle:
+  plugins:
+    - $libs.plugins.kotlinMultiplatform
+    - $libs.plugins.androidMultiplatformLibrary
+    - $libs.plugins.composeMultiplatform
+    - $libs.plugins.composeCompiler
+
+amper:
+  compose: enabled
+
+sources:
+  - path: composeResources/*
+  - path: ../iosApp/*
+  - target: slot://org.gradle/gradle/kotlinRoot
+    path: android.gradle.kts
+  - target: slot://org.gradle/gradle/iosOverride
+    text: |-
+      listOf(
+          iosArm64(),
+          iosSimulatorArm64()
+      ).forEach { iosTarget ->
+          iosTarget.binaries.framework {
+              baseName = "Shared"
+              isStatic = true
+          }
+      }

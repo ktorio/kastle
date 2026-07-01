@@ -1,10 +1,12 @@
 platform: web
 
 dependencies:
-  - ../sharedUI
+  - ../shared
+  - $libs.compose.ui
 
 gradle:
   plugins:
+    - $libs.plugins.kotlinMultiplatform
     - $libs.plugins.composeMultiplatform
     - $libs.plugins.composeCompiler
 

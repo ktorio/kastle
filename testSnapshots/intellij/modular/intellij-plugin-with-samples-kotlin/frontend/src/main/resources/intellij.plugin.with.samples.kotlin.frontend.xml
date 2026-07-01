@@ -1,0 +1,13 @@
+<idea-plugin>
+    <dependencies>
+        <module name="intellij.platform.frontend"/>
+        <module name="intellij.plugin.with.samples.kotlin.shared"/>
+    </dependencies>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow
+                id="ModularPlugin"
+                factoryClass="com.acme.toolWindow.ModularPluginToolWindowFactory"
+                icon="com.acme.ModularPluginIcons.ToolWindow"/>
+    </extensions>
+</idea-plugin>

@@ -1,16 +1,12 @@
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlinJvm)
     alias(ktorLibs.plugins.ktor)
     alias(libs.plugins.kotlin.serialization)
 }
 
 group = "com.acme"
 version = "1.0.0-SNAPSHOT"
-
-application {
-    mainClass = "io.ktor.server.netty.EngineMain"
-}
 
 kotlin {
     jvmToolchain(21)
@@ -21,7 +17,10 @@ dependencies {
     implementation(ktorLibs.server.core)
     implementation(ktorLibs.server.netty)
     implementation(libs.logback.classic)
-
-    testImplementation(kotlin("test"))
+    testImplementation(libs.kotlin.test)
     testImplementation(ktorLibs.server.testHost)
+}
+
+application {
+    mainClass = "io.ktor.server.netty.EngineMain"
 }

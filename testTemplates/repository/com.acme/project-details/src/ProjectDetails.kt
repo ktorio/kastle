@@ -22,6 +22,9 @@ fun main() {
                     "catalog" -> {
                         +        "${dependency.key}"
                     }
+                    "reference" -> {
+                        +        "${dependency.reference}"
+                    }
                 }
             }
         }
