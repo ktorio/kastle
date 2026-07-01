@@ -1,5 +1,5 @@
 name: Language Servers (LSP)
-description: Enables communication between IDE and Language Servers
+description: Enables integration between IDE and Language Servers
 icon: AllIcons.Nodes.Library
 links:
   docs: https://plugins.jetbrains.com/docs/intellij/language-server-protocol.html
