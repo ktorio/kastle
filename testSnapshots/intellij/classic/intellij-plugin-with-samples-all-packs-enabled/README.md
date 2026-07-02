@@ -3,12 +3,35 @@
 [![Twitter Follow](https://img.shields.io/badge/follow-%40JBPlatform-1DA1F2?logo=twitter)](https://twitter.com/JBPlatform)
 [![Developers Forum](https://img.shields.io/badge/JetBrains%20Platform-Join-blue)][jb:forum]
 
+## Connect repository to GitHub
+
+1. [Create a new repository](https://github.com/new) on GitHub.
+2. Run the following commands to initialize and push this project to the repository created in step 1:
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/<username>/<repository>.git
+git push -u origin main
+```
+
+3. Configure publishing [secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) in the GitHub repository settings:
+
+| Secret                 | Description                                                                                                |
+|------------------------|------------------------------------------------------------------------------------------------------------|
+| `PUBLISH_TOKEN`        | JetBrains Marketplace token — [generate here](https://plugins.jetbrains.com/author/me/tokens)              |
+| `CERTIFICATE_CHAIN`    | Plugin signing certificate chain ([docs](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html)) |
+| `PRIVATE_KEY`          | Plugin signing private key                                                                                 |
+| `PRIVATE_KEY_PASSWORD` | Password for the private key                                                                               |
+
 ## Plugin structure
 
 A generated project contains the following content structure:
 
 ```
 .
+├── .github/                GitHub Workflows, issue templates, and Dependabot configuration
 ├── .run/                   Predefined Run/Debug Configurations
 ├── build/                  Output build directory
 ├── gradle
@@ -62,6 +85,29 @@ Within the default project structure, there is a `.run` directory provided conta
 Releasing a plugin to [JetBrains Marketplace](https://plugins.jetbrains.com) is a straightforward operation that uses the `publishPlugin` Gradle task provided by the [intellij-platform-gradle-plugin][gh:intellij-platform-gradle-plugin-docs].
 
 You can also upload the plugin to the [JetBrains Plugin Repository](https://plugins.jetbrains.com/plugin/upload) manually via UI.
+
+## GitHub Integration
+
+### GitHub Actions
+
+The project includes [GitHub Actions][https://docs.github.com/en/actions] workflows for automated CI/CD:
+
+| Workflow | Trigger | Description |
+|---|---|---|
+| [Build](.github/workflows/build.yml) | Push / PR | Builds, tests, and verifies the plugin; creates a draft release |
+| [Release](.github/workflows/release.yml) | GitHub Release | Publishes the plugin to JetBrains Marketplace |
+
+### GitHub issue templates
+
+The project includes GitHub issue templates:
+- [Bug Report](.github/ISSUE_TEMPLATE/bug-report.yml)
+- [Feature Request](.github/ISSUE_TEMPLATE/feature-request.yml)
+
+See [Syntax for issue forms](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms).
+
+### Dependabot
+
+[Dependabot configuration](.github/dependabot.yml) file enables tracking outdated or vulnerable dependencies.
 
 ## Useful links
 

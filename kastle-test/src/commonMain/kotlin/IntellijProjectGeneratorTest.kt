@@ -116,6 +116,17 @@ fun IntellijProjectGeneratorTest(
         )
     }
 
+    suspend fun testPluginGitHub(layout: PluginLayout) {
+        generateAndValidateSnapshot(
+            "intellij-plugin-github",
+            layout.snapshotSubDir,
+            listOf(
+                "org.jetbrains.intellij.platform/plugin",
+                "org.jetbrains.intellij.platform.vcs/github",
+            ) + layout.extraPacks,
+        )
+    }
+
     suspend fun testPluginAllPacksEnabled(layout: PluginLayout, includeSamples: Boolean) {
         val snapshotName = if (includeSamples) "intellij-plugin-with-samples-all-packs-enabled"
         else "intellij-plugin-all-packs-enabled"
@@ -139,6 +150,7 @@ fun IntellijProjectGeneratorTest(
                 "org.jetbrains.intellij.platform.plugins/database",
                 "org.jetbrains.intellij.platform.dependencies/lsp",
                 "org.jetbrains.intellij.platform.vcs/git",
+                "org.jetbrains.intellij.platform.vcs/github",
             ) + layout.extraPacks,
             properties,
         )
@@ -158,6 +170,9 @@ fun IntellijProjectGeneratorTest(
 
     "intellij-plugin-lsp (classic)" { testPluginLsp(PluginLayout.Classic) }
     "intellij-plugin-lsp (modular)" { testPluginLsp(PluginLayout.Modular) }
+
+    "intellij-plugin-github (classic)" { testPluginGitHub(PluginLayout.Classic) }
+    "intellij-plugin-github (modular)" { testPluginGitHub(PluginLayout.Modular) }
 
     "intellij-plugin-all-packs-enabled (classic)" {
         testPluginAllPacksEnabled(

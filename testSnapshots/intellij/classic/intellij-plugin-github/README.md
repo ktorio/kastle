@@ -1,4 +1,4 @@
-# Intellij-plugin-all-packs-enabled
+# Intellij-plugin-github
 
 [![Twitter Follow](https://img.shields.io/badge/follow-%40JBPlatform-1DA1F2?logo=twitter)](https://twitter.com/JBPlatform)
 [![Developers Forum](https://img.shields.io/badge/JetBrains%20Platform-Join-blue)][jb:forum]
@@ -25,13 +25,6 @@ git push -u origin main
 | `PRIVATE_KEY`          | Plugin signing private key                                                                                 |
 | `PRIVATE_KEY_PASSWORD` | Password for the private key                                                                               |
 
-## Overview
-
-This repository is a modular IntelliJ Platform plugin template. It introduces a concept of content modules as a unit of functionality that the plugin consists of.
-It also demonstrates how to use this concept to separate UI code from business logic. Not only does it help to keep the plugin code clean, but it also allows implementing features in a way they work natively in **split mode** just like in the ordinary monolithic IDE.
-
-It packages a single plugin out of separate `shared`, `frontend`, and `backend` modules and demonstrates how to keep UI code on the frontend side while delegating stateful logic to the backend side through RPC.
-
 ## Plugin structure
 
 A generated project contains the following content structure:
@@ -40,68 +33,46 @@ A generated project contains the following content structure:
 .
 ├── .github/                GitHub Workflows, issue templates, and Dependabot configuration
 ├── .run/                   Predefined Run/Debug Configurations
-├── backend/                Backend module – business logic
-│   ├── build.gradle.kts
-│   └── src/main/
-│       ├── kotlin/         Kotlin production sources
-│       └── resources/      intellij.plugin.all.packs.enabled.backend.xml
-├── frontend/               Frontend module – UI and presentation
-│   ├── build.gradle.kts
-│   └── src/main/
-│       ├── kotlin/         Kotlin production sources
-│       └── resources/      intellij.plugin.all.packs.enabled.frontend.xml
-├── shared/                 Shared module – cross-boundary contracts
-│   ├── build.gradle.kts
-│   └── src/main/
-│       ├── kotlin/         Kotlin production sources
-│       └── resources/      intellij.plugin.all.packs.enabled.shared.xml
-├── gradle/
+├── build/                  Output build directory
+├── gradle
 │   ├── wrapper/            Gradle Wrapper
-│   └── libs.versions.toml  Version catalog
-├── src/main/resources/META-INF/
-│                           plugin.xml, pluginIcon.svg
-├── .gitignore
-├── build.gradle.kts        Root build – assembles the final plugin
-├── gradle.properties
-├── gradlew / gradlew.bat
-└── settings.gradle.kts
+│   ├── libs.versions.toml  Version catalog
+├── src                     Plugin sources
+│   ├── main
+│   │   ├── kotlin/         Kotlin production sources
+│   │   └── resources/      Resources - plugin.xml, icons, messages
+├── .gitignore              Git ignoring rules
+├── build.gradle.kts        Gradle build configuration
+├── gradle.properties       Gradle configuration properties
+├── gradlew                 *nix Gradle Wrapper script
+├── gradlew.bat             Windows Gradle Wrapper script
+├── README.md               README
+└── settings.gradle.kts     Gradle project settings
 ```
 
-### Module Layout
+In addition to the configuration files, the most crucial part is the `src` directory, which contains our implementation and the manifest for our plugin – [plugin.xml][file:plugin.xml].
 
-- `root project` assembles the final plugin, declares the main IntelliJ Platform dependency, enables split mode, and includes the `shared`, `frontend`, and `backend` plugin modules in the final distribution.
-- `shared` contains contracts that both sides must understand: RPC interfaces, DTOs, serializers, and shared model types. Put a cross-boundary API here.
-- `frontend` contains UI-only code and presentation logic: the tool window registration, Swing UI, view models, and the frontend adapter that talks to the backend via RPC.
-- `backend` contains project-level services and business logic: access to project, file system, and external processes, message creation, response generation, and the RPC implementation exposed to the frontend.
+> [!NOTE]
+> To use Java in your plugin, create the `/src/main/java` directory.
 
-## Plugin configuration files
+## Plugin configuration file
 
-The root [plugin.xml][file:plugin.xml] file located in `src/main/resources/META-INF` provides general information about the plugin, its dependencies, and references the per-module plugin descriptors.
+The plugin configuration file is a [plugin.xml][file:plugin.xml] file located in the `src/main/resources/META-INF` directory.
+It provides general information about the plugin, its dependencies, extensions, and listeners.
 
-Each module ships its own plugin descriptor in its `src/main/resources/` directory:
-- `intellij.plugin.all.packs.enabled.backend.xml` – registers backend extensions and services
-- `intellij.plugin.all.packs.enabled.frontend.xml` – registers frontend extensions and tool windows
-- `intellij.plugin.all.packs.enabled.shared.xml` – registers shared extensions and interfaces
+You can read more about this file in the [Plugin Configuration File][docs:plugin.xml] section of our documentation.
 
-You can read more about plugin configuration files in the [Plugin Configuration File][docs:plugin.xml] section of our documentation.
-
-## Remote Development Ready Architecture
-
-The demo is intentionally split so that the UI stays frontend-only and the business logic stays backend-only.
-This ensures optimal UX in the remote development scenario where the IDE has separate frontend and backend processes.
-This is what we call **Split Mode**.
-
-This separation keeps the frontend focused on rendering, local UI state, and interaction handling, while the backend owns project-scoped state and logic that should execute on the backend side in split mode.
+If you're still not quite sure what this is all about, read [Introduction to IntelliJ Platform][docs:intro].
 
 ## Predefined Run/Debug configurations
 
 Within the default project structure, there is a `.run` directory provided containing predefined *Run/Debug configurations* that expose corresponding Gradle tasks:
 
-| Configuration name   | Description                                                                                                                                                      |
-|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Run IDE (Frontend)   | Runs [`:runIdeFrontend`][gh:intellij-platform-gradle-plugin-runIde] IntelliJ Platform Gradle Plugin task. Use the *Debug* icon for plugin debugging.             |
-| Run IDE (Backend)    | Runs [`:runIdeBackend`][gh:intellij-platform-gradle-plugin-runIde] IntelliJ Platform Gradle Plugin task. Use the *Debug* icon for plugin debugging.              |
-| Run IDE (Split Mode) | Runs both *Run IDE (Backend)* and *Run IDE (Frontend)* configurations simultaneously to launch the plugin in split mode.                                         |
+| Configuration name | Description                                                                                                                                                                         |
+|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Run Plugin         | Runs [`:runIde`][gh:intellij-platform-gradle-plugin-runIde] IntelliJ Platform Gradle Plugin task. Use the *Debug* icon for plugin debugging.                                        |
+| Run Tests          | Runs [`:check`][gradle:lifecycle-tasks] Gradle task.                                                                                                                                |
+| Run Verifications  | Runs [`:verifyPlugin`][gh:intellij-platform-gradle-plugin-verifyPlugin] IntelliJ Platform Gradle Plugin task to check the plugin compatibility against the specified IntelliJ IDEs. |
 
 > [!NOTE]
 > You can find the logs from the running task in the `idea.log` tab.
@@ -147,13 +118,11 @@ See [Syntax for issue forms](https://docs.github.com/en/communities/using-templa
 - [IntelliJ Platform UI Guidelines][jb:ui-guidelines]
 - [JetBrains Marketplace Paid Plugins][jb:paid-plugins]
 - [IntelliJ SDK Code Samples][gh:code-samples]
-- [Remote Development / Split Mode][docs:remote-dev]
 
 [docs]: https://plugins.jetbrains.com/docs/intellij
 [docs:intro]: https://plugins.jetbrains.com/docs/intellij/intellij-platform.html?from=IJPluginTemplate
 [docs:plugin.xml]: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html?from=IJPluginTemplate
 [docs:publishing]: https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate
-[docs:remote-dev]: https://plugins.jetbrains.com/docs/intellij/plugin-content-modules.html
 
 [file:plugin.xml]: ./src/main/resources/META-INF/plugin.xml
 

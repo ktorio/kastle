@@ -1,4 +1,4 @@
-# Intellij-plugin-all-packs-enabled
+# Intellij-plugin-github
 
 [![Twitter Follow](https://img.shields.io/badge/follow-%40JBPlatform-1DA1F2?logo=twitter)](https://twitter.com/JBPlatform)
 [![Developers Forum](https://img.shields.io/badge/JetBrains%20Platform-Join-blue)][jb:forum]
@@ -44,17 +44,17 @@ A generated project contains the following content structure:
 │   ├── build.gradle.kts
 │   └── src/main/
 │       ├── kotlin/         Kotlin production sources
-│       └── resources/      intellij.plugin.all.packs.enabled.backend.xml
+│       └── resources/      intellij.plugin.github.backend.xml
 ├── frontend/               Frontend module – UI and presentation
 │   ├── build.gradle.kts
 │   └── src/main/
 │       ├── kotlin/         Kotlin production sources
-│       └── resources/      intellij.plugin.all.packs.enabled.frontend.xml
+│       └── resources/      intellij.plugin.github.frontend.xml
 ├── shared/                 Shared module – cross-boundary contracts
 │   ├── build.gradle.kts
 │   └── src/main/
 │       ├── kotlin/         Kotlin production sources
-│       └── resources/      intellij.plugin.all.packs.enabled.shared.xml
+│       └── resources/      intellij.plugin.github.shared.xml
 ├── gradle/
 │   ├── wrapper/            Gradle Wrapper
 │   └── libs.versions.toml  Version catalog
@@ -79,9 +79,9 @@ A generated project contains the following content structure:
 The root [plugin.xml][file:plugin.xml] file located in `src/main/resources/META-INF` provides general information about the plugin, its dependencies, and references the per-module plugin descriptors.
 
 Each module ships its own plugin descriptor in its `src/main/resources/` directory:
-- `intellij.plugin.all.packs.enabled.backend.xml` – registers backend extensions and services
-- `intellij.plugin.all.packs.enabled.frontend.xml` – registers frontend extensions and tool windows
-- `intellij.plugin.all.packs.enabled.shared.xml` – registers shared extensions and interfaces
+- `intellij.plugin.github.backend.xml` – registers backend extensions and services
+- `intellij.plugin.github.frontend.xml` – registers frontend extensions and tool windows
+- `intellij.plugin.github.shared.xml` – registers shared extensions and interfaces
 
 You can read more about plugin configuration files in the [Plugin Configuration File][docs:plugin.xml] section of our documentation.
 
