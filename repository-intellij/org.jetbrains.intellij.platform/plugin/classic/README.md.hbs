@@ -2,6 +2,9 @@
 
 [![Twitter Follow](https://img.shields.io/badge/follow-%40JBPlatform-1DA1F2?logo=twitter)](https://twitter.com/JBPlatform)
 [![Developers Forum](https://img.shields.io/badge/JetBrains%20Platform-Join-blue)][jb:forum]
+{{#if _slots.readmeInitialSections}}
+
+{{slots readmeInitialSections}}{{/if}}
 
 ## Plugin structure
 
@@ -9,6 +12,8 @@ A generated project contains the following content structure:
 
 ```
 .
+{{#if isGithubEnabled}}
+├── .github/                GitHub Workflows, issue templates, and Dependabot configuration{{/if}}
 ├── .run/                   Predefined Run/Debug Configurations
 ├── build/                  Output build directory
 ├── gradle
@@ -62,6 +67,8 @@ Within the default project structure, there is a `.run` directory provided conta
 Releasing a plugin to [JetBrains Marketplace](https://plugins.jetbrains.com) is a straightforward operation that uses the `publishPlugin` Gradle task provided by the [intellij-platform-gradle-plugin][gh:intellij-platform-gradle-plugin-docs].
 
 You can also upload the plugin to the [JetBrains Plugin Repository](https://plugins.jetbrains.com/plugin/upload) manually via UI.
+
+{{slots readmeAdditionalSections}}
 
 ## Useful links
 

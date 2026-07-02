@@ -1,0 +1,22 @@
+## GitHub Integration
+
+### GitHub Actions
+
+The project includes [GitHub Actions][https://docs.github.com/en/actions] workflows for automated CI/CD:
+
+| Workflow | Trigger | Description |
+|---|---|---|
+| [Build](.github/workflows/build.yml) | Push / PR | Builds, tests, and verifies the plugin; creates a draft release |
+| [Release](.github/workflows/release.yml) | GitHub Release | Publishes the plugin to JetBrains Marketplace |
+
+### GitHub issue templates
+
+The project includes GitHub issue templates:
+- [Bug Report](.github/ISSUE_TEMPLATE/bug-report.yml)
+- [Feature Request](.github/ISSUE_TEMPLATE/feature-request.yml)
+
+See [Syntax for issue forms](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms).
+
+### Dependabot
+
+[Dependabot configuration](.github/dependabot.yml) file enables tracking outdated or vulnerable dependencies.

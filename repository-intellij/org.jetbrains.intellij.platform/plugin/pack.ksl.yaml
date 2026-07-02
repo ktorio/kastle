@@ -24,6 +24,10 @@ properties:
   - key: pluginModuleName
     type: string
     hidden: true
+  - key: isGithubEnabled
+    type: boolean
+    default: false
+    hidden: true
 
   # Fixed values:
   - key: platformVersion

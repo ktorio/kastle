@@ -67,6 +67,7 @@ fun FlowContent.wizardPacksGrid(
                         "org.jetbrains.intellij.platform.architecture" -> "Architecture"
                         "org.jetbrains.intellij.platform.dependencies" -> "Platform dependencies"
                         "org.jetbrains.intellij.platform.plugins" -> "Plugin dependencies"
+                        "org.jetbrains.intellij.platform.vcs" -> "Version control"
                         else -> group.name ?: group.id
                     }
                 }
