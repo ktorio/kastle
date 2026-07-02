@@ -1,9 +1,9 @@
 
 
 import com.intellij.DynamicBundle
-{{#unless isKotlinEnabled}}
+{{#if isKotlinEnabled}}{{else}}
 import org.jetbrains.annotations.Nls
-{{/unless}}
+{{/if}}
 import org.jetbrains.annotations.PropertyKey
 import java.util.function.Supplier
 
