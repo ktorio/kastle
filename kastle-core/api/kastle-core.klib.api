@@ -1167,6 +1167,9 @@ sealed interface org.jetbrains.kastle/SourceFile { // org.jetbrains.kastle/Sourc
 }
 
 sealed interface org.jetbrains.kastle/SourceImport { // org.jetbrains.kastle/SourceImport|null[0]
+    abstract val value // org.jetbrains.kastle/SourceImport.value|{}value[0]
+        abstract fun <get-value>(): kotlin/String // org.jetbrains.kastle/SourceImport.value.<get-value>|<get-value>(){}[0]
+
     final value class External : org.jetbrains.kastle/SourceImport { // org.jetbrains.kastle/SourceImport.External|null[0]
         constructor <init>(kotlin/String) // org.jetbrains.kastle/SourceImport.External.<init>|<init>(kotlin.String){}[0]
 
@@ -1506,6 +1509,15 @@ final class org.jetbrains.kastle.utils/BufferAppendable : kotlin.text/Appendable
     final fun append(kotlin/Char): kotlin.text/Appendable // org.jetbrains.kastle.utils/BufferAppendable.append|append(kotlin.Char){}[0]
     final fun append(kotlin/CharSequence?): kotlin.text/Appendable // org.jetbrains.kastle.utils/BufferAppendable.append|append(kotlin.CharSequence?){}[0]
     final fun append(kotlin/CharSequence?, kotlin/Int, kotlin/Int): kotlin.text/Appendable // org.jetbrains.kastle.utils/BufferAppendable.append|append(kotlin.CharSequence?;kotlin.Int;kotlin.Int){}[0]
+}
+
+final class org.jetbrains.kastle.utils/ImportTrackingAppendable : kotlin.text/Appendable { // org.jetbrains.kastle.utils/ImportTrackingAppendable|null[0]
+    constructor <init>(org.jetbrains.kastle/SourceImports) // org.jetbrains.kastle.utils/ImportTrackingAppendable.<init>|<init>(org.jetbrains.kastle.SourceImports){}[0]
+
+    final fun append(kotlin/Char): org.jetbrains.kastle.utils/ImportTrackingAppendable // org.jetbrains.kastle.utils/ImportTrackingAppendable.append|append(kotlin.Char){}[0]
+    final fun append(kotlin/CharSequence?): org.jetbrains.kastle.utils/ImportTrackingAppendable // org.jetbrains.kastle.utils/ImportTrackingAppendable.append|append(kotlin.CharSequence?){}[0]
+    final fun append(kotlin/CharSequence?, kotlin/Int, kotlin/Int): org.jetbrains.kastle.utils/ImportTrackingAppendable // org.jetbrains.kastle.utils/ImportTrackingAppendable.append|append(kotlin.CharSequence?;kotlin.Int;kotlin.Int){}[0]
+    final fun filterUnused(): org.jetbrains.kastle/SourceImports // org.jetbrains.kastle.utils/ImportTrackingAppendable.filterUnused|filterUnused(){}[0]
 }
 
 final class org.jetbrains.kastle.utils/LocalVariables : org.jetbrains.kastle.utils/Variables { // org.jetbrains.kastle.utils/LocalVariables|null[0]

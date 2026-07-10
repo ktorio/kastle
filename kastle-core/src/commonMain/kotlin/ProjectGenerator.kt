@@ -70,17 +70,30 @@ class ProjectGenerator(
             }
         }
 
-        // 1. Dry run to validate configuration
+        // 1. Dry run to:
+        //  - validate configuration, and
+        //  - detect unused imports
+        val importOverrides = mutableMapOf<String, SourceImports?>()
         project.forEachTemplate { template ->
-            if (template is SourceTemplateIR.Parameters)
-                templateEvaluator.evaluateTo(template, DevNull)
+            if (template !is SourceTemplateIR.Parameters) return@forEachTemplate
+
+            val appendable = template.template.imports?.let(::ImportTrackingAppendable) ?: DevNull
+            templateEvaluator.evaluateTo(template, appendable)
+
+            (appendable as? ImportTrackingAppendable)?.filterUnused()?.let { unusedImports ->
+                importOverrides[template.path] = unusedImports
+            }
         }
 
         // 2. Write actual source file entries
         return flow {
             project.forEachTemplate { template ->
-                emit(SourceFileEntry(template.path) {
-                    templateEvaluator.evaluateToBuffer(template)
+                val effectiveTemplate = when {
+                    template !is SourceTemplateIR.Parameters || template.path !in importOverrides -> template
+                    else -> template.copy(template = template.template.copy(imports = importOverrides[template.path]))
+                }
+                emit(SourceFileEntry(effectiveTemplate.path) {
+                    templateEvaluator.evaluateToBuffer(effectiveTemplate)
                 })
             }
         }
