@@ -106,12 +106,14 @@ sealed interface SourceImport {
             else External(input)
     }
 
+    val value: String
+
     /**
      * A reference to another package from the KASTLE repository.
      */
     @Serializable
     @JvmInline
-    value class Module(val value: String): SourceImport {
+    value class Module(override val value: String): SourceImport {
         override fun toString(): String = "module: $value"
     }
 
@@ -120,7 +122,7 @@ sealed interface SourceImport {
      */
     @Serializable
     @JvmInline
-    value class External(val value: String): SourceImport {
+    value class External(override val value: String): SourceImport {
         override fun toString(): String = value
     }
 }

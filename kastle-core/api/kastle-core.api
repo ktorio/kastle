@@ -1890,6 +1890,7 @@ public final class org/jetbrains/kastle/SourceFileEntry {
 
 public abstract interface class org/jetbrains/kastle/SourceImport {
 	public static final field Companion Lorg/jetbrains/kastle/SourceImport$Companion;
+	public abstract fun getValue ()Ljava/lang/String;
 }
 
 public final class org/jetbrains/kastle/SourceImport$Companion {
@@ -1904,7 +1905,7 @@ public final class org/jetbrains/kastle/SourceImport$External : org/jetbrains/ka
 	public fun equals (Ljava/lang/Object;)Z
 	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
 	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
-	public final fun getValue ()Ljava/lang/String;
+	public fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public static fun hashCode-impl (Ljava/lang/String;)I
 	public fun toString ()Ljava/lang/String;
@@ -1934,7 +1935,7 @@ public final class org/jetbrains/kastle/SourceImport$Module : org/jetbrains/kast
 	public fun equals (Ljava/lang/Object;)Z
 	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
 	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
-	public final fun getValue ()Ljava/lang/String;
+	public fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public static fun hashCode-impl (Ljava/lang/String;)I
 	public fun toString ()Ljava/lang/String;
@@ -3290,6 +3291,17 @@ public final synthetic class org/jetbrains/kastle/utils/Expression$VariableRef$$
 
 public final class org/jetbrains/kastle/utils/Expression$VariableRef$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/kastle/utils/ImportTrackingAppendable : java/lang/Appendable {
+	public fun <init> (Lorg/jetbrains/kastle/SourceImports;)V
+	public synthetic fun append (C)Ljava/lang/Appendable;
+	public fun append (C)Lorg/jetbrains/kastle/utils/ImportTrackingAppendable;
+	public synthetic fun append (Ljava/lang/CharSequence;)Ljava/lang/Appendable;
+	public fun append (Ljava/lang/CharSequence;)Lorg/jetbrains/kastle/utils/ImportTrackingAppendable;
+	public synthetic fun append (Ljava/lang/CharSequence;II)Ljava/lang/Appendable;
+	public fun append (Ljava/lang/CharSequence;II)Lorg/jetbrains/kastle/utils/ImportTrackingAppendable;
+	public final fun filterUnused ()Lorg/jetbrains/kastle/SourceImports;
 }
 
 public final class org/jetbrains/kastle/utils/ListQueue : org/jetbrains/kastle/utils/Queue {
