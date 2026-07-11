@@ -74,15 +74,14 @@ class CatalogArtifactSerializer : KSerializer<CatalogArtifact> {
             element<String>("group", isOptional = true)
             element<String>("name", isOptional = true)
             element<CatalogVersion>("version")
+            element<Boolean>("kmp", isOptional = true)
         }
 
     override fun serialize(encoder: Encoder, value: CatalogArtifact) {
         encoder.encodeStructure(descriptor) {
             encodeStringElement(descriptor, 0, value.module)
             encodeSerializableElement(descriptor, 3, CatalogVersionSerializer(), value.version)
-            if (value.builtIn) {
-                encodeBooleanElement(descriptor, 4, value.builtIn)
-            }
+            encodeBooleanElement(descriptor, 4, value.kmp)
         }
     }
 
@@ -91,7 +90,7 @@ class CatalogArtifactSerializer : KSerializer<CatalogArtifact> {
         var group: String? = null
         var name: String? = null
         var version: CatalogVersion? = null
-        var builtIn = false
+        var kmp = true
 
         decoder.decodeStructure(descriptor) {
             while (true) {
@@ -104,7 +103,7 @@ class CatalogArtifactSerializer : KSerializer<CatalogArtifact> {
                         index,
                         CatalogVersionSerializer()
                     )
-                    4 -> builtIn = decodeBooleanElement(descriptor, index)
+                    4 -> kmp = decodeBooleanElement(descriptor, index)
                     kotlinx.serialization.encoding.CompositeDecoder.DECODE_DONE -> break
                     else -> error("Unexpected index: $index")
                 }
@@ -121,7 +120,7 @@ class CatalogArtifactSerializer : KSerializer<CatalogArtifact> {
         return CatalogArtifact(
             module = finalModule,
             version = requireNotNull(version) { "CatalogArtifact.version is required" },
-            builtIn = builtIn
+            kmp = kmp
         )
     }
 }
