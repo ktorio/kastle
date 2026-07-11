@@ -697,7 +697,9 @@ data class PluginArtifact(
 data class CatalogArtifact(
     val module: String,
     val version: CatalogVersion,
+    @Deprecated("No longer used")
     val builtIn: Boolean = false,
+    val kmp: Boolean = true,
 ) {
     val group: String get() = module.substringBefore(':')
     val name: String get() = module.substringAfter(':')

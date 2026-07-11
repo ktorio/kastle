@@ -36,12 +36,12 @@
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <artifactId>logback-classic-jvm</artifactId>
             <version>${logback_version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test</artifactId>
+            <artifactId>kotlin-test-jvm</artifactId>
             <version>${kotlin_version}</version>
             <scope>test</scope>
         </dependency>

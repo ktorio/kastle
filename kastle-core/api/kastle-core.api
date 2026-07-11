@@ -131,16 +131,18 @@ public final class org/jetbrains/kastle/ByteStringSerializer : kotlinx/serializa
 
 public final class org/jetbrains/kastle/CatalogArtifact {
 	public static final field Companion Lorg/jetbrains/kastle/CatalogArtifact$Companion;
-	public fun <init> (Ljava/lang/String;Lorg/jetbrains/kastle/CatalogVersion;Z)V
-	public synthetic fun <init> (Ljava/lang/String;Lorg/jetbrains/kastle/CatalogVersion;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lorg/jetbrains/kastle/CatalogVersion;ZZ)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/jetbrains/kastle/CatalogVersion;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/jetbrains/kastle/CatalogVersion;
 	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;Lorg/jetbrains/kastle/CatalogVersion;Z)Lorg/jetbrains/kastle/CatalogArtifact;
-	public static synthetic fun copy$default (Lorg/jetbrains/kastle/CatalogArtifact;Ljava/lang/String;Lorg/jetbrains/kastle/CatalogVersion;ZILjava/lang/Object;)Lorg/jetbrains/kastle/CatalogArtifact;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Lorg/jetbrains/kastle/CatalogVersion;ZZ)Lorg/jetbrains/kastle/CatalogArtifact;
+	public static synthetic fun copy$default (Lorg/jetbrains/kastle/CatalogArtifact;Ljava/lang/String;Lorg/jetbrains/kastle/CatalogVersion;ZZILjava/lang/Object;)Lorg/jetbrains/kastle/CatalogArtifact;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBuiltIn ()Z
 	public final fun getGroup ()Ljava/lang/String;
+	public final fun getKmp ()Z
 	public final fun getModule ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getVersion ()Lorg/jetbrains/kastle/CatalogVersion;

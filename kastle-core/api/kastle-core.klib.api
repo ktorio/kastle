@@ -1747,12 +1747,14 @@ final class org.jetbrains.kastle/ByteStringSerializer : kotlinx.serialization/KS
 }
 
 final class org.jetbrains.kastle/CatalogArtifact { // org.jetbrains.kastle/CatalogArtifact|null[0]
-    constructor <init>(kotlin/String, org.jetbrains.kastle/CatalogVersion, kotlin/Boolean = ...) // org.jetbrains.kastle/CatalogArtifact.<init>|<init>(kotlin.String;org.jetbrains.kastle.CatalogVersion;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/String, org.jetbrains.kastle/CatalogVersion, kotlin/Boolean = ..., kotlin/Boolean = ...) // org.jetbrains.kastle/CatalogArtifact.<init>|<init>(kotlin.String;org.jetbrains.kastle.CatalogVersion;kotlin.Boolean;kotlin.Boolean){}[0]
 
     final val builtIn // org.jetbrains.kastle/CatalogArtifact.builtIn|{}builtIn[0]
         final fun <get-builtIn>(): kotlin/Boolean // org.jetbrains.kastle/CatalogArtifact.builtIn.<get-builtIn>|<get-builtIn>(){}[0]
     final val group // org.jetbrains.kastle/CatalogArtifact.group|{}group[0]
         final fun <get-group>(): kotlin/String // org.jetbrains.kastle/CatalogArtifact.group.<get-group>|<get-group>(){}[0]
+    final val kmp // org.jetbrains.kastle/CatalogArtifact.kmp|{}kmp[0]
+        final fun <get-kmp>(): kotlin/Boolean // org.jetbrains.kastle/CatalogArtifact.kmp.<get-kmp>|<get-kmp>(){}[0]
     final val module // org.jetbrains.kastle/CatalogArtifact.module|{}module[0]
         final fun <get-module>(): kotlin/String // org.jetbrains.kastle/CatalogArtifact.module.<get-module>|<get-module>(){}[0]
     final val name // org.jetbrains.kastle/CatalogArtifact.name|{}name[0]
@@ -1763,7 +1765,8 @@ final class org.jetbrains.kastle/CatalogArtifact { // org.jetbrains.kastle/Catal
     final fun component1(): kotlin/String // org.jetbrains.kastle/CatalogArtifact.component1|component1(){}[0]
     final fun component2(): org.jetbrains.kastle/CatalogVersion // org.jetbrains.kastle/CatalogArtifact.component2|component2(){}[0]
     final fun component3(): kotlin/Boolean // org.jetbrains.kastle/CatalogArtifact.component3|component3(){}[0]
-    final fun copy(kotlin/String = ..., org.jetbrains.kastle/CatalogVersion = ..., kotlin/Boolean = ...): org.jetbrains.kastle/CatalogArtifact // org.jetbrains.kastle/CatalogArtifact.copy|copy(kotlin.String;org.jetbrains.kastle.CatalogVersion;kotlin.Boolean){}[0]
+    final fun component4(): kotlin/Boolean // org.jetbrains.kastle/CatalogArtifact.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., org.jetbrains.kastle/CatalogVersion = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): org.jetbrains.kastle/CatalogArtifact // org.jetbrains.kastle/CatalogArtifact.copy|copy(kotlin.String;org.jetbrains.kastle.CatalogVersion;kotlin.Boolean;kotlin.Boolean){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/CatalogArtifact.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/CatalogArtifact.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/CatalogArtifact.toString|toString(){}[0]

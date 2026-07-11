@@ -113,7 +113,7 @@ private fun CatalogArtifact.toTemplateType(): TemplateCatalogArtifact =
         versionRef = (version as? CatalogVersion.Ref)?.ref,
         group = group,
         artifact = name,
-        kmp = isKmp(group, name),
+        kmp = kmp,
     )
 
 context(project: Project)
@@ -181,7 +181,8 @@ private fun Dependency.toTemplateType(modulePath: String): TemplateBuildDependen
             version = version,
             exported = scope == Dependency.EXPORTED_SCOPE,
             scope = scope,
-            kmp = isKmp(group, artifact)
+            // we only track this in catalogs during export
+            kmp = false,
         )
 
         is ModuleDependency -> TemplateBuildDependency(
@@ -293,11 +294,3 @@ private fun ModuleDependency.typesafeProjectAccessor(modulePath: String): String
         }
     }
 }
-
-// TODO small hack for working with maven
-private fun isKmp(group: String, artifact: String): Boolean =
-    group in setOf(
-        "org.jetbrains",
-        "org.jetbrains.kotlinx",
-        "io.ktor",
-    )

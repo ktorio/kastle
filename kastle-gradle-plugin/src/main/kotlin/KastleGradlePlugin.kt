@@ -29,6 +29,8 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
         // Read the repository path from gradle.properties or use default
         val repositoryPath = settings.providers.gradleProperty("kastle.repositoryPath")
             .getOrElse(".")
+        val defaultExportPath = settings.providers.gradleProperty("kastle.exportPath")
+            .getOrElse("export")
 
         val repositoryDir = File(settings.rootDir, repositoryPath)
         if (!repositoryDir.exists() || !repositoryDir.isDirectory) {
@@ -89,16 +91,33 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
         // Register top-level tasks on the root project
         settings.gradle.rootProject { project ->
             fun doExport(fileFormat: FileFormat) {
-                val exportPath = kotlinx.io.files.Path(
-                    project.findProperty("exportPath") as? String ?: "export"
-                )
+                val exportPath = kotlinx.io.files.Path(project.findProperty("exportPath") as? String ?: defaultExportPath)
+                // Maven needs this to know whether to append `-jvm` or not
+                val detectKmp: (String) -> Boolean = { coords ->
+                    runCatching {
+                        val dependency = project.dependencies.create(coords)
+                        val config = project.configurations.detachedConfiguration(dependency)
+                            .apply { isTransitive = false }
+                        config.resolvedConfiguration.resolvedArtifacts.any {
+                            it.moduleVersion.id.module.name.endsWith("-jvm")
+                        }
+                    }.getOrDefault(false)
+                }
                 logger.lifecycle("Exporting repository to $exportPath...")
                 runBlocking {
                     val export = repository.export(
                         path = exportPath,
                         fileFormat = fileFormat,
                     )
-                    val exportedCatalogs = export.catalogs()
+                    val exportedCatalogs = export.catalogs().map { catalog ->
+                        catalog.copy(libraries = catalog.libraries.mapValues { (_, library) ->
+                            val versionString = when(val version = library.version) {
+                                is CatalogVersion.Number -> version.number
+                                is CatalogVersion.Ref -> catalog.versions[version.ref] ?: return@mapValues library
+                            }
+                            library.copy(kmp = detectKmp("${library.group}:${library.name}:${versionString}"))
+                        })
+                    }
                     val alreadyExportedNames = exportedCatalogs.map { it.name }.toSet()
                     val catalogsExtension = project.extensions.getByType(VersionCatalogsExtension::class.java)
                     val catalogNames = catalogsExtension.catalogNames
@@ -117,9 +136,13 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
 
                         val libraryAliases = gradleCatalog.libraryAliases.associateWith { alias ->
                             val dependency = gradleCatalog.findLibrary(alias).get().get()
+                            val group = dependency.module.group
+                            val name = dependency.module.name
+                            val version = dependency.versionConstraint.requiredVersion
                             CatalogArtifact(
-                                module = "${dependency.module.group}:${dependency.module.name}",
-                                version = dependency.versionConstraint.requiredVersion.let(CatalogVersion::Number),
+                                module = "$group:$name",
+                                version = version.let(CatalogVersion::Number),
+                                kmp = detectKmp("$group:$name:$version")
                             )
                         }.mapKeys { (key) -> key.replace('.', '-') }
 
@@ -131,9 +154,9 @@ abstract class KastleGradlePlugin : Plugin<Settings> {
                             libraries = libraryAliases,
                         )
                     }
-                    if (externalCatalogs.isNotEmpty()) {
-                        export.catalogs(exportedCatalogs + externalCatalogs)
-                    }
+                    // always override catalogs
+                    export.catalogs(exportedCatalogs + externalCatalogs)
+
                     logger.lifecycle("Exported to $exportPath")
                 }
             }
