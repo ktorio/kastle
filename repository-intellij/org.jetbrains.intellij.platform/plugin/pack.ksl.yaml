@@ -41,7 +41,7 @@ properties:
   - key: intellijPlatformGradlePluginVersion
     type: string
     hidden: true
-    default: "2.18.0"
+    default: "2.18.1"
 
 propertyValues:
   # Post-processed input properties:
