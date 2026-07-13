@@ -7,7 +7,8 @@ propertyValues:
     value: "true"
 
 rootSources:
-  - path: .github/workflows/build.yml
+  - path: .github/workflows/build.yml.hbs
+    target: file:.github/workflows/build.yml
   - path: .github/workflows/release.yml
   - path: .github/dependabot.yml
   - path: .github/ISSUE_TEMPLATE/bug-report.yml
