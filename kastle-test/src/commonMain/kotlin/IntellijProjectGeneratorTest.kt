@@ -127,6 +127,29 @@ fun IntellijProjectGeneratorTest(
         )
     }
 
+    suspend fun testPluginQodana(layout: PluginLayout) {
+        generateAndValidateSnapshot(
+            "intellij-plugin-qodana",
+            layout.snapshotSubDir,
+            listOf(
+                "org.jetbrains.intellij.platform/plugin",
+                "org.jetbrains.intellij.platform.misc/qodana",
+            ) + layout.extraPacks,
+        )
+    }
+
+    suspend fun testPluginQodanaGitHub(layout: PluginLayout) {
+        generateAndValidateSnapshot(
+            "intellij-plugin-qodana-github",
+            layout.snapshotSubDir,
+            listOf(
+                "org.jetbrains.intellij.platform/plugin",
+                "org.jetbrains.intellij.platform.vcs/github",
+                "org.jetbrains.intellij.platform.misc/qodana",
+            ) + layout.extraPacks,
+        )
+    }
+
     suspend fun testPluginAllPacksEnabled(layout: PluginLayout, includeSamples: Boolean) {
         val snapshotName = if (includeSamples) "intellij-plugin-with-samples-all-packs-enabled"
         else "intellij-plugin-all-packs-enabled"
@@ -151,6 +174,7 @@ fun IntellijProjectGeneratorTest(
                 "org.jetbrains.intellij.platform.dependencies/lsp",
                 "org.jetbrains.intellij.platform.vcs/git",
                 "org.jetbrains.intellij.platform.vcs/github",
+                "org.jetbrains.intellij.platform.misc/qodana",
             ) + layout.extraPacks,
             properties,
         )
@@ -173,6 +197,12 @@ fun IntellijProjectGeneratorTest(
 
     "intellij-plugin-github (classic)" { testPluginGitHub(PluginLayout.Classic) }
     "intellij-plugin-github (modular)" { testPluginGitHub(PluginLayout.Modular) }
+
+    "intellij-plugin-qodana (classic)" { testPluginQodana(PluginLayout.Classic) }
+    "intellij-plugin-qodana (modular)" { testPluginQodana(PluginLayout.Modular) }
+
+    "intellij-plugin-qodana-github (classic)" { testPluginQodanaGitHub(PluginLayout.Classic) }
+    "intellij-plugin-qodana-github (modular)" { testPluginQodanaGitHub(PluginLayout.Modular) }
 
     "intellij-plugin-all-packs-enabled (classic)" {
         testPluginAllPacksEnabled(

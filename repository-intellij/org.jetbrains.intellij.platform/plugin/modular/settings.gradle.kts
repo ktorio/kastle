@@ -12,6 +12,9 @@ pluginManagement {
         id("rpc") version "2.3.20-RC2-0.1"
         id("org.jetbrains.kotlin.jvm") version "2.3.20"
         id("org.jetbrains.kotlin.plugin.serialization") version "2.3.20"
+        for (plugin in _project.gradle.plugins) {
+        id(plugin.id) version plugin.version
+        }
     }
 }
 

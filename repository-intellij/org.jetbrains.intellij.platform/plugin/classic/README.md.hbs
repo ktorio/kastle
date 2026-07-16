@@ -14,6 +14,10 @@ A generated project contains the following content structure:
 .
 {{#if isGithubEnabled}}
 ├── .github/                GitHub Workflows, issue templates, and Dependabot configuration{{/if}}
+{{#if isQodanaEnabled}}
+├── .qodana
+│   └── profiles
+│       └── plugin.yaml     Qodana plugin inspections profile{{/if}}
 ├── .run/                   Predefined Run/Debug Configurations
 ├── build/                  Output build directory
 ├── gradle
@@ -29,6 +33,8 @@ A generated project contains the following content structure:
 ├── gradlew                 *nix Gradle Wrapper script
 ├── gradlew.bat             Windows Gradle Wrapper script
 ├── README.md               README
+{{#if isQodanaEnabled}}
+├── qodana.yml              Qodana code inspections configuration{{/if}}
 └── settings.gradle.kts     Gradle project settings
 ```
 

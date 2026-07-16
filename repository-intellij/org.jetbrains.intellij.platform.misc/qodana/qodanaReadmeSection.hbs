@@ -1,0 +1,40 @@
+
+## Qodana Code Inspections
+
+> Running Qodana locally requires [Docker](https://www.docker.com/).
+
+Qodana integration adds the possibility of inspecting the plugin code against the same inspections that are available in JetBrains IDEs.
+
+This plugin project declares a Qodana inspections profile: `.qodana/profiles/plugin.yaml`.
+It is referenced in the `qodana.yml` configuration file.
+
+The profile includes the default profiles of JetBrains IDEs and all inspections from the **Plugin DevKit** category.
+
+See more about [Qodana inspection profiles](https://www.jetbrains.com/help/qodana/inspection-profiles.html).
+
+### Qodana Gradle Plugin
+
+To run Qodana code inspections locally
+1. Make sure that Docker is running.
+2. Run the `qodanaScan` Gradle task in the project root:
+   ```
+   ./gradlew qodanaScan
+   ```
+
+It generates results in `build/qodana/results/`.
+To view the results open one of:
+- `qodana.sarif.json` - opens the results in the IDE
+- `report/index.html` - to see the report in the browser
+
+See more information about [Gradle integration](https://www.jetbrains.com/help/qodana/quick-start.html#quickstart-gradle-plugin).
+
+{{#if isGithubEnabled}}
+### Qodana GitHub Action
+
+The Code Inspection GitHub Action invokes Qodana analysis on GitHub on push to the main branch and when a PR is opened.
+The PR analysis includes only the newly introduced issues.
+
+Results can be viewed in the workflow results in the **Qodana for JVM** tab.
+They are also automatically posted in the PR comment.
+
+{{/if}}

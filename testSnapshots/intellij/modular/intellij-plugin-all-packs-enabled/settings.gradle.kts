@@ -10,6 +10,7 @@ pluginManagement {
         id("rpc") version "2.3.20-RC2-0.1"
         id("org.jetbrains.kotlin.jvm") version "2.3.20"
         id("org.jetbrains.kotlin.plugin.serialization") version "2.3.20"
+        id("org.jetbrains.qodana") version "2026.1.3"
     }
 }
 

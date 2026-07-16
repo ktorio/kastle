@@ -1,0 +1,5 @@
+platform: jvm
+
+gradle:
+  plugins:
+    - libs.plugin3-qodana

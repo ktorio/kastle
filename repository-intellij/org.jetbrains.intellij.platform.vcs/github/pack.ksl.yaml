@@ -5,6 +5,8 @@ icon: AllIcons.Nodes.FolderGithub
 propertyValues:
   - key: org.jetbrains.intellij.platform/plugin/isGithubEnabled
     value: "true"
+  - key: org.jetbrains.intellij.platform.misc/qodana/isGithubEnabled
+    value: "true"
 
 rootSources:
   - path: .github/workflows/build.yml.hbs

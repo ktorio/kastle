@@ -7,6 +7,9 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
     id("rpc") apply false
     id("org.jetbrains.kotlin.plugin.serialization") apply false
+    for (plugin in _project.gradle.plugins) {
+    id(plugin.id)
+    }
 }
 
 subprojects {
