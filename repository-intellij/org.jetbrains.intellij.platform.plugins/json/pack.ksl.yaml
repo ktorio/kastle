@@ -1,5 +1,5 @@
 name: JSON
-description: Dependency on the JSON (com.intellij.modules.json) plugin
+description: JSON language
 icon: AllIcons.FileTypes.Json
 links:
   home: https://plugins.jetbrains.com/plugin/25364-json
