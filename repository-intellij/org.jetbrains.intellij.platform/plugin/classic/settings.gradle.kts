@@ -16,7 +16,6 @@ plugins {
     id("org.jetbrains.intellij.platform.settings") version intellijPlatformGradlePluginVersion
 }
 
-@Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     // Configure all projects' repositories
     repositories {

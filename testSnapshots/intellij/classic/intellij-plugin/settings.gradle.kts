@@ -14,7 +14,6 @@ plugins {
     id("org.jetbrains.intellij.platform.settings") version "1.0.0"
 }
 
-@Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     // Configure all projects' repositories
     repositories {
