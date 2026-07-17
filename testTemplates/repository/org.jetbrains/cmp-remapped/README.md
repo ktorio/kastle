@@ -1,0 +1,1 @@
+This pack demonstrates module remapping logic using Compose Multiplatform.

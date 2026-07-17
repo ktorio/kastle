@@ -887,7 +887,7 @@ public final class org/jetbrains/kastle/PackDescriptor$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class org/jetbrains/kastle/PackId {
+public final class org/jetbrains/kastle/PackId : org/jetbrains/kastle/PackSelection {
 	public static final field Companion Lorg/jetbrains/kastle/PackId$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -1065,7 +1065,7 @@ public final class org/jetbrains/kastle/PackRepositoryKt {
 	public static final fun read (Lorg/jetbrains/kastle/PackRepository;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class org/jetbrains/kastle/PackRequirement {
+public final class org/jetbrains/kastle/PackRequirement : org/jetbrains/kastle/PackSelection {
 	public static final field Companion Lorg/jetbrains/kastle/PackRequirement$Companion;
 	public fun <init> (Lorg/jetbrains/kastle/PackId;Ljava/util/Map;)V
 	public synthetic fun <init> (Lorg/jetbrains/kastle/PackId;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -1078,6 +1078,7 @@ public final class org/jetbrains/kastle/PackRequirement {
 	public final fun getPackId ()Lorg/jetbrains/kastle/PackId;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+	public final fun transform (Lorg/jetbrains/kastle/ProjectModules;)Lorg/jetbrains/kastle/ProjectModules;
 }
 
 public final class org/jetbrains/kastle/PackRequirement$Companion {
@@ -1086,6 +1087,19 @@ public final class org/jetbrains/kastle/PackRequirement$Companion {
 }
 
 public final class org/jetbrains/kastle/PackRequirementStringSerializer : org/jetbrains/kastle/CustomParserSerializer {
+	public fun <init> ()V
+}
+
+public abstract interface class org/jetbrains/kastle/PackSelection {
+	public static final field Companion Lorg/jetbrains/kastle/PackSelection$Companion;
+}
+
+public final class org/jetbrains/kastle/PackSelection$Companion {
+	public final fun parse (Ljava/lang/String;)Lorg/jetbrains/kastle/PackSelection;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/kastle/PackSelectionSerializer : org/jetbrains/kastle/CustomParserSerializer {
 	public fun <init> ()V
 }
 
@@ -1124,8 +1138,10 @@ public final class org/jetbrains/kastle/PackSources$Companion {
 }
 
 public final class org/jetbrains/kastle/PackTypesKt {
+	public static final fun asRequirement (Lorg/jetbrains/kastle/PackSelection;)Lorg/jetbrains/kastle/PackRequirement;
 	public static final fun getAllSources (Lorg/jetbrains/kastle/PackDescriptor;)Lkotlin/sequences/Sequence;
 	public static final fun getCommonAndRootSources (Lorg/jetbrains/kastle/PackDescriptor;)Lkotlin/sequences/Sequence;
+	public static final fun getPackId (Lorg/jetbrains/kastle/PackSelection;)Lorg/jetbrains/kastle/PackId;
 }
 
 public final class org/jetbrains/kastle/PackagingStyle : java/lang/Enum {
@@ -1200,6 +1216,7 @@ public final class org/jetbrains/kastle/ProjectDescriptor {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getGroup ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
+	public final fun getPackIds ()Ljava/util/List;
 	public final fun getPackaging ()Lorg/jetbrains/kastle/PackagingStyle;
 	public final fun getPacks ()Ljava/util/List;
 	public final fun getProperties ()Ljava/util/Map;
@@ -1237,6 +1254,7 @@ public abstract interface class org/jetbrains/kastle/ProjectModules {
 	public static final field Companion Lorg/jetbrains/kastle/ProjectModules$Companion;
 	public abstract fun getModules ()Ljava/util/List;
 	public fun map (Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/kastle/ProjectModules;
+	public fun mapNotNull (Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/kastle/ProjectModules;
 }
 
 public final class org/jetbrains/kastle/ProjectModules$Companion {
@@ -1246,6 +1264,7 @@ public final class org/jetbrains/kastle/ProjectModules$Companion {
 
 public final class org/jetbrains/kastle/ProjectModules$DefaultImpls {
 	public static fun map (Lorg/jetbrains/kastle/ProjectModules;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/kastle/ProjectModules;
+	public static fun mapNotNull (Lorg/jetbrains/kastle/ProjectModules;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/kastle/ProjectModules;
 }
 
 public final class org/jetbrains/kastle/ProjectModules$Empty : org/jetbrains/kastle/ProjectModules {
@@ -1254,6 +1273,7 @@ public final class org/jetbrains/kastle/ProjectModules$Empty : org/jetbrains/kas
 	public fun getModules ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun map (Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/kastle/ProjectModules;
+	public fun mapNotNull (Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/kastle/ProjectModules;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 	public fun toString ()Ljava/lang/String;
 }
@@ -1268,6 +1288,7 @@ public final class org/jetbrains/kastle/ProjectModules$Multi : org/jetbrains/kas
 	public fun getModules ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun map (Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/kastle/ProjectModules;
+	public fun mapNotNull (Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/kastle/ProjectModules;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -1297,6 +1318,7 @@ public final class org/jetbrains/kastle/ProjectModules$Single : org/jetbrains/ka
 	public fun getModules ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun map (Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/kastle/ProjectModules;
+	public fun mapNotNull (Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/kastle/ProjectModules;
 	public fun toString ()Ljava/lang/String;
 }
 

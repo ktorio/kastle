@@ -1,7 +1,6 @@
 package org.jetbrains.kastle
 
 import io.kotest.matchers.shouldBe
-import kotlinx.datetime.Clock
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.buffered
@@ -40,7 +39,7 @@ fun assertFilesAreEqualWithSnapshot(
         val destination =
             if (replace) Path(expectedPath)
             else SystemTemporaryDirectory
-                .resolve("actual-files-${Clock.System.now().toEpochMilliseconds()}")
+                .resolve("actual-files-${kotlin.time.Clock.System.now().toEpochMilliseconds()}")
 
         println("Files changed, see $destination for new snapshot")
 

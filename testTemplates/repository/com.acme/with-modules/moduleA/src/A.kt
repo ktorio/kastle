@@ -1,0 +1,3 @@
+package acme
+
+class A

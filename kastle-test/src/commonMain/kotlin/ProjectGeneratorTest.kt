@@ -339,6 +339,13 @@ fun TestSuite.testProjectGenerator(
                 outputDir.toString(),
             )
         }
+
+        test("module remapping") { gen ->
+            gen.generateAndValidateSnapshot(
+                "module-remapping",
+                listOf("com.acme/module-remapping"),
+            )
+        }
     } closeWith {
         tearDown()
     }

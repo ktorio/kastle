@@ -1,0 +1,6 @@
+name: Module Remapping
+description: Remaps modules from the with-modules pack to new locations
+requires:
+  - com.acme/with-modules:
+      moduleA: remapped/alpha
+      moduleB: remapped/beta

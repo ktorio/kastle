@@ -145,7 +145,7 @@ private fun mergeDependencies(
     }
 }
 
-private fun relativizePath(fromAbsolute: String, toAbsolute: String): String {
+internal fun relativizePath(fromAbsolute: String, toAbsolute: String): String {
     val fromSegments = fromAbsolute.split('/').filter { it.isNotEmpty() }
     val toSegments = toAbsolute.split('/').filter { it.isNotEmpty() }
     var common = 0

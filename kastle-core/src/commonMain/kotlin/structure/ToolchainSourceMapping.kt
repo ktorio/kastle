@@ -4,6 +4,7 @@ import org.jetbrains.kastle.CatalogReference
 import org.jetbrains.kastle.Dependency
 import org.jetbrains.kastle.FunctionDependency
 import org.jetbrains.kastle.SourceModule
+import org.jetbrains.kastle.GradleSettings
 import org.jetbrains.kastle.gen.ProjectMapping
 import org.jetbrains.kastle.gradlePlugins
 import kotlin.collections.mapValues
@@ -11,19 +12,29 @@ import kotlin.collections.mapValues
 @Deprecated("use ToolchainSourceMapping", ReplaceWith("ToolchainSourceMapping"))
 val AmperSourceMapping get() = ToolchainSourceMapping
 
+private val TOOLCHAIN_HANDLED_PLUGINS: Set<String> = setOf(
+    "kotlinMultiplatform",
+    "kotlinJvm",
+    "androidApplication",
+    "androidMultiplatformLibrary",
+    "composeMultiplatform",
+    "composeCompiler",
+)
+
 val ToolchainSourceMapping = ProjectMapping { project ->
     if (project.packs.none { it.id == BuildToolModules.TOOLCHAIN_PACK_ID })
         return@ProjectMapping project
 
     for (module in project.moduleSources.modules) {
-        // we assume that when amper is configured, then gradle plugins won't cause trouble
+        // we assume that when the toolchain is configured, then gradle plugins won't cause trouble
         if (module.toolchain.isNotEmpty())
             continue
-        require(module.gradlePlugins.isEmpty()) {
-            "Project has plugins that require the Gradle build system"
+        val unhandledPlugins = module.gradlePlugins.filterNot {
+            it.tomlKey in TOOLCHAIN_HANDLED_PLUGINS
         }
-        require(module.dependencies.values.flatten().none { it is FunctionDependency }) {
-            "Project has dependencies not supported by Kotlin Toolchain"
+        require(unhandledPlugins.isEmpty()) {
+            "Project has plugins that require the Gradle build system: " +
+                    unhandledPlugins.joinToString { it.tomlKey }
         }
     }
 

@@ -1,0 +1,12 @@
+name: Compose Multiplatform With Remapping
+description: >
+  Consumes the Compose Multiplatform pack while remapping two of its modules.
+  Exercises PackRequirement.transform for relative inter-module dependencies
+  (e.g. ../sharedLogic) so they are re-pointed to the new module locations.
+requires:
+  - org.jetbrains/compose-multiplatform:
+      composeApp/shared: features/ui
+      composeApp/sharedLogic: features/logic
+      composeApp/androidApp: apps/android
+      composeApp/desktopApp: apps/desktop
+      composeApp/iosApp: apps/ios

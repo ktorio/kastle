@@ -866,11 +866,20 @@ sealed interface org.jetbrains.kastle/PackMetadata { // org.jetbrains.kastle/Pac
     }
 }
 
+sealed interface org.jetbrains.kastle/PackSelection { // org.jetbrains.kastle/PackSelection|null[0]
+    final object Companion : kotlinx.serialization.internal/SerializerFactory { // org.jetbrains.kastle/PackSelection.Companion|null[0]
+        final fun parse(kotlin/String): org.jetbrains.kastle/PackSelection // org.jetbrains.kastle/PackSelection.Companion.parse|parse(kotlin.String){}[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<org.jetbrains.kastle/PackSelection> // org.jetbrains.kastle/PackSelection.Companion.serializer|serializer(){}[0]
+        final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // org.jetbrains.kastle/PackSelection.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
+    }
+}
+
 sealed interface org.jetbrains.kastle/ProjectModules { // org.jetbrains.kastle/ProjectModules|null[0]
     abstract val modules // org.jetbrains.kastle/ProjectModules.modules|{}modules[0]
         abstract fun <get-modules>(): kotlin.collections/List<org.jetbrains.kastle/SourceModule> // org.jetbrains.kastle/ProjectModules.modules.<get-modules>|<get-modules>(){}[0]
 
     open fun map(kotlin/Function1<org.jetbrains.kastle/SourceModule, org.jetbrains.kastle/SourceModule>): org.jetbrains.kastle/ProjectModules // org.jetbrains.kastle/ProjectModules.map|map(kotlin.Function1<org.jetbrains.kastle.SourceModule,org.jetbrains.kastle.SourceModule>){}[0]
+    open fun mapNotNull(kotlin/Function1<org.jetbrains.kastle/SourceModule, org.jetbrains.kastle/SourceModule?>): org.jetbrains.kastle/ProjectModules // org.jetbrains.kastle/ProjectModules.mapNotNull|mapNotNull(kotlin.Function1<org.jetbrains.kastle.SourceModule,org.jetbrains.kastle.SourceModule?>){}[0]
 
     final class Multi : org.jetbrains.kastle/ProjectModules { // org.jetbrains.kastle/ProjectModules.Multi|null[0]
         constructor <init>(kotlin.collections/List<org.jetbrains.kastle/SourceModule>) // org.jetbrains.kastle/ProjectModules.Multi.<init>|<init>(kotlin.collections.List<org.jetbrains.kastle.SourceModule>){}[0]
@@ -2440,7 +2449,7 @@ final class org.jetbrains.kastle/PackDescriptor : org.jetbrains.kastle/PackMetad
     }
 }
 
-final class org.jetbrains.kastle/PackId { // org.jetbrains.kastle/PackId|null[0]
+final class org.jetbrains.kastle/PackId : org.jetbrains.kastle/PackSelection { // org.jetbrains.kastle/PackId|null[0]
     constructor <init>(kotlin/String, kotlin/String) // org.jetbrains.kastle/PackId.<init>|<init>(kotlin.String;kotlin.String){}[0]
 
     final val group // org.jetbrains.kastle/PackId.group|{}group[0]
@@ -2580,20 +2589,21 @@ final class org.jetbrains.kastle/PackReadException : kotlin/Exception { // org.j
     constructor <init>(org.jetbrains.kastle/PackId?, kotlin/Throwable) // org.jetbrains.kastle/PackReadException.<init>|<init>(org.jetbrains.kastle.PackId?;kotlin.Throwable){}[0]
 }
 
-final class org.jetbrains.kastle/PackRequirement { // org.jetbrains.kastle/PackRequirement|null[0]
-    constructor <init>(org.jetbrains.kastle/PackId, kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // org.jetbrains.kastle/PackRequirement.<init>|<init>(org.jetbrains.kastle.PackId;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+final class org.jetbrains.kastle/PackRequirement : org.jetbrains.kastle/PackSelection { // org.jetbrains.kastle/PackRequirement|null[0]
+    constructor <init>(org.jetbrains.kastle/PackId, kotlin.collections/Map<kotlin/String, kotlin/String>? = ...) // org.jetbrains.kastle/PackRequirement.<init>|<init>(org.jetbrains.kastle.PackId;kotlin.collections.Map<kotlin.String,kotlin.String>?){}[0]
 
     final val modules // org.jetbrains.kastle/PackRequirement.modules|{}modules[0]
-        final fun <get-modules>(): kotlin.collections/Map<kotlin/String, kotlin/String> // org.jetbrains.kastle/PackRequirement.modules.<get-modules>|<get-modules>(){}[0]
+        final fun <get-modules>(): kotlin.collections/Map<kotlin/String, kotlin/String>? // org.jetbrains.kastle/PackRequirement.modules.<get-modules>|<get-modules>(){}[0]
     final val packId // org.jetbrains.kastle/PackRequirement.packId|{}packId[0]
         final fun <get-packId>(): org.jetbrains.kastle/PackId // org.jetbrains.kastle/PackRequirement.packId.<get-packId>|<get-packId>(){}[0]
 
     final fun component1(): org.jetbrains.kastle/PackId // org.jetbrains.kastle/PackRequirement.component1|component1(){}[0]
-    final fun component2(): kotlin.collections/Map<kotlin/String, kotlin/String> // org.jetbrains.kastle/PackRequirement.component2|component2(){}[0]
-    final fun copy(org.jetbrains.kastle/PackId = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ...): org.jetbrains.kastle/PackRequirement // org.jetbrains.kastle/PackRequirement.copy|copy(org.jetbrains.kastle.PackId;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun component2(): kotlin.collections/Map<kotlin/String, kotlin/String>? // org.jetbrains.kastle/PackRequirement.component2|component2(){}[0]
+    final fun copy(org.jetbrains.kastle/PackId = ..., kotlin.collections/Map<kotlin/String, kotlin/String>? = ...): org.jetbrains.kastle/PackRequirement // org.jetbrains.kastle/PackRequirement.copy|copy(org.jetbrains.kastle.PackId;kotlin.collections.Map<kotlin.String,kotlin.String>?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/PackRequirement.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/PackRequirement.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/PackRequirement.toString|toString(){}[0]
+    final fun transform(org.jetbrains.kastle/ProjectModules): org.jetbrains.kastle/ProjectModules // org.jetbrains.kastle/PackRequirement.transform|transform(org.jetbrains.kastle.ProjectModules){}[0]
 
     final object Companion { // org.jetbrains.kastle/PackRequirement.Companion|null[0]
         final fun parse(kotlin/String): org.jetbrains.kastle/PackRequirement // org.jetbrains.kastle/PackRequirement.Companion.parse|parse(kotlin.String){}[0]
@@ -2603,6 +2613,10 @@ final class org.jetbrains.kastle/PackRequirement { // org.jetbrains.kastle/PackR
 
 final class org.jetbrains.kastle/PackRequirementStringSerializer : org.jetbrains.kastle/CustomParserSerializer<org.jetbrains.kastle/PackRequirement> { // org.jetbrains.kastle/PackRequirementStringSerializer|null[0]
     constructor <init>() // org.jetbrains.kastle/PackRequirementStringSerializer.<init>|<init>(){}[0]
+}
+
+final class org.jetbrains.kastle/PackSelectionSerializer : org.jetbrains.kastle/CustomParserSerializer<org.jetbrains.kastle/PackSelection> { // org.jetbrains.kastle/PackSelectionSerializer|null[0]
+    constructor <init>() // org.jetbrains.kastle/PackSelectionSerializer.<init>|<init>(){}[0]
 }
 
 final class org.jetbrains.kastle/PackSources { // org.jetbrains.kastle/PackSources|null[0]
@@ -2673,16 +2687,18 @@ final class org.jetbrains.kastle/PluginArtifact { // org.jetbrains.kastle/Plugin
 }
 
 final class org.jetbrains.kastle/ProjectDescriptor { // org.jetbrains.kastle/ProjectDescriptor|null[0]
-    constructor <init>(kotlin/String, kotlin/String, org.jetbrains.kastle/PackagingStyle = ..., kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> = ..., kotlin.collections/List<org.jetbrains.kastle/PackId> = ...) // org.jetbrains.kastle/ProjectDescriptor.<init>|<init>(kotlin.String;kotlin.String;org.jetbrains.kastle.PackagingStyle;kotlin.collections.Map<org.jetbrains.kastle.VariableId,kotlin.String>;kotlin.collections.List<org.jetbrains.kastle.PackId>){}[0]
+    constructor <init>(kotlin/String, kotlin/String, org.jetbrains.kastle/PackagingStyle = ..., kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> = ..., kotlin.collections/List<org.jetbrains.kastle/PackSelection> = ...) // org.jetbrains.kastle/ProjectDescriptor.<init>|<init>(kotlin.String;kotlin.String;org.jetbrains.kastle.PackagingStyle;kotlin.collections.Map<org.jetbrains.kastle.VariableId,kotlin.String>;kotlin.collections.List<org.jetbrains.kastle.PackSelection>){}[0]
 
     final val group // org.jetbrains.kastle/ProjectDescriptor.group|{}group[0]
         final fun <get-group>(): kotlin/String // org.jetbrains.kastle/ProjectDescriptor.group.<get-group>|<get-group>(){}[0]
     final val name // org.jetbrains.kastle/ProjectDescriptor.name|{}name[0]
         final fun <get-name>(): kotlin/String // org.jetbrains.kastle/ProjectDescriptor.name.<get-name>|<get-name>(){}[0]
+    final val packIds // org.jetbrains.kastle/ProjectDescriptor.packIds|{}packIds[0]
+        final fun <get-packIds>(): kotlin.collections/List<org.jetbrains.kastle/PackId> // org.jetbrains.kastle/ProjectDescriptor.packIds.<get-packIds>|<get-packIds>(){}[0]
     final val packaging // org.jetbrains.kastle/ProjectDescriptor.packaging|{}packaging[0]
         final fun <get-packaging>(): org.jetbrains.kastle/PackagingStyle // org.jetbrains.kastle/ProjectDescriptor.packaging.<get-packaging>|<get-packaging>(){}[0]
     final val packs // org.jetbrains.kastle/ProjectDescriptor.packs|{}packs[0]
-        final fun <get-packs>(): kotlin.collections/List<org.jetbrains.kastle/PackId> // org.jetbrains.kastle/ProjectDescriptor.packs.<get-packs>|<get-packs>(){}[0]
+        final fun <get-packs>(): kotlin.collections/List<org.jetbrains.kastle/PackSelection> // org.jetbrains.kastle/ProjectDescriptor.packs.<get-packs>|<get-packs>(){}[0]
     final val properties // org.jetbrains.kastle/ProjectDescriptor.properties|{}properties[0]
         final fun <get-properties>(): kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> // org.jetbrains.kastle/ProjectDescriptor.properties.<get-properties>|<get-properties>(){}[0]
 
@@ -2690,8 +2706,8 @@ final class org.jetbrains.kastle/ProjectDescriptor { // org.jetbrains.kastle/Pro
     final fun component2(): kotlin/String // org.jetbrains.kastle/ProjectDescriptor.component2|component2(){}[0]
     final fun component3(): org.jetbrains.kastle/PackagingStyle // org.jetbrains.kastle/ProjectDescriptor.component3|component3(){}[0]
     final fun component4(): kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> // org.jetbrains.kastle/ProjectDescriptor.component4|component4(){}[0]
-    final fun component5(): kotlin.collections/List<org.jetbrains.kastle/PackId> // org.jetbrains.kastle/ProjectDescriptor.component5|component5(){}[0]
-    final fun copy(kotlin/String = ..., kotlin/String = ..., org.jetbrains.kastle/PackagingStyle = ..., kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> = ..., kotlin.collections/List<org.jetbrains.kastle/PackId> = ...): org.jetbrains.kastle/ProjectDescriptor // org.jetbrains.kastle/ProjectDescriptor.copy|copy(kotlin.String;kotlin.String;org.jetbrains.kastle.PackagingStyle;kotlin.collections.Map<org.jetbrains.kastle.VariableId,kotlin.String>;kotlin.collections.List<org.jetbrains.kastle.PackId>){}[0]
+    final fun component5(): kotlin.collections/List<org.jetbrains.kastle/PackSelection> // org.jetbrains.kastle/ProjectDescriptor.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., org.jetbrains.kastle/PackagingStyle = ..., kotlin.collections/Map<org.jetbrains.kastle/VariableId, kotlin/String> = ..., kotlin.collections/List<org.jetbrains.kastle/PackSelection> = ...): org.jetbrains.kastle/ProjectDescriptor // org.jetbrains.kastle/ProjectDescriptor.copy|copy(kotlin.String;kotlin.String;org.jetbrains.kastle.PackagingStyle;kotlin.collections.Map<org.jetbrains.kastle.VariableId,kotlin.String>;kotlin.collections.List<org.jetbrains.kastle.PackSelection>){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.jetbrains.kastle/ProjectDescriptor.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.jetbrains.kastle/ProjectDescriptor.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.jetbrains.kastle/ProjectDescriptor.toString|toString(){}[0]
@@ -3703,6 +3719,8 @@ final val org.jetbrains.kastle/commonAndRootSources // org.jetbrains.kastle/comm
     final fun (org.jetbrains.kastle/PackDescriptor).<get-commonAndRootSources>(): kotlin.sequences/Sequence<org.jetbrains.kastle/SourceFile> // org.jetbrains.kastle/commonAndRootSources.<get-commonAndRootSources>|<get-commonAndRootSources>@org.jetbrains.kastle.PackDescriptor(){}[0]
 final val org.jetbrains.kastle/gradlePlugins // org.jetbrains.kastle/gradlePlugins|@org.jetbrains.kastle.SourceModuleMetadata{}gradlePlugins[0]
     final fun (org.jetbrains.kastle/SourceModuleMetadata).<get-gradlePlugins>(): kotlin.collections/List<org.jetbrains.kastle/CatalogReference> // org.jetbrains.kastle/gradlePlugins.<get-gradlePlugins>|<get-gradlePlugins>@org.jetbrains.kastle.SourceModuleMetadata(){}[0]
+final val org.jetbrains.kastle/packId // org.jetbrains.kastle/packId|@org.jetbrains.kastle.PackSelection{}packId[0]
+    final fun (org.jetbrains.kastle/PackSelection).<get-packId>(): org.jetbrains.kastle/PackId // org.jetbrains.kastle/packId.<get-packId>|<get-packId>@org.jetbrains.kastle.PackSelection(){}[0]
 final val org.jetbrains.kastle/resourcesDir // org.jetbrains.kastle/resourcesDir|@org.jetbrains.kastle.Platform{}resourcesDir[0]
     final fun (org.jetbrains.kastle/Platform).<get-resourcesDir>(): kotlin/String // org.jetbrains.kastle/resourcesDir.<get-resourcesDir>|<get-resourcesDir>@org.jetbrains.kastle.Platform(){}[0]
 final val org.jetbrains.kastle/srcDir // org.jetbrains.kastle/srcDir|@org.jetbrains.kastle.Platform{}srcDir[0]
@@ -3748,6 +3766,7 @@ final fun (org.jetbrains.kastle.gen/ProjectResolver).org.jetbrains.kastle.gen/pl
 final fun (org.jetbrains.kastle.utils/LocalVariables).org.jetbrains.kastle.utils/addVariableOrScope(kotlin/String?, kotlin/Any?) // org.jetbrains.kastle.utils/addVariableOrScope|addVariableOrScope@org.jetbrains.kastle.utils.LocalVariables(kotlin.String?;kotlin.Any?){}[0]
 final fun (org.jetbrains.kastle.utils/StringExpression).org.jetbrains.kastle.utils/takeIfSlot(): org.jetbrains.kastle.utils/StringExpression? // org.jetbrains.kastle.utils/takeIfSlot|takeIfSlot@org.jetbrains.kastle.utils.StringExpression(){}[0]
 final fun (org.jetbrains.kastle/Block).org.jetbrains.kastle.utils/contains(org.jetbrains.kastle/Block?): kotlin/Boolean // org.jetbrains.kastle.utils/contains|contains@org.jetbrains.kastle.Block(org.jetbrains.kastle.Block?){}[0]
+final fun (org.jetbrains.kastle/PackSelection).org.jetbrains.kastle/asRequirement(): org.jetbrains.kastle/PackRequirement // org.jetbrains.kastle/asRequirement|asRequirement@org.jetbrains.kastle.PackSelection(){}[0]
 final fun (org.jetbrains.kastle/ProjectModules).org.jetbrains.kastle/flatten(): org.jetbrains.kastle/ProjectModules // org.jetbrains.kastle/flatten|flatten@org.jetbrains.kastle.ProjectModules(){}[0]
 final fun (org.jetbrains.kastle/ProjectModules).org.jetbrains.kastle/map(kotlin/Function1<org.jetbrains.kastle/SourceModule, org.jetbrains.kastle/SourceModule>): org.jetbrains.kastle/ProjectModules // org.jetbrains.kastle/map|map@org.jetbrains.kastle.ProjectModules(kotlin.Function1<org.jetbrains.kastle.SourceModule,org.jetbrains.kastle.SourceModule>){}[0]
 final fun (org.jetbrains.kastle/ProjectModules).org.jetbrains.kastle/plus(org.jetbrains.kastle/ProjectModules): org.jetbrains.kastle/ProjectModules // org.jetbrains.kastle/plus|plus@org.jetbrains.kastle.ProjectModules(org.jetbrains.kastle.ProjectModules){}[0]
