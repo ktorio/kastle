@@ -63,6 +63,7 @@ class SourceImportSerializer: CustomParserSerializer<SourceImport>(SourceImport:
 class CatalogReferenceSerializer: CustomParserSerializer<CatalogReference>(CatalogReference::class, CatalogReference::parse)
 class PropertyScopeSerializer: CustomParserSerializer<PropertyScope>(PropertyScope::class, PropertyScope::parse)
 class PackRequirementStringSerializer: CustomParserSerializer<PackRequirement>(PackRequirement::class, PackRequirement::parse)
+class PackSelectionSerializer: CustomParserSerializer<PackSelection>(PackSelection::class, PackSelection::parse)
 
 /**
  * Handles both { module } and { group, name }.

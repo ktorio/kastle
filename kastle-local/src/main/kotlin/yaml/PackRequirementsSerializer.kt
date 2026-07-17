@@ -34,10 +34,11 @@ class PackRequirementYamlSerializer: KSerializer<PackRequirement> {
         encoder: Encoder,
         value: PackRequirement
     ) {
-        if (value.modules.isEmpty()) {
+        val modules = value.modules
+        if (modules.isNullOrEmpty()) {
             encoder.encodeString(value.packId.toString())
         } else {
-            val singleEmptyKey = value.modules.size == 1 && value.modules.containsKey("")
+            val singleEmptyKey = modules.keys == setOf("")
             val mapDescriptor = buildClassSerialDescriptor("PackRequirement.Object") {
                 if (singleEmptyKey) {
                     element(value.packId.toString(), String.serializer().descriptor)
@@ -47,9 +48,9 @@ class PackRequirementYamlSerializer: KSerializer<PackRequirement> {
             }
             val composite = encoder.beginStructure(mapDescriptor)
             if (singleEmptyKey) {
-                composite.encodeStringElement(mapDescriptor, 0, value.modules.getValue(""))
+                composite.encodeStringElement(mapDescriptor, 0, modules.getValue(""))
             } else {
-                composite.encodeSerializableElement(mapDescriptor, 0, modulesSerializer, value.modules)
+                composite.encodeSerializableElement(mapDescriptor, 0, modulesSerializer, modules)
             }
             composite.endStructure(mapDescriptor)
         }

@@ -2,6 +2,7 @@ package org.jetbrains.kastle
 
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
+import org.jetbrains.kastle.structure.relativizePath
 import org.jetbrains.kastle.utils.StringExpression
 
 @Serializable
@@ -125,8 +126,28 @@ data class SlotDescriptor(
     val parent: StringExpression,
 ): Slot by slot
 
+@Serializable(PackSelectionSerializer::class)
+sealed interface PackSelection {
+    companion object {
+        fun parse(text: String) = when {
+            '|' in text -> PackRequirement.parse(text)
+            else -> PackId.parse(text)
+        }
+    }
+}
+
+val PackSelection.packId get() = when (this) {
+    is PackId -> this
+    is PackRequirement -> packId
+}
+
+fun PackSelection.asRequirement(): PackRequirement = when(this) {
+    is PackId -> PackRequirement(this)
+    is PackRequirement -> this
+}
+
 @Serializable(PackIdSerializer::class)
-data class PackId(val group: String, val id: String) {
+data class PackId(val group: String, val id: String): PackSelection {
     companion object {
         internal val ID_REGEX = Regex("""^[a-z0-9][a-z0-9-.]*[a-z0-9]$""")
         // used during parsing
@@ -151,8 +172,21 @@ data class PackId(val group: String, val id: String) {
 @Serializable(PackRequirementStringSerializer::class)
 data class PackRequirement(
     val packId: PackId,
-    val modules: Map<String, String> = emptyMap(),
-) {
+    val modules: Map<String, String>? = null,
+): PackSelection {
+    private val normalizedModules: Map<String, String>? get() = modules?.ifEmpty { null }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is PackRequirement) return false
+        return packId == other.packId && normalizedModules == other.normalizedModules
+    }
+
+    override fun hashCode(): Int {
+        var result = packId.hashCode()
+        result = 31 * result + (normalizedModules?.hashCode() ?: 0)
+        return result
+    }
     companion object {
         /**
          * This format is not used in the manifests, only for later serialization.
@@ -176,12 +210,80 @@ data class PackRequirement(
         }
     }
 
+    fun transform(modules: ProjectModules): ProjectModules =
+        when(this.modules) {
+            null -> modules
+            else -> modules.mapNotNull { module ->
+                val replacementPath = this.modules[module.path] ?: return@mapNotNull null
+                module.copy(
+                    manifest = module.manifest.copy(
+                        path = remapDependencyPath(
+                            dependencyPath = replacementPath,
+                            originalModulePath = module.path,
+                            newModulePath = replacementPath,
+                        ),
+                        dependencies = module.dependencies.mapValues { (_, dependencies) ->
+                            dependencies.map { dependency ->
+                                when (dependency) {
+                                    is ModuleDependency -> ModuleDependency(
+                                        path = remapDependencyPath(
+                                            dependencyPath = dependency.path,
+                                            originalModulePath = module.path,
+                                            newModulePath = replacementPath,
+                                        ),
+                                        exported = dependency.exported,
+                                        scope = dependency.scope,
+                                    )
+                                    else -> dependency
+                                }
+                            }.toSet()
+                        }
+                    ),
+                )
+            }
+        }
+
+    private fun remapDependencyPath(
+        dependencyPath: String,
+        originalModulePath: String,
+        newModulePath: String,
+    ): String {
+        val moduleRemap = this.modules ?: return dependencyPath
+        if (!dependencyPath.startsWith("..") && !dependencyPath.startsWith("./")) {
+            return moduleRemap[dependencyPath] ?: dependencyPath
+        }
+        val resolved = joinAndNormalize(parentPath(originalModulePath), dependencyPath)
+        val remappedTarget = moduleRemap[resolved] ?: return dependencyPath
+        val base = parentPath(newModulePath)
+        return if (base.isEmpty()) remappedTarget else relativizePath(base, remappedTarget)
+    }
+
+    private fun parentPath(path: String): String {
+        val idx = path.lastIndexOf('/')
+        return if (idx <= 0) "" else path.substring(0, idx)
+    }
+
+    private fun joinAndNormalize(base: String, relative: String): String {
+        val segments = mutableListOf<String>()
+        if (base.isNotEmpty()) segments.addAll(base.split('/').filter { it.isNotEmpty() })
+        for (segment in relative.split('/')) {
+            when (segment) {
+                "", "." -> {}
+                ".." -> if (segments.isNotEmpty()) segments.removeAt(segments.lastIndex)
+                else -> segments.add(segment)
+            }
+        }
+        return segments.joinToString("/")
+    }
+
     override fun toString(): String =
         buildString {
             append(packId)
-            if (modules.isNotEmpty()) {
+            if (!modules.isNullOrEmpty()) {
                 append('|')
-                append(modules.entries.joinToString(",") { (key, value) -> "$key=$value" })
+                append(modules.entries.joinToString(",") { (key, value) ->
+                    "$key=$value"
+                })
             }
         }
 

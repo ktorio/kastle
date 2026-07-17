@@ -113,6 +113,20 @@ sealed interface ProjectModules {
 
     val modules: List<SourceModule>
 
+    fun mapNotNull(mapping: (SourceModule) -> SourceModule?): ProjectModules =
+        when (this) {
+            is Empty -> this
+            is Single -> mapping(module)?.let(::Single) ?: Empty
+            is Multi -> {
+                val mappedModules = modules.mapNotNull { mapping(it) }
+                when(mappedModules.size) {
+                    0 -> Empty
+                    1 -> Single(mappedModules.single())
+                    else -> Multi(mappedModules)
+                }
+            }
+        }
+
     fun map(mapping: (SourceModule) -> SourceModule): ProjectModules =
         when (this) {
             is Empty -> this

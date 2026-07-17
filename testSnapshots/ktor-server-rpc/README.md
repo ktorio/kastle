@@ -16,6 +16,15 @@ Here's a list of features included in this project:
 | [kotlinx.rpc](https://start.ktor.io/p/org.jetbrains/kotlinx-rpc) | Adds remote procedure call (RPC) routing |
 | [kotlinx.serialization](https://start.ktor.io/p/io.ktor/server-kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library |
 
+## Structure
+This project includes the following modules:
+
+| Path | Description |
+|------|-------------|
+|  | null |
+| client | null |
+| core | null |
+| server | null |
 
 ## Building & Running
 To build or run the project, use one of the following tasks:

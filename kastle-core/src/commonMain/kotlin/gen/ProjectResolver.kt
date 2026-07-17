@@ -15,11 +15,20 @@ import kotlin.collections.groupBy
 fun interface ProjectResolver {
     companion object {
         val BaseImpl = ProjectResolver { descriptor, repository ->
-            val chosenPacks = repository.readAll(descriptor.packs).toList()
+            val chosenPacks = repository.readAll(descriptor.packIds).toList().mapIndexed { index, pack ->
+                when(val requirement = descriptor.packs[index]) {
+                    is PackRequirement -> pack.copy(
+                        sources = pack.sources.copy(
+                            modules = requirement.transform(pack.sources.modules)
+                        )
+                    )
+                    is PackId -> pack
+                }
+            }
             var moduleSources: ProjectModules = ProjectModules.Empty
             val packs = chosenPacks.toMutableList()
             val requirementsVisited = descriptor.packs
-                .map(::PackRequirement)
+                .map(PackSelection::asRequirement)
                 .toMutableSet()
 
             // Collect all module sources
@@ -32,10 +41,7 @@ fun interface ProjectResolver {
                     val requiredPack = repository.read(requirement.packId)
                         ?: throw MissingPackException(requirement.packId)
                     packs += requiredPack
-                    moduleSources += requiredPack.sources.modules.map { module ->
-                        val replacementPath = requirement.modules[module.path] ?: return@map module
-                        module.copy(manifest = module.manifest.copy(path = replacementPath),)
-                    }
+                    moduleSources += requirement.transform(requiredPack.sources.modules)
                 }
             }
             // Remove empty intermediate modules
