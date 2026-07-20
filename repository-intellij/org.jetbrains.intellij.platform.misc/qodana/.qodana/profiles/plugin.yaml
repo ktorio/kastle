@@ -1,0 +1,11 @@
+version: "1.0"
+profile:
+  base:
+    name: qodana.recommended
+  groups:
+    - groupId: PluginDevKitAll
+      groups:
+        - "category:Plugin DevKit"
+  inspections:
+    - group: PluginDevKitAll
+      enabled: true

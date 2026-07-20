@@ -1,0 +1,23 @@
+name: Qodana
+description: Adds a Qodana static code analysis setup adjusted for IntelliJ plugin projects
+icon: AllIcons.General.Inspections.InspectionsEye
+links:
+  home: https://www.jetbrains.com/qodana/
+
+properties:
+  - key: isGithubEnabled
+    type: boolean
+    default: false
+    hidden: true
+
+propertyValues:
+  - key: org.jetbrains.intellij.platform/plugin/isQodanaEnabled
+    value: "true"
+
+rootSources:
+  - path: .qodana/profiles/plugin.yaml
+  - path: qodana.yml
+  - path: qodanaReadmeSection.hbs
+    target: slot://org.jetbrains.intellij.platform/plugin/readmeAdditionalSections
+  - path: .github/workflows/code-inspection.yml
+    if: isGithubEnabled

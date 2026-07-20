@@ -1,9 +1,13 @@
 name: GitHub
 description: Generates GitHub Actions workflows for CI/CD and dependency management.
 icon: AllIcons.Nodes.FolderGithub
+links:
+  home: https://github.com/
 
 propertyValues:
   - key: org.jetbrains.intellij.platform/plugin/isGithubEnabled
+    value: "true"
+  - key: org.jetbrains.intellij.platform.misc/qodana/isGithubEnabled
     value: "true"
 
 rootSources:

@@ -139,6 +139,7 @@ See [Syntax for issue forms](https://docs.github.com/en/communities/using-templa
 
 [Dependabot configuration](.github/dependabot.yml) file enables tracking outdated or vulnerable dependencies.
 
+
 ## Useful links
 
 - [IntelliJ Platform SDK Plugin SDK][docs]

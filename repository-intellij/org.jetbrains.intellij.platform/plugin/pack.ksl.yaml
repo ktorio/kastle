@@ -28,6 +28,10 @@ properties:
     type: boolean
     default: false
     hidden: true
+  - key: isQodanaEnabled
+    type: boolean
+    default: false
+    hidden: true
 
   # Fixed values:
   - key: platformVersion

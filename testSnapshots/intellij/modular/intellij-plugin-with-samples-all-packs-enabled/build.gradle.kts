@@ -7,6 +7,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
     id("rpc") apply false
     id("org.jetbrains.kotlin.plugin.serialization") apply false
+    id("org.jetbrains.qodana")
 }
 
 subprojects {
