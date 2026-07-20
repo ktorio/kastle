@@ -108,9 +108,9 @@ See more information about [Gradle integration](https://www.jetbrains.com/help/q
 - [IntelliJ SDK Code Samples][gh:code-samples]
 
 [docs]: https://plugins.jetbrains.com/docs/intellij
-[docs:intro]: https://plugins.jetbrains.com/docs/intellij/intellij-platform.html?from=IJPluginTemplate
-[docs:plugin.xml]: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html?from=IJPluginTemplate
-[docs:publishing]: https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate
+[docs:intro]: https://plugins.jetbrains.com/docs/intellij/intellij-platform.html?from=IJPluginReadmeFile
+[docs:plugin.xml]: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html?from=IJPluginReadmeFile
+[docs:publishing]: https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginReadmeFile
 
 [file:plugin.xml]: ./src/main/resources/META-INF/plugin.xml
 
