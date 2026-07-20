@@ -1,5 +1,5 @@
 name: Qodana
-description: Qodana static code analysis support for IntelliJ plugin projects
+description: Adds a Qodana static code analysis setup adjusted for IntelliJ plugin projects
 icon: AllIcons.General.Inspections.InspectionsEye
 links:
   home: https://www.jetbrains.com/qodana/
