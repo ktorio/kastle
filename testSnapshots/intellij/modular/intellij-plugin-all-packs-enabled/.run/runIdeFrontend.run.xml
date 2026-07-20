@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run IDE (Frontend)" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="Run IDE with Plugin (Frontend)" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />

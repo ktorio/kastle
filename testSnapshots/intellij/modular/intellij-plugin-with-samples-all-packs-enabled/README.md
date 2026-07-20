@@ -116,11 +116,11 @@ This separation keeps the frontend focused on rendering, local UI state, and int
 
 Within the default project structure, there is a `.run` directory provided containing predefined *Run/Debug configurations* that expose corresponding Gradle tasks:
 
-| Configuration name   | Description                                                                                                                                                      |
-|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Run IDE (Frontend)   | Runs [`:runIdeFrontend`][gh:intellij-platform-gradle-plugin-runIde] IntelliJ Platform Gradle Plugin task. Use the *Debug* icon for plugin debugging.             |
-| Run IDE (Backend)    | Runs [`:runIdeBackend`][gh:intellij-platform-gradle-plugin-runIde] IntelliJ Platform Gradle Plugin task. Use the *Debug* icon for plugin debugging.              |
-| Run IDE (Split Mode) | Runs both *Run IDE (Backend)* and *Run IDE (Frontend)* configurations simultaneously to launch the plugin in split mode.                                         |
+| Configuration name               | Description                                                                                                                                                      |
+|----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Run IDE with Plugin (Frontend)   | Runs [`:runIdeFrontend`][gh:intellij-platform-gradle-plugin-runIde] IntelliJ Platform Gradle Plugin task. Use the *Debug* icon for plugin debugging.             |
+| Run IDE with Plugin (Backend)    | Runs [`:runIdeBackend`][gh:intellij-platform-gradle-plugin-runIde] IntelliJ Platform Gradle Plugin task. Use the *Debug* icon for plugin debugging.              |
+| Run IDE with Plugin (Split Mode) | Runs both *Run IDE (Backend)* and *Run IDE (Frontend)* configurations simultaneously to launch the plugin in split mode.                                         |
 
 > [!NOTE]
 > You can find the logs from the running task in the `idea.log` tab.
