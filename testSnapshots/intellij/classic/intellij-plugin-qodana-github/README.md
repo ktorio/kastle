@@ -87,6 +87,14 @@ intellijIdea("2025.3.5")
 
 See [Target Versions][docs:target-version] for more information.
 
+The `intellijPlatform` dependencies block also contains a dependency on the platform testing framework:
+
+```kotlin
+testFramework(TestFrameworkType.Platform)
+```
+
+See [Testing][docs:testing] for more information
+
 ## Plugin configuration file
 
 The plugin configuration file is a [plugin.xml][file:plugin.xml] file located in the `src/main/resources/META-INF` directory.
@@ -197,6 +205,7 @@ They are also automatically posted in the PR comment.
 [docs:intellij-platform-gradle-plugin-verifyPlugin]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-tasks.html?from=IJPluginReadmeFile#verifyPlugin
 [docs:logo]: https://plugins.jetbrains.com/docs/intellij/plugin-icon-file.html?from=IJPluginReadmeFile
 [docs:target-version]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html?from=IJPluginReadmeFile#target-versions
+[docs:testing]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html?from=IJPluginReadmeFile#testing
 
 [file:build.gradle.kts]: ./build.gradle.kts
 [file:CHANGELOG.md]: ./CHANGELOG.md

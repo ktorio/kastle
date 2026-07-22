@@ -91,6 +91,14 @@ intellijIdea("2025.3.5")
 
 See [Target Versions][docs:target-version] for more information.
 
+The `intellijPlatform` dependencies block also contains a dependency on the platform testing framework:
+
+```kotlin
+testFramework(TestFrameworkType.Platform)
+```
+
+See [Testing][docs:testing] for more information
+
 ## Plugin configuration files
 
 The root [plugin.xml][file:plugin.xml] file located in `src/main/resources/META-INF` provides general information about the plugin, its dependencies, and references the per-module plugin descriptors.
@@ -180,6 +188,7 @@ See more information about [Gradle integration](https://www.jetbrains.com/help/q
 [docs:publishing]: https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginReadmeFile
 [docs:remote-dev]: https://plugins.jetbrains.com/docs/intellij/plugin-content-modules.html?from=IJPluginReadmeFile
 [docs:target-version]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html?from=IJPluginReadmeFile#target-versions
+[docs:testing]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html?from=IJPluginReadmeFile#testing
 [docs:intellij-platform-gradle-plugin-docs]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html?from=IJPluginReadmeFile
 [docs:intellij-platform-gradle-plugin-runIde]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-tasks.html?from=IJPluginReadmeFile#runIde
 [docs:intellij-platform-gradle-plugin-verifyPlugin]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-tasks.html?from=IJPluginReadmeFile#verifyPlugin
