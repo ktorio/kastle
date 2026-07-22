@@ -78,8 +78,6 @@ It provides general information about the plugin, its dependencies, extensions, 
 
 You can read more about this file in the [Plugin Configuration File][docs:plugin.xml] section of our documentation.
 
-If you're still not quite sure what this is all about, read [Introduction to IntelliJ Platform][docs:intro].
-
 ## Predefined Run/Debug configurations
 
 Within the default project structure, there is a `.run` directory provided containing predefined *Run/Debug configurations* that expose corresponding Gradle tasks:
@@ -143,7 +141,6 @@ See more information about [Gradle integration](https://www.jetbrains.com/help/q
 - [IntelliJ SDK Code Samples][gh:code-samples]
 
 [docs]: https://plugins.jetbrains.com/docs/intellij
-[docs:intro]: https://plugins.jetbrains.com/docs/intellij/intellij-platform.html?from=IJPluginReadmeFile
 [docs:plugin.xml]: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html?from=IJPluginReadmeFile
 [docs:publishing]: https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginReadmeFile
 [docs:intellij-platform-gradle-plugin-docs]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html?from=IJPluginReadmeFile
