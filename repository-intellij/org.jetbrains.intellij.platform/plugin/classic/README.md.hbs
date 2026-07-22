@@ -91,6 +91,16 @@ It provides general information about the plugin, its dependencies, extensions, 
 
 You can read more about this file in the [Plugin Configuration File][docs:plugin.xml] section of our documentation.
 
+### Plugin ID and name
+
+Generated plugin ID and name may require adjustment.
+
+These values are generated based on _Group ID_ and _Artifact ID_ provided in the IDE Plugin wizard.
+It is recommended to review `<id>` and `<name>` elements in the plugin.xml file, and adjust them if needed.
+
+Please note that Gradle properties `rootProject.name` and `project.group` don't need to match the `<id>` and `<name>` elements.
+There is no IntelliJ Platform-related reason they should as they serve different functions.
+
 ## Predefined Run/Debug configurations
 
 Within the default project structure, there is a `.run` directory provided containing predefined *Run/Debug configurations* that expose corresponding Gradle tasks:

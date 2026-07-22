@@ -134,6 +134,16 @@ Each module ships its own plugin descriptor in its `src/main/resources/` directo
 
 You can read more about plugin configuration files in the [Plugin Configuration File][docs:plugin.xml] section of our documentation.
 
+### Plugin ID and name
+
+Generated plugin ID and name may require adjustment.
+
+These values are generated based on _Group ID_ and _Artifact ID_ provided in the IDE Plugin wizard.
+It is recommended to review `<id>` and `<name>` elements in the plugin.xml file, and adjust them if needed.
+
+Please note that Gradle properties `rootProject.name` and `project.group` don't need to match the `<id>` and `<name>` elements.
+There is no IntelliJ Platform-related reason they should as they serve different functions.
+
 ## Remote Development Ready Architecture
 
 The demo is intentionally split so that the UI stays frontend-only and the business logic stays backend-only.
