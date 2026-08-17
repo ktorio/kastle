@@ -10,9 +10,10 @@ import org.jetbrains.kastle.utils.StringLiteral
 import org.jetbrains.kastle.utils.capitalizeFirst
 import org.jetbrains.kastle.utils.fileName
 import org.jetbrains.kastle.utils.protocol
+import org.jetbrains.kastle.utils.relativeFile
 
-internal val SOURCE_OR_RESOURCE_FOLDER_REGEX = Regex("(src|test|resources|testResources|res|composeResources)(?:@(\\w+))?/")
-internal val SOURCE_FOLDER_REGEX = Regex("(src|test)(?:@(\\w+))?/")
+internal val SOURCE_OR_RESOURCE_FOLDER_REGEX = Regex("^(src|test|resources|testResources|res|composeResources)(?:@(\\w+))?/")
+internal val SOURCE_FOLDER_REGEX = Regex("^(src|test)(?:@(\\w+))?/")
 internal val UNCATEGORIZED_FILES = setOf("AndroidManifest.xml")
 
 /**
@@ -27,8 +28,9 @@ val GradleSourceMapping = ProjectMapping { project ->
             module.copy(
                 sources = module.sources.map { source ->
                     // TODO support string templates
-                    if (source.target.protocol == "file" && source.target.toString().contains(SOURCE_OR_RESOURCE_FOLDER_REGEX)) {
-                        val newTarget = source.target.toString().replace(SOURCE_OR_RESOURCE_FOLDER_REGEX) { match ->
+                    val relativeFile = source.target.relativeFile
+                    if (source.target.protocol == "file" && relativeFile.contains(SOURCE_OR_RESOURCE_FOLDER_REGEX)) {
+                        val newRelativeFile = relativeFile.replace(SOURCE_OR_RESOURCE_FOLDER_REGEX) { match ->
                             val sourceRoot = match.groups[1]!!.value
                             val mainOrTest = if (sourceRoot in setOf("test", "testResources")) "test" else "main"
                             val fileCategory = when {
@@ -48,9 +50,10 @@ val GradleSourceMapping = ProjectMapping { project ->
                                 else -> "src/$target${mainOrTest.capitalizeFirst()}/$fileCategory"
                             }
                         }
+                        val newTarget = StringLiteral("file:$newRelativeFile")
                         when(source) {
-                            is StaticSource -> source.copy(target = StringLiteral(newTarget))
-                            is SourceTemplate -> source.copy(target = StringLiteral(newTarget))
+                            is StaticSource -> source.copy(target = newTarget)
+                            is SourceTemplate -> source.copy(target = newTarget)
                         }
                     }
                     else source
