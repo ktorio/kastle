@@ -1,4 +1,4 @@
-@file:OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
     alias(ktorLibs.plugins.ktor)
@@ -11,11 +11,11 @@ plugins {
 
 ktor {
     openApi {
-        // Kotlin 2.4.0 breaking change
-        enabled = false
+        enabled = true
     }
 }
 
+@OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
     jvm {
         mainRun {
@@ -36,7 +36,7 @@ kotlin {
 
         jsMain {
             dependencies {
-                implementation(npm("htmx.org", "2.0.10"))
+                implementation(npm("htmx.org", "2.0.11"))
             }
         }
 
@@ -79,7 +79,8 @@ kotlin {
 }
 
 // Copy JS distribution to resources so it can be served by the JVM server
-val copyJsDistribution by tasks.registering(Copy::class) {
+val copyJsDistribution = tasks.register<Copy>("copyJsDistribution") {
+    description = "Moves browser distribution to server resources"
     dependsOn("jsBrowserDistribution")
     from(layout.buildDirectory.dir("dist/js/productionExecutable"))
     into(layout.buildDirectory.dir("processedResources/jvm/main/assets"))
