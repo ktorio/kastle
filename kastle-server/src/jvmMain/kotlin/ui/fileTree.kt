@@ -17,7 +17,6 @@ fun HTML.fileTreeHtml(basePath: String, fileNames: List<String>, selectedFile: S
 }
 
 // Recursively builds the tree structure as UL/LI elements.
-@OptIn(ExperimentalKtorApi::class)
 private fun UL.buildTree(
     basePath: String,
     paths: List<List<String>>,

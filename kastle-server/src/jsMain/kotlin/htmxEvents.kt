@@ -87,10 +87,11 @@ fun setupHtmxEvents() {
     document.addEventListener("htmx:afterOnLoad", { event ->
         // Only update URL for requests that should push state
         val customEvent = event.asDynamic()
-        val requestPath = customEvent.detail.pathInfo.requestPath as String
+        val requestPath = customEvent.detail.pathInfo.requestPath
         if (requestPath == "$basePath/project") {
             val url = buildProjectGenerationUrl(window.location.pathname)
-            val newUrl = window.location.pathname + url.substringAfter(window.location.pathname)
+            val newUrl = window.location.pathname +
+                    url.substringAfter(window.location.pathname)
             window.history.replaceState(null, "", newUrl)
         }
     })

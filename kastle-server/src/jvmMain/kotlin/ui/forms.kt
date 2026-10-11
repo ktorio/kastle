@@ -1,6 +1,5 @@
 package org.jetbrains.kastle.server.ui
 
-import io.ktor.utils.io.ExperimentalKtorApi
 import kotlinx.html.*
 import kotlinx.html.consumers.delayed
 import kotlinx.html.stream.HTMLStreamBuilder
@@ -9,7 +8,6 @@ import org.jetbrains.kastle.PropertyDescriptor
 import org.jetbrains.kastle.PropertyType
 import org.jetbrains.kastle.utils.isTruthy
 
-@OptIn(ExperimentalKtorApi::class)
 fun HTML.packPropertiesHtml(pack: PackDescriptor) {
     body {
         val properties = pack.properties.filter { !it.hidden }

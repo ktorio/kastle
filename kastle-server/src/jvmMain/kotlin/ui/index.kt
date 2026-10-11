@@ -2,14 +2,10 @@ package org.jetbrains.kastle.server.ui
 
 import io.ktor.htmx.html.*
 import io.ktor.utils.io.*
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.html.*
 import org.jetbrains.kastle.PackDescriptor
 import org.jetbrains.kastle.ProjectDescriptor
-import org.jetbrains.kastle.ProjectGenerator
 
-@OptIn(ExperimentalKtorApi::class)
 fun HTML.indexHtml(
     basePath: String = "",
     view: View = View(),
@@ -51,7 +47,6 @@ fun HTML.indexHtml(
     }
 }
 
-@OptIn(ExperimentalKtorApi::class)
 private fun BODY.navigationPanel(
     basePath: String,
     packs: List<PackDescriptor>
@@ -85,7 +80,6 @@ private fun BODY.navigationPanel(
 }
 
 
-@OptIn(ExperimentalKtorApi::class)
 private fun BODY.mainPanel(
     view: View,
     basePath: String,
@@ -209,20 +203,19 @@ private fun BODY.mainPanel(
     }
 }
 
-@OptIn(ExperimentalKtorApi::class)
 fun UL.packListItem(basePath: String, pack: PackDescriptor) {
     li {
-        // TODO role is tab?
         val inputId = "toggle/${pack.id}"
         input(type = InputType.radio, name = "selected-pack") {
+            id = inputId
+            value = pack.id.toString()
             attributes.hx {
                 get = "$basePath/packs/${pack.id}/docs"
                 target = "#pack-details-docs"
                 trigger = "change"
             }
-            this.id = inputId
-            this.value = pack.id.toString()
         }
+        // more content...
         verticalNavLabel(inputId, "pack-list") {
             div {
                 +pack.name
