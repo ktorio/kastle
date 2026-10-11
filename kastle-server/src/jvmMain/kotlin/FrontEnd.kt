@@ -2,6 +2,7 @@ package org.jetbrains.kastle.server
 
 import io.ktor.http.*
 import io.ktor.server.html.*
+import io.ktor.server.htmx.hx
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.utils.io.*
