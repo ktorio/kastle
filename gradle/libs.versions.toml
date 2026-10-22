@@ -1,9 +1,9 @@
 [versions]
 kaml = "0.79.0"
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 ksp-version = "2.3.12"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
-kotlinx-serialization = "1.11.0"
+kotlinx-serialization = "1.12.0"
 kotlinx-coroutines = "1.11.0"
 kotlinx-io = "0.9.1"
 ktoml = "0.7.1"
@@ -12,8 +12,8 @@ mcp-sdk = "0.15.0"
 pluginPublish = "2.2.1"
 kastle = "1.0.0-SNAPSHOT"
 agp = "9.3.0"
-composeMultiplatform = "1.12.1"
-commonmark = "0.30.0"
+composeMultiplatform = "1.12.2"
+commonmark = "0.30.1"
 testballoon = "1.0.1-K2.4.0"
 
 [libraries]
