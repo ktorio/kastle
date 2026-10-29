@@ -78,7 +78,7 @@ It applies three Gradle plugins:
 The `intellijPlatform` dependencies block selects the IDE to compile against:
 
 ```kotlin
-intellijIdea("2025.3.5")
+intellijIdea("2025.3.6.1")
 ```
 
 See [Target Versions][docs:target-version] for more information.

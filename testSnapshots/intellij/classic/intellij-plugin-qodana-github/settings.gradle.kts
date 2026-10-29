@@ -6,13 +6,13 @@ pluginManagement {
     plugins {
         id("org.jetbrains.kotlin.jvm") version "2.3.20"
         id("org.jetbrains.changelog") version "2.5.0"
-        id("org.jetbrains.qodana") version "2026.1.3"
+        id("org.jetbrains.qodana") version "2026.2.2"
     }
 }
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-    id("org.jetbrains.intellij.platform.settings") version "2.18.1"
+    id("org.jetbrains.intellij.platform.settings") version "2.19.0"
 }
 
 dependencyResolutionManagement {
