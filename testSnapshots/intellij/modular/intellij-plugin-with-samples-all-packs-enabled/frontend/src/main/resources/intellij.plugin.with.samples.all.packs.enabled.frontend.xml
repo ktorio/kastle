@@ -5,6 +5,9 @@
     </dependencies>
 
     <extensions defaultExtensionNs="com.intellij">
+        <!-- If the plugin is published on JetBrains Marketplace, errors reported by users are available on the plugin page.
+             See https://plugins.jetbrains.com/docs/marketplace/error-handler.html#developers-side for details. -->
+        <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
         <toolWindow
                 id="ModularPlugin"
                 factoryClass="com.acme.toolWindow.ModularPluginToolWindowFactory"
