@@ -232,7 +232,7 @@ private operator fun TemplateBuildDependency.plus(artifact: TemplateCatalogArtif
 context(project: Project)
 internal fun SourceModule.slotsTemplateMap(packId: PackId): Map<String, Any?> =
     buildMap {
-        for ((url, value) in project.slotSources + this@slotsTemplateMap.slotSources) {
+        for ((url, value) in project.slotSourcesFor(this@slotsTemplateMap)) {
             // insert relative value
             if (packId.toString() in url)
                 put(url.relativeFile.removePrefix(packId.toString()).trimStart('/'), value)
@@ -253,6 +253,24 @@ val SourceModule.slotSources: SourcesByUrl
         sources
             .filter { it.isSlot() }
             .groupBy { it.target.toString() }
+
+/**
+ * Combines project-level (pack) slot contributions with those of the given module.
+ *
+ * Contributions targeting the same slot URL are concatenated, rather than the module
+ * replacing the project's entries for that slot.
+ */
+internal fun Project.slotSourcesFor(module: SourceModule): SourcesByUrl =
+    slotSources mergedWith module.slotSources
+
+internal infix fun SourcesByUrl.mergedWith(other: SourcesByUrl): SourcesByUrl =
+    when {
+        other.isEmpty() -> this
+        isEmpty() -> other
+        else -> (keys + other.keys).associateWith { url ->
+            this[url].orEmpty() + other[url].orEmpty()
+        }
+    }
 
 /**
  * Find the main class from either amper settings, gradle properties, or use the default main.kt file.

@@ -115,7 +115,7 @@ class ProjectGenerator(
                 addAll(commonSources)
             }
             val outputtedPaths = mutableSetOf<String>()
-            val slotSources = slotSources + module.slotSources
+            val slotSources = slotSourcesFor(module)
             val visitedPaths = mutableSetOf<String>()
 
             for (source in moduleSources) {
@@ -176,7 +176,7 @@ class ProjectGenerator(
 
     private fun Project.collectVariables(packId: PackId, module: SourceModule): LocalVariables {
         val modulePath = module.originalPath.takeIf { it.isNotEmpty() }
-        val slotSources = slotSources + module.slotSources
+        val slotSources = slotSourcesFor(module)
         val variables = resolvedVariables(modulePath).relativeTo(packId).also { variables ->
             variables["_project"] = this.asTemplateMap()
             variables["_module"] = module.asTemplateMap()
