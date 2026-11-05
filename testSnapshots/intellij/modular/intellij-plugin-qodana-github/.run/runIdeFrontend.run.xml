@@ -1,12 +1,15 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run IDE with Plugin (Frontend)" type="GradleRunConfiguration" factoryName="Gradle">
+    <log_file alias="Frontend IDE logs"
+              path="$PROJECT_DIR$/.intellijPlatform/sandbox/*/*/log_runIdeFrontend/frontend/*/idea.log"
+              show_all="true" skipped="false" />
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
-      <option name="scriptParameters" value="" />
+      <option name="scriptParameters" value="--purge-old-log-directories" />
       <option name="taskDescriptions">
-        <list />
+        <list/>
       </option>
       <option name="taskNames">
         <list>
@@ -19,6 +22,6 @@
     <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
     <DebugAllEnabled>false</DebugAllEnabled>
     <RunAsTest>false</RunAsTest>
-    <method v="2" />
+    <method v="2"/>
   </configuration>
 </component>
