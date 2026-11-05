@@ -4,7 +4,7 @@ rootProject.name = "intellij-plugin-qodana-github"
 
 pluginManagement {
     plugins {
-        id("org.jetbrains.kotlin.jvm") version "2.3.20"
+        id("org.jetbrains.kotlin.jvm") version "2.4.0"
         id("org.jetbrains.changelog") version "2.5.0"
         id("org.jetbrains.qodana") version "2026.2.2"
     }
