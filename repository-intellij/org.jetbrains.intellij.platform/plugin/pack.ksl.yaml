@@ -37,11 +37,11 @@ properties:
   - key: platformVersion
     type: string
     hidden: true
-    default: "2025.3.6.1"
+    default: "2026.2.4"
   - key: platformVersionModular
     type: string
     hidden: true
-    default: "2026.1.5"
+    default: "2026.2.4"
   - key: intellijPlatformGradlePluginVersion
     type: string
     hidden: true
